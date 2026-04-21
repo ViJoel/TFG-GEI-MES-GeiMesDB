@@ -1,5 +1,5 @@
 create table if not exists connections (
-    id integer primary key autoincrement,
+    id text primary key,
     name text not null,
     driver text not null,
     host text,

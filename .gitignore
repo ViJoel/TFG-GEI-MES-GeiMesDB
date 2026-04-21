@@ -9,3 +9,7 @@ env/
 
 # Python
 __pycache__/
+
+# Carpetas autogeneradas del proyecto
+logs/
+data/

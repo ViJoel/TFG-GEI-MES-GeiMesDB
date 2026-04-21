@@ -1,64 +1,69 @@
+import logging
 from model.connections.connection import Connection
 from model.connections.database import (
     init_database,
     get_connection as get_db_connection,
 )
-from model.connections.drivers import Driver
+from sqlite3 import IntegrityError, OperationalError
 
+# Crear sub-logger
+logger = logging.getLogger(__name__)
 
 def create_connections_database():
     """Crea la base de datos de conexiones."""
     init_database()
 
 
-def create_connection(connection: Connection) -> int:
-    """Crea una conexión."""
+def create_connection(connection: Connection) -> bool:
+    """Inserta una nueva conexión en la base de datos.
+
+    Args:
+        connection: Objeto Connection con los datos a insertar.
+
+    Returns:
+        bool: True si la inserción fue exitosa.
+
+    Raises:
+        IntegrityError: Si el ID ya existe en la base de datos.
+        OperationalError: Si la base de datos no está accesible.
+        Exception: Para cualquier otro error inesperado de SQLite.
+    """
 
     # Consulta SQL para insertar una nueva conexión
     query = """
     insert into connections (
-        name, driver, host, port, database, username, password, path
-    ) values (?, ?, ?, ?, ?, ?, ?, ?)
+        id, name, driver, host, port, database, username, password, path
+    ) values (?, ?, ?, ?, ?, ?, ?, ?, ?)
     """
 
     # Abre conexión a la base de datos usando un context manager
     with get_db_connection() as conn:
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                query,
+                (
+                    connection.id,
+                    connection.name,
+                    connection.driver.value,
+                    connection.host,
+                    connection.port,
+                    connection.database,
+                    connection.username,
+                    connection.password,
+                    connection.path,
+                ),
+            )
+            conn.commit()
+            logger.info(f"Conexión '{connection.name}' (ID: {connection.id}) creada con éxito.")
+            return True
 
-        # Crea un cursor para ejecutar la consulta
-        cursor = conn.cursor()
-
-        # Ejecuta el INSERT con los valores de la conexión
-        cursor.execute(
-            query,
-            (
-                connection.name,
-                connection.driver.value,  # Convierte el enum a string
-                connection.host,
-                connection.port,
-                connection.database,
-                connection.username,
-                connection.password,
-                connection.path,
-            ),
-        )
-
-        # Guarda los cambios en la base de datos
-        conn.commit()
-
-        # Devuelve el id generado automáticamente
-        return cursor.lastrowid
-
-
-def update_connection():
-    """Edita una conexión."""
-    return
-
-
-def delete_connection():
-    """Elimina una conexión."""
-    return
-
-
-def get_all_connections():
-    """Obtiene todas las conexiones."""
-    return
+        except IntegrityError as e:
+            logger.warning(f"Intento de duplicar ID: {connection.id}. Error: {e}")
+            raise
+        except OperationalError as e:
+            logger.error(f"Error de acceso a la base de datos (¿Existe el archivo?): {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error inesperado al crear conexión: {e}")
+            raise
