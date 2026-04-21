@@ -1,6 +1,12 @@
 import os
 import sys
-from .constants import DB_FILE_NAME, LOG_FILE_NAME, DATA_DIR_NAME, LOG_DIR_NAME
+from .constants import (
+    DB_FILE_NAME,
+    LOG_FILE_NAME,
+    DATA_DIR_NAME,
+    LOG_DIR_NAME,
+    DB_SQL_DDL_FILE,
+)
 
 if getattr(sys, "frozen", False):
     # Producción
@@ -14,7 +20,8 @@ else:
     BASE_DIR = RESOURCE_ROOT
 
 # Ruta a los archivos sql
-SQL_PATH = os.path.join(RESOURCE_ROOT, "data")
+SQL_DIR = os.path.join(RESOURCE_ROOT, "data")
+SQL_PATH = os.path.join(SQL_DIR, DB_SQL_DDL_FILE)
 
 # Directorio de datos y archivo de base de datos
 DATA_DIR = os.path.join(BASE_DIR, DATA_DIR_NAME)

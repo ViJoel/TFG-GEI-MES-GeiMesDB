@@ -1,12 +1,12 @@
 import logging
 import os
 import sqlite3
-import sys
 from contextlib import contextmanager
 from common.paths import DB_PATH, DATA_DIR, SQL_PATH
 
 # Esto crea un sub-logger llamado 'model.connections.database'
 logger = logging.getLogger(__name__)
+
 
 @contextmanager
 def get_connection():
@@ -27,7 +27,7 @@ def get_connection():
 
 def init_database():
     """
-    Inicializa la base de datos solo si no existe el archivo .db.
+    Inicializa la base de datos de forma segura.
     """
 
     # Asegurar directorio de datos

@@ -4,10 +4,12 @@ from sqlite3 import IntegrityError, OperationalError
 
 logger = logging.getLogger(__name__)
 
+
 def handle_db_errors(operation_name):
     """
     Decorador agnóstico para capturar errores técnicos de SQLite.
     """
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -25,5 +27,7 @@ def handle_db_errors(operation_name):
                 # Cualquier otro error inesperado
                 logger.error(f"Error no controlado al {operation_name}: {e}")
                 raise
+
         return wrapper
+
     return decorator
