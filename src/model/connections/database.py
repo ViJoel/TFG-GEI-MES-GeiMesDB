@@ -2,6 +2,7 @@ import logging
 import os
 import sqlite3
 import sys
+from contextlib import contextmanager
 
 # Esto crea un sub-logger llamado 'model.connections.database'
 logger = logging.getLogger(__name__)
@@ -23,23 +24,27 @@ else:
     BASE_DIR = RESOURCE_PATH
 
 # Definición de rutas finales
-DATA_DIR = os.path.join(BASE_DIR, "data")
+DATA_DIR = os.path.join(BASE_DIR, "geimesdb_data")
 DB_PATH = os.path.join(DATA_DIR, "connections.db")
 # El SQL se busca siempre en la carpeta de recursos (dentro del ejecutable o raíz del proyecto)
 SQL_PATH = os.path.join(RESOURCE_PATH, "sql", "connections.sql")
 
 
+@contextmanager
 def get_connection():
     """
-    Establece y devuelve una conexión a la base de datos SQLite.
-
-    Esta función utiliza la ruta absoluta definida en DB_PATH para conectar
-    con el archivo de base de datos que almacena la configuración de las conexiones.
-
-    Returns:
-        sqlite3.Connection: Un objeto de conexión activo hacia la base de datos.
+    Establece una conexión, gestiona transacciones y asegura el cierre.
+    Si algo falla dentro del bloque 'with', hace rollback explícito.
     """
-    return sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        yield conn
+    except Exception as e:
+        conn.rollback()  # Rollback explícito ante cualquier error
+        logger.error(f"Error en transacción: {e}")
+        raise
+    finally:
+        conn.close()
 
 
 def init_database():
@@ -73,6 +78,7 @@ def init_database():
             conn.execute("PRAGMA foreign_keys = ON;")
             # Ejecutar todas las sentencias del archivo .sql
             conn.executescript(schema)
+            conn.commit()
 
         logger.info("Base de datos creada e inicializada por primera vez.")
     except Exception as e:

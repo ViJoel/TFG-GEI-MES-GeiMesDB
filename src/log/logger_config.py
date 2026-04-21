@@ -18,7 +18,7 @@ def setup_logging():
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     # Configurar la carpeta de logs
-    log_dir = os.path.join(base_dir, "logs")
+    log_dir = os.path.join(base_dir, "geimesdb_logs")
     os.makedirs(log_dir, exist_ok=True)
 
     # Configurar archivo de logs
@@ -30,7 +30,9 @@ def setup_logging():
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
         handlers=[
             # 'encoding="utf-8"' es vital para evitar errores en Windows con acentos
-            logging.FileHandler(log_file, encoding="utf-8", mode='w'), # 'w' sobreescribe el archivo (solo para desarrollo, quitar el argumento para producción)
+            logging.FileHandler(
+                log_file, encoding="utf-8", mode="w"
+            ),  # 'w' sobreescribe el archivo (solo para desarrollo, quitar el argumento para producción)
             # El StreamHandler mantiene la salida por consola para desarrollo
             logging.StreamHandler(sys.stdout),
         ],

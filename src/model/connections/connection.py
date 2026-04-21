@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from model.connections.driver import Driver
+from .driver import Driver
 from typing import Optional
 import uuid
 

@@ -11,5 +11,5 @@ env/
 __pycache__/
 
 # Carpetas autogeneradas del proyecto
-logs/
-data/
+geimesdb_logs/
+geimesdb_data/
