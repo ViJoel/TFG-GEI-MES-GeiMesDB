@@ -1,23 +1,32 @@
 import logging
 from .connection import Connection
-from .database import (
-    init_database,
+from model.database.database import (
     get_connection as get_db_connection,
 )
-from .exceptions.connection_not_found import ConnectionNotFoundError
-from .wrapper import handle_db_errors
-from sqlite3 import IntegrityError, OperationalError
+from model.database.wrapper import handle_db_errors
 
 # Crear sub-logger
 logger = logging.getLogger(__name__)
 
 
-def create_connections_database():
-    """Crea la base de datos de conexiones."""
-    init_database()
+# TODO: Añadir PythonDoc a esta función
+@handle_db_errors("cargar todas las conexiones")
+def get_all_connections() -> list[Connection]:
+    """
+    Recupera todas las conexiones de la base de datos.
+
+    Returns:
+        list[Connection]: Lista de objetos Connection (vacía si no hay registros).
+    """
+
+    query = "select * from connections order by name asc"
+    connections_list = []
+
+    return
 
 
-@handle_db_errors("crear")
+# TODO: Revisar el PythonDoc de esta función
+@handle_db_errors("crear conexión")
 def create_connection(connection: Connection) -> bool:
     """
     Inserta una nueva conexión en la base de datos.
@@ -65,7 +74,8 @@ def create_connection(connection: Connection) -> bool:
         return True
 
 
-@handle_db_errors("actualizar")
+# TODO: Añadir PythonDoc a esta función
+@handle_db_errors("actualizar conexión")
 def update_connection(connection: Connection) -> bool:
     query = """
     update connections
@@ -97,8 +107,6 @@ def update_connection(connection: Connection) -> bool:
                 connection.id,
             ),
         )
-        if cur.rowcount == 0:
-            raise ConnectionNotFoundError()
         conn.commit()
         logger.info(
             f"Conexión '{connection.name}' (ID: {connection.id}) actualizada con éxito."
@@ -106,7 +114,8 @@ def update_connection(connection: Connection) -> bool:
         return True
 
 
-@handle_db_errors("eliminar")
+# TODO: Añadir PythonDoc a esta función
+@handle_db_errors("eliminar conexión")
 def delete_connection(connection: Connection) -> bool:
     query = """
     delete from connections
@@ -119,8 +128,6 @@ def delete_connection(connection: Connection) -> bool:
             query,
             (connection.id,),
         )
-        if cur.rowcount == 0:
-            raise ConnectionNotFoundError()
         conn.commit()
         logger.info(
             f"Conexión '{connection.name}' (ID: {connection.id}) eliminada con éxito."

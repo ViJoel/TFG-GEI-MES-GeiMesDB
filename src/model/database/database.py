@@ -3,32 +3,10 @@ import os
 import sqlite3
 import sys
 from contextlib import contextmanager
+from common.paths import DB_PATH, DATA_DIR, SQL_PATH
 
 # Esto crea un sub-logger llamado 'model.connections.database'
 logger = logging.getLogger(__name__)
-
-# Ruta para RECURSOS (Archivos que vienen dentro del ejecutable)
-if getattr(sys, "frozen", False):
-    # En el ejecutable, PyInstaller descomprime los recursos en esta carpeta temporal
-    RESOURCE_PATH = sys._MEIPASS
-else:
-    # En desarrollo, subimos un nivel desde model/connections/ hacia la raíz del proyecto src/
-    RESOURCE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-# Ruta para DATOS (Archivos que el usuario genera y deben persistir)
-if getattr(sys, "frozen", False):
-    # Al lado del ejecutable real
-    BASE_DIR = os.path.dirname(sys.executable)
-else:
-    # En desarrollo, usamos la raíz del proyecto
-    BASE_DIR = RESOURCE_PATH
-
-# Definición de rutas finales
-DATA_DIR = os.path.join(BASE_DIR, "geimesdb_data")
-DB_PATH = os.path.join(DATA_DIR, "connections.db")
-# El SQL se busca siempre en la carpeta de recursos (dentro del ejecutable o raíz del proyecto)
-SQL_PATH = os.path.join(RESOURCE_PATH, "sql", "connections.sql")
-
 
 @contextmanager
 def get_connection():
