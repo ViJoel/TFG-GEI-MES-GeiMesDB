@@ -1,7 +1,7 @@
 import logging
 
 from model.connections.connection import Connection
-from model.database.database import get_connection as get_db_connection
+from model.database.model import get_connection as get_db_connection
 from model.database.wrapper import handle_db_errors
 
 # Crear sub-logger
