@@ -1,7 +1,8 @@
-from dataclasses import dataclass, field
-from .driver import Driver
-from typing import Optional
 import uuid
+from dataclasses import dataclass, field
+from typing import Optional
+
+from model.connections.driver import Driver
 
 
 @dataclass(kw_only=True)  # Obliga a usar nombres de campo

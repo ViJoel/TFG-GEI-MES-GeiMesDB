@@ -2,7 +2,8 @@ import logging
 import os
 import sqlite3
 from contextlib import contextmanager
-from common.paths import DB_PATH, DATA_DIR, SQL_PATH
+
+from common.paths import DATA_DIR, DB_PATH, SQL_PATH
 
 # Esto crea un sub-logger llamado 'model.connections.database'
 logger = logging.getLogger(__name__)

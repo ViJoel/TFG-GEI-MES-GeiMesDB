@@ -1,7 +1,8 @@
 import sys
-from log.logger_config import setup_logging
+
 from PySide6 import QtWidgets
 
+from log.logger_config import setup_logging
 from ui import MainWidget
 
 if __name__ == "__main__":
