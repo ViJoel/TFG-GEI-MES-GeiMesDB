@@ -2,12 +2,16 @@ import sys
 
 from PySide6 import QtWidgets
 
+from model.database.model import init_database
 from log.logger_config import setup_logging
-from ui import MainWidget
+from ui.app.main_widget import MainWidget
 
 if __name__ == "__main__":
     # Inicializamos los logs antes que cualquier otra cosa
     setup_logging()
+
+    # Inicializamos la base de datos
+    init_database()
 
     # Creamos la instancia de la aplicación.
     # sys.argv permite que Qt reconozca parámetros de consola (como el tema o escalado).

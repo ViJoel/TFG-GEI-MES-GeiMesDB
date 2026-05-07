@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
+from PySide6.QtWidgets import QSizePolicy
 
 
 class Sidebar(QWidget):
@@ -11,26 +12,37 @@ class Sidebar(QWidget):
 
     def _setup_ui(self):
         self.sidebar()
+
+        # Logo de la aplicación
         self.app_logo()
 
-        # 2. Lista de conexiones (placeholder por ahora)
-        self.connections = QLabel("Conexiones")
+        # Lista de conexiones (placeholder por ahora)
+        self.connections = QLabel("Connections")
         self.layout.addWidget(self.connections)
 
-        # 3. Botón añadir conexión
+        # Botón añadir conexión
         self.add_button = QPushButton("+")
         self.layout.addWidget(self.add_button)
 
-        # 🔥 4. Espacio flexible (CLAVE)
+        # Espacio flexible (CLAVE)
         self.layout.addStretch()
 
-        # 5. Botón ajustes (abajo del todo)
+        # Botón ajustes (abajo del todo)
         self.settings()
 
     def sidebar(self):
-        self.layout = QVBoxLayout(self)  # Layout vertical
-        self.setFixedWidth(70)  # Ancho fijo
-        self.layout.setContentsMargins(0, 0, 0, 0)  # Quitar márgenes
+        # Layout vertical
+        self.layout = QVBoxLayout(self)
+
+        # Tamaño ajustable:
+        # - Ancho mínimo
+        # - Altura máxima
+        self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        # Márgenes internos
+        self.layout.setContentsMargins(10, 20, 10, 20)
+
+        # Espaciado entre widgets
         self.layout.setSpacing(5)
 
     def app_logo(self):
