@@ -9,6 +9,8 @@ env/
 
 # Python
 __pycache__/
+build/
+dist/
 
 # Carpetas autogeneradas del proyecto
 geimesdb_logs/
