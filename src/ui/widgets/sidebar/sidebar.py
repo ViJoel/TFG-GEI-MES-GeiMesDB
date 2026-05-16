@@ -1,7 +1,11 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QSizePolicy
+from PySide6.QtWidgets import QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget
+
+from ui.common.paths import APP_LOGO
+from ui.widgets.sidebar.app_logo import AppLogo
+from ui.widgets.sidebar.connections_list import ConnectionsList
+from ui.widgets.sidebar.settings_button import SettingsButton
 
 
 class Sidebar(QWidget):
@@ -11,79 +15,41 @@ class Sidebar(QWidget):
         self._setup_ui()
 
     def _setup_ui(self):
-        self.sidebar()
+        """
+        Configura la interfaz principal de la barra lateral.
+        """
+        self._setup_layout()
 
-        # Logo de la aplicación
-        self.app_logo()
+        self.layout.addWidget(AppLogo())
 
-        # Lista de conexiones (placeholder por ahora)
-        self.connections = QLabel("Connections")
-        self.layout.addWidget(self.connections)
+        self.layout.addWidget(ConnectionsList())
 
-        # Botón añadir conexión
-        self.add_button = QPushButton("+")
-        self.layout.addWidget(self.add_button)
-
-        # Espacio flexible (CLAVE)
         self.layout.addStretch()
 
-        # Botón ajustes (abajo del todo)
-        self.settings()
+        self.layout.addWidget(SettingsButton())
 
-    def sidebar(self):
-        # Layout vertical
-        self.layout = QVBoxLayout(self)
+    def _setup_layout(self):
+        """
+        Configura el layout principal del sidebar.
+        """
 
-        # Tamaño ajustable:
-        # - Ancho mínimo
-        # - Altura máxima
-        self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+        # Crear layout vertical
+        self.layout = QVBoxLayout()
+
+        # Asignar el layout al widget Sidebar
+        self.setLayout(self.layout)
+
+        # Sidebar vertical expansible
+        self.setSizePolicy(
+            QSizePolicy.Policy.Fixed,
+            QSizePolicy.Policy.Expanding,
+        )
+
+        # Ancho fijo del sidebar
+        self.setFixedWidth(220)
 
         # Márgenes internos
         self.layout.setContentsMargins(10, 20, 10, 20)
 
         # Espaciado entre widgets
         self.layout.setSpacing(5)
-
-    def app_logo(self):
-        # QLabel para el logo
-        self.logo = QLabel()
-        self.logo.setAlignment(Qt.AlignCenter)
-
-        # Cargar imagen
-        pixmap = QPixmap("ui/resources/images/geimesdb_logo.png")
-
-        # Escalar imagen
-        pixmap = pixmap.scaled(
-            60,  # Ancho
-            60,  # Alto
-            Qt.KeepAspectRatio,  # No se deforma
-            Qt.SmoothTransformation,  # Mejor calidad
-        )
-
-        # Asignar imagen al label
-        self.logo.setPixmap(pixmap)
-
-        # Añadir al layout
-        self.layout.addWidget(self.logo)
-
-    def settings(self):
-        self.icon = QLabel()
-        self.icon.setAlignment(Qt.AlignCenter)
-
-        # Cargar imagen
-        pixmap = QPixmap("ui/resources/images/settings.png")
-
-        # Escalar imagen
-        pixmap = pixmap.scaled(
-            30,  # Ancho
-            30,  # Alto
-            Qt.KeepAspectRatio,  # No se deforma
-            Qt.SmoothTransformation,  # Mejor calidad
-        )
-
-        # Asignar imagen al label
-        self.icon.setPixmap(pixmap)
-
-        # Añadir al layout
-        self.layout.addWidget(self.icon)

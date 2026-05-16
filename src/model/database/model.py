@@ -15,13 +15,29 @@ def get_connection():
     Establece una conexión, gestiona transacciones y asegura el cierre.
     Si algo falla dentro del bloque 'with', hace rollback explícito.
     """
+
     conn = sqlite3.connect(DB_PATH)
+
+    # Permite acceder a columnas por nombre
+    conn.row_factory = sqlite3.Row
+
+    # Activar claves foráneas en SQLite
+    conn.execute("PRAGMA foreign_keys = ON;")
+
     try:
         yield conn
+
+        # Confirmar transacción si todo salió bien
+        conn.commit()
+
     except Exception as e:
-        conn.rollback()  # Rollback explícito ante cualquier error
+        # Revertir cambios ante cualquier error
+        conn.rollback()
+
         logger.error(f"Error en transacción: {e}")
+
         raise
+
     finally:
         conn.close()
 

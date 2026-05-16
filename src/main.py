@@ -4,7 +4,7 @@ from PySide6 import QtWidgets
 
 from model.database.model import init_database
 from log.logger_config import setup_logging
-from ui.app.main_widget import MainWidget
+from ui.app.main_window import MainWindow
 
 if __name__ == "__main__":
     # Inicializamos los logs antes que cualquier otra cosa
@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     # Instanciamos nuestra clase principal.
     # Aquí es donde se construye todo a machete.
-    window = MainWidget()
+    window = MainWindow()
 
     # Mostramos la interfaz ocupando toda la pantalla disponible.
     # A diferencia de .show(), esto aprovecha el espacio desde el arranque.

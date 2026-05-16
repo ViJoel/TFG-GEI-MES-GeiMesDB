@@ -1,0 +1,18 @@
+from model.connections.connection import Connection
+from model.connections.model import get_all_connections as gac
+from model.connections.model import create_connection as cc
+
+
+def get_connections() -> list[Connection]:
+    """
+    Recupera todas las conexiones disponibles desde la capa modelo.
+
+    Returns:
+        list[Connection]:
+            Lista de conexiones persistidas en la base de datos.
+    """
+
+    return gac()
+
+def add_connection(connection: Connection) -> bool:
+    return cc(connection=connection)

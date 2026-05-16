@@ -1,0 +1,14 @@
+import os
+from common.paths import RESOURCE_ROOT
+
+# Recursos
+RESOURCES_DIR = os.path.join(RESOURCE_ROOT, "ui", "resources")
+
+# Imágenes
+IMAGES_DIR = os.path.join(RESOURCES_DIR, "images")
+APP_LOGO = os.path.join(IMAGES_DIR, "geimesdb_logo.png")
+POSTGRESQL_LOGO = os.path.join(IMAGES_DIR, "postgresql_logo.png")
+MYSQL_LOGO = os.path.join(IMAGES_DIR, "mysql_logo.png")
+SQLITE_LOGO = os.path.join(IMAGES_DIR, "sqlite_logo.png")
+ORACLE_LOGO = os.path.join(IMAGES_DIR, "oracle_logo.png")
+SETTINGS_ICON = os.path.join(IMAGES_DIR, "settings.png")
