@@ -3,6 +3,7 @@ from PySide6.QtWidgets import QHBoxLayout, QMainWindow, QVBoxLayout, QWidget
 
 
 from common.constants import APP_NAME
+from ui.widgets.forms.connection_form import ConnectionForm
 from ui.widgets.sidebar.sidebar import Sidebar
 
 
@@ -32,6 +33,8 @@ class MainWindow(QMainWindow):
         layout.addWidget(sidebar)
 
         layout.addStretch()
+        
+        layout.addWidget(ConnectionForm())
 
     def _connect_signals(self):
         pass

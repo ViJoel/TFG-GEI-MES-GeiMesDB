@@ -1,3 +1,5 @@
+import logging
+
 import qtawesome as qta
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon
@@ -15,6 +17,9 @@ from model.connections.connection import Connection
 from model.connections.driver import Driver
 from service.connections import get_connections
 from ui.common.paths import MYSQL_LOGO, ORACLE_LOGO, POSTGRESQL_LOGO, SQLITE_LOGO
+
+# Crear sub-logger
+logger = logging.getLogger(__name__)
 
 
 class ConnectionsList(QWidget):
@@ -37,7 +42,7 @@ class ConnectionsList(QWidget):
     # === Widgets ===
     # ===============
 
-    def _setup_ui(self):
+    def _setup_ui(self) -> None:
         """
         Configura la interfaz del widget.
         """
@@ -52,7 +57,7 @@ class ConnectionsList(QWidget):
         # Lista de conexiones
         self._connections_list()
 
-    def _buttons(self):
+    def _buttons(self) -> None:
         # Layout horizontal para botones
         self.buttons_layout = QHBoxLayout()
 
@@ -79,7 +84,7 @@ class ConnectionsList(QWidget):
         button.setFixedSize(32, 32)
         return button
 
-    def _connections_list(self):
+    def _connections_list(self) -> None:
         self.list_widget = QListWidget()
         self.list_widget.setSizePolicy(
             QSizePolicy.Policy.Expanding,
@@ -91,7 +96,11 @@ class ConnectionsList(QWidget):
     # === Señales ===
     # ===============
 
-    def _connect_signals(self):
+    def _connect_signals(self) -> None:
+        """
+        Conecta las señales de los widgets con sus callbacks.
+        """
+
         # Lista de conexiones
         self.list_widget.itemClicked.connect(self._on_item_clicked)
 
@@ -114,7 +123,7 @@ class ConnectionsList(QWidget):
     # === Servicios ===
     # =================
 
-    def _load_connections(self):
+    def _load_connections(self) -> None:
         """
         Recupera las conexiones desde el servicio y las
         carga en la lista visual.
@@ -127,7 +136,7 @@ class ConnectionsList(QWidget):
         for connection in connections:
             self._add_connection_item(connection)
 
-    def _add_connection_item(self, connection: Connection):
+    def _add_connection_item(self, connection: Connection) -> None:
         """
         Añade una conexión individual a la lista visual.
 
@@ -178,18 +187,34 @@ class ConnectionsList(QWidget):
         """
         Maneja la selección de elementos de la lista.
 
+        Recupera el objeto ``Connection`` asociado al item
+        seleccionado, registra la acción en el logger y emite
+        una señal para notificar al resto de componentes de la
+        aplicación.
+
         Args:
             item (QListWidgetItem):
-                Elemento seleccionado.
+                Elemento seleccionado de la lista.
         """
 
+        # Recupera el objeto Connection almacenado previamente en el UserRole del item.
         connection = item.data(Qt.ItemDataRole.UserRole)
 
-        print(f"{connection}")
+        # Registra en logs la conexión seleccionada.
+        logger.info(f"Conexión seleccionada: {connection}")
 
+        # Emite la señal personalizada enviando la conexión seleccionada al resto de la aplicación.
         self.connection_selected.emit(connection)
 
     def _get_selected_connection(self) -> Connection | None:
+        """
+        Obtiene la conexión seleccionada en la lista.
+
+        Returns:
+            Connection:
+                El objeto de la conexión.
+        """
+
         item = self.list_widget.currentItem()
 
         if item is None:
@@ -207,6 +232,11 @@ class ConnectionsList(QWidget):
         print("Botón de eliminar conexión clickado")
 
     def _con_btn_clicked(self):
+        connection = self._get_selected_connection()
+
+        if connection is None:
+            return
+
         print("Botón de conectar clickado")
 
     def _discon_btn_clicked(self):
