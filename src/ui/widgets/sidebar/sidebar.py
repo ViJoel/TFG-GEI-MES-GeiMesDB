@@ -1,43 +1,53 @@
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QSizePolicy, QWidget
 
-from ui.common.paths import APP_LOGO
+from ui.utils.layouts import vbox
 from ui.widgets.sidebar.app_logo import AppLogo
 from ui.widgets.sidebar.connections_list import ConnectionsList
 from ui.widgets.sidebar.settings_button import SettingsButton
 
 
 class Sidebar(QWidget):
+
+    # ============
+    # === INIT ===
+    # ============
+
     def __init__(self):
         super().__init__()
 
         self._setup_ui()
 
-    def _setup_ui(self):
+    # ================
+    # === UI SETUP ===
+    # ================
+
+    def _setup_ui(self) -> None:
         """
         Configura la interfaz principal de la barra lateral.
         """
+
+        # Barra lateral
         self._setup_layout()
 
-        self.layout.addWidget(AppLogo())
+        # Logo de la aplicación
+        self.main_layout.addWidget(AppLogo())
 
-        self.layout.addWidget(ConnectionsList())
+        # Lista de conexiones
+        self.main_layout.addWidget(ConnectionsList())
 
-        self.layout.addStretch()
+        # Botón de ajustes
+        self.main_layout.addWidget(SettingsButton())
 
-        self.layout.addWidget(SettingsButton())
-
-    def _setup_layout(self):
+    def _setup_layout(self) -> None:
         """
         Configura el layout principal del sidebar.
         """
 
         # Crear layout vertical
-        self.layout = QVBoxLayout()
+        self.main_layout = vbox()
 
         # Asignar el layout al widget Sidebar
-        self.setLayout(self.layout)
+        self.setLayout(self.main_layout)
 
         # Sidebar vertical expansible
         self.setSizePolicy(
@@ -46,10 +56,4 @@ class Sidebar(QWidget):
         )
 
         # Ancho fijo del sidebar
-        self.setFixedWidth(220)
-
-        # Márgenes internos
-        self.layout.setContentsMargins(10, 20, 10, 20)
-
-        # Espaciado entre widgets
-        self.layout.setSpacing(5)
+        self.setFixedWidth(200)

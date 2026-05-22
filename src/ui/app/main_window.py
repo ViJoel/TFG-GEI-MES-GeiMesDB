@@ -1,20 +1,27 @@
-from PySide6.QtCore import QEvent
-from PySide6.QtWidgets import QHBoxLayout, QMainWindow, QVBoxLayout, QWidget
-
+from PySide6.QtWidgets import QMainWindow, QWidget
 
 from common.constants import APP_NAME
+from ui.utils.layouts import hbox
 from ui.widgets.forms.connection_form import ConnectionForm
 from ui.widgets.sidebar.sidebar import Sidebar
 
 
 class MainWindow(QMainWindow):
+
+    # ============
+    # === INIT ===
+    # ============
+
     def __init__(self):
         super().__init__()
 
         self._setup_ui()
-        self._connect_signals()
 
-    def _setup_ui(self):
+    # ================
+    # === UI SETUP ===
+    # ================
+
+    def _setup_ui(self) -> None:
         # Título de la ventana.
         self.setWindowTitle(APP_NAME)
 
@@ -23,27 +30,13 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central)
 
         # Layout principal (horizontal)
-        layout = QHBoxLayout()
-        central.setLayout(layout)
+        main_layout = hbox()
+        central.setLayout(main_layout)
 
         # Sidebar
         sidebar = Sidebar()
+        main_layout.addWidget(sidebar)
 
-        # Insertar sidebar en el layout
-        layout.addWidget(sidebar)
+        main_layout.addStretch()
 
-        layout.addStretch()
-        
-        layout.addWidget(ConnectionForm())
-
-    def _connect_signals(self):
-        pass
-
-    def retranslateUi(self):
-        """Aquí irán TODOS los textos traducibles"""
-        pass
-
-    def changeEvent(self, event):
-        if event.type() == QEvent.LanguageChange:
-            self.retranslateUi()
-        super().changeEvent(event)
+        main_layout.addWidget(ConnectionForm())
