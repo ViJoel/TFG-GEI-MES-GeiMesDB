@@ -10,13 +10,14 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QWidget,
 )
-from ui.widgets.notifications.notification import Notification
-from ui.widgets.notifications.notifications_type import NotificationType
+
 from model.entities.connection import Connection
 from model.entities.driver import Driver
 from service.connections.service import delete_connection, get_connections
 from ui.common.paths import MYSQL_LOGO, ORACLE_LOGO, POSTGRESQL_LOGO, SQLITE_LOGO
 from ui.utils.layouts import hbox, vbox
+from ui.widgets.notifications.notification import Notification
+from ui.widgets.notifications.notifications_type import NotificationType
 
 # Crear sub-logger
 logger = logging.getLogger(__name__)
