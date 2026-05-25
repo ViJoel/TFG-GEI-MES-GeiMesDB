@@ -2,7 +2,7 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Optional
 
-from model.connections.driver import Driver
+from model.entities.driver import Driver
 
 
 @dataclass(kw_only=True)  # Obliga a usar nombres de campo
@@ -29,7 +29,7 @@ class Connection:
     id: str = field(
         default_factory=lambda: str(uuid.uuid4())
     )  # Si no pasas un id, se ejecuta el lambda y genera un UUID string
-    name: str
+    name: str = ""
     driver: Driver
     host: Optional[str] = None
     port: Optional[int] = None

@@ -1,9 +1,9 @@
 import logging
 
-from model.connections.connection import Connection
-from model.connections.driver import Driver
 from model.database.model import get_connection as get_db_connection
 from model.database.wrapper import handle_db_errors
+from model.entities.connection import Connection
+from model.entities.driver import Driver
 
 # Crear sub-logger
 logger = logging.getLogger(__name__)
@@ -252,6 +252,7 @@ def update_connection(connection: Connection) -> bool:
         return True
 
 
+# TODO: Añadir PythonDoc a esta función
 @handle_db_errors("eliminar conexión")
 def delete_connection(connection: Connection) -> bool:
     """

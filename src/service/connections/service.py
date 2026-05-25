@@ -1,6 +1,6 @@
-from model.connections.connection import Connection
-from model.connections.model import get_all_connections as gac
 from model.connections.model import create_connection as cc
+from model.connections.model import get_all_connections as gac
+from model.entities.connection import Connection
 
 
 def get_connections() -> list[Connection]:
@@ -14,5 +14,6 @@ def get_connections() -> list[Connection]:
 
     return gac()
 
-def add_connection(connection: Connection) -> bool:
+
+def create_connection(connection: Connection) -> bool:
     return cc(connection=connection)

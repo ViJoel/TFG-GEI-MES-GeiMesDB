@@ -1,3 +1,5 @@
+import logging
+
 from PySide6.QtCore import QRegularExpression
 from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import (
@@ -9,8 +11,16 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from model.connections.driver import Driver
+from model.entities.connection import Connection
+from model.entities.driver import Driver
+from service.connections.service import create_connection
 from ui.utils.layouts import hbox, vbox
+from ui.widgets.notifications.notification import Notification
+from ui.widgets.notifications.notifications_type import NotificationType
+from ui.widgets.sidebar.connections_list import ConnectionsList
+
+# Crear sub-logger
+logger = logging.getLogger(__name__)
 
 
 class ConnectionForm(QWidget):
@@ -38,6 +48,9 @@ class ConnectionForm(QWidget):
 
         # Inputs del formulario
         self._set_form_inputs(main_layout)
+
+        # Botones del formulario
+        self._build_action_buttons(main_layout)
 
         # Señales
         self._connect_signals()
@@ -135,7 +148,7 @@ class ConnectionForm(QWidget):
     def _build_port_field(self, parent_layout) -> None:
         self.port_input = self._create_input("12345")
 
-        self._set_port_validator()
+        self._set_port_regex()
 
         self.port_field = self._build_field(
             "Port",
@@ -196,6 +209,33 @@ class ConnectionForm(QWidget):
 
         parent_layout.addWidget(self.path_field)
 
+    def _build_action_buttons(self, parent_layout) -> None:
+        """
+        Construye los botones de acción del formulario.
+        """
+
+        # Widget contenedor
+        buttons_widget = QWidget()
+
+        # Layout horizontal
+        buttons_layout = hbox()
+        buttons_widget.setLayout(buttons_layout)
+
+        # Botones
+        self.test_connection_button = QPushButton("Test connection")
+        self.save_button = QPushButton("Save")
+
+        # Añadir widgets
+        buttons_layout.addWidget(self.test_connection_button)
+
+        # Empuja el siguiente botón al extremo derecho
+        buttons_layout.addStretch()
+
+        buttons_layout.addWidget(self.save_button)
+
+        # Añadir al layout padre
+        parent_layout.addWidget(buttons_widget)
+
     # ===============
     # === HELPERS ===
     # ===============
@@ -235,9 +275,9 @@ class ConnectionForm(QWidget):
     def _build_field(self, label_text, widget) -> QWidget:
         """
         Construye un campo estándar del formulario compuesto por:
-        - Un label.
-        - Un widget principal.
-        - Un contenedor vertical.
+        - Contenedor vertical.
+        - Label.
+        - Widget principal.
 
         Args:
             label_text (str): Texto que aparecerá en el label.
@@ -252,18 +292,20 @@ class ConnectionForm(QWidget):
         field_layout = vbox()
         field_widget.setLayout(field_layout)
 
+        # Label principal
         field_label = self._create_input_label(label_text)
 
+        # Añadir widgets
         field_layout.addWidget(field_label)
         field_layout.addWidget(widget)
 
         return field_widget
 
-    # ==================
-    # === VALIDATORS ===
-    # ==================
+    # =============
+    # === REGEX ===
+    # =============
 
-    def _set_port_validator(self):
+    def _set_port_regex(self):
         # Expresión regular que valide: "solo números (\d) entre 0 y 5 veces ({0,5})"
         regex = QRegularExpression(r"^\d{0,5}$")
         validator = QRegularExpressionValidator(regex, self.port_input)
@@ -277,6 +319,10 @@ class ConnectionForm(QWidget):
         self.browse_button.clicked.connect(self._select_file)
 
         self.driver_input.currentTextChanged.connect(self._update_fields_visibility)
+
+        self.save_button.clicked.connect(
+            self._save_button_clicked,
+        )
 
     # ======================
     # === EVENT HANDLERS ===
@@ -295,6 +341,54 @@ class ConnectionForm(QWidget):
         # Si el usuario seleccionó un archivo (no canceló la ventana), lo ponemos en el input
         if file_path:
             self.path_input.setText(file_path)
+
+    def _save_button_clicked(self) -> None:
+
+        # Extraer datos del formulario
+        selected_driver = Driver(self.driver_input.currentText())
+
+        connection = Connection(
+            name=self.name_input.text(),
+            driver=selected_driver,
+        )
+        if selected_driver == Driver.SQLITE:
+            connection.path = self.path_input.text()
+        else:
+            connection.host = self.host_input.text()
+            connection.port = int(self.port_input.text())
+            connection.database = self.database_input.text()
+            connection.username = self.username_input.text()
+            connection.password = self.password_input.text()
+
+        # Guardar conexión
+        try:
+            create_connection(connection)
+
+            # Crear log
+            logger.info(f"Conexión guardada con éxito: {connection}")
+
+            # TODO: Recargar lista de conexiones
+
+            # Notificar
+            notification = Notification(
+                NotificationType.SUCCESS,
+                "Connection saved",
+                parent=self.window(),
+            )
+            notification.show()
+
+        # Notificar si falla al guardar
+        except Exception as e:
+            # Crear log
+            logger.error(f"Error al guardar conexión: {connection}. Excepción: {e}")
+
+            # Notificar
+            notification = Notification(
+                NotificationType.ERROR,
+                "Error saving",
+                parent=self.window(),
+            )
+            notification.show()
 
     # ================
     # === UI STATE ===

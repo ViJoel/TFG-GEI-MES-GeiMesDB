@@ -11,9 +11,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from model.connections.connection import Connection
-from model.connections.driver import Driver
-from service.connections import get_connections
+from model.entities.connection import Connection
+from model.entities.driver import Driver
+from service.connections.service import get_connections
 from ui.common.paths import MYSQL_LOGO, ORACLE_LOGO, POSTGRESQL_LOGO, SQLITE_LOGO
 from ui.utils.layouts import hbox, vbox
 
@@ -245,3 +245,15 @@ class ConnectionsList(QWidget):
 
         # De momento desactivado
         self.disconnect_button.setEnabled(False)
+
+    # ==================
+    # === PUBLIC API ===
+    # ==================
+
+    def reload_connections(self) -> None:
+        """
+        Recarga las conexiones desde la base de datos
+        y actualiza la lista visual.
+        """
+
+        self._load_connections()
