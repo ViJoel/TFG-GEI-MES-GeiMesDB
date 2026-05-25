@@ -10,10 +10,11 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QWidget,
 )
-
+from ui.widgets.notifications.notification import Notification
+from ui.widgets.notifications.notifications_type import NotificationType
 from model.entities.connection import Connection
 from model.entities.driver import Driver
-from service.connections.service import get_connections
+from service.connections.service import delete_connection, get_connections
 from ui.common.paths import MYSQL_LOGO, ORACLE_LOGO, POSTGRESQL_LOGO, SQLITE_LOGO
 from ui.utils.layouts import hbox, vbox
 
@@ -116,6 +117,9 @@ class ConnectionsList(QWidget):
 
         # Botón de añadir conexión
         self.add_button.clicked.connect(self._on_add_button_clicked)
+
+        # Botón de eliminar conexión
+        self.delete_button.clicked.connect(self._on_delete_button_clicked)
 
     # ======================
     # === EVENT HANDLERS ===
@@ -222,6 +226,50 @@ class ConnectionsList(QWidget):
         logger.info("Solicitud para crear nueva conexión")
 
         self.add_connection_requested.emit()
+
+    def _on_delete_button_clicked(self) -> None:
+        """
+        Elimina la conexión seleccionada.
+        """
+
+        connection = self._get_selected_connection()
+
+        if connection is None:
+            logger.warning("Se intentó eliminar una conexión sin selección.")
+            return
+
+        try:
+            # Eliminar conexión
+            delete_connection(connection)
+
+            # Crear log
+            logger.info(f"Conexión eliminada: {connection}")
+
+            # Mostrar notificación
+            notification = Notification(
+                NotificationType.SUCCESS,
+                "Connection deleted",
+                parent=self.window(),
+            )
+            notification.show()
+
+            # Recargar lista de conexiones
+            self.reload_connections()
+
+            # Limpiar selección
+            self._clear_selection()
+
+        except Exception as e:
+            # Crear log
+            logger.error(f"Error al eliminar conexión: {connection}. Excepción: {e}")
+
+            # Mostrar notificación
+            notification = Notification(
+                NotificationType.ERROR,
+                "Error saving",
+                parent=self.window(),
+            )
+            notification.show()
 
     # ================
     # === UI STATE ===
