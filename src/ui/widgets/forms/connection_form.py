@@ -1,6 +1,6 @@
 import logging
 
-from PySide6.QtCore import QRegularExpression
+from PySide6.QtCore import QRegularExpression, Signal
 from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import (
     QComboBox,
@@ -25,6 +25,9 @@ logger = logging.getLogger(__name__)
 
 class ConnectionForm(QWidget):
 
+    # Señales
+    connection_saved = Signal()
+
     # ============
     # === INIT ===
     # ============
@@ -33,6 +36,7 @@ class ConnectionForm(QWidget):
         super().__init__()
 
         self._setup_ui()
+        self._connect_signals()
 
     # ================
     # === UI SETUP ===
@@ -51,9 +55,6 @@ class ConnectionForm(QWidget):
 
         # Botones del formulario
         self._build_action_buttons(main_layout)
-
-        # Señales
-        self._connect_signals()
 
         # Aplicar estado inicial del formulario
         self._update_fields_visibility()
@@ -367,9 +368,7 @@ class ConnectionForm(QWidget):
             # Crear log
             logger.info(f"Conexión guardada con éxito: {connection}")
 
-            # TODO: Recargar lista de conexiones
-
-            # Notificar
+            # Mostrar notificación
             notification = Notification(
                 NotificationType.SUCCESS,
                 "Connection saved",
@@ -377,12 +376,15 @@ class ConnectionForm(QWidget):
             )
             notification.show()
 
+            # Emitir señal
+            self.connection_saved.emit()
+
         # Notificar si falla al guardar
         except Exception as e:
             # Crear log
             logger.error(f"Error al guardar conexión: {connection}. Excepción: {e}")
 
-            # Notificar
+            # Mostrar notificación
             notification = Notification(
                 NotificationType.ERROR,
                 "Error saving",

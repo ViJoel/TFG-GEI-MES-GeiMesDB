@@ -33,7 +33,8 @@ class Sidebar(QWidget):
         self.main_layout.addWidget(AppLogo())
 
         # Lista de conexiones
-        self.main_layout.addWidget(ConnectionsList())
+        self.connections_list = ConnectionsList()
+        self.main_layout.addWidget(self.connections_list)
 
         # Botón de ajustes
         self.main_layout.addWidget(SettingsButton())

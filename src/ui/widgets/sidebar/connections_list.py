@@ -26,8 +26,9 @@ class ConnectionsList(QWidget):
     Widget encargado de visualizar y gestionar la lista de conexiones.
     """
 
-    # Señal emitida al seleccionar una conexión
+    # Señales
     connection_selected = Signal(Connection)
+    add_connection_requested = Signal()
 
     # ============
     # === INIT ===
@@ -112,6 +113,9 @@ class ConnectionsList(QWidget):
 
         # Lista de conexiones
         self.list_widget.itemSelectionChanged.connect(self._on_selection_changed)
+
+        # Botón de añadir conexión
+        self.add_button.clicked.connect(self._on_add_button_clicked)
 
     # ======================
     # === EVENT HANDLERS ===
@@ -213,6 +217,11 @@ class ConnectionsList(QWidget):
 
         self.list_widget.clearSelection()
         self.list_widget.setCurrentItem(None)
+
+    def _on_add_button_clicked(self) -> None:
+        logger.info("Solicitud para crear nueva conexión")
+
+        self.add_connection_requested.emit()
 
     # ================
     # === UI STATE ===
