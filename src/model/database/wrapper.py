@@ -4,7 +4,7 @@ from sqlite3 import IntegrityError, OperationalError
 
 logger = logging.getLogger(__name__)
 
-
+# TODO: PythonDoc
 def handle_db_errors(operation_name):
     """
     Decorador agnóstico para capturar errores técnicos de SQLite.
