@@ -16,6 +16,7 @@ from model.entities.driver import Driver
 from service.connections.service import delete_connection, get_connections
 from ui.common.paths import MYSQL_LOGO, ORACLE_LOGO, POSTGRESQL_LOGO, SQLITE_LOGO
 from ui.utils.layouts import hbox, vbox
+from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
 from ui.widgets.notifications.notification import Notification
 from ui.widgets.notifications.notifications_type import NotificationType
 
@@ -243,11 +244,30 @@ class ConnectionsList(QWidget):
             logger.warning("Se intentó eliminar una conexión sin selección.")
             return
 
+        dialog = ConfirmationDialog(
+            title="Delete connection",
+            message=(f"Are you sure you want to delete " f"'{connection.name}'?"),
+            parent=self,
+        )
+
+        dialog.confirmed.connect(lambda: self._delete_connection(connection))
+
+        dialog.exec()
+
+    def _delete_connection(
+        self,
+        connection: Connection,
+    ) -> None:
+        """
+        Elimina una conexión persistida y
+        actualiza la interfaz.
+        """
+
         try:
+
             # Eliminar conexión
             delete_connection(connection)
 
-            # Crear log
             logger.info(f"Conexión eliminada: {connection}")
 
             # Mostrar notificación
@@ -256,24 +276,27 @@ class ConnectionsList(QWidget):
                 "Connection deleted",
                 parent=self.window(),
             )
+
             notification.show()
 
-            # Recargar lista de conexiones
+            # Recargar conexiones
             self.reload_connections()
 
             # Limpiar selección
             self._clear_selection()
 
         except Exception as e:
-            # Crear log
-            logger.error(f"Error al eliminar conexión: {connection}. Excepción: {e}")
 
-            # Mostrar notificación
+            logger.error(
+                f"Error al eliminar conexión: " f"{connection}. Excepción: {e}"
+            )
+
             notification = Notification(
                 NotificationType.ERROR,
-                "Error saving",
+                "Error deleting",
                 parent=self.window(),
             )
+
             notification.show()
 
     def _on_edit_button_clicked(self) -> None:
