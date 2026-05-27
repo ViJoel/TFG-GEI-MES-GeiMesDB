@@ -1,10 +1,10 @@
 import logging
 import sqlite3
 
-from model.database.model import get_connection as get_db_connection
-from model.database.wrapper import handle_db_errors
-from model.entities.connection import Connection
-from model.entities.driver import Driver
+from entities.connection import Connection
+from entities.driver import Driver
+from modules.database.model import get_connection as get_db_connection
+from modules.database.wrapper import handle_db_errors
 
 logger = logging.getLogger(__name__)
 

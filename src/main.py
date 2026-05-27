@@ -2,8 +2,8 @@ import sys
 
 from PySide6 import QtWidgets
 
-from model.database.model import init_database
 from log.logger_config import setup_logging
+from modules.database.model import init_database
 from ui.app.main_window import MainWindow
 
 if __name__ == "__main__":

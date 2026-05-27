@@ -2,7 +2,7 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Optional
 
-from model.entities.driver import Driver
+from entities.driver import Driver
 
 
 @dataclass(kw_only=True)  # Obliga a usar nombres de campo

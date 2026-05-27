@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QLabel, QMainWindow, QStackedWidget, QWidget
 
 from common.constants import APP_NAME
-from model.entities.connection import Connection
+from entities.connection import Connection
 from ui.utils.layouts import hbox
 from ui.widgets.forms.connection_form import ConnectionForm
 from ui.widgets.sidebar.sidebar import Sidebar

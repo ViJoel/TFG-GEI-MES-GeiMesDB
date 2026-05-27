@@ -11,9 +11,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from model.entities.connection import Connection
-from model.entities.driver import Driver
-from service.connections.service import delete_connection, get_connections
+from entities.connection import Connection
+from entities.driver import Driver
+from modules.connections.service import delete_connection, get_connections
 from ui.common.paths import MYSQL_LOGO, ORACLE_LOGO, POSTGRESQL_LOGO, SQLITE_LOGO
 from ui.utils.layouts import hbox, vbox
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog

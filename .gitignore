@@ -1,6 +1,9 @@
 # Carpeta con apuntes
 cosas/
 
+# Scripts de bash
+*.sh
+
 # Visual Studio Code
 .vscode/
 

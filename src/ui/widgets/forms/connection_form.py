@@ -11,9 +11,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from model.entities.connection import Connection
-from model.entities.driver import Driver
-from service.connections.service import create_connection, update_connection
+from entities.connection import Connection
+from entities.driver import Driver
+from modules.connections.service import create_connection, update_connection
 from ui.utils.layouts import hbox, vbox
 from ui.widgets.notifications.notification import Notification
 from ui.widgets.notifications.notifications_type import NotificationType
