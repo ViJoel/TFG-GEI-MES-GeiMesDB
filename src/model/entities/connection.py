@@ -30,7 +30,7 @@ class Connection:
         default_factory=lambda: str(uuid.uuid4())
     )  # Si no pasas un id, se ejecuta el lambda y genera un UUID string
     name: str = ""
-    driver: Driver
+    driver: Driver = Driver.POSTGRESQL
     host: Optional[str] = None
     port: Optional[int] = None
     database: Optional[str] = None

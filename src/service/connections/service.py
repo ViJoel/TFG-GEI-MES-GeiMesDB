@@ -2,6 +2,7 @@ from model.connections.model import create_connection as cc
 from model.connections.model import update_connection as uc
 from model.connections.model import delete_connection as dc
 from model.connections.model import get_all_connections as gac
+from model.connections.model import connection_exists as ce
 from model.entities.connection import Connection
 
 
@@ -30,3 +31,8 @@ def update_connection(connection: Connection) -> None:
 # TODO: PythonDoc
 def delete_connection(connection: Connection) -> None:
     return dc(connection=connection)
+
+
+# TODO: PythonDoc
+def connection_exists(connection_id: str) -> bool:
+    return ce(connection_id=connection_id)

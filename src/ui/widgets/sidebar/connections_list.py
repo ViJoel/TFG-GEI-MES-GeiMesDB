@@ -31,6 +31,7 @@ class ConnectionsList(QWidget):
     # Señales
     connection_selected = Signal(Connection)
     add_connection_requested = Signal()
+    edit_connection_requested = Signal(Connection)
 
     # ============
     # === INIT ===
@@ -121,6 +122,9 @@ class ConnectionsList(QWidget):
 
         # Botón de eliminar conexión
         self.delete_button.clicked.connect(self._on_delete_button_clicked)
+
+        # Botón de editar conexión
+        self.edit_button.clicked.connect(self._on_edit_button_clicked)
 
     # ======================
     # === EVENT HANDLERS ===
@@ -271,6 +275,17 @@ class ConnectionsList(QWidget):
                 parent=self.window(),
             )
             notification.show()
+
+    def _on_edit_button_clicked(self) -> None:
+
+        connection = self._get_selected_connection()
+
+        if connection is None:
+            return
+
+        logger.info(f"Editar conexión: {connection}")
+
+        self.edit_connection_requested.emit(connection)
 
     # ================
     # === UI STATE ===

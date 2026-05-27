@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QLabel, QMainWindow, QStackedWidget, QWidget
 
 from common.constants import APP_NAME
+from model.entities.connection import Connection
 from ui.utils.layouts import hbox
 from ui.widgets.forms.connection_form import ConnectionForm
 from ui.widgets.sidebar.sidebar import Sidebar
@@ -68,6 +69,10 @@ class MainWindow(QMainWindow):
 
         self.connection_form.connection_saved.connect(self._on_connection_saved)
 
+        self.sidebar.connections_list.edit_connection_requested.connect(
+            self._show_edit_connection_form
+        )
+
     # ======================
     # === EVENT HANDLERS ===
     # ======================
@@ -85,4 +90,12 @@ class MainWindow(QMainWindow):
     # ================
 
     def _show_connection_form(self) -> None:
+        self.connection_form.clear_form()
+        self.stack.setCurrentWidget(self.connection_form)
+
+    def _show_edit_connection_form(
+        self,
+        connection: Connection,
+    ) -> None:
+        self.connection_form.load_connection(connection)
         self.stack.setCurrentWidget(self.connection_form)

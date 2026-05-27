@@ -155,3 +155,28 @@ def delete_connection(connection: Connection) -> None:
         logger.info(
             f"Conexión '{connection.name}' (ID: {connection.id}) eliminada con éxito."
         )
+
+
+# TODO: PythonDoc
+@handle_db_errors("verificar existencia de conexión")
+def connection_exists(connection_id: str) -> bool:
+
+    query = """
+    SELECT 1
+    FROM connections
+    WHERE id = ?
+    LIMIT 1
+    """
+
+    with get_db_connection() as conn:
+        cur = conn.cursor()
+
+        cur.execute(query, (connection_id,))
+
+        exists = cur.fetchone() is not None
+
+    logger.info(
+        f"Verificación de existencia para conexión ID '{connection_id}': {exists}"
+    )
+
+    return exists
