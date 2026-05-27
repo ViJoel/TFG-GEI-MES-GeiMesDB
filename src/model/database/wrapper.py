@@ -4,27 +4,77 @@ from sqlite3 import IntegrityError, OperationalError
 
 logger = logging.getLogger(__name__)
 
-# TODO: PythonDoc
+
 def handle_db_errors(operation_name):
     """
-    Decorador agnóstico para capturar errores técnicos de SQLite.
+    Decorador para centralizar el manejo y registro
+    de errores relacionados con SQLite.
+
+    El decorador captura las excepciones más comunes
+    de persistencia y genera logs contextualizados
+    según la operación ejecutada.
+
+    Args:
+        operation_name (str):
+            Descripción legible de la operación
+            que se está ejecutando.
+
+    Returns:
+        callable:
+            Función decorada con manejo de errores.
     """
 
     def decorator(func):
+        """
+        Envuelve la función original añadiendo
+        control centralizado de excepciones SQLite.
+
+        Args:
+            func (callable):
+                Función objetivo a decorar.
+
+        Returns:
+            callable:
+                Wrapper con manejo de errores.
+        """
+
         @wraps(func)
         def wrapper(*args, **kwargs):
+            """
+            Ejecuta la función decorada interceptando
+            errores comunes de persistencia.
+
+            Raises:
+                IntegrityError:
+                    Violaciones de integridad como
+                    claves duplicadas o constraints.
+
+                OperationalError:
+                    Problemas operativos de SQLite
+                    como bloqueos, permisos o acceso
+                    al archivo de base de datos.
+
+                Exception:
+                    Cualquier error inesperado no controlado.
+            """
+
             try:
                 return func(*args, **kwargs)
+
+            # Violaciones de constraints, claves únicas,
+            # foreign keys o integridad relacional.
             except IntegrityError as e:
-                # Error de claves duplicadas o violaciones de constraints
                 logger.warning(f"Conflicto de integridad al {operation_name}: {e}")
                 raise
+
+            # Problemas relacionados con acceso a la BD,
+            # permisos, locking o corrupción.
             except OperationalError as e:
-                # Error de archivo, permisos o base de datos bloqueada
                 logger.error(f"Fallo operativo al {operation_name}: {e}")
                 raise
+
+            # Fallback para cualquier excepción no prevista.
             except Exception as e:
-                # Cualquier otro error inesperado
                 logger.error(f"Error no controlado al {operation_name}: {e}")
                 raise
 

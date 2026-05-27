@@ -1,15 +1,27 @@
 import logging
+import sqlite3
 
 from model.database.model import get_connection as get_db_connection
 from model.database.wrapper import handle_db_errors
 from model.entities.connection import Connection
 from model.entities.driver import Driver
 
-# Crear sub-logger
 logger = logging.getLogger(__name__)
 
 
-def _map_row_to_connection(row) -> Connection:
+def _map_row_to_connection(row: sqlite3.Row) -> Connection:
+    """
+    Reconstruye una entidad Connection a partir
+    de una fila SQLite.
+
+    Args:
+        row (sqlite3.Row):
+            Registro recuperado desde la base de datos.
+
+    Returns:
+        Connection:
+            Entidad de conexión reconstruida.
+    """
 
     return Connection(
         id=row["id"],
@@ -24,15 +36,29 @@ def _map_row_to_connection(row) -> Connection:
     )
 
 
-# TODO: PythonDoc
 @handle_db_errors("cargar todas las conexiones")
 def get_all_connections() -> list[Connection]:
+    """
+    Recupera todas las conexiones persistidas
+    ordenadas alfabéticamente por nombre.
 
-    query = "SELECT * FROM connections ORDER BY name ASC"
+    Returns:
+        list[Connection]:
+            Lista de conexiones registradas.
+    """
+
+    query = """
+    SELECT *
+    FROM connections
+    ORDER BY name ASC
+    """
+
     connections_list: list[Connection] = []
 
     with get_db_connection() as conn:
+
         cur = conn.cursor()
+
         cur.execute(query)
 
         rows = cur.fetchall()
@@ -47,19 +73,24 @@ def get_all_connections() -> list[Connection]:
     return connections_list
 
 
-# TODO: PythonDoc
 @handle_db_errors("crear conexión")
 def create_connection(connection: Connection) -> None:
+    """
+    Persiste una nueva conexión en la base de datos.
 
-    # Consulta SQL para insertar una nueva conexión
+    Args:
+        connection (Connection):
+            Conexión a registrar.
+    """
+
     query = """
     INSERT INTO connections (
         id, name, driver, host, port, database, username, password, path
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     """
 
-    # Abre conexión a la base de datos usando un context manager
     with get_db_connection() as conn:
+
         cur = conn.cursor()
 
         cur.execute(
@@ -77,14 +108,18 @@ def create_connection(connection: Connection) -> None:
             ),
         )
 
-        logger.info(
-            f"Conexión '{connection.name}' (ID: {connection.id}) creada con éxito."
-        )
+    logger.info(f"Conexión '{connection.name}' (ID: {connection.id}) creada con éxito.")
 
 
-# TODO: PythonDoc
 @handle_db_errors("actualizar conexión")
 def update_connection(connection: Connection) -> None:
+    """
+    Actualiza una conexión persistida existente.
+
+    Args:
+        connection (Connection):
+            Conexión con los datos actualizados.
+    """
 
     query = """
     UPDATE connections
@@ -101,6 +136,7 @@ def update_connection(connection: Connection) -> None:
     """
 
     with get_db_connection() as conn:
+
         cur = conn.cursor()
 
         cur.execute(
@@ -118,27 +154,35 @@ def update_connection(connection: Connection) -> None:
             ),
         )
 
+        # No existe ninguna conexión con ese ID.
         if cur.rowcount == 0:
             logger.warning(
                 f"Conexión '{connection.name}' (ID: {connection.id}) no encontrada para actualizar."
             )
             return
 
-        logger.info(
-            f"Conexión '{connection.name}' (ID: {connection.id}) actualizada con éxito."
-        )
+    logger.info(
+        f"Conexión '{connection.name}' (ID: {connection.id}) actualizada con éxito."
+    )
 
 
-# TODO: PythonDoc
 @handle_db_errors("eliminar conexión")
 def delete_connection(connection: Connection) -> None:
+    """
+    Elimina una conexión persistida.
+
+    Args:
+        connection (Connection):
+            Conexión a eliminar.
+    """
 
     query = """
-    delete from connections
-    where id = ?
+    DELETE FROM connections
+    WHERE id = ?
     """
 
     with get_db_connection() as conn:
+
         cur = conn.cursor()
 
         cur.execute(
@@ -146,20 +190,33 @@ def delete_connection(connection: Connection) -> None:
             (connection.id,),
         )
 
+        # No existe ninguna conexión con ese ID.
         if cur.rowcount == 0:
             logger.warning(
                 f"Conexión '{connection.name}' (ID: {connection.id}) no encontrada para eliminar."
             )
             return
 
-        logger.info(
-            f"Conexión '{connection.name}' (ID: {connection.id}) eliminada con éxito."
-        )
+    logger.info(
+        f"Conexión '{connection.name}' (ID: {connection.id}) eliminada con éxito."
+    )
 
 
-# TODO: PythonDoc
 @handle_db_errors("verificar existencia de conexión")
 def connection_exists(connection_id: str) -> bool:
+    """
+    Verifica si existe una conexión registrada
+    con el identificador especificado.
+
+    Args:
+        connection_id (str):
+            Identificador único de la conexión.
+
+    Returns:
+        bool:
+            True si la conexión existe,
+            False en caso contrario.
+    """
 
     query = """
     SELECT 1
@@ -169,6 +226,7 @@ def connection_exists(connection_id: str) -> bool:
     """
 
     with get_db_connection() as conn:
+
         cur = conn.cursor()
 
         cur.execute(query, (connection_id,))
