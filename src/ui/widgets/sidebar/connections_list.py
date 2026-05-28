@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 from entities.connection import Connection
 from entities.driver import Driver
 from modules.connections.service import delete_connection, get_connections
+from modules.sessions.service import has_session
 from ui.common.paths import MYSQL_LOGO, ORACLE_LOGO, POSTGRESQL_LOGO, SQLITE_LOGO
 from ui.utils.layouts import hbox, vbox
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
@@ -33,6 +34,8 @@ class ConnectionsList(QWidget):
     connection_selected = Signal(Connection)
     add_connection_requested = Signal()
     edit_connection_requested = Signal(Connection)
+    connection_open_requested = Signal(Connection)
+    connection_close_requested = Signal(Connection)
 
     # ============
     # === INIT ===
@@ -126,6 +129,10 @@ class ConnectionsList(QWidget):
 
         # Botón de editar conexión
         self.edit_button.clicked.connect(self._on_edit_button_clicked)
+
+        self.connect_button.clicked.connect(self._on_connect_button_clicked)
+
+        self.disconnect_button.clicked.connect(self._on_disconnect_button_clicked)
 
     # ======================
     # === EVENT HANDLERS ===
@@ -310,6 +317,28 @@ class ConnectionsList(QWidget):
 
         self.edit_connection_requested.emit(connection)
 
+    def _on_connect_button_clicked(self) -> None:
+
+        connection = self._get_selected_connection()
+
+        if connection is None:
+            return
+
+        logger.info(f"Conectar sesión: {connection}")
+
+        self.connection_open_requested.emit(connection)
+
+    def _on_disconnect_button_clicked(self) -> None:
+
+        connection = self._get_selected_connection()
+
+        if connection is None:
+            return
+
+        logger.info(f"Desconectar sesión: {connection}")
+
+        self.connection_close_requested.emit(connection)
+
     # ================
     # === UI STATE ===
     # ================
@@ -337,10 +366,16 @@ class ConnectionsList(QWidget):
 
         self.edit_button.setEnabled(has_selection)
         self.delete_button.setEnabled(has_selection)
-        self.connect_button.setEnabled(has_selection)
 
-        # De momento desactivado
-        self.disconnect_button.setEnabled(False)
+        if not has_selection:
+            self.connect_button.setEnabled(False)
+            self.disconnect_button.setEnabled(False)
+            return
+
+        is_connected = has_session(connection.id)
+
+        self.connect_button.setEnabled(not is_connected)
+        self.disconnect_button.setEnabled(is_connected)
 
     # ==================
     # === PUBLIC API ===

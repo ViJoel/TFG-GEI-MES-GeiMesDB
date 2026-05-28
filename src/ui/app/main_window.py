@@ -1,10 +1,17 @@
+import logging
+
 from PySide6.QtWidgets import QLabel, QMainWindow, QStackedWidget, QWidget
 
 from common.constants import APP_NAME
 from entities.connection import Connection
+from modules.sessions.service import close_session, has_session, open_session
 from ui.utils.layouts import hbox
 from ui.widgets.forms.connection_form import ConnectionForm
+from ui.widgets.notifications.notification import Notification
+from ui.widgets.notifications.notifications_type import NotificationType
 from ui.widgets.sidebar.sidebar import Sidebar
+
+logger = logging.getLogger(__name__)
 
 
 class MainWindow(QMainWindow):
@@ -75,6 +82,14 @@ class MainWindow(QMainWindow):
 
         self.connection_form.cancel_requested.connect(self._show_home_page)
 
+        self.sidebar.connections_list.connection_open_requested.connect(
+            self._open_connection_session
+        )
+
+        self.sidebar.connections_list.connection_close_requested.connect(
+            self._close_connection_session
+        )
+
     # ======================
     # === EVENT HANDLERS ===
     # ======================
@@ -86,6 +101,68 @@ class MainWindow(QMainWindow):
 
         # Volver al home
         self.stack.setCurrentWidget(self.home_page)
+
+    def _open_connection_session(
+        self,
+        connection: Connection,
+    ) -> None:
+
+        try:
+
+            open_session(connection)
+
+            notification = Notification(
+                NotificationType.SUCCESS,
+                "Connection opened",
+                parent=self,
+            )
+
+            notification.show()
+
+            self.sidebar.connections_list.reload_connections()
+
+        except Exception as e:
+
+            logger.error(f"Error opening session: {e}")
+
+            notification = Notification(
+                NotificationType.ERROR,
+                "Connection failed",
+                parent=self,
+            )
+
+            notification.show()
+
+    def _close_connection_session(
+        self,
+        connection: Connection,
+    ) -> None:
+
+        try:
+
+            close_session(connection.id)
+
+            notification = Notification(
+                NotificationType.SUCCESS,
+                "Connection closed",
+                parent=self,
+            )
+
+            notification.show()
+
+            self.sidebar.connections_list.reload_connections()
+
+        except Exception as e:
+
+            logger.error(f"Error closing session: {e}")
+
+            notification = Notification(
+                NotificationType.ERROR,
+                "Error disconnecting",
+                parent=self,
+            )
+
+            notification.show()
 
     # ================
     # === UI STATE ===
