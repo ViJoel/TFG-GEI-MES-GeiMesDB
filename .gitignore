@@ -1,5 +1,23 @@
+# Carpeta con apuntes
+cosas/
+
+# Scripts de bash
+*.sh
+
+# Visual Studio Code
+.vscode/
+
 # Entornos virtuales
 .venv/
 venv/
 ENV/
 env/
+
+# Python
+__pycache__/
+build/
+dist/
+
+# Carpetas autogeneradas del proyecto
+geimesdb_logs/
+geimesdb_data/

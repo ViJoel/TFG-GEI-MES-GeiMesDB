@@ -1,0 +1,7 @@
+APP_NAME = "GeiMesDB"
+VERSION = "1.0.0"
+DB_FILE_NAME = "app.db"
+LOG_FILE_NAME = "app.log"
+DATA_DIR_NAME = "geimesdb_data"
+LOG_DIR_NAME = "geimesdb_logs"
+DB_SQL_DDL_FILE = "database.sql"
