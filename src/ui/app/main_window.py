@@ -73,6 +73,8 @@ class MainWindow(QMainWindow):
             self._show_edit_connection_form
         )
 
+        self.connection_form.cancel_requested.connect(self._show_home_page)
+
     # ======================
     # === EVENT HANDLERS ===
     # ======================
@@ -88,6 +90,9 @@ class MainWindow(QMainWindow):
     # ================
     # === UI STATE ===
     # ================
+
+    def _show_home_page(self) -> None:
+        self.stack.setCurrentWidget(self.home_page)
 
     def _show_connection_form(self) -> None:
         self.connection_form.clear_form()

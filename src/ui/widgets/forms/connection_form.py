@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 from entities.connection import Connection
 from entities.driver import Driver
 from modules.connections.service import create_connection, update_connection
+from modules.sessions.service import test_connection
 from ui.utils.layouts import hbox, vbox
 from ui.widgets.notifications.notification import Notification
 from ui.widgets.notifications.notifications_type import NotificationType
@@ -27,6 +28,7 @@ class ConnectionForm(QWidget):
 
     # Señales
     connection_saved = Signal()
+    cancel_requested = Signal()
 
     # ============
     # === INIT ===
@@ -226,14 +228,16 @@ class ConnectionForm(QWidget):
 
         # Botones
         self.test_connection_button = QPushButton("Test connection")
+        self.cancel_button = QPushButton("Cancel")
         self.save_button = QPushButton("Save")
 
         # Añadir widgets
         buttons_layout.addWidget(self.test_connection_button)
 
-        # Empuja el siguiente botón al extremo derecho
+        # Empuja cancel y save a la derecha
         buttons_layout.addStretch()
 
+        buttons_layout.addWidget(self.cancel_button)
         buttons_layout.addWidget(self.save_button)
 
         # Añadir al layout padre
@@ -327,6 +331,14 @@ class ConnectionForm(QWidget):
             self._save_button_clicked,
         )
 
+        self.test_connection_button.clicked.connect(
+            self._test_connection_button_clicked,
+        )
+
+        self.cancel_button.clicked.connect(
+            self._cancel_button_clicked,
+        )
+
     # ======================
     # === EVENT HANDLERS ===
     # ======================
@@ -387,35 +399,7 @@ class ConnectionForm(QWidget):
 
     def _save_button_clicked(self) -> None:
 
-        selected_driver = Driver(self.driver_input.currentText())
-
-        # Si estamos editando reutilizamos el ID
-        connection = (
-            self.current_connection
-            if self.current_connection is not None
-            else Connection()
-        )
-
-        connection.name = self.name_input.text()
-        connection.driver = selected_driver
-
-        if selected_driver == Driver.SQLITE:
-            connection.path = self.path_input.text()
-
-            connection.host = None
-            connection.port = None
-            connection.database = None
-            connection.username = None
-            connection.password = None
-
-        else:
-            connection.host = self.host_input.text()
-            connection.port = int(self.port_input.text())
-            connection.database = self.database_input.text()
-            connection.username = self.username_input.text()
-            connection.password = self.password_input.text()
-
-            connection.path = None
+        connection = self._build_connection_from_form()
 
         try:
 
@@ -460,6 +444,82 @@ class ConnectionForm(QWidget):
             )
 
             notification.show()
+
+    def _test_connection_button_clicked(self) -> None:
+
+        try:
+
+            connection = self._build_connection_from_form()
+
+            success = test_connection(connection)
+
+            if success:
+
+                notification = Notification(
+                    NotificationType.SUCCESS,
+                    "Connection successful",
+                    parent=self.window(),
+                )
+
+            else:
+
+                notification = Notification(
+                    NotificationType.ERROR,
+                    "Connection failed",
+                    parent=self.window(),
+                )
+
+            notification.show()
+
+        except Exception as e:
+
+            logger.error(f"Error testing connection: {e}")
+
+            notification = Notification(
+                NotificationType.ERROR,
+                "Invalid connection data",
+                parent=self.window(),
+            )
+
+            notification.show()
+
+    def _build_connection_from_form(self) -> Connection:
+        selected_driver = Driver(self.driver_input.currentText())
+
+        # Si estamos editando reutilizamos el ID
+        connection = (
+            self.current_connection
+            if self.current_connection is not None
+            else Connection()
+        )
+
+        connection.name = self.name_input.text()
+        connection.driver = selected_driver
+
+        if selected_driver == Driver.SQLITE:
+            connection.path = self.path_input.text()
+
+            connection.host = None
+            connection.port = None
+            connection.database = None
+            connection.username = None
+            connection.password = None
+
+        else:
+            connection.host = self.host_input.text()
+            connection.port = int(self.port_input.text())
+            connection.database = self.database_input.text()
+            connection.username = self.username_input.text()
+            connection.password = self.password_input.text()
+
+            connection.path = None
+
+        return connection
+
+    def _cancel_button_clicked(self) -> None:
+        self.clear_form()
+
+        self.cancel_requested.emit()
 
     # ================
     # === UI STATE ===

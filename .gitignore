@@ -1,6 +1,9 @@
 # Carpeta con apuntes
 cosas/
 
+# Carpeta con los scripts de las bases de datos de pruebas
+sakila/
+
 # Scripts de bash
 *.sh
 
