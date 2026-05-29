@@ -508,7 +508,7 @@ class ConnectionForm(QWidget):
             if self.current_connection is not None:
                 update_connection(connection)
 
-                logger.info(f"Connection updated: {connection}")
+                logger.info(f"Connection updated: {connection}.")
 
                 notification = Notification(
                     NotificationType.SUCCESS,
@@ -520,7 +520,7 @@ class ConnectionForm(QWidget):
             else:
                 create_connection(connection)
 
-                logger.info(f"Connection created: {connection}")
+                logger.info(f"Connection created: {connection}.")
 
                 notification = Notification(
                     NotificationType.SUCCESS,
@@ -536,7 +536,7 @@ class ConnectionForm(QWidget):
 
         except Exception as e:
 
-            logger.error(f"Error saving connection: {connection}. Exception: {e}")
+            logger.error(f"Error saving connection: {connection}. Exception: {e}.")
 
             notification = Notification(
                 NotificationType.ERROR,
@@ -579,7 +579,7 @@ class ConnectionForm(QWidget):
 
         except Exception as e:
 
-            logger.error(f"Error testing connection: {e}")
+            logger.error(f"Error testing connection: {e}.")
 
             notification = Notification(
                 NotificationType.ERROR,

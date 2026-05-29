@@ -40,9 +40,9 @@ def open_session(connection: Connection) -> Session:
     # Evita múltiples sesiones activas
     # para la misma conexión persistida.
     if connection.id in _active_sessions:
-        raise ValueError(f"Ya existe una sesión activa para '{connection.name}'.")
+        raise ValueError(f"There is already an active session for '{connection.name}'.")
 
-    logger.info(f"Abriendo sesión para '{connection.name}'...")
+    logger.info(f"Opening session for '{connection.name}'...")
 
     # Crear sesión runtime.
     session = Session.create(connection)
@@ -50,7 +50,7 @@ def open_session(connection: Connection) -> Session:
     # Registrar sesión activa.
     _active_sessions[connection.id] = session
 
-    logger.info(f"Sesión abierta correctamente para '{connection.name}'.")
+    logger.info(f"Session opened correctly for '{connection.name}'.")
 
     return session
 
@@ -69,10 +69,10 @@ def close_session(connection_id: str) -> None:
 
     # No existe sesión activa.
     if session is None:
-        logger.warning(f"No existe una sesión activa para la conexión {connection_id}.")
+        logger.warning(f"There is no active session for the connection {connection_id}.")
         return
 
-    logger.info(f"Cerrando sesión para '{session.connection.name}'...")
+    logger.info(f"Closing session for '{session.connection.name}'...")
 
     # Liberar recursos SQLAlchemy.
     session.close()
@@ -125,7 +125,7 @@ def close_all_sessions() -> None:
     registradas en memoria.
     """
 
-    logger.info("Cerrando todas las sesiones activas...")
+    logger.info("Closing all active sessions...")
 
     # Crear copia para evitar modificar
     # el diccionario durante iteración.
@@ -134,7 +134,7 @@ def close_all_sessions() -> None:
     for connection_id in connection_ids:
         close_session(connection_id)
 
-    logger.info("Todas las sesiones fueron cerradas.")
+    logger.info("All active sessions were closed.")
 
 
 def test_connection(connection: Connection) -> bool:
@@ -153,7 +153,7 @@ def test_connection(connection: Connection) -> bool:
             - `False` en caso contrario.
     """
 
-    logger.info(f"Testeando conexión para '{connection.name}'...")
+    logger.info(f"Testing connection for '{connection.name}'...")
 
     session = None
 
@@ -172,13 +172,13 @@ def test_connection(connection: Connection) -> bool:
 
             conn.execute(text(query))
 
-        logger.info(f"Test de conexión exitoso para '{connection.name}'.")
+        logger.info(f"Connection test successful for '{connection.name}'.")
 
         return True
 
     except SQLAlchemyError as e:
 
-        logger.error(f"Error verificando conexión '{connection.name}': {e}")
+        logger.error(f"Error verifying connection '{connection.name}': {e}.")
 
         return False
 

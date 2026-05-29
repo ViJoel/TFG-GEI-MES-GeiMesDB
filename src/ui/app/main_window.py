@@ -17,6 +17,7 @@ from entities.connection import Connection
 from modules.sessions.service import close_session, open_session
 from ui.utils.layouts import hbox
 from ui.widgets.forms.connection_form import ConnectionForm
+from ui.widgets.home.home import Home
 from ui.widgets.notifications.notification import Notification
 from ui.widgets.notifications.notifications_type import NotificationType
 from ui.widgets.sidebar.sidebar import Sidebar
@@ -78,7 +79,7 @@ class MainWindow(QMainWindow):
         self.stack = QStackedWidget()
 
         # Pantalla inicial.
-        self.home_page = QLabel("HOME")
+        self.home_page = Home()
 
         # Formulario de conexiones.
         self.connection_form = ConnectionForm()

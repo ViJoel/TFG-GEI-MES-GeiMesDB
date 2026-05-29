@@ -15,7 +15,7 @@ Clases:
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
 from ui.utils.layouts import vbox
-from ui.widgets.sidebar.app_logo import AppLogo
+from ui.widgets.logos.app_logo import AppLogo
 from ui.widgets.sidebar.connections_list import ConnectionsList
 from ui.widgets.sidebar.settings_button import SettingsButton
 

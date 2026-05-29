@@ -272,10 +272,10 @@ class ConnectionsList(QWidget):
         self._update_buttons_state(connection)
 
         if connection is not None:
-            logger.info(f"Connection selected: {connection}")
+            logger.info(f"Connection selected: {connection}.")
             self.connection_selected.emit(connection)
         else:
-            logger.info(f"Connection selected: {None}")
+            logger.info(f"Connection selected: {None}.")
 
     def _get_selected_connection(self) -> Connection | None:
         """
@@ -308,7 +308,7 @@ class ConnectionsList(QWidget):
         de creación de conexiones.
         """
 
-        logger.info("Requesting new connection creation")
+        logger.info("Requesting new connection creation...")
 
         self.add_connection_requested.emit()
 
@@ -321,7 +321,7 @@ class ConnectionsList(QWidget):
         connection = self._get_selected_connection()
 
         if connection is None:
-            logger.warning("Delete attempted without selection")
+            logger.warning("Delete attempted without selection.")
             return
 
         dialog = ConfirmationDialog(
@@ -351,7 +351,7 @@ class ConnectionsList(QWidget):
 
             delete_connection(connection)
 
-            logger.info(f"Connection deleted: {connection}")
+            logger.info(f"Connection deleted: {connection}.")
 
             notification = Notification(
                 NotificationType.SUCCESS,
@@ -367,7 +367,7 @@ class ConnectionsList(QWidget):
 
         except Exception as e:
 
-            logger.error(f"Error deleting connection: {connection}. Exception: {e}")
+            logger.error(f"Error deleting connection: {connection}. Exception: {e}.")
 
             notification = Notification(
                 NotificationType.ERROR,
@@ -388,7 +388,7 @@ class ConnectionsList(QWidget):
         if connection is None:
             return
 
-        logger.info(f"Editing connection: {connection}")
+        logger.info(f"Editing connection: {connection}...")
 
         self.edit_connection_requested.emit(connection)
 
@@ -403,7 +403,7 @@ class ConnectionsList(QWidget):
         if connection is None:
             return
 
-        logger.info(f"Opening session: {connection}")
+        logger.info(f"Opening session: {connection}...")
 
         self.connection_open_requested.emit(connection)
 
@@ -418,7 +418,7 @@ class ConnectionsList(QWidget):
         if connection is None:
             return
 
-        logger.info(f"Closing session: {connection}")
+        logger.info(f"Closing session: {connection}...")
 
         self.connection_close_requested.emit(connection)
 
