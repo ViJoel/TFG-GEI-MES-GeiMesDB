@@ -1,3 +1,15 @@
+"""
+Widget reutilizable encargado de representar
+el logo principal de la aplicación.
+
+El logo se carga desde disco y se escala
+manteniendo la relación de aspecto original
+para evitar deformaciones visuales.
+
+Clases:
+    - AppLogo
+"""
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel
@@ -7,12 +19,18 @@ from ui.common.paths import APP_LOGO
 
 class AppLogo(QLabel):
     """
-    Widget reutilizable para mostrar el logo principal de la aplicación.
+    Widget reutilizable para mostrar
+    el logo principal de la aplicación.
 
-    El logo se carga desde disco utilizando la ruta definida en
-    ``ui.common.paths.APP_LOGO`` y se escala manteniendo la
-    relación de aspecto original.
+    Responsabilidades:
+    - Cargar el logo desde disco.
+    - Escalar la imagen manteniendo proporciones.
+    - Centrar visualmente el contenido.
     """
+
+    # ============
+    # === INIT ===
+    # ============
 
     def __init__(self, size: int = 60):
         """
@@ -20,25 +38,32 @@ class AppLogo(QLabel):
 
         Args:
             size (int):
-                Tamaño máximo (ancho y alto) utilizado para escalar
-                la imagen del logo.
+                Tamaño máximo utilizado para
+                escalar la imagen.
         """
 
         super().__init__()
 
+        # Tamaño máximo del logo.
         self.size = size
 
         self._setup_ui()
 
+    # ================
+    # === UI SETUP ===
+    # ================
+
     def _setup_ui(self):
         """
-        Configura el aspecto visual del widget.
+        Configura la interfaz visual
+        del widget.
         """
 
-        # Cargar imagen desde disco
+        # Cargar imagen desde disco.
         pixmap = QPixmap(APP_LOGO)
 
-        # Escalar imagen preservando proporciones
+        # Escalar imagen preservando
+        # proporciones originales.
         scaled_pixmap = pixmap.scaled(
             self.size,
             self.size,
@@ -46,8 +71,8 @@ class AppLogo(QLabel):
             Qt.TransformationMode.SmoothTransformation,
         )
 
-        # Asignar imagen al QLabel
+        # Asignar imagen al QLabel.
         self.setPixmap(scaled_pixmap)
 
-        # Centrar contenido
+        # Centrar visualmente el contenido.
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
