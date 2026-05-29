@@ -1,10 +1,14 @@
+import logging
 from dataclasses import dataclass
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
+from sqlalchemy.pool import NullPool
 
 from entities.connection import Connection
 from entities.driver import Driver
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
@@ -60,11 +64,7 @@ class Session:
         """
 
         connection_url = cls._build_connection_url(connection)
-
-        engine = create_engine(
-            connection_url,
-            pool_pre_ping=True,
-        )
+        engine = cls._build_engine(connection, connection_url)
 
         return cls(
             connection=connection,
@@ -136,7 +136,79 @@ class Session:
                 )
 
             case _:
-                raise ValueError(f"Driver no soportado: {connection.driver}")
+                raise ValueError(f"Unsupported driver: {connection.driver}")
+
+    @staticmethod
+    def _build_engine(connection: Connection, connection_url: str) -> Engine:
+        """
+        Construye y configura el engine SQLAlchemy
+        asociado a una conexión persistida.
+
+        Args:
+            connection (Connection):
+                Configuración persistida utilizada
+                para determinar el driver y opciones
+                específicas del engine.
+
+            connection_url (str):
+                URL SQLAlchemy ya construida.
+
+        Returns:
+            Engine:
+                Engine SQLAlchemy configurado.
+        """
+
+        logger.info("Creating engine...")
+
+        # Configuración común reutilizable para
+        # todos los engines de conexiones de red.
+        base_config = {
+            "pool_pre_ping": True,
+            "pool_recycle": 3600,
+        }
+
+        engine = None
+
+        match connection.driver:
+
+            case Driver.SQLITE:
+                engine = create_engine(
+                    connection_url,
+                    poolclass=NullPool,
+                )
+
+            case Driver.POSTGRESQL:
+                engine = create_engine(
+                    connection_url,
+                    **base_config,
+                    connect_args={"connect_timeout": 5},
+                )
+
+            case Driver.MYSQL:
+                engine = create_engine(
+                    connection_url,
+                    **base_config,
+                    connect_args={"connect_timeout": 5},
+                )
+
+            case Driver.ORACLE:
+                engine = create_engine(
+                    connection_url,
+                    **base_config,
+                    connect_args={"tcp_connect_timeout": 5},
+                )
+
+            case _:
+                raise ValueError(f"Unsupported driver: {connection.driver}")
+
+        logger.info(
+            "Engine created: driver=%s, pool_pre_ping=%s, pool_recycle=%s.",
+            connection.driver,
+            base_config["pool_pre_ping"],
+            base_config["pool_recycle"],
+        )
+
+        return engine
 
     # =================
     # === LIFECYCLE ===

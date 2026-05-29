@@ -201,17 +201,42 @@ class ConnectionsList(QWidget):
     def _load_connections(self) -> None:
         """
         Recupera las conexiones persistidas
-        y reconstruye la lista visual.
+        y reconstruye la lista visual
+        preservando la selección actual.
         """
 
-        self._clear_selection()
+        selected_connection = self._get_selected_connection()
+
+        selected_id = (
+            selected_connection.id if selected_connection is not None else None
+        )
 
         connections = get_connections()
 
+        # Bloquear señales durante reconstrucción
+        self.list_widget.blockSignals(True)
+
         self.list_widget.clear()
 
+        restored_connection = None
+
         for connection in connections:
+
             self._add_connection_item(connection)
+
+            if connection.id == selected_id:
+
+                item = self.list_widget.item(self.list_widget.count() - 1)
+
+                self.list_widget.setCurrentItem(item)
+
+                restored_connection = connection
+
+        # Reactivar señales
+        self.list_widget.blockSignals(False)
+
+        # Actualizar estado manualmente
+        self._update_buttons_state(restored_connection)
 
     def _add_connection_item(self, connection: Connection) -> None:
         """
