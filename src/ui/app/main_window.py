@@ -162,13 +162,11 @@ class MainWindow(QMainWindow):
 
             open_session(connection)
 
-            notification = Notification(
+            Notification(
                 NotificationType.SUCCESS,
                 "Connection opened",
                 parent=self,
-            )
-
-            notification.show()
+            ).show()
 
             # Refrescar estado visual.
             self.sidebar.connections_list.reload_connections()
@@ -177,13 +175,11 @@ class MainWindow(QMainWindow):
 
             logger.error(f"Error opening session: {e}")
 
-            notification = Notification(
+            Notification(
                 NotificationType.ERROR,
                 "Connection failed",
                 parent=self,
-            )
-
-            notification.show()
+            ).show()
 
     def _close_connection_session(
         self,
@@ -202,13 +198,11 @@ class MainWindow(QMainWindow):
 
             close_session(connection.id)
 
-            notification = Notification(
+            Notification(
                 NotificationType.SUCCESS,
                 "Connection closed",
                 parent=self,
-            )
-
-            notification.show()
+            ).show()
 
             # Refrescar estado visual.
             self.sidebar.connections_list.reload_connections()
@@ -217,13 +211,11 @@ class MainWindow(QMainWindow):
 
             logger.error(f"Error closing session: {e}")
 
-            notification = Notification(
+            Notification(
                 NotificationType.ERROR,
                 "Error disconnecting",
                 parent=self,
-            )
-
-            notification.show()
+            ).show()
 
     # ================
     # === UI STATE ===

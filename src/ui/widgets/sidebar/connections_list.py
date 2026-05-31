@@ -390,13 +390,11 @@ class ConnectionsList(QWidget):
                 f"Connection '{connection.name}' (ID: {connection.id}) deleted."
             )
 
-            notification = Notification(
+            Notification(
                 NotificationType.SUCCESS,
                 "Connection deleted",
                 parent=self.window(),
-            )
-
-            notification.show()
+            ).show()
 
             self.reload_connections()
 
@@ -409,13 +407,11 @@ class ConnectionsList(QWidget):
                 f"Exception: {e}"
             )
 
-            notification = Notification(
+            Notification(
                 NotificationType.ERROR,
                 "Error deleting",
                 parent=self.window(),
-            )
-
-            notification.show()
+            ).show()
 
     def _on_edit_button_clicked(self) -> None:
         """
