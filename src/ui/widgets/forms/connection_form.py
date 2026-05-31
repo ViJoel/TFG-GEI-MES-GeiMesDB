@@ -454,6 +454,10 @@ class ConnectionForm(QWidget):
                 Conexión persistida a editar.
         """
 
+        logger.info(
+            f"Loading connection '{connection.name}' (ID: {connection.id}) into form..."
+        )
+
         self.current_connection = connection
 
         self.name_input.setText(connection.name)
@@ -470,11 +474,17 @@ class ConnectionForm(QWidget):
 
         self._update_fields_visibility()
 
+        logger.success(
+            f"Connection '{connection.name}' (ID: {connection.id}) loaded into form."
+        )
+
     def _select_file(self) -> None:
         """
         Abre un selector de archivos para
         elegir una base de datos SQLite.
         """
+
+        logger.info("Opening SQLite file selector...")
 
         # Abrir el selector de archivos
         # El segundo parámetro es el título de la ventana
@@ -487,6 +497,7 @@ class ConnectionForm(QWidget):
         )
 
         if file_path:
+            logger.success(f"SQLite database file selected: {file_path}")
             self.path_input.setText(file_path)
 
     def _save_button_clicked(self) -> None:
@@ -502,13 +513,13 @@ class ConnectionForm(QWidget):
 
         connection = self._build_connection_from_form()
 
+        logger.info(f"Saving connection '{connection.name}'...")
+
         try:
 
             # UPDATE
             if self.current_connection is not None:
                 update_connection(connection)
-
-                logger.info(f"Connection updated: {connection}.")
 
                 notification = Notification(
                     NotificationType.SUCCESS,
@@ -520,13 +531,13 @@ class ConnectionForm(QWidget):
             else:
                 create_connection(connection)
 
-                logger.info(f"Connection created: {connection}.")
-
                 notification = Notification(
                     NotificationType.SUCCESS,
                     "Connection saved",
                     parent=self.window(),
                 )
+
+            logger.success(f"Connection saved '{connection.name}'...")
 
             notification.show()
 
@@ -536,7 +547,9 @@ class ConnectionForm(QWidget):
 
         except Exception as e:
 
-            logger.error(f"Error saving connection: {connection}. Exception: {e}.")
+            logger.error(
+                f"Failed to save connection '{connection.name}'. " f"Exception: {e}"
+            )
 
             notification = Notification(
                 NotificationType.ERROR,
@@ -556,6 +569,8 @@ class ConnectionForm(QWidget):
         try:
 
             connection = self._build_connection_from_form()
+
+            logger.info(f"Testing connection '{connection.name}'...")
 
             success = test_connection(connection)
 
@@ -637,6 +652,8 @@ class ConnectionForm(QWidget):
         Cancela la edición actual y solicita
         volver a la pantalla anterior.
         """
+
+        logger.info("Connection form cancelled.")
 
         self.clear_form()
         self.cancel_requested.emit()

@@ -4,6 +4,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
 from entities.connection import Connection
+from entities.driver import Driver
 from modules.sessions.session import Session
 
 logger = logging.getLogger(__name__)
@@ -37,22 +38,64 @@ def open_session(connection: Connection) -> Session:
             para la conexión especificada.
     """
 
-    # Evita múltiples sesiones activas
-    # para la misma conexión persistida.
     if connection.id in _active_sessions:
+
+        logger.error(
+            f"Cannot open session for '{connection.name}'. "
+            f"An active session already exists."
+        )
+
         raise ValueError(f"There is already an active session for '{connection.name}'.")
 
     logger.info(f"Opening session for '{connection.name}'...")
 
-    # Crear sesión runtime.
-    session = Session.create(connection)
+    session = None
 
-    # Registrar sesión activa.
-    _active_sessions[connection.id] = session
+    try:
 
-    logger.info(f"Session opened correctly for '{connection.name}'.")
+        logger.info(f"Creating runtime session for '{connection.name}'...")
 
-    return session
+        session = Session.create(connection)
+
+        logger.success(f"Runtime session created for '{connection.name}'.")
+
+        logger.info(f"Verifying connection to '{connection.name}'...")
+
+        with session.engine.connect() as conn:
+
+            query = (
+                "SELECT 1 FROM DUAL"
+                if connection.driver == Driver.ORACLE
+                else "SELECT 1"
+            )
+
+            conn.execute(text(query))
+
+        logger.success(f"Connection verified for '{connection.name}'.")
+
+        logger.info(f"Registering active session for '{connection.name}'...")
+
+        _active_sessions[connection.id] = session
+
+        logger.success(f"Active session registered for '{connection.name}'.")
+
+        logger.success(f"Session opened for '{connection.name}'.")
+
+        return session
+
+    except Exception as e:
+
+        logger.error(
+            f"Failed to open session for '{connection.name}'. " f"Exception: {e}"
+        )
+
+        if session is not None:
+            try:
+                session.close()
+            except Exception:
+                pass
+
+        raise
 
 
 def close_session(connection_id: str) -> None:
@@ -69,18 +112,22 @@ def close_session(connection_id: str) -> None:
 
     # No existe sesión activa.
     if session is None:
-        logger.warning(f"There is no active session for the connection {connection_id}.")
+        logger.warning(
+            f"There is no active session for the connection {connection_id}."
+        )
         return
 
     logger.info(f"Closing session for '{session.connection.name}'...")
 
-    # Liberar recursos SQLAlchemy.
     session.close()
 
-    # Eliminar registro runtime.
+    logger.info(f"Removing active session registry for '{session.connection.name}'...")
+
     del _active_sessions[connection_id]
 
-    logger.info(f"Sesión cerrada correctamente para '{session.connection.name}'.")
+    logger.success(f"Active session registry removed for '{session.connection.name}'.")
+
+    logger.success(f"Session closed correctly for '{session.connection.name}'.")
 
 
 def get_session(
@@ -134,7 +181,7 @@ def close_all_sessions() -> None:
     for connection_id in connection_ids:
         close_session(connection_id)
 
-    logger.info("All active sessions were closed.")
+    logger.success("All active sessions were closed.")
 
 
 def test_connection(connection: Connection) -> bool:
@@ -165,25 +212,31 @@ def test_connection(connection: Connection) -> bool:
         with session.engine.connect() as conn:
 
             # Oracle requiere DUAL.
-            if connection.driver.name == "ORACLE":
+            if connection.driver == Driver.ORACLE:
                 query = "SELECT 1 FROM DUAL"
             else:
                 query = "SELECT 1"
 
             conn.execute(text(query))
 
-        logger.info(f"Connection test successful for '{connection.name}'.")
+        logger.success(f"Connection test successful for '{connection.name}'.")
 
         return True
 
     except SQLAlchemyError as e:
 
-        logger.error(f"Error verifying connection '{connection.name}': {e}.")
+        logger.error(
+            f"Connection test failed for '{connection.name}'. " f"Exception: {e}"
+        )
 
         return False
 
     finally:
 
+        logger.info(f"Releasing temporary resources for '{connection.name}'...")
+
         # Liberar recursos aunque falle.
         if session is not None:
             session.close()
+
+        logger.success(f"Temporary resources released for '{connection.name}'.")

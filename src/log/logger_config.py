@@ -2,6 +2,26 @@ import logging
 import os
 import sys
 
+from colorlog import ColoredFormatter
+
+# Nivel personalizado para operaciones
+# completadas correctamente.
+SUCCESS = 25
+
+logging.addLevelName(SUCCESS, "SUCCESS")
+
+
+def success(self, message, *args, **kwargs):
+    """
+    Añade soporte para logger.success().
+    """
+
+    if self.isEnabledFor(SUCCESS):
+        self._log(SUCCESS, message, args, **kwargs)
+
+
+logging.Logger.success = success
+
 
 def setup_logging():
     """
@@ -14,8 +34,8 @@ def setup_logging():
         - Definir el formato global de logs.
 
     La configuración soporta tanto:
-        - ejecución en desarrollo
-        - ejecutables empaquetados (PyInstaller)
+        - Ejecución en desarrollo
+        - Ejecutables empaquetados (PyInstaller)
     """
 
     # En aplicaciones empaquetadas, el ejecutable es
@@ -34,17 +54,49 @@ def setup_logging():
     # Archivo principal de logs.
     log_file = os.path.join(log_dir, "app.log")
 
-    # Configuración global
+    # ====================
+    # === FILE HANDLER ===
+    # ====================
+
+    file_handler = logging.FileHandler(
+        log_file,
+        encoding="utf-8",
+        mode="w",
+    )
+
+    file_handler.setFormatter(
+        logging.Formatter("%(asctime)s [%(levelname)-8s] %(name)s: %(message)s")
+    )
+
+    # =======================
+    # === CONSOLE HANDLER ===
+    # =======================
+
+    console_handler = logging.StreamHandler(sys.stdout)
+
+    console_handler.setFormatter(
+        ColoredFormatter(
+            "%(log_color)s%(asctime)s " "[%(levelname)s] " "%(name)s: " "%(message)s",
+            log_colors={
+                "DEBUG": "cyan",
+                "INFO": "white",
+                "SUCCESS": "green",
+                "WARNING": "yellow",
+                "ERROR": "red",
+                "CRITICAL": "red,bg_white",
+            },
+        )
+    )
+
+    # =====================
+    # === GLOBAL CONFIG ===
+    # =====================
+
     logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        level=logging.DEBUG,
         handlers=[
-            # UTF-8 evita problemas de codificación especialmente en Windows.
-            logging.FileHandler(
-                log_file, encoding="utf-8", mode="w"
-            ),  # mode="w" sobreescribe el archivo (solo para desarrollo, quitar el argumento para producción)
-            # Mantiene salida visible por consola durante desarrollo.
-            logging.StreamHandler(sys.stdout),
+            file_handler,
+            console_handler,
         ],
     )
 

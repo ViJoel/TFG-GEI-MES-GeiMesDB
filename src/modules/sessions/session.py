@@ -158,7 +158,7 @@ class Session:
                 Engine SQLAlchemy configurado.
         """
 
-        logger.info("Creating engine...")
+        logger.info(f"Creating engine for '{connection.name}'...")
 
         # Configuración común reutilizable para
         # todos los engines de conexiones de red.
@@ -201,11 +201,15 @@ class Session:
             case _:
                 raise ValueError(f"Unsupported driver: {connection.driver}")
 
-        logger.info(
-            "Engine created: driver=%s, pool_pre_ping=%s, pool_recycle=%s.",
-            connection.driver,
-            base_config["pool_pre_ping"],
-            base_config["pool_recycle"],
+        logger.success(
+            f"Engine created for '{connection.name}'. "
+            f"Driver: {connection.driver.name}.",
+        )
+
+        logger.debug(
+            f"Engine configuration for '{connection.name}': "
+            f"driver={connection.driver.name}, "
+            f"base_config={base_config}."
         )
 
         return engine
@@ -225,4 +229,8 @@ class Session:
             por SQLAlchemy.
         """
 
+        logger.info(f"Disposing engine for '{self.connection.name}'...")
+
         self.engine.dispose()
+
+        logger.success(f"Engine disposed for '{self.connection.name}'.")

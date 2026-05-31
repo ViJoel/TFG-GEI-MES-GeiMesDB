@@ -47,6 +47,8 @@ def get_all_connections() -> list[Connection]:
             Lista de conexiones registradas.
     """
 
+    logger.info("Loading persisted connections...")
+
     query = """
     SELECT *
     FROM connections
@@ -66,9 +68,7 @@ def get_all_connections() -> list[Connection]:
         for row in rows:
             connections_list.append(_map_row_to_connection(row))
 
-    logger.info(
-        f"Conexiones recuperadas con éxito ({len(connections_list)} registros)."
-    )
+    logger.success(f"Loaded {len(connections_list)} persisted connections.")
 
     return connections_list
 
@@ -82,6 +82,8 @@ def create_connection(connection: Connection) -> None:
         connection (Connection):
             Conexión a registrar.
     """
+
+    logger.info(f"Creating connection '{connection.name}'...")
 
     query = """
     INSERT INTO connections (
@@ -108,7 +110,7 @@ def create_connection(connection: Connection) -> None:
             ),
         )
 
-    logger.info(f"Conexión '{connection.name}' (ID: {connection.id}) creada con éxito.")
+    logger.success(f"Connection '{connection.name}' created (ID: {connection.id}).")
 
 
 @handle_db_errors("actualizar conexión")
@@ -120,6 +122,8 @@ def update_connection(connection: Connection) -> None:
         connection (Connection):
             Conexión con los datos actualizados.
     """
+
+    logger.info(f"Updating connection '{connection.name}' (ID: {connection.id})...")
 
     query = """
     UPDATE connections
@@ -157,13 +161,11 @@ def update_connection(connection: Connection) -> None:
         # No existe ninguna conexión con ese ID.
         if cur.rowcount == 0:
             logger.warning(
-                f"Conexión '{connection.name}' (ID: {connection.id}) no encontrada para actualizar."
+                f"Connection '{connection.name}' (ID: {connection.id}) not found."
             )
             return
 
-    logger.info(
-        f"Conexión '{connection.name}' (ID: {connection.id}) actualizada con éxito."
-    )
+    logger.success(f"Connection '{connection.name}' (ID: {connection.id}) updated.")
 
 
 @handle_db_errors("eliminar conexión")
@@ -175,6 +177,8 @@ def delete_connection(connection: Connection) -> None:
         connection (Connection):
             Conexión a eliminar.
     """
+
+    logger.info(f"Deleting connection '{connection.name}' (ID: {connection.id})...")
 
     query = """
     DELETE FROM connections
@@ -193,13 +197,11 @@ def delete_connection(connection: Connection) -> None:
         # No existe ninguna conexión con ese ID.
         if cur.rowcount == 0:
             logger.warning(
-                f"Conexión '{connection.name}' (ID: {connection.id}) no encontrada para eliminar."
+                f"Connection '{connection.name}' (ID: {connection.id}) not found."
             )
             return
 
-    logger.info(
-        f"Conexión '{connection.name}' (ID: {connection.id}) eliminada con éxito."
-    )
+    logger.success(f"Connection '{connection.name}' (ID: {connection.id}) deleted.")
 
 
 @handle_db_errors("verificar existencia de conexión")
@@ -233,8 +235,6 @@ def connection_exists(connection_id: str) -> bool:
 
         exists = cur.fetchone() is not None
 
-    logger.info(
-        f"Verificación de existencia para conexión ID '{connection_id}': {exists}"
-    )
+    logger.debug(f"Connection existence check: id={connection_id}, exists={exists}")
 
     return exists

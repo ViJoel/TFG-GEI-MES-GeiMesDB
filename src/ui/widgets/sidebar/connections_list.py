@@ -17,7 +17,7 @@ import logging
 
 import qtawesome as qta
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QColor, QIcon
 from PySide6.QtWidgets import (
     QListWidget,
     QListWidgetItem,
@@ -255,6 +255,10 @@ class ConnectionsList(QWidget):
         # Icono según driver.
         item.setIcon(self._get_driver_icon(connection.driver))
 
+        # Resaltar conexiones con sesión activa.
+        if has_session(connection.id):
+            item.setBackground(QColor("green"))
+
         # Guardar objeto completo dentro del item.
         item.setData(
             Qt.ItemDataRole.UserRole,
@@ -297,10 +301,12 @@ class ConnectionsList(QWidget):
         self._update_buttons_state(connection)
 
         if connection is not None:
-            logger.info(f"Connection selected: {connection}.")
+            logger.debug(
+                f"Connection '{connection.name}' (ID: {connection.id}) selected."
+            )
             self.connection_selected.emit(connection)
         else:
-            logger.info(f"Connection selected: {None}.")
+            logger.debug(f"Connection selected: {None}.")
 
     def _get_selected_connection(self) -> Connection | None:
         """
@@ -333,7 +339,7 @@ class ConnectionsList(QWidget):
         de creación de conexiones.
         """
 
-        logger.info("Requesting new connection creation...")
+        logger.info("Connection creation requested.")
 
         self.add_connection_requested.emit()
 
@@ -374,9 +380,15 @@ class ConnectionsList(QWidget):
 
         try:
 
+            logger.info(
+                f"Deleting connection '{connection.name}' (ID: {connection.id})..."
+            )
+
             delete_connection(connection)
 
-            logger.info(f"Connection deleted: {connection}.")
+            logger.success(
+                f"Connection '{connection.name}' (ID: {connection.id}) deleted."
+            )
 
             notification = Notification(
                 NotificationType.SUCCESS,
@@ -392,7 +404,10 @@ class ConnectionsList(QWidget):
 
         except Exception as e:
 
-            logger.error(f"Error deleting connection: {connection}. Exception: {e}.")
+            logger.error(
+                f"Failed to delete connection '{connection.name}' (ID: {connection.id}). "
+                f"Exception: {e}"
+            )
 
             notification = Notification(
                 NotificationType.ERROR,
@@ -413,7 +428,9 @@ class ConnectionsList(QWidget):
         if connection is None:
             return
 
-        logger.info(f"Editing connection: {connection}...")
+        logger.info(
+            f"Connection '{connection.name}' (ID: {connection.id}) edit requested."
+        )
 
         self.edit_connection_requested.emit(connection)
 
@@ -428,7 +445,9 @@ class ConnectionsList(QWidget):
         if connection is None:
             return
 
-        logger.info(f"Opening session: {connection}...")
+        logger.info(
+            f"Session open requested for '{connection.name}' (ID: {connection.id})."
+        )
 
         self.connection_open_requested.emit(connection)
 
@@ -443,7 +462,9 @@ class ConnectionsList(QWidget):
         if connection is None:
             return
 
-        logger.info(f"Closing session: {connection}...")
+        logger.info(
+            f"Session close requested for '{connection.name}' (ID: {connection.id})."
+        )
 
         self.connection_close_requested.emit(connection)
 
@@ -501,4 +522,8 @@ class ConnectionsList(QWidget):
         y actualiza la lista visual.
         """
 
+        logger.debug("Reloading connections list...")
+
         self._load_connections()
+
+        logger.debug("Connections list reloaded.")
