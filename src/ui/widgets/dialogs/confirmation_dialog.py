@@ -1,3 +1,14 @@
+"""
+Diálogo reutilizable para solicitar confirmación
+antes de ejecutar acciones sensibles desde la interfaz.
+
+Permite mostrar mensajes personalizados y emitir
+eventos explícitos de aceptación o cancelación.
+
+Clases:
+    - ConfirmationDialog
+"""
+
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QDialog,
@@ -11,15 +22,15 @@ from ui.utils.layouts import hbox, vbox
 class ConfirmationDialog(QDialog):
     """
     Diálogo reutilizable para solicitar confirmación
-    al usuario antes de ejecutar acciones sensibles.
+    antes de ejecutar acciones sensibles.
 
     Responsabilidades:
-        - Mostrar un mensaje configurable.
-        - Permitir aceptar o cancelar la acción.
-        - Emitir señales explícitas de confirmación o cancelación.
+    - Mostrar un mensaje configurable.
+    - Permitir confirmar o cancelar una acción.
+    - Emitir señales explícitas según la acción elegida.
     """
 
-    # Señales
+    # Señales emitidas por el diálogo.
     confirmed = Signal()
     cancelled = Signal()
 
@@ -41,7 +52,7 @@ class ConfirmationDialog(QDialog):
                 Título de la ventana.
 
             message (str):
-                Mensaje mostrado al usuario.
+                Mensaje principal mostrado al usuario.
 
             parent:
                 Widget padre del diálogo.
@@ -49,10 +60,11 @@ class ConfirmationDialog(QDialog):
 
         super().__init__(parent)
 
+        # Título de la ventana
         self.setWindowTitle(title)
 
-        # Bloquea interacción con la ventana padre
-        # hasta cerrar el diálogo.
+        # Bloquear interacción con la ventana padre
+        # mientras el diálogo permanezca abierto.
         self.setModal(True)
 
         self._setup_ui(message)
@@ -64,7 +76,7 @@ class ConfirmationDialog(QDialog):
 
     def _setup_ui(self, message: str) -> None:
         """
-        Construye la interfaz del diálogo.
+        Construye la interfaz visual del diálogo.
 
         Args:
             message (str):
@@ -75,12 +87,12 @@ class ConfirmationDialog(QDialog):
 
         self.setLayout(main_layout)
 
-        # Mensaje principal
+        # Mensaje principal.
         self.message_label = QLabel(message)
 
         main_layout.addWidget(self.message_label)
 
-        # Botones de acción
+        # Botones de acción.
         buttons_layout = hbox()
 
         self.cancel_button = QPushButton("Cancel")
@@ -98,8 +110,8 @@ class ConfirmationDialog(QDialog):
 
     def _connect_signals(self) -> None:
         """
-        Conecta los botones del diálogo
-        con sus callbacks.
+        Conecta señales de los widgets
+        con sus handlers correspondientes.
         """
 
         self.accept_button.clicked.connect(self._on_accept_clicked)

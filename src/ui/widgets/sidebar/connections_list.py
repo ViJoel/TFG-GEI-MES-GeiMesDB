@@ -1,8 +1,23 @@
+"""
+Widget encargado de visualizar y gestionar
+las conexiones persistidas de la aplicación.
+
+Permite:
+- Mostrar conexiones registradas.
+- Seleccionar conexiones activas.
+- Crear, editar y eliminar conexiones.
+- Abrir y cerrar sesiones de base de datos.
+- Reflejar visualmente el estado de conexión.
+
+Clases:
+    - ConnectionsList
+"""
+
 import logging
 
 import qtawesome as qta
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QColor, QIcon
 from PySide6.QtWidgets import (
     QListWidget,
     QListWidgetItem,
@@ -14,31 +29,45 @@ from PySide6.QtWidgets import (
 from entities.connection import Connection
 from entities.driver import Driver
 from modules.connections.service import delete_connection, get_connections
+from modules.sessions.service import has_session
 from ui.common.paths import MYSQL_LOGO, ORACLE_LOGO, POSTGRESQL_LOGO, SQLITE_LOGO
 from ui.utils.layouts import hbox, vbox
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
 from ui.widgets.notifications.notification import Notification
 from ui.widgets.notifications.notifications_type import NotificationType
 
-# Crear sub-logger
 logger = logging.getLogger(__name__)
 
 
 class ConnectionsList(QWidget):
     """
-    Widget encargado de visualizar y gestionar la lista de conexiones.
+    Widget encargado de visualizar y gestionar
+    la lista de conexiones persistidas.
+
+    Responsabilidades:
+    - Mostrar conexiones disponibles.
+    - Gestionar selección de conexiones.
+    - Emitir eventos de acciones del usuario.
+    - Controlar el estado visual de los botones.
+    - Reflejar el estado de las sesiones activas.
     """
 
-    # Señales
+    # Señales emitidas por el widget.
     connection_selected = Signal(Connection)
     add_connection_requested = Signal()
     edit_connection_requested = Signal(Connection)
+    connection_open_requested = Signal(Connection)
+    connection_close_requested = Signal(Connection)
 
     # ============
     # === INIT ===
     # ============
 
     def __init__(self):
+        """
+        Inicializa la lista de conexiones.
+        """
+
         super().__init__()
 
         self._setup_ui()
@@ -51,22 +80,35 @@ class ConnectionsList(QWidget):
 
     def _setup_ui(self) -> None:
         """
-        Configura la interfaz del widget.
+        Construye la interfaz principal
+        del widget.
         """
 
-        # Layout principal
+        # Layout vertical principal.
         main_layout = vbox()
+
         self.setLayout(main_layout)
 
-        # Botones
+        # Barra de acciones.
         self._setup_buttons(main_layout)
+
+        # Estado inicial de botones.
         self._setup_buttons_state()
 
-        # Lista de conexiones
+        # Lista visual de conexiones.
         self._setup_connections_list(main_layout)
 
     def _setup_buttons(self, parent_layout) -> None:
-        # Layout horizontal
+        """
+        Construye la barra de botones
+        de acciones rápidas.
+
+        Args:
+            parent_layout:
+                Layout padre donde se añadirá
+                la barra de botones.
+        """
+
         buttons_layout = hbox()
 
         # Botones
@@ -76,19 +118,29 @@ class ConnectionsList(QWidget):
         self.connect_button = self._create_icon_button("mdi.wifi")
         self.disconnect_button = self._create_icon_button("mdi.wifi-off")
 
-        # Añadir botones al layout horizontal
+        # Añadir botones al layout
         buttons_layout.addWidget(self.add_button)
         buttons_layout.addWidget(self.edit_button)
         buttons_layout.addWidget(self.delete_button)
         buttons_layout.addWidget(self.connect_button)
         buttons_layout.addWidget(self.disconnect_button)
 
-        # Añadir layout al layout padre
         parent_layout.addLayout(buttons_layout)
 
     def _setup_connections_list(self, parent_layout) -> None:
+        """
+        Construye la lista visual
+        de conexiones.
+
+        Args:
+            parent_layout:
+                Layout padre donde se añadirá
+                la lista.
+        """
+
         self.list_widget = QListWidget()
 
+        # Permitir expansión vertical y horizontal.
         self.list_widget.setSizePolicy(
             QSizePolicy.Policy.Expanding,
             QSizePolicy.Policy.Expanding,
@@ -101,6 +153,20 @@ class ConnectionsList(QWidget):
     # ===============
 
     def _create_icon_button(self, icon_name: str) -> QPushButton:
+        """
+        Crea un botón cuadrado basado
+        únicamente en iconografía.
+
+        Args:
+            icon_name (str):
+                Nombre del icono compatible
+                con QtAwesome.
+
+        Returns:
+            QPushButton:
+                Botón configurado.
+        """
+
         button = QPushButton()
         button.setIcon(qta.icon(icon_name))
         button.setFixedSize(32, 32)
@@ -112,20 +178,21 @@ class ConnectionsList(QWidget):
 
     def _connect_signals(self) -> None:
         """
-        Conecta las señales de los widgets con sus callbacks.
+        Conecta señales de widgets
+        con sus handlers correspondientes.
         """
 
-        # Lista de conexiones
+        # Selección de elementos.
         self.list_widget.itemSelectionChanged.connect(self._on_selection_changed)
 
-        # Botón de añadir conexión
+        # Acciones CRUD.
         self.add_button.clicked.connect(self._on_add_button_clicked)
-
-        # Botón de eliminar conexión
+        self.edit_button.clicked.connect(self._on_edit_button_clicked)
         self.delete_button.clicked.connect(self._on_delete_button_clicked)
 
-        # Botón de editar conexión
-        self.edit_button.clicked.connect(self._on_edit_button_clicked)
+        # Gestión de sesiones.
+        self.connect_button.clicked.connect(self._on_connect_button_clicked)
+        self.disconnect_button.clicked.connect(self._on_disconnect_button_clicked)
 
     # ======================
     # === EVENT HANDLERS ===
@@ -133,18 +200,43 @@ class ConnectionsList(QWidget):
 
     def _load_connections(self) -> None:
         """
-        Recupera las conexiones desde el servicio y las
-        carga en la lista visual.
+        Recupera las conexiones persistidas
+        y reconstruye la lista visual
+        preservando la selección actual.
         """
 
-        self._clear_selection()
+        selected_connection = self._get_selected_connection()
+
+        selected_id = (
+            selected_connection.id if selected_connection is not None else None
+        )
 
         connections = get_connections()
 
+        # Bloquear señales durante reconstrucción
+        self.list_widget.blockSignals(True)
+
         self.list_widget.clear()
 
+        restored_connection = None
+
         for connection in connections:
+
             self._add_connection_item(connection)
+
+            if connection.id == selected_id:
+
+                item = self.list_widget.item(self.list_widget.count() - 1)
+
+                self.list_widget.setCurrentItem(item)
+
+                restored_connection = connection
+
+        # Reactivar señales
+        self.list_widget.blockSignals(False)
+
+        # Actualizar estado manualmente
+        self._update_buttons_state(restored_connection)
 
     def _add_connection_item(self, connection: Connection) -> None:
         """
@@ -155,15 +247,19 @@ class ConnectionsList(QWidget):
                 Conexión a representar.
         """
 
-        # Texto visible
+        # Texto visible.
         connection_name = connection.name or "Sin nombre"
 
         item = QListWidgetItem(connection_name)
 
-        # Icono según driver
+        # Icono según driver.
         item.setIcon(self._get_driver_icon(connection.driver))
 
-        # Guardar objeto completo dentro del item
+        # Resaltar conexiones con sesión activa.
+        if has_session(connection.id):
+            item.setBackground(QColor("green"))
+
+        # Guardar objeto completo dentro del item.
         item.setData(
             Qt.ItemDataRole.UserRole,
             connection,
@@ -173,15 +269,16 @@ class ConnectionsList(QWidget):
 
     def _get_driver_icon(self, driver: Driver) -> QIcon:
         """
-        Retorna el icono asociado al driver de base de datos.
+        Retorna el icono asociado
+        al driver de base de datos.
 
         Args:
             driver (Driver):
-                Driver asociado a la conexión.
+                Driver de la conexión.
 
         Returns:
             QIcon:
-                Icono correspondiente al driver.
+                Icono correspondiente.
         """
 
         icons = {
@@ -194,23 +291,31 @@ class ConnectionsList(QWidget):
         return icons.get(driver, QIcon())
 
     def _on_selection_changed(self) -> None:
+        """
+        Maneja cambios de selección
+        dentro de la lista.
+        """
+
         connection = self._get_selected_connection()
 
         self._update_buttons_state(connection)
 
         if connection is not None:
-            logger.info(f"Conexión seleccionada: {connection}")
+            logger.debug(
+                f"Connection '{connection.name}' (ID: {connection.id}) selected."
+            )
             self.connection_selected.emit(connection)
         else:
-            logger.info(f"Conexión seleccionada: {None}")
+            logger.debug(f"Connection selected: {None}.")
 
     def _get_selected_connection(self) -> Connection | None:
         """
-        Obtiene la conexión seleccionada en la lista.
+        Retorna la conexión actualmente seleccionada.
 
         Returns:
-            Connection:
-                El objeto de la conexión.
+            Connection | None:
+                Conexión seleccionada o `None`
+                si no existe selección.
         """
 
         item = self.list_widget.currentItem()
@@ -229,24 +334,30 @@ class ConnectionsList(QWidget):
         self.list_widget.setCurrentItem(None)
 
     def _on_add_button_clicked(self) -> None:
-        logger.info("Solicitud para crear nueva conexión")
+        """
+        Solicita apertura del formulario
+        de creación de conexiones.
+        """
+
+        logger.info("Connection creation requested.")
 
         self.add_connection_requested.emit()
 
     def _on_delete_button_clicked(self) -> None:
         """
-        Elimina la conexión seleccionada.
+        Solicita confirmación para eliminar
+        la conexión seleccionada.
         """
 
         connection = self._get_selected_connection()
 
         if connection is None:
-            logger.warning("Se intentó eliminar una conexión sin selección.")
+            logger.warning("Delete attempted without selection.")
             return
 
         dialog = ConfirmationDialog(
             title="Delete connection",
-            message=(f"Are you sure you want to delete " f"'{connection.name}'?"),
+            message=(f"Are you sure you want to delete '{connection.name}'?"),
             parent=self,
         )
 
@@ -259,56 +370,99 @@ class ConnectionsList(QWidget):
         connection: Connection,
     ) -> None:
         """
-        Elimina una conexión persistida y
-        actualiza la interfaz.
+        Elimina una conexión persistida
+        y actualiza la interfaz.
+
+        Args:
+            connection (Connection):
+                Conexión a eliminar.
         """
 
         try:
 
-            # Eliminar conexión
+            logger.info(
+                f"Deleting connection '{connection.name}' (ID: {connection.id})..."
+            )
+
             delete_connection(connection)
 
-            logger.info(f"Conexión eliminada: {connection}")
+            logger.success(
+                f"Connection '{connection.name}' (ID: {connection.id}) deleted."
+            )
 
-            # Mostrar notificación
-            notification = Notification(
+            Notification(
                 NotificationType.SUCCESS,
                 "Connection deleted",
                 parent=self.window(),
-            )
+            ).show()
 
-            notification.show()
-
-            # Recargar conexiones
             self.reload_connections()
 
-            # Limpiar selección
             self._clear_selection()
 
         except Exception as e:
 
             logger.error(
-                f"Error al eliminar conexión: " f"{connection}. Excepción: {e}"
+                f"Failed to delete connection '{connection.name}' (ID: {connection.id}). "
+                f"Exception: {e}"
             )
 
-            notification = Notification(
+            Notification(
                 NotificationType.ERROR,
                 "Error deleting",
                 parent=self.window(),
-            )
-
-            notification.show()
+            ).show()
 
     def _on_edit_button_clicked(self) -> None:
+        """
+        Solicita edición de la conexión
+        seleccionada.
+        """
 
         connection = self._get_selected_connection()
 
         if connection is None:
             return
 
-        logger.info(f"Editar conexión: {connection}")
+        logger.info(
+            f"Connection '{connection.name}' (ID: {connection.id}) edit requested."
+        )
 
         self.edit_connection_requested.emit(connection)
+
+    def _on_connect_button_clicked(self) -> None:
+        """
+        Solicita apertura de sesión
+        para la conexión seleccionada.
+        """
+
+        connection = self._get_selected_connection()
+
+        if connection is None:
+            return
+
+        logger.info(
+            f"Session open requested for '{connection.name}' (ID: {connection.id})."
+        )
+
+        self.connection_open_requested.emit(connection)
+
+    def _on_disconnect_button_clicked(self) -> None:
+        """
+        Solicita cierre de sesión
+        para la conexión seleccionada.
+        """
+
+        connection = self._get_selected_connection()
+
+        if connection is None:
+            return
+
+        logger.info(
+            f"Session close requested for '{connection.name}' (ID: {connection.id})."
+        )
+
+        self.connection_close_requested.emit(connection)
 
     # ================
     # === UI STATE ===
@@ -318,6 +472,7 @@ class ConnectionsList(QWidget):
         """
         Configura el estado inicial de los botones.
         """
+
         self.add_button.setEnabled(True)
         self.edit_button.setEnabled(False)
         self.delete_button.setEnabled(False)
@@ -329,18 +484,29 @@ class ConnectionsList(QWidget):
         connection: Connection | None,
     ) -> None:
         """
-        Actualiza el estado de los botones según
-        la conexión seleccionada.
+        Actualiza el estado visual
+        de los botones según la conexión
+        seleccionada y el estado de sesión.
+
+        Args:
+            connection (Connection | None):
+                Conexión actualmente seleccionada.
         """
 
         has_selection = connection is not None
 
         self.edit_button.setEnabled(has_selection)
         self.delete_button.setEnabled(has_selection)
-        self.connect_button.setEnabled(has_selection)
 
-        # De momento desactivado
-        self.disconnect_button.setEnabled(False)
+        if not has_selection:
+            self.connect_button.setEnabled(False)
+            self.disconnect_button.setEnabled(False)
+            return
+
+        is_connected = has_session(connection.id)
+
+        self.connect_button.setEnabled(not is_connected)
+        self.disconnect_button.setEnabled(is_connected)
 
     # ==================
     # === PUBLIC API ===
@@ -348,8 +514,12 @@ class ConnectionsList(QWidget):
 
     def reload_connections(self) -> None:
         """
-        Recarga las conexiones desde la base de datos
+        Recarga las conexiones persistidas
         y actualiza la lista visual.
         """
 
+        logger.debug("Reloading connections list...")
+
         self._load_connections()
+
+        logger.debug("Connections list reloaded.")

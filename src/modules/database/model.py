@@ -28,6 +28,8 @@ def get_connection():
             o la transacción.
     """
 
+    logger.debug("Opening SQLite connection.")
+
     conn = sqlite3.connect(
         f"file:{DB_PATH}?mode=rw",
         uri=True,
@@ -53,7 +55,7 @@ def get_connection():
         # ante cualquier excepción.
         conn.rollback()
 
-        logger.error(f"Error en transacción: {e}")
+        logger.error(f"Transaction failed. Rollback executed. Exception: {e}")
 
         raise
 
@@ -62,6 +64,8 @@ def get_connection():
         # Garantiza el cierre de la conexión incluso
         # si ocurre una excepción.
         conn.close()
+
+        logger.debug("SQLite connection closed.")
 
 
 def init_database() -> None:
@@ -83,13 +87,14 @@ def init_database() -> None:
             o inicialización de la base de datos.
     """
 
+    logger.info("Initializing application database...")
+
     # Garantiza que el directorio de datos exista
     # antes de crear la base de datos.
     os.makedirs(DATA_DIR, exist_ok=True)
 
-    # Evita sobrescribir una base de datos ya inicializada.
     if os.path.exists(DB_PATH):
-        logger.info("La base de datos ya existe. Omitiendo inicialización.")
+        logger.info("Application database already exists. Initialization skipped.")
         return
 
     try:
@@ -111,13 +116,14 @@ def init_database() -> None:
             # manualmente por sesión.
             conn.execute("PRAGMA foreign_keys = ON;")
 
-            # Ejecutar todas las sentencias SQL del esquema.
+            logger.info("Creating database schema...")
+
             conn.executescript(schema)
 
             conn.commit()
 
-        logger.info("Base de datos creada e inicializada por primera vez.")
+        logger.success("Application database initialized successfully.")
 
     except Exception as e:
-        logger.error(f"Fallo crítico al crear la BD: {e}")
+        logger.critical(f"Database initialization failed. Exception: {e}")
         raise
