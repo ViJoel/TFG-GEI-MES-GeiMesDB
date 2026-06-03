@@ -10,7 +10,7 @@ Clases:
 """
 
 import qtawesome as qta
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QShowEvent
 from PySide6.QtWidgets import (
     QLabel,
@@ -43,6 +43,7 @@ class Notification(QWidget):
         notification_type: NotificationType,
         message: str,
         parent=None,
+        duration_ms: int | None = None,
     ):
         """
         Inicializa una nueva notificación.
@@ -56,15 +57,25 @@ class Notification(QWidget):
 
             parent:
                 Widget padre de la notificación.
+
+            duration_ms (int | None):
+                Tiempo que permanecerá visible la
+                notificación antes de cerrarse
+                automáticamente.
+
+                Si es ``None``, se utilizará la
+                duración predeterminada definida
+                para el tipo de notificación.
+
         """
 
         super().__init__(parent)
 
-        # Tipo visual de la notificación.
         self.notification_type = notification_type
 
-        # Mensaje mostrado al usuario.
         self.message = message
+
+        self.duration_ms = duration_ms
 
         # Ventana flotante sin bordes nativos.
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.ToolTip)
@@ -148,6 +159,8 @@ class Notification(QWidget):
             global_pos.y() + margin,
         )
 
+        QTimer.singleShot(self._get_duration(), self.close)
+
     # ===============
     # === HELPERS ===
     # ===============
@@ -170,3 +183,33 @@ class Notification(QWidget):
         }
 
         return icons[self.notification_type]
+
+    def _get_duration(self) -> int:
+        """
+        Retorna la duración, en milisegundos, durante la cual
+        la notificación permanecerá visible antes de cerrarse
+        automáticamente.
+
+        Si se ha especificado una duración personalizada mediante
+        ``duration_ms``, esta tendrá prioridad sobre los valores
+        predeterminados asociados al tipo de notificación.
+
+        Duraciones por defecto:
+            - SUCCESS: 5000 ms
+            - INFO: 5000 ms
+            - ERROR: 10000 ms
+
+        Returns:
+            int:
+                Tiempo de visualización de la notificación
+                expresado en milisegundos.
+        """
+
+        if self.duration_ms is not None:
+            return self.duration_ms
+
+        return {
+            NotificationType.SUCCESS: 5000,
+            NotificationType.INFO: 5000,
+            NotificationType.ERROR: 10000,
+        }[self.notification_type]
