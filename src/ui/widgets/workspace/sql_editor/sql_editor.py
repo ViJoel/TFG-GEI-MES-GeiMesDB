@@ -1,3 +1,19 @@
+"""
+Editor SQL basado en QPlainTextEdit con soporte
+para numeración de líneas y ejecución de consultas.
+
+Permite:
+- Editar sentencias SQL.
+- Ejecutar el texto seleccionado.
+- Ejecutar el script completo.
+- Mostrar números de línea.
+- Resaltar la línea actual.
+- Gestionar atajos de teclado habituales.
+
+Clases:
+    - SqlEditor
+"""
+
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QKeyEvent, QPainter, QTextFormat
 from PySide6.QtWidgets import QPlainTextEdit, QTextEdit
@@ -7,6 +23,17 @@ from ui.widgets.workspace.sql_scope import SqlScope
 
 
 class SqlEditor(QPlainTextEdit):
+    """
+    Widget encargado de proporcionar un editor
+    de texto orientado a SQL.
+
+    Responsabilidades:
+    - Gestionar la edición del texto SQL.
+    - Mostrar numeración de líneas.
+    - Resaltar la línea actual.
+    - Emitir solicitudes de ejecución.
+    - Gestionar atajos de teclado del editor.
+    """
 
     # =================
     # === VARIABLES ===
@@ -48,12 +75,26 @@ class SqlEditor(QPlainTextEdit):
     # ==================
 
     def line_number_area_width(self) -> int:
+        """
+        Calcula el ancho necesario para mostrar
+        correctamente los números de línea.
+
+        Returns:
+            int:
+                Ancho requerido para el área
+                lateral de numeración.
+        """
 
         digits = len(str(max(1, self.blockCount())))
 
         return 10 + self.fontMetrics().horizontalAdvance("9") * digits
 
     def _update_line_number_area_width(self) -> None:
+        """
+        Actualiza el margen izquierdo del editor
+        para reservar espacio al área de números
+        de línea.
+        """
 
         self.setViewportMargins(
             self.line_number_area_width(),
@@ -67,6 +108,18 @@ class SqlEditor(QPlainTextEdit):
         rect,
         dy,
     ) -> None:
+        """
+        Actualiza el área de números de línea
+        cuando el editor se desplaza o repinta.
+
+        Args:
+            rect:
+                Región afectada por la actualización.
+
+            dy:
+                Desplazamiento vertical aplicado
+                al contenido.
+        """
 
         if dy:
             self.line_number_area.scroll(0, dy)
@@ -115,6 +168,10 @@ class SqlEditor(QPlainTextEdit):
     # ===============
 
     def _connect_signals(self) -> None:
+        """
+        Conecta las señales del editor con
+        sus handlers correspondientes.
+        """
 
         self.blockCountChanged.connect(self._update_line_number_area_width)
 
@@ -130,6 +187,11 @@ class SqlEditor(QPlainTextEdit):
         """
         Emite la solicitud de ejecución del SQL
         correspondiente al ámbito especificado.
+
+        Args:
+            scope (SqlScope):
+                Alcance del texto que debe
+                ejecutarse.
         """
 
         sql = self._get_sql(scope)
@@ -149,6 +211,14 @@ class SqlEditor(QPlainTextEdit):
         self,
         event: QKeyEvent,
     ) -> None:
+        """
+        Gestiona combinaciones de teclas
+        específicas del editor SQL.
+
+        Args:
+            event (QKeyEvent):
+                Evento de teclado recibido.
+        """
 
         modifiers = event.modifiers()
 
@@ -177,6 +247,15 @@ class SqlEditor(QPlainTextEdit):
         super().keyPressEvent(event)
 
     def resizeEvent(self, event):
+        """
+        Reposiciona el área de números de línea
+        cuando cambia el tamaño del editor.
+
+        Args:
+            event:
+                Evento de redimensionamiento
+                recibido desde Qt.
+        """
 
         super().resizeEvent(event)
 
@@ -200,11 +279,34 @@ class SqlEditor(QPlainTextEdit):
         """
         Comprueba si el texto contiene caracteres
         distintos de espacios en blanco.
+
+        Args:
+            text (str):
+                Texto a evaluar.
+
+        Returns:
+            bool:
+                - `True` si existe contenido útil.
+                - `False` en caso contrario.
         """
 
         return bool(text.strip())
 
     def _get_sql(self, scope: SqlScope) -> str | None:
+        """
+        Obtiene el texto SQL correspondiente
+        al ámbito solicitado.
+
+        Args:
+            scope (SqlScope):
+                Alcance del texto que se desea
+                recuperar.
+
+        Returns:
+            str | None:
+                Texto SQL normalizado o `None`
+                si no existe contenido.
+        """
 
         if scope == SqlScope.SELECTED_TEXT:
             text = self.textCursor().selectedText()
@@ -219,8 +321,16 @@ class SqlEditor(QPlainTextEdit):
 
     def _normalize_sql(self, text: str) -> str:
         """
-        Convierte caracteres especiales utilizados por Qt
-        en saltos de línea convencionales.
+        Convierte caracteres especiales utilizados
+        por Qt en saltos de línea convencionales.
+
+        Args:
+            text (str):
+                Texto original.
+
+        Returns:
+            str:
+                Texto normalizado.
         """
 
         return text.replace("\u2029", "\n").replace("\r\n", "\n").replace("\r", "\n")
@@ -230,6 +340,15 @@ class SqlEditor(QPlainTextEdit):
     # ==================
 
     def line_number_area_paint_event(self, event) -> None:
+        """
+        Dibuja los números de línea visibles
+        en el área lateral del editor.
+
+        Args:
+            event:
+                Evento de pintado recibido desde
+                el widget de numeración.
+        """
 
         painter = QPainter(self.line_number_area)
 
