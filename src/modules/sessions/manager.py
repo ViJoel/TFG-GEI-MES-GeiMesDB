@@ -240,3 +240,50 @@ def test_connection(connection: Connection) -> bool:
             session.close()
 
         logger.success(f"Temporary resources released for '{connection.name}'.")
+
+
+def execute_query(
+    connection_id: str,
+    query: str,
+) -> None:
+
+    session = get_session(connection_id)
+
+    if session is None:
+        logger.warning(
+            f"There is no active session for the connection {connection_id}."
+        )
+        return
+
+    logger.info(f"Executing SQL on '{session.connection.name}'...")
+
+    with session.engine.begin() as conn:
+
+        result = conn.execute(text(query))
+
+        logger.success(f"SQL executed successfully on '{session.connection.name}'.")
+
+        if result.returns_rows:
+
+            for row in result:
+                print(row)
+
+        else:
+
+            command = query.lstrip().split(None, 1)[0].upper()
+
+            if command == "INSERT":
+
+                print(f"{result.rowcount} row(s) inserted.")
+
+            elif command == "UPDATE":
+
+                print(f"{result.rowcount} row(s) updated.")
+
+            elif command == "DELETE":
+
+                print(f"{result.rowcount} row(s) deleted.")
+
+            else:
+
+                print("Query executed successfully.")

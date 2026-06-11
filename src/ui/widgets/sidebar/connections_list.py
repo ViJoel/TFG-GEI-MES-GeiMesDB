@@ -31,6 +31,7 @@ from entities.driver import Driver
 from modules.connections.service import delete_connection, get_connections
 from modules.sessions.service import has_session
 from ui.common.paths import MYSQL_LOGO, ORACLE_LOGO, POSTGRESQL_LOGO, SQLITE_LOGO
+from ui.state.state import get_selected_connection, set_selected_connection
 from ui.utils.layouts import hbox, vbox
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
 from ui.widgets.notifications.notification import Notification
@@ -203,6 +204,8 @@ class ConnectionsList(QWidget):
         self.list_widget.clearSelection()
         self.list_widget.setCurrentItem(None)
 
+        set_selected_connection(None)
+
     # ==================
     # === UI HELPERS ===
     # ==================
@@ -250,6 +253,35 @@ class ConnectionsList(QWidget):
 
         return icons.get(driver, QIcon())
 
+    def _add_connection_item(self, connection: Connection) -> None:
+        """
+        Añade una conexión individual a la lista visual.
+
+        Args:
+            connection (Connection):
+                Conexión a representar.
+        """
+
+        # Texto visible.
+        connection_name = connection.name or "Sin nombre"
+
+        item = QListWidgetItem(connection_name)
+
+        # Icono según driver.
+        item.setIcon(self._get_driver_icon(connection.driver))
+
+        # Resaltar conexiones con sesión activa.
+        if has_session(connection.id):
+            item.setBackground(QColor("green"))
+
+        # Guardar objeto completo dentro del item.
+        item.setData(
+            Qt.ItemDataRole.UserRole,
+            connection,
+        )
+
+        self.list_widget.addItem(item)
+
     # ===============
     # === SIGNALS ===
     # ===============
@@ -282,7 +314,9 @@ class ConnectionsList(QWidget):
         dentro de la lista.
         """
 
-        connection = self.get_selected_connection()
+        connection = self._get_selected_connection()
+
+        set_selected_connection(connection)
 
         self._update_buttons_state(connection)
 
@@ -310,7 +344,7 @@ class ConnectionsList(QWidget):
         la conexión seleccionada.
         """
 
-        connection = self.get_selected_connection()
+        connection = self._get_selected_connection()
 
         if connection is None:
             logger.warning("Delete attempted without selection.")
@@ -332,7 +366,7 @@ class ConnectionsList(QWidget):
         seleccionada.
         """
 
-        connection = self.get_selected_connection()
+        connection = self._get_selected_connection()
 
         if connection is None:
             return
@@ -340,6 +374,8 @@ class ConnectionsList(QWidget):
         logger.info(
             f"Connection '{connection.name}' (ID: {connection.id}) edit requested."
         )
+
+        self.connection_close_requested.emit(connection)
 
         self.edit_connection_requested.emit(connection)
 
@@ -349,7 +385,7 @@ class ConnectionsList(QWidget):
         para la conexión seleccionada.
         """
 
-        connection = self.get_selected_connection()
+        connection = self._get_selected_connection()
 
         if connection is None:
             return
@@ -366,7 +402,7 @@ class ConnectionsList(QWidget):
         para la conexión seleccionada.
         """
 
-        connection = self.get_selected_connection()
+        connection = self._get_selected_connection()
 
         if connection is None:
             return
@@ -436,7 +472,7 @@ class ConnectionsList(QWidget):
         preservando la selección actual.
         """
 
-        selected_connection = self.get_selected_connection()
+        selected_connection = self._get_selected_connection()
 
         selected_id = (
             selected_connection.id if selected_connection is not None else None
@@ -466,37 +502,32 @@ class ConnectionsList(QWidget):
         # Reactivar señales
         self.list_widget.blockSignals(False)
 
+        # Actualizar conexión seleccionada en el estado global
+        set_selected_connection(restored_connection)
+
         # Actualizar estado manualmente
         self._update_buttons_state(restored_connection)
 
-    def _add_connection_item(self, connection: Connection) -> None:
+    # ===================
+    # === PRIVATE API ===
+    # ===================
+
+    def _get_selected_connection(self) -> Connection | None:
         """
-        Añade una conexión individual a la lista visual.
+        Retorna la conexión actualmente seleccionada.
 
-        Args:
-            connection (Connection):
-                Conexión a representar.
+        Returns:
+            Connection | None:
+                Conexión seleccionada o `None`
+                si no existe selección.
         """
 
-        # Texto visible.
-        connection_name = connection.name or "Sin nombre"
+        item = self.list_widget.currentItem()
 
-        item = QListWidgetItem(connection_name)
+        if item is None:
+            return None
 
-        # Icono según driver.
-        item.setIcon(self._get_driver_icon(connection.driver))
-
-        # Resaltar conexiones con sesión activa.
-        if has_session(connection.id):
-            item.setBackground(QColor("green"))
-
-        # Guardar objeto completo dentro del item.
-        item.setData(
-            Qt.ItemDataRole.UserRole,
-            connection,
-        )
-
-        self.list_widget.addItem(item)
+        return item.data(Qt.ItemDataRole.UserRole)
 
     # ==================
     # === PUBLIC API ===
@@ -513,20 +544,3 @@ class ConnectionsList(QWidget):
         self._load_connections()
 
         logger.debug("Connections list reloaded.")
-
-    def get_selected_connection(self) -> Connection | None:
-        """
-        Retorna la conexión actualmente seleccionada.
-
-        Returns:
-            Connection | None:
-                Conexión seleccionada o `None`
-                si no existe selección.
-        """
-
-        item = self.list_widget.currentItem()
-
-        if item is None:
-            return None
-
-        return item.data(Qt.ItemDataRole.UserRole)
