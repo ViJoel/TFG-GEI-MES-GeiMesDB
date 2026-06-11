@@ -1,6 +1,7 @@
 from entities.connection import Connection
 from modules.sessions.manager import close_all_sessions as cas
 from modules.sessions.manager import close_session as cs
+from modules.sessions.manager import execute_query as eq
 from modules.sessions.manager import get_session as gs
 from modules.sessions.manager import has_session as hs
 from modules.sessions.manager import open_session as os
@@ -90,3 +91,10 @@ def test_connection(connection: Connection) -> bool:
     """
 
     return tc(connection)
+
+
+def execute_query(
+    connection_id: str,
+    query: str,
+) -> None:
+    eq(connection_id, query)

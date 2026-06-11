@@ -10,6 +10,7 @@ Responsabilidades:
 
 import logging
 
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QLabel, QMainWindow, QStackedWidget, QWidget
 
 from common.constants import APP_NAME
@@ -21,6 +22,7 @@ from ui.widgets.home.home import Home
 from ui.widgets.notifications.notification import Notification
 from ui.widgets.notifications.notifications_type import NotificationType
 from ui.widgets.sidebar.sidebar import Sidebar
+from ui.widgets.workspace.workspace import Workspace
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +37,10 @@ class MainWindow(QMainWindow):
     - Gestión de sesiones activas,
     - Eventos globales de interfaz.
     """
+
+    # Señales emitidas por el widget.
+    connection_session_opened = Signal()
+    connection_session_closed = Signal()
 
     # ============
     # === INIT ===
@@ -84,9 +90,13 @@ class MainWindow(QMainWindow):
         # Formulario de conexiones.
         self.connection_form = ConnectionForm()
 
+        # Espacio de trabajo
+        self.workspace = Workspace()
+
         # Registrar páginas.
         self.stack.addWidget(self.home_page)
         self.stack.addWidget(self.connection_form)
+        self.stack.addWidget(self.workspace)
 
         # Mostrar pantalla inicial.
         self._show_home_page()
@@ -128,6 +138,10 @@ class MainWindow(QMainWindow):
         self.sidebar.connections_list.connection_close_requested.connect(
             self._close_connection_session
         )
+
+        self.connection_session_opened.connect(self._show_workspace)
+
+        self.connection_session_closed.connect(self._show_home_page)
 
     # ======================
     # === EVENT HANDLERS ===
@@ -171,6 +185,8 @@ class MainWindow(QMainWindow):
             # Refrescar estado visual.
             self.sidebar.connections_list.reload_connections()
 
+            self.connection_session_opened.emit()
+
         except Exception as e:
 
             logger.error(f"Error opening session: {e}")
@@ -206,6 +222,8 @@ class MainWindow(QMainWindow):
 
             # Refrescar estado visual.
             self.sidebar.connections_list.reload_connections()
+
+            self.connection_session_closed.emit()
 
         except Exception as e:
 
@@ -254,3 +272,6 @@ class MainWindow(QMainWindow):
         self.connection_form.load_connection(connection)
 
         self.stack.setCurrentWidget(self.connection_form)
+
+    def _show_workspace(self) -> None:
+        self.stack.setCurrentWidget(self.workspace)
