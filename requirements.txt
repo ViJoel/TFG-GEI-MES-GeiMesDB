@@ -2,6 +2,7 @@ altgraph==0.17.5
 black==26.3.1
 cffi==2.0.0
 click==8.3.1
+colorlog==6.10.1
 cryptography==46.0.6
 greenlet==3.3.2
 iniconfig==2.3.0
@@ -26,6 +27,8 @@ PySide6_Examples==6.11.0
 pytest==9.0.3
 pytest-qt==4.5.0
 pytokens==0.4.1
+QtAwesome==1.4.2
+QtPy==2.4.3
 setuptools==82.0.1
 shiboken6==6.11.0
 SQLAlchemy==2.0.48
