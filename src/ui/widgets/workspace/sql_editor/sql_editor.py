@@ -19,7 +19,7 @@ from PySide6.QtGui import QColor, QKeyEvent, QPainter, QTextFormat
 from PySide6.QtWidgets import QPlainTextEdit, QTextEdit
 
 from ui.widgets.workspace.sql_editor.line_number_area import LineNumberArea
-from ui.widgets.workspace.sql_scope import SqlScope
+from ui.widgets.workspace.sql_editor.sql_scope import SqlScope
 
 
 class SqlEditor(QPlainTextEdit):

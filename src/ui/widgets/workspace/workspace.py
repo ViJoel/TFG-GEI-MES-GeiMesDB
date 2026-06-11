@@ -3,8 +3,9 @@ from PySide6.QtWidgets import QWidget
 from modules.sessions.service import execute_query
 from ui.state.state import get_selected_connection
 from ui.utils.layouts import hbox, vbox
+from ui.widgets.workspace.results_view.results_view import ResultsView
 from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
-from ui.widgets.workspace.sql_scope import SqlScope
+from ui.widgets.workspace.sql_editor.sql_scope import SqlScope
 
 
 class Workspace(QWidget):
@@ -42,16 +43,10 @@ class Workspace(QWidget):
         main_layout.addLayout(sql_layout)
 
         self.sql_editor = SqlEditor()
-
         sql_layout.addWidget(self.sql_editor)
 
-    # ================
-    # === UI STATE ===
-    # ================
-
-    # ==================
-    # === UI HELPERS ===
-    # ==================
+        self.results_view = ResultsView()
+        sql_layout.addWidget(self.results_view)
 
     # ===============
     # === SIGNALS ===
@@ -69,20 +64,10 @@ class Workspace(QWidget):
         sql: str,
         scope: SqlScope,
     ) -> None:
-        execute_query(connection_id=get_selected_connection().id, query=sql)
 
-    # =====================
-    # === EVENT HELPERS ===
-    # =====================
+        result = execute_query(
+            connection_id=get_selected_connection().id,
+            query=sql,
+        )
 
-    # ====================
-    # === QT OVERRIDES ===
-    # ====================
-
-    # ===================
-    # === PRIVATE API ===
-    # ===================
-
-    # ==================
-    # === PUBLIC API ===
-    # ==================
+        self.results_view.show_result(result)

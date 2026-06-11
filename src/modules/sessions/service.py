@@ -1,4 +1,5 @@
 from entities.connection import Connection
+from entities.query_result import QueryResult
 from modules.sessions.manager import close_all_sessions as cas
 from modules.sessions.manager import close_session as cs
 from modules.sessions.manager import execute_query as eq
@@ -96,5 +97,5 @@ def test_connection(connection: Connection) -> bool:
 def execute_query(
     connection_id: str,
     query: str,
-) -> None:
-    eq(connection_id, query)
+) -> QueryResult:
+    return eq(connection_id, query)

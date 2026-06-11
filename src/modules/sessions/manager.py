@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from entities.connection import Connection
 from entities.driver import Driver
+from entities.query_result import QueryResult, ResultSet
 from modules.sessions.session import Session
 
 logger = logging.getLogger(__name__)
@@ -245,45 +246,115 @@ def test_connection(connection: Connection) -> bool:
 def execute_query(
     connection_id: str,
     query: str,
-) -> None:
+) -> QueryResult:
 
     session = get_session(connection_id)
 
     if session is None:
-        logger.warning(
-            f"There is no active session for the connection {connection_id}."
+        message = f"There is no active session for the connection {connection_id}."
+
+        logger.warning(message)
+
+        return QueryResult(
+            success=False,
+            console_output=message,
+            result_set=None,
         )
-        return
 
     logger.info(f"Executing SQL on '{session.connection.name}'...")
 
-    with session.engine.begin() as conn:
+    try:
 
-        result = conn.execute(text(query))
+        with session.engine.begin() as conn:
 
-        logger.success(f"SQL executed successfully on '{session.connection.name}'.")
+            result = conn.execute(text(query))
 
-        if result.returns_rows:
+            logger.success(f"SQL executed successfully on '{session.connection.name}'.")
 
-            for row in result:
-                print(row)
+            if result.returns_rows:
 
-        else:
+                columns = list(result.keys())
+                rows = [list(row) for row in result.fetchall()]
+
+                result_set = ResultSet(
+                    columns=columns,
+                    rows=rows,
+                )
+
+                console_output = (
+                    _format_result_set(result_set)
+                    + "\n\n"
+                    + f"{len(rows)} row(s) returned."
+                )
+
+                return QueryResult(
+                    success=True,
+                    console_output=console_output,
+                    result_set=result_set,
+                )
 
             command = query.lstrip().split(None, 1)[0].upper()
 
             if command == "INSERT":
-
-                print(f"{result.rowcount} row(s) inserted.")
-
+                console_output = f"{result.rowcount} row(s) inserted."
             elif command == "UPDATE":
-
-                print(f"{result.rowcount} row(s) updated.")
-
+                console_output = f"{result.rowcount} row(s) updated."
             elif command == "DELETE":
-
-                print(f"{result.rowcount} row(s) deleted.")
-
+                console_output = f"{result.rowcount} row(s) deleted."
             else:
+                console_output = "Query executed successfully."
 
-                print("Query executed successfully.")
+            return QueryResult(
+                success=True,
+                console_output=console_output,
+                result_set=None,
+            )
+
+    except Exception as e:
+
+        logger.exception(f"Error executing SQL query: {e}")
+
+        return QueryResult(
+            success=False,
+            console_output=str(e),
+            result_set=None,
+        )
+
+
+def _format_result_set(
+    result_set: ResultSet,
+) -> str:
+
+    rows = result_set.rows
+    columns = result_set.columns
+
+    widths = [len(column) for column in columns]
+
+    for row in rows:
+
+        for i, value in enumerate(row):
+
+            widths[i] = max(
+                widths[i],
+                len(str(value)),
+            )
+
+    header = " | ".join(column.ljust(widths[i]) for i, column in enumerate(columns))
+
+    separator = "-+-".join("-" * width for width in widths)
+
+    body = []
+
+    for row in rows:
+
+        body.append(
+            " | ".join(str(value).ljust(widths[i]) for i, value in enumerate(row))
+        )
+
+    lines = [
+        header,
+        separator,
+        *body,
+    ]
+
+    return "\n".join(lines)
