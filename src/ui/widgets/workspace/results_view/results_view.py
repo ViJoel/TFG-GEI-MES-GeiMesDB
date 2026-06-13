@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
 
 from entities.query_result import QueryResult
 from ui.widgets.workspace.results_view.console import Console
+from ui.widgets.workspace.results_view.table import Table
 
 
 class ResultsView(QWidget):
@@ -42,25 +43,23 @@ class ResultsView(QWidget):
         """
 
         pagelayout = QVBoxLayout()
-        button_layout = QHBoxLayout()
+
+        toolbar_layout = QHBoxLayout()
+        self.left_toolbar_layout = QHBoxLayout()
+        self.right_toolbar_layout = QHBoxLayout()
+
         self.stacklayout = QStackedLayout()
 
-        pagelayout.addLayout(button_layout)
+        toolbar_layout.addLayout(self.left_toolbar_layout)
+        toolbar_layout.addStretch()
+        toolbar_layout.addLayout(self.right_toolbar_layout)
+
+        pagelayout.addLayout(toolbar_layout)
         pagelayout.addLayout(self.stacklayout)
 
-        # Añadimos los botones de pestañas
-        self.console_button = self._create_button("Console")
-        button_layout.addWidget(self.console_button)
-
-        self.table_button = self._create_button("Table")
-        button_layout.addWidget(self.table_button)
-
-        # Añadimos las pestañas
-        self.console = Console()
-        self.stacklayout.addWidget(self.console)
-
-        self.table = QLabel("Table")
-        self.stacklayout.addWidget(self.table)
+        self._create_tab_buttons()
+        self._create_cell_buttons()
+        self._create_tabs()
 
         self.setLayout(pagelayout)
 
@@ -69,10 +68,10 @@ class ResultsView(QWidget):
     # ================
 
     def show_console(self):
-        self.stacklayout.setCurrentIndex(0)
+        self.stacklayout.setCurrentWidget(self.console)
 
     def show_table(self):
-        self.stacklayout.setCurrentIndex(1)
+        self.stacklayout.setCurrentWidget(self.table)
 
     def show_result(
         self,
@@ -88,7 +87,7 @@ class ResultsView(QWidget):
 
         else:
 
-            # self.table.set_result_set(result.result_set)
+            self.table.set_result_set(result.result_set)
 
             self.show_table()
 
@@ -105,6 +104,29 @@ class ResultsView(QWidget):
         )
         return btn
 
+    def _create_tab_buttons(self) -> None:
+
+        self.console_button = self._create_button("Console")
+        self.left_toolbar_layout.addWidget(self.console_button)
+
+        self.table_button = self._create_button("Table")
+        self.left_toolbar_layout.addWidget(self.table_button)
+
+    def _create_cell_buttons(self) -> None:
+
+        self.save_button = self._create_button("Save")
+        self.right_toolbar_layout.addWidget(self.save_button)
+
+        self.discard_button = self._create_button("Discard")
+        self.right_toolbar_layout.addWidget(self.discard_button)
+
+    def _create_tabs(self) -> None:
+        self.console = Console()
+        self.stacklayout.addWidget(self.console)
+
+        self.table = Table()
+        self.stacklayout.addWidget(self.table)
+
     # ===============
     # === SIGNALS ===
     # ===============
@@ -117,6 +139,7 @@ class ResultsView(QWidget):
 
         self.console_button.pressed.connect(self.show_console)
         self.table_button.pressed.connect(self.show_table)
+        self.discard_button.clicked.connect(self.table.discard_changes)
 
     # ======================
     # === EVENT HANDLERS ===

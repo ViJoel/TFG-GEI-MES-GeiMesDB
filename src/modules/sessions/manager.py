@@ -1,6 +1,8 @@
 import logging
+from typing import Any
 
-from sqlalchemy import text
+from sqlalchemy import inspect, text
+from sqlalchemy.engine import CursorResult, Engine
 from sqlalchemy.exc import SQLAlchemyError
 
 from entities.connection import Connection
@@ -18,6 +20,10 @@ logger = logging.getLogger(__name__)
 # Value:
 #     Session activa asociada.
 _active_sessions: dict[str, Session] = {}
+
+# ==================
+# === PUBLIC API ===
+# ==================
 
 
 def open_session(connection: Connection) -> Session:
@@ -273,40 +279,18 @@ def execute_query(
 
             if result.returns_rows:
 
-                columns = list(result.keys())
-                rows = [list(row) for row in result.fetchall()]
-
-                result_set = ResultSet(
-                    columns=columns,
-                    rows=rows,
+                return _create_query_result(
+                    engine=session.engine,
+                    query=query,
+                    result=result,
                 )
-
-                console_output = (
-                    _format_result_set(result_set)
-                    + "\n\n"
-                    + f"{len(rows)} row(s) returned."
-                )
-
-                return QueryResult(
-                    success=True,
-                    console_output=console_output,
-                    result_set=result_set,
-                )
-
-            command = query.lstrip().split(None, 1)[0].upper()
-
-            if command == "INSERT":
-                console_output = f"{result.rowcount} row(s) inserted."
-            elif command == "UPDATE":
-                console_output = f"{result.rowcount} row(s) updated."
-            elif command == "DELETE":
-                console_output = f"{result.rowcount} row(s) deleted."
-            else:
-                console_output = "Query executed successfully."
 
             return QueryResult(
                 success=True,
-                console_output=console_output,
+                console_output=_create_console_output(
+                    query=query,
+                    result=result,
+                ),
                 result_set=None,
             )
 
@@ -319,6 +303,118 @@ def execute_query(
             console_output=str(e),
             result_set=None,
         )
+
+
+def is_editable_query(
+    query: str,
+) -> bool:
+
+    normalized_query = " ".join(query.strip().split()).upper()
+
+    if not normalized_query.startswith("SELECT * FROM "):
+        return False
+
+    forbidden_keywords = (
+        " JOIN ",
+        " WHERE ",
+        " GROUP BY ",
+        " HAVING ",
+        " LIMIT ",
+        " DISTINCT ",
+        " UNION ",
+        " INTERSECT ",
+        " EXCEPT ",
+        " WITH ",
+        " OFFSET ",
+        " INTO ",
+    )
+
+    for keyword in forbidden_keywords:
+        if keyword in normalized_query:
+            return False
+
+    return True
+
+
+# ===================
+# === PRIVATE API ===
+# ===================
+
+
+def _create_query_result(
+    engine: Engine,
+    query: str,
+    result: CursorResult,
+) -> QueryResult:
+
+    result_set = _create_result_set(
+        engine=engine,
+        query=query,
+        result=result,
+    )
+
+    console_output = (
+        _format_result_set(result_set)
+        + "\n\n"
+        + f"{len(result_set.rows)} row(s) returned."
+    )
+
+    return QueryResult(
+        success=True,
+        console_output=console_output,
+        result_set=result_set,
+    )
+
+
+def _create_result_set(
+    engine: Engine,
+    query: str,
+    result: CursorResult,
+) -> ResultSet:
+
+    columns = list(result.keys())
+    rows = [list(row) for row in result.fetchall()]
+
+    table_name, primary_key_columns = _get_editable_metadata(
+        query=query,
+        engine=engine,
+    )
+
+    return ResultSet(
+        rows=rows,
+        columns=columns,
+        columns_types=_infer_column_types(
+            columns=columns,
+            rows=rows,
+        ),
+        table_name=table_name,
+        primary_key_columns=primary_key_columns,
+    )
+
+
+def _infer_column_types(
+    columns: list[str],
+    rows: list[list[Any]],
+) -> list[type]:
+
+    columns_types = []
+
+    for i in range(len(columns)):
+
+        column_type = str
+
+        for row in rows:
+
+            value = row[i]
+
+            if value is not None:
+
+                column_type = type(value)
+                break
+
+        columns_types.append(column_type)
+
+    return columns_types
 
 
 def _format_result_set(
@@ -358,3 +454,75 @@ def _format_result_set(
     ]
 
     return "\n".join(lines)
+
+
+def _create_console_output(
+    query: str,
+    result: CursorResult,
+) -> str:
+
+    command = query.lstrip().split(None, 1)[0].upper()
+
+    if command == "INSERT":
+        console_output = f"{result.rowcount} row(s) inserted."
+
+    elif command == "UPDATE":
+        console_output = f"{result.rowcount} row(s) updated."
+
+    elif command == "DELETE":
+        console_output = f"{result.rowcount} row(s) deleted."
+
+    else:
+        console_output = "Query executed successfully."
+
+    return console_output
+
+
+def _extract_table_name(
+    query: str,
+) -> str | None:
+
+    normalized_query = " ".join(query.strip().split())
+
+    words = normalized_query.split()
+
+    if len(words) < 4:
+        return None
+
+    return words[3].rstrip(";")
+
+
+def _get_primary_key_columns(
+    engine: Engine,
+    table_name: str,
+) -> list[str]:
+
+    inspector = inspect(engine)
+
+    pk = inspector.get_pk_constraint(table_name)
+
+    return pk.get(
+        "constrained_columns",
+        [],
+    )
+
+
+def _get_editable_metadata(
+    query: str,
+    engine: Engine,
+) -> tuple[str | None, list[str]]:
+
+    if not is_editable_query(query):
+        return None, []
+
+    table_name = _extract_table_name(query)
+
+    if table_name is None:
+        return None, []
+
+    primary_key_columns = _get_primary_key_columns(
+        engine,
+        table_name,
+    )
+
+    return table_name, primary_key_columns
