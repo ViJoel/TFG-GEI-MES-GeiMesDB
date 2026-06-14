@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget
 
-from modules.sessions.service import execute_query
+from modules.sessions.service import execute_query, execute_script, is_editable_query
 from ui.state.state import get_selected_connection
 from ui.utils.layouts import hbox, vbox
 from ui.widgets.workspace.results_view.results_view import ResultsView
@@ -54,6 +54,7 @@ class Workspace(QWidget):
 
     def _connect_signals(self) -> None:
         self.sql_editor.execute_requested.connect(self._on_execute_requested)
+        self.results_view.save_requested.connect(self._on_save_requested)
 
     # ======================
     # === EVENT HANDLERS ===
@@ -65,9 +66,30 @@ class Workspace(QWidget):
         scope: SqlScope,
     ) -> None:
 
+        self.current_query = sql
+
         result = execute_query(
             connection_id=get_selected_connection().id,
             query=sql,
         )
 
         self.results_view.show_result(result)
+        self.results_view.set_action_buttons_state(False)
+
+    def _on_save_requested(self):
+
+        queries = self.results_view.table.model.generate_update_queries()
+
+        script_result = execute_script(
+            connection_id=get_selected_connection().id,
+            queries=queries,
+        )
+
+        result = execute_query(
+            connection_id=get_selected_connection().id,
+            query=self.current_query,
+        )
+
+        self.results_view.show_result(result)
+
+        self.results_view.script_result.show_script_result(script_result)

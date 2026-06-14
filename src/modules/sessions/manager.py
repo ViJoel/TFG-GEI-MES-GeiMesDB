@@ -8,6 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from entities.connection import Connection
 from entities.driver import Driver
 from entities.query_result import QueryResult, ResultSet
+from entities.script_result_data import ScriptResultData, ScriptResultDataItem
 from modules.sessions.session import Session
 
 logger = logging.getLogger(__name__)
@@ -334,6 +335,45 @@ def is_editable_query(
             return False
 
     return True
+
+
+def execute_script(
+    connection_id: str,
+    queries: list[str],
+) -> ScriptResultData:
+
+    items = []
+
+    print(queries)
+    print(len(queries))
+
+    for query in queries:
+
+        result = execute_query(
+            connection_id=connection_id,
+            query=query,
+        )
+
+        if result.success:
+
+            items.append(
+                ScriptResultDataItem(
+                    query=query,
+                )
+            )
+
+        else:
+
+            items.append(
+                ScriptResultDataItem(
+                    query=query,
+                    error=result.console_output,
+                )
+            )
+
+    return ScriptResultData(
+        items=items,
+    )
 
 
 # ===================

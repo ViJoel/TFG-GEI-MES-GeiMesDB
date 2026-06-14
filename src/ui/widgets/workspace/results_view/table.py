@@ -1,3 +1,4 @@
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QTableView
 
 from entities.query_result import ResultSet
@@ -10,6 +11,8 @@ class Table(QTableView):
     # === VARIABLES ===
     # =================
 
+    data_changed = Signal(bool)
+
     # ============
     # === INIT ===
     # ============
@@ -18,54 +21,7 @@ class Table(QTableView):
 
         super().__init__()
 
-        self._setup_ui()
-
-    # ================
-    # === UI SETUP ===
-    # ================
-
-    def _setup_ui(self) -> None:
-        """
-        Construye la interfaz principal del widget.
-        """
-
-        pass
-
-    # ================
-    # === UI STATE ===
-    # ================
-
-    # ==================
-    # === UI HELPERS ===
-    # ==================
-
-    # ===============
-    # === SIGNALS ===
-    # ===============
-
-    def _connect_signals(self) -> None:
-        """
-        Conecta señales de widgets
-        con sus handlers correspondientes.
-        """
-
-        pass
-
-    # ======================
-    # === EVENT HANDLERS ===
-    # ======================
-
-    # =====================
-    # === EVENT HELPERS ===
-    # =====================
-
-    # ====================
-    # === QT OVERRIDES ===
-    # ====================
-
-    # ===================
-    # === PRIVATE API ===
-    # ===================
+        self.model: ResultTableModel | None = None
 
     # ==================
     # === PUBLIC API ===
@@ -76,12 +32,15 @@ class Table(QTableView):
         result_set: ResultSet,
     ) -> None:
 
-        model = ResultTableModel(result_set)
+        self.model = ResultTableModel(result_set)
 
-        self.setModel(model)
+        self.model.state_changed.connect(self.data_changed)
+
+        self.setModel(self.model)
 
     def discard_changes(
         self,
     ) -> None:
 
-        self.model().discard_changes()
+        if self.model is not None:
+            self.model.discard_changes()

@@ -1,9 +1,10 @@
+from collections import defaultdict
 from copy import deepcopy
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
 
-from PySide6.QtCore import QAbstractTableModel, Qt
+from PySide6.QtCore import QAbstractTableModel, Qt, Signal
 from PySide6.QtGui import QColor
 
 from entities.query_result import ResultSet
@@ -14,6 +15,8 @@ class ResultTableModel(QAbstractTableModel):
     # =================
     # === VARIABLES ===
     # =================
+
+    state_changed = Signal(bool)
 
     # ============
     # === INIT ===
@@ -186,6 +189,8 @@ class ResultTableModel(QAbstractTableModel):
         else:
             self.modified_cells.add((row, column))
 
+        self.state_changed.emit(self._has_changes())
+
     def _convert_value(
         self,
         column: int,
@@ -233,6 +238,12 @@ class ResultTableModel(QAbstractTableModel):
 
             return value
 
+    def _has_changes(
+        self,
+    ) -> bool:
+
+        return bool(self.modified_cells)
+
     # ==================
     # === PUBLIC API ===
     # ==================
@@ -247,3 +258,70 @@ class ResultTableModel(QAbstractTableModel):
         self.modified_cells.clear()
 
         self.layoutChanged.emit()
+
+        self.state_changed.emit(False)
+
+    def generate_update_queries(
+        self,
+    ) -> list[str]:
+
+        queries = []
+
+        modified_columns_by_row = defaultdict(set)
+
+        for row, column in self.modified_cells:
+            modified_columns_by_row[row].add(column)
+
+        for row, modified_columns in modified_columns_by_row.items():
+
+            set_parts = []
+
+            for column in modified_columns:
+
+                column_name = self.result_set.columns[column]
+
+                value = self.result_set.rows[row][column]
+
+                set_parts.append(f"{column_name} = {self._format_sql_value(value)}")
+
+            where_parts = []
+
+            for pk_column in self.result_set.primary_key_columns:
+
+                pk_index = self.result_set.columns.index(pk_column)
+
+                value = self.original_result_set.rows[row][pk_index]
+
+                where_parts.append(f"{pk_column} = {self._format_sql_value(value)}")
+
+            query = (
+                f"UPDATE {self.result_set.table_name} "
+                f"SET {', '.join(set_parts)} "
+                f"WHERE {' AND '.join(where_parts)};"
+            )
+
+            queries.append(query)
+
+        return queries
+
+    def _format_sql_value(
+        self,
+        value: Any,
+    ) -> str:
+
+        if value is None:
+            return "NULL"
+
+        if isinstance(value, str):
+            return "'" + value.replace("'", "''") + "'"
+
+        if isinstance(value, bool):
+            return "TRUE" if value else "FALSE"
+
+        if isinstance(value, (date, datetime)):
+            return f"'{value.isoformat()}'"
+
+        if isinstance(value, Decimal):
+            return str(value)
+
+        return str(value)

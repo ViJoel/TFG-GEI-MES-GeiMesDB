@@ -1,6 +1,6 @@
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QHBoxLayout,
-    QLabel,
     QPushButton,
     QSizePolicy,
     QStackedLayout,
@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
 
 from entities.query_result import QueryResult
 from ui.widgets.workspace.results_view.console import Console
+from ui.widgets.workspace.results_view.script_result import ScriptResult
 from ui.widgets.workspace.results_view.table import Table
 
 
@@ -18,6 +19,8 @@ class ResultsView(QWidget):
     # =================
     # === VARIABLES ===
     # =================
+
+    save_requested = Signal()
 
     # ============
     # === INIT ===
@@ -58,7 +61,7 @@ class ResultsView(QWidget):
         pagelayout.addLayout(self.stacklayout)
 
         self._create_tab_buttons()
-        self._create_cell_buttons()
+        self._create_action_buttons()
         self._create_tabs()
 
         self.setLayout(pagelayout)
@@ -72,6 +75,9 @@ class ResultsView(QWidget):
 
     def show_table(self):
         self.stacklayout.setCurrentWidget(self.table)
+
+    def show_script_result(self):
+        self.stacklayout.setCurrentWidget(self.script_result)
 
     def show_result(
         self,
@@ -112,7 +118,10 @@ class ResultsView(QWidget):
         self.table_button = self._create_button("Table")
         self.left_toolbar_layout.addWidget(self.table_button)
 
-    def _create_cell_buttons(self) -> None:
+        self.script_result_button = self._create_button("Script result")
+        self.left_toolbar_layout.addWidget(self.script_result_button)
+
+    def _create_action_buttons(self) -> None:
 
         self.save_button = self._create_button("Save")
         self.right_toolbar_layout.addWidget(self.save_button)
@@ -120,12 +129,24 @@ class ResultsView(QWidget):
         self.discard_button = self._create_button("Discard")
         self.right_toolbar_layout.addWidget(self.discard_button)
 
+        self._set_action_buttons_initial_state()
+
     def _create_tabs(self) -> None:
         self.console = Console()
         self.stacklayout.addWidget(self.console)
 
         self.table = Table()
         self.stacklayout.addWidget(self.table)
+
+        self.script_result = ScriptResult()
+        self.stacklayout.addWidget(self.script_result)
+
+    def _set_action_buttons_initial_state(
+        self,
+    ) -> None:
+
+        self.save_button.setEnabled(False)
+        self.discard_button.setEnabled(False)
 
     # ===============
     # === SIGNALS ===
@@ -139,7 +160,10 @@ class ResultsView(QWidget):
 
         self.console_button.pressed.connect(self.show_console)
         self.table_button.pressed.connect(self.show_table)
+        self.script_result_button.pressed.connect(self.show_script_result)
+        self.save_button.clicked.connect(self.save_requested)
         self.discard_button.clicked.connect(self.table.discard_changes)
+        self.table.data_changed.connect(self.set_action_buttons_state)
 
     # ======================
     # === EVENT HANDLERS ===
@@ -160,3 +184,7 @@ class ResultsView(QWidget):
     # ==================
     # === PUBLIC API ===
     # ==================
+
+    def set_action_buttons_state(self, state: bool):
+        self.save_button.setEnabled(state)
+        self.discard_button.setEnabled(state)
