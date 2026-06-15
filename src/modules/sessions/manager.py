@@ -27,7 +27,9 @@ _active_sessions: dict[str, Session] = {}
 # ==================
 
 
-def open_session(connection: Connection) -> Session:
+def open_session(
+    connection: Connection,
+) -> Session:
     """
     Crea y registra una nueva sesión activa.
 
@@ -106,7 +108,9 @@ def open_session(connection: Connection) -> Session:
         raise
 
 
-def close_session(connection_id: str) -> None:
+def close_session(
+    connection_id: str,
+) -> None:
     """
     Cierra y elimina una sesión activa.
 
@@ -156,7 +160,9 @@ def get_session(
     return _active_sessions.get(connection_id)
 
 
-def has_session(connection_id: str) -> bool:
+def has_session(
+    connection_id: str,
+) -> bool:
     """
     Verifica si existe una sesión activa
     para la conexión especificada.
@@ -192,7 +198,9 @@ def close_all_sessions() -> None:
     logger.success("All active sessions were closed.")
 
 
-def test_connection(connection: Connection) -> bool:
+def test_connection(
+    connection: Connection,
+) -> bool:
     """
     Verifica si una conexión puede comunicarse
     correctamente con la base de datos asociada.
@@ -254,6 +262,23 @@ def execute_query(
     connection_id: str,
     query: str,
 ) -> QueryResult:
+    """
+    Ejecuta una consulta SQL utilizando una
+    sesión activa.
+
+    Args:
+        connection_id (str):
+            Identificador de la conexión cuya
+            sesión se utilizará.
+
+        query (str):
+            Consulta SQL que debe ejecutarse.
+
+    Returns:
+        QueryResult:
+            Resultado de la ejecución de la
+            consulta.
+    """
 
     session = get_session(connection_id)
 
@@ -309,6 +334,26 @@ def execute_query(
 def is_editable_query(
     query: str,
 ) -> bool:
+    """
+    Determina si una consulta permite
+    edición gráfica de resultados.
+
+    Solo se consideran editables las
+    consultas de la forma:
+
+        SELECT * FROM tabla
+
+    sin cláusulas adicionales.
+
+    Args:
+        query (str):
+            Consulta SQL a evaluar.
+
+    Returns:
+        bool:
+            - `True` si la consulta es editable.
+            - `False` en caso contrario.
+    """
 
     normalized_query = " ".join(query.strip().split()).upper()
 
@@ -341,6 +386,23 @@ def execute_script(
     connection_id: str,
     queries: list[str],
 ) -> ScriptResult:
+    """
+    Ejecuta secuencialmente varias consultas
+    SQL utilizando una sesión activa.
+
+    Args:
+        connection_id (str):
+            Identificador de la conexión cuya
+            sesión se utilizará.
+
+        queries (list[str]):
+            Consultas SQL que deben ejecutarse.
+
+    Returns:
+        ScriptResult:
+            Resultado agregado de las consultas
+            ejecutadas.
+    """
 
     items = []
 
@@ -386,6 +448,25 @@ def _create_query_result(
     query: str,
     result: CursorResult,
 ) -> QueryResult:
+    """
+    Construye un objeto de resultado a partir
+    del resultado devuelto por SQLAlchemy.
+
+    Args:
+        engine (Engine):
+            Motor asociado a la sesión activa.
+
+        query (str):
+            Consulta SQL ejecutada.
+
+        result (CursorResult):
+            Resultado obtenido tras la ejecución.
+
+    Returns:
+        QueryResult:
+            Resultado enriquecido con los datos
+            tabulares y la salida de consola.
+    """
 
     result_set = _create_result_set(
         engine=engine,
@@ -411,6 +492,25 @@ def _create_result_set(
     query: str,
     result: CursorResult,
 ) -> ResultSet:
+    """
+    Construye un conjunto de resultados a partir
+    del resultado devuelto por SQLAlchemy.
+
+    Args:
+        engine (Engine):
+            Motor asociado a la sesión activa.
+
+        query (str):
+            Consulta SQL ejecutada.
+
+        result (CursorResult):
+            Resultado obtenido tras la ejecución.
+
+    Returns:
+        ResultSet:
+            Estructura tabular con los datos
+            recuperados.
+    """
 
     columns = list(result.keys())
     rows = [list(row) for row in result.fetchall()]
@@ -436,6 +536,21 @@ def _infer_column_types(
     columns: list[str],
     rows: list[list[Any]],
 ) -> list[type]:
+    """
+    Infiere el tipo de cada columna a partir
+    de los valores recuperados.
+
+    Args:
+        columns (list[str]):
+            Nombres de las columnas.
+
+        rows (list[list[Any]]):
+            Filas obtenidas de la consulta.
+
+    Returns:
+        list[type]:
+            Tipos inferidos para cada columna.
+    """
 
     columns_types = []
 
@@ -460,6 +575,19 @@ def _infer_column_types(
 def _format_result_set(
     result_set: ResultSet,
 ) -> str:
+    """
+    Convierte un conjunto de resultados en una
+    representación textual tabular.
+
+    Args:
+        result_set (ResultSet):
+            Resultado que se desea formatear.
+
+    Returns:
+        str:
+            Representación textual del conjunto
+            de resultados.
+    """
 
     rows = result_set.rows
     columns = result_set.columns
@@ -500,6 +628,22 @@ def _create_console_output(
     query: str,
     result: CursorResult,
 ) -> str:
+    """
+    Genera el mensaje mostrado en consola tras
+    ejecutar una consulta que no devuelve filas.
+
+    Args:
+        query (str):
+            Consulta SQL ejecutada.
+
+        result (CursorResult):
+            Resultado devuelto por SQLAlchemy.
+
+    Returns:
+        str:
+            Mensaje descriptivo del resultado
+            obtenido.
+    """
 
     command = query.lstrip().split(None, 1)[0].upper()
 
@@ -521,6 +665,19 @@ def _create_console_output(
 def _extract_table_name(
     query: str,
 ) -> str | None:
+    """
+    Extrae el nombre de la tabla objetivo
+    de una consulta editable.
+
+    Args:
+        query (str):
+            Consulta SQL analizada.
+
+    Returns:
+        str | None:
+            Nombre de la tabla o `None`
+            si no puede determinarse.
+    """
 
     normalized_query = " ".join(query.strip().split())
 
@@ -536,6 +693,23 @@ def _get_primary_key_columns(
     engine: Engine,
     table_name: str,
 ) -> list[str]:
+    """
+    Recupera las columnas que forman la clave
+    primaria de una tabla.
+
+    Args:
+        engine (Engine):
+            Motor utilizado para acceder al
+            esquema de la base de datos.
+
+        table_name (str):
+            Nombre de la tabla.
+
+    Returns:
+        list[str]:
+            Columnas que componen la clave
+            primaria.
+    """
 
     inspector = inspect(engine)
 
@@ -551,6 +725,23 @@ def _get_editable_metadata(
     query: str,
     engine: Engine,
 ) -> tuple[str | None, list[str]]:
+    """
+    Obtiene la información necesaria para
+    permitir la edición gráfica de una consulta.
+
+    Args:
+        query (str):
+            Consulta SQL ejecutada.
+
+        engine (Engine):
+            Motor asociado a la sesión activa.
+
+    Returns:
+        tuple[str | None, list[str]]:
+            Nombre de la tabla y columnas de la
+            clave primaria. Si la consulta no es
+            editable, se devuelve `(None, [])`.
+    """
 
     if not is_editable_query(query):
         return None, []
