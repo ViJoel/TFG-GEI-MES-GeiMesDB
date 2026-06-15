@@ -10,6 +10,9 @@ from PySide6.QtWidgets import (
 
 from entities.query_result import QueryResult
 from entities.script_result import ScriptResult
+from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
+from ui.widgets.notifications.notification import Notification
+from ui.widgets.notifications.notifications_type import NotificationType
 from ui.widgets.workspace.results_view.console import Console
 from ui.widgets.workspace.results_view.table import Table
 
@@ -203,16 +206,80 @@ class ResultsView(QWidget):
         )
 
         self.save_button.clicked.connect(
-            self.save_requested,
+            self._on_save_button_clicked,
         )
 
         self.discard_button.clicked.connect(
-            self.table.discard_changes,
+            self._on_discard_button_clicked,
         )
 
         self.table.data_changed.connect(
             self.set_action_buttons_state,
         )
+
+    # ======================
+    # === EVENT HANDLERS ===
+    # ======================
+
+    def _on_save_button_clicked(
+        self,
+    ) -> None:
+
+        dialog = ConfirmationDialog(
+            title="Save changes",
+            message="Are you sure you want to save the changes?",
+            parent=self,
+        )
+
+        dialog.confirmed.connect(
+            self._save_changes,
+        )
+
+        dialog.exec()
+
+    def _on_discard_button_clicked(
+        self,
+    ) -> None:
+
+        dialog = ConfirmationDialog(
+            title="Discard changes",
+            message="Are you sure you want to discard the changes?",
+            parent=self,
+        )
+
+        dialog.confirmed.connect(
+            self._discard_changes,
+        )
+
+        dialog.exec()
+
+    # =====================
+    # === EVENT HELPERS ===
+    # =====================
+
+    def _save_changes(
+        self,
+    ) -> None:
+
+        self.save_requested.emit()
+
+        Notification(
+            NotificationType.SUCCESS,
+            "Changes saved",
+            parent=self.window(),
+        ).show()
+
+    def _discard_changes(
+        self,
+    ) -> None:
+
+        self.table.discard_changes()
+
+        Notification(
+            NotificationType.INFO,
+            "Changes discarded",
+            parent=self.window(),
+        ).show()
 
     # ==================
     # === PUBLIC API ===
