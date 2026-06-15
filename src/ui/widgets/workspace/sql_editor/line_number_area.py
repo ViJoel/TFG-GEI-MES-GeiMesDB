@@ -1,5 +1,8 @@
 from PySide6.QtCore import QSize
+from PySide6.QtGui import QPaintEvent
 from PySide6.QtWidgets import QWidget
+
+from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
 
 
 class LineNumberArea(QWidget):
@@ -15,13 +18,20 @@ class LineNumberArea(QWidget):
       el editor asociado.
     """
 
-    def __init__(self, editor):
+    # ============
+    # === INIT ===
+    # ============
+
+    def __init__(
+        self,
+        editor: SqlEditor,
+    ) -> None:
         """
         Inicializa el área de números
         de línea asociada a un editor.
 
         Args:
-            editor:
+            editor (SqlEditor):
                 Editor propietario encargado
                 del cálculo y pintado del área.
         """
@@ -30,7 +40,13 @@ class LineNumberArea(QWidget):
 
         self.editor = editor
 
-    def sizeHint(self) -> QSize:
+    # ==================
+    # === PUBLIC API ===
+    # ==================
+
+    def sizeHint(
+        self,
+    ) -> QSize:
         """
         Retorna el tamaño recomendado para
         el área de números de línea.
@@ -42,13 +58,16 @@ class LineNumberArea(QWidget):
 
         return QSize(self.editor.line_number_area_width(), 0)
 
-    def paintEvent(self, event) -> None:
+    def paintEvent(
+        self,
+        event: QPaintEvent,
+    ) -> None:
         """
         Solicita al editor asociado el
         pintado del área de números de línea.
 
         Args:
-            event:
+            event (QPaintEvent):
                 Evento de pintado recibido
                 por Qt.
         """

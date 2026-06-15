@@ -11,6 +11,16 @@ from entities.query_result import ResultSet
 
 
 class ResultTableModel(QAbstractTableModel):
+    """
+    Modelo de datos utilizado para representar y
+    editar los resultados de una consulta en una
+    tabla Qt.
+
+    Permite detectar modificaciones realizadas sobre
+    las celdas y generar sentencias SQL necesarias
+    para persistir los cambios efectuados.
+    Mantiene una copia del estado original
+    """
 
     # =================
     # === VARIABLES ===
@@ -26,53 +36,21 @@ class ResultTableModel(QAbstractTableModel):
         self,
         result_set: ResultSet,
     ) -> None:
+        """
+        Inicializa el modelo con un conjunto de
+        resultados.
+
+        Args:
+            result_set (ResultSet):
+                Conjunto de resultados que será
+                gestionado por el modelo.
+        """
 
         super().__init__()
 
         self.result_set = result_set
         self.original_result_set = deepcopy(result_set)
         self.modified_cells: set[tuple[int, int]] = set()
-
-        self._setup_ui()
-
-    # ================
-    # === UI SETUP ===
-    # ================
-
-    def _setup_ui(self) -> None:
-        """
-        Construye la interfaz principal del widget.
-        """
-
-        pass
-
-    # ================
-    # === UI STATE ===
-    # ================
-
-    # ==================
-    # === UI HELPERS ===
-    # ==================
-
-    # ===============
-    # === SIGNALS ===
-    # ===============
-
-    def _connect_signals(self) -> None:
-        """
-        Conecta señales de widgets
-        con sus handlers correspondientes.
-        """
-
-        pass
-
-    # ======================
-    # === EVENT HANDLERS ===
-    # ======================
-
-    # =====================
-    # === EVENT HELPERS ===
-    # =====================
 
     # ====================
     # === QT OVERRIDES ===
@@ -82,6 +60,13 @@ class ResultTableModel(QAbstractTableModel):
         self,
         parent=None,
     ) -> int:
+        """
+        Devuelve el número de filas del modelo.
+
+        Returns:
+            int:
+                Número de filas disponibles.
+        """
 
         return len(self.result_set.rows)
 
@@ -89,6 +74,13 @@ class ResultTableModel(QAbstractTableModel):
         self,
         parent=None,
     ) -> int:
+        """
+        Devuelve el número de columnas del modelo.
+
+        Returns:
+            int:
+                Número de columnas disponibles.
+        """
 
         return len(self.result_set.columns)
 
@@ -97,6 +89,21 @@ class ResultTableModel(QAbstractTableModel):
         index,
         role,
     ):
+        """
+        Devuelve los datos asociados a una celda.
+
+        Args:
+            index:
+                Índice de la celda consultada.
+
+            role:
+                Rol solicitado por Qt.
+
+        Returns:
+            Any:
+                Valor asociado a la celda para el rol
+                indicado.
+        """
 
         row = index.row()
         column = index.column()
@@ -120,6 +127,23 @@ class ResultTableModel(QAbstractTableModel):
         orientation,
         role,
     ):
+        """
+        Devuelve los datos de una cabecera.
+
+        Args:
+            section:
+                Índice de la sección solicitada.
+
+            orientation:
+                Orientación de la cabecera.
+
+            role:
+                Rol solicitado por Qt.
+
+        Returns:
+            Any:
+                Valor asociado a la cabecera.
+        """
 
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
 
@@ -129,6 +153,18 @@ class ResultTableModel(QAbstractTableModel):
         self,
         index,
     ):
+        """
+        Devuelve las capacidades disponibles para una
+        celda.
+
+        Args:
+            index:
+                Índice de la celda.
+
+        Returns:
+            Qt.ItemFlags:
+                Banderas asociadas a la celda.
+        """
 
         return Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable
 
@@ -138,6 +174,26 @@ class ResultTableModel(QAbstractTableModel):
         value,
         role,
     ):
+        """
+        Actualiza el valor de una celda.
+
+        Args:
+            index:
+                Índice de la celda a modificar.
+
+            value:
+                Nuevo valor introducido.
+
+            role:
+                Rol asociado a la modificación.
+
+        Returns:
+            bool:
+                True si el valor fue procesado
+                correctamente; False en caso
+                contrario.
+        """
+
         if role != Qt.EditRole:
             return False
 
@@ -181,6 +237,23 @@ class ResultTableModel(QAbstractTableModel):
         original_value: Any,
         new_value: Any,
     ):
+        """
+        Actualiza el valor de una celda y registra si
+        ha sido modificada.
+
+        Args:
+            row (int):
+                Índice de la fila modificada.
+
+            column (int):
+                Índice de la columna modificada.
+
+            original_value (Any):
+                Valor original de la celda.
+
+            new_value (Any):
+                Nuevo valor asignado a la celda.
+        """
 
         self.result_set.rows[row][column] = new_value
 
@@ -196,6 +269,22 @@ class ResultTableModel(QAbstractTableModel):
         column: int,
         value: str,
     ) -> Any:
+        """
+        Convierte un valor textual al tipo asociado a
+        una columna.
+
+        Args:
+            column (int):
+                Índice de la columna.
+
+            value (str):
+                Valor introducido por el usuario.
+
+        Returns:
+            Any:
+                Valor convertido al tipo de datos
+                correspondiente.
+        """
 
         try:
 
@@ -241,6 +330,14 @@ class ResultTableModel(QAbstractTableModel):
     def _has_changes(
         self,
     ) -> bool:
+        """
+        Comprueba si existen cambios pendientes.
+
+        Returns:
+            bool:
+                True si alguna celda ha sido
+                modificada; False en caso contrario.
+        """
 
         return bool(self.modified_cells)
 
@@ -251,9 +348,19 @@ class ResultTableModel(QAbstractTableModel):
     def discard_changes(
         self,
     ) -> None:
+        """
+        Descarta todos los cambios realizados y
+        restaura el estado original del conjunto de
+        resultados.
+        """
 
-        self.result_set.columns = deepcopy(self.original_result_set.columns)
-        self.result_set.rows = deepcopy(self.original_result_set.rows)
+        self.result_set.columns = deepcopy(
+            self.original_result_set.columns,
+        )
+
+        self.result_set.rows = deepcopy(
+            self.original_result_set.rows,
+        )
 
         self.modified_cells.clear()
 
@@ -264,6 +371,14 @@ class ResultTableModel(QAbstractTableModel):
     def generate_update_queries(
         self,
     ) -> list[str]:
+        """
+        Genera las sentencias SQL necesarias para
+        persistir las modificaciones realizadas.
+
+        Returns:
+            list[str]:
+                Lista de sentencias UPDATE generadas.
+        """
 
         queries = []
 
@@ -308,6 +423,19 @@ class ResultTableModel(QAbstractTableModel):
         self,
         value: Any,
     ) -> str:
+        """
+        Convierte un valor Python a su representación
+        equivalente en SQL.
+
+        Args:
+            value (Any):
+                Valor que se desea formatear.
+
+        Returns:
+            str:
+                Representación del valor en formato
+                SQL.
+        """
 
         if value is None:
             return "NULL"

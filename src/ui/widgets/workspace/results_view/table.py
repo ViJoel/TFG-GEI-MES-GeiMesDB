@@ -9,6 +9,14 @@ from ui.widgets.workspace.results_view.result_table_model import ResultTableMode
 
 
 class Table(QTableView):
+    """
+    Widget visual encargado de mostrar resultados
+    de consultas en formato tabular.
+
+    Permite visualizar la información obtenida y
+    habilitar o restringir su edición en función
+    de las características del conjunto de resultados.
+    """
 
     # =================
     # === VARIABLES ===
@@ -20,7 +28,12 @@ class Table(QTableView):
     # === INIT ===
     # ============
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+    ) -> None:
+        """
+        Inicializa la tabla de resultados.
+        """
 
         super().__init__()
 
@@ -34,6 +47,15 @@ class Table(QTableView):
         self,
         result_set: ResultSet,
     ) -> None:
+        """
+        Asigna un conjunto de resultados a la
+        tabla.
+
+        Args:
+            result_set (ResultSet):
+                Conjunto de resultados que se
+                mostrará en la tabla.
+        """
 
         self.model = ResultTableModel(result_set)
 
@@ -44,6 +66,10 @@ class Table(QTableView):
     def discard_changes(
         self,
     ) -> None:
+        """
+        Descarta los cambios pendientes realizados
+        sobre los datos mostrados.
+        """
 
         if self.model is not None:
             self.model.discard_changes()
@@ -52,6 +78,15 @@ class Table(QTableView):
         self,
         editable: bool,
     ) -> None:
+        """
+        Habilita o deshabilita la edición de las
+        celdas de la tabla.
+
+        Args:
+            editable (bool):
+                Indica si las celdas deben poder
+                editarse.
+        """
 
         if editable:
 

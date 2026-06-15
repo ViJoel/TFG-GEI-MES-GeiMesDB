@@ -9,16 +9,25 @@ from ui.widgets.workspace.sql_editor.sql_scope import SqlScope
 
 
 class Workspace(QWidget):
+    """
+    Widget principal encargado de coordinar
+    la edición y ejecución de consultas SQL.
 
-    # =================
-    # === VARIABLES ===
-    # =================
+    Responsabilidades:
+    - Gestionar las solicitudes de ejecución
+      provenientes del editor SQL.
+    - Mostrar los resultados obtenidos.
+    - Gestionar la persistencia de cambios
+      realizados sobre los datos.
+    """
 
     # ============
     # === INIT ===
     # ============
 
-    def __init__(self):
+    def __init__(
+        self,
+    ) -> None:
         """
         Inicializa el espacio de trabajo.
         """
@@ -32,7 +41,9 @@ class Workspace(QWidget):
     # === UI SETUP ===
     # ================
 
-    def _setup_ui(self) -> None:
+    def _setup_ui(
+        self,
+    ) -> None:
         """
         Construye la interfaz principal del widget.
         """
@@ -52,9 +63,21 @@ class Workspace(QWidget):
     # === SIGNALS ===
     # ===============
 
-    def _connect_signals(self) -> None:
-        self.sql_editor.execute_requested.connect(self._on_execute_requested)
-        self.results_view.save_requested.connect(self._on_save_requested)
+    def _connect_signals(
+        self,
+    ) -> None:
+        """
+        Conecta las señales de los widgets
+        con sus handlers correspondientes.
+        """
+
+        self.sql_editor.execute_requested.connect(
+            self._on_execute_requested,
+        )
+
+        self.results_view.save_requested.connect(
+            self._on_save_requested,
+        )
 
     # ======================
     # === EVENT HANDLERS ===
@@ -65,6 +88,18 @@ class Workspace(QWidget):
         sql: list[str],
         scope: SqlScope,
     ) -> None:
+        """
+        Gestiona las solicitudes de ejecución
+        emitidas por el editor SQL.
+
+        Args:
+            sql (list[str]):
+                Lista de sentencias SQL que deben
+                ejecutarse.
+
+            scope (SqlScope):
+                Ámbito de ejecución solicitado.
+        """
 
         if scope == SqlScope.SELECTED_TEXT:
 
@@ -101,7 +136,14 @@ class Workspace(QWidget):
 
         self.results_view.set_action_buttons_state(False)
 
-    def _on_save_requested(self):
+    def _on_save_requested(
+        self,
+    ) -> None:
+        """
+        Persiste los cambios realizados sobre
+        los datos mostrados en la tabla y
+        actualiza los resultados.
+        """
 
         queries = self.results_view.table.model.generate_update_queries()
 

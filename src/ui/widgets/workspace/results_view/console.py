@@ -1,20 +1,25 @@
 from PySide6.QtGui import QColor, QFont, QTextCursor
-from PySide6.QtWidgets import QPlainTextEdit, QTextEdit
+from PySide6.QtWidgets import QTextEdit
 
 from entities.script_result import ScriptResult
 
 
 class Console(QTextEdit):
-
-    # =================
-    # === VARIABLES ===
-    # =================
+    """
+    Widget utilizado para mostrar mensajes y
+    resultados de ejecución en formato de consola.
+    """
 
     # ============
     # === INIT ===
     # ============
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+    ) -> None:
+        """
+        Inicializa el widget de consola.
+        """
 
         super().__init__()
 
@@ -24,7 +29,9 @@ class Console(QTextEdit):
     # === UI SETUP ===
     # ================
 
-    def _setup_ui(self) -> None:
+    def _setup_ui(
+        self,
+    ) -> None:
         """
         Construye la interfaz principal del widget.
         """
@@ -35,8 +42,6 @@ class Console(QTextEdit):
         font.setStyleHint(QFont.StyleHint.Monospace)
         self.setFont(font)
 
-        pass
-
     # ===================
     # === PRIVATE API ===
     # ===================
@@ -46,6 +51,18 @@ class Console(QTextEdit):
         text: str,
         color: QColor,
     ) -> None:
+        """
+        Añade texto a la consola utilizando el
+        color especificado.
+
+        Args:
+            text (str):
+                Texto que se añadirá a la consola.
+
+            color (QColor):
+                Color con el que se mostrará el
+                texto.
+        """
 
         self.moveCursor(QTextCursor.MoveOperation.End)
 
@@ -59,7 +76,13 @@ class Console(QTextEdit):
     # === PUBLIC API ===
     # ==================
 
-    def clear_output(self) -> None:
+    def clear_output(
+        self,
+    ) -> None:
+        """
+        Elimina todo el contenido mostrado en la
+        consola.
+        """
 
         self.clear()
 
@@ -67,6 +90,13 @@ class Console(QTextEdit):
         self,
         text: str,
     ) -> None:
+        """
+        Escribe texto en color blanco.
+
+        Args:
+            text (str):
+                Texto que se mostrará en la consola.
+        """
 
         self._append_colored_text(
             text=text,
@@ -77,6 +107,13 @@ class Console(QTextEdit):
         self,
         text: str,
     ) -> None:
+        """
+        Escribe texto en color verde.
+
+        Args:
+            text (str):
+                Texto que se mostrará en la consola.
+        """
 
         self._append_colored_text(
             text=text,
@@ -87,6 +124,13 @@ class Console(QTextEdit):
         self,
         text: str,
     ) -> None:
+        """
+        Escribe texto en color rojo.
+
+        Args:
+            text (str):
+                Texto que se mostrará en la consola.
+        """
 
         self._append_colored_text(
             text=text,
@@ -97,6 +141,15 @@ class Console(QTextEdit):
         self,
         script_result: ScriptResult,
     ) -> None:
+        """
+        Muestra en la consola el resultado de la
+        ejecución de un script.
+
+        Args:
+            script_result (ScriptResult):
+                Resultado de la ejecución del
+                script.
+        """
 
         self.clear()
 
