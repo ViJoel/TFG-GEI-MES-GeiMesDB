@@ -372,7 +372,7 @@ class ConnectionsList(QWidget):
             parent=self,
         )
 
-        dialog.confirmed.connect(lambda: self._delete_connection(connection))
+        dialog.confirmed.connect(lambda: self._close_and_delete_connection(connection))
 
         dialog.exec()
 
@@ -393,7 +393,7 @@ class ConnectionsList(QWidget):
             f"Connection '{connection.name}' (ID: {connection.id}) edit requested."
         )
 
-        self.connection_close_requested.emit(connection)
+        self._close_session_if_needed(connection)
 
         self.edit_connection_requested.emit(connection)
 
@@ -438,6 +438,23 @@ class ConnectionsList(QWidget):
     # =====================
     # === EVENT HELPERS ===
     # =====================
+
+    def _close_and_delete_connection(
+        self,
+        connection: Connection,
+    ) -> None:
+        """
+        Cierra la sesión asociada y elimina
+        la conexión persistida.
+
+        Args:
+            connection (Connection):
+                Conexión que debe eliminarse.
+        """
+
+        self._close_session_if_needed(connection)
+
+        self._delete_connection(connection)
 
     def _delete_connection(
         self,
@@ -554,6 +571,22 @@ class ConnectionsList(QWidget):
             return None
 
         return item.data(Qt.ItemDataRole.UserRole)
+
+    def _close_session_if_needed(
+        self,
+        connection: Connection,
+    ) -> None:
+        """
+        Cierra la sesión asociada a la conexión
+        si existe una sesión activa.
+
+        Args:
+            connection (Connection):
+                Conexión cuya sesión debe cerrarse.
+        """
+
+        if has_session(connection.id):
+            self.connection_close_requested.emit(connection)
 
     # ==================
     # === PUBLIC API ===
