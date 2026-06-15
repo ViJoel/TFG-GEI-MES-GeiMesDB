@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class ScriptResultDataItem:
+class ScriptResultItem:
     query: str
     error: str | None = None
 
@@ -12,5 +12,5 @@ class ScriptResultDataItem:
 
 
 @dataclass
-class ScriptResultData:
-    items: list[ScriptResultDataItem]
+class ScriptResult:
+    items: list[ScriptResultItem]

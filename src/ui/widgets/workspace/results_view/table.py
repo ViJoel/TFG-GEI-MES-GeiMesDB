@@ -1,5 +1,8 @@
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QTableView
+from PySide6.QtWidgets import (
+    QAbstractItemView,
+    QTableView,
+)
 
 from entities.query_result import ResultSet
 from ui.widgets.workspace.results_view.result_table_model import ResultTableModel
@@ -44,3 +47,19 @@ class Table(QTableView):
 
         if self.model is not None:
             self.model.discard_changes()
+
+    def set_editable(
+        self,
+        editable: bool,
+    ) -> None:
+
+        if editable:
+
+            self.setEditTriggers(
+                QAbstractItemView.EditTrigger.DoubleClicked
+                | QAbstractItemView.EditTrigger.EditKeyPressed
+            )
+
+        else:
+
+            self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)

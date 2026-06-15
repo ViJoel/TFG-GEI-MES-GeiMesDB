@@ -62,18 +62,43 @@ class Workspace(QWidget):
 
     def _on_execute_requested(
         self,
-        sql: str,
+        sql: list[str],
         scope: SqlScope,
     ) -> None:
 
-        self.current_query = sql
+        if scope == SqlScope.SELECTED_TEXT:
 
-        result = execute_query(
-            connection_id=get_selected_connection().id,
-            query=sql,
-        )
+            query = sql[0]
+            self.current_query = query
 
-        self.results_view.show_result(result)
+            result = execute_query(
+                connection_id=get_selected_connection().id,
+                query=query,
+            )
+
+            self.results_view.show_result(
+                result=result,
+                script_result=None,
+                is_script=False,
+            )
+
+            self.results_view.set_editable(is_editable_query(query))
+
+        elif scope == SqlScope.FULL_SCRIPT:
+
+            script_result = execute_script(
+                connection_id=get_selected_connection().id,
+                queries=sql,
+            )
+
+            self.results_view.show_result(
+                result=None,
+                script_result=script_result,
+                is_script=True,
+            )
+
+            self.results_view.set_editable(False)
+
         self.results_view.set_action_buttons_state(False)
 
     def _on_save_requested(self):
@@ -90,6 +115,17 @@ class Workspace(QWidget):
             query=self.current_query,
         )
 
-        self.results_view.show_result(result)
+        self.results_view.show_result(
+            result=result,
+            script_result=None,
+            is_script=False,
+        )
 
-        self.results_view.script_result.show_script_result(script_result)
+        self.results_view.show_result(
+            result=None,
+            script_result=script_result,
+            is_script=True,
+        )
+
+        self.results_view.set_tab_buttons_state(True)
+        self.results_view.set_action_buttons_state(True)

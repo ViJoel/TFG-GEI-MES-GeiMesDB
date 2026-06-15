@@ -14,6 +14,7 @@ Clases:
     - SqlEditor
 """
 
+import sqlparse
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QKeyEvent, QPainter, QTextFormat
 from PySide6.QtWidgets import QPlainTextEdit, QTextEdit
@@ -39,7 +40,7 @@ class SqlEditor(QPlainTextEdit):
     # === VARIABLES ===
     # =================
 
-    execute_requested = Signal(str, object)
+    execute_requested = Signal(list, object)
 
     # ============
     # === INIT ===
@@ -198,10 +199,19 @@ class SqlEditor(QPlainTextEdit):
 
         if sql is not None:
 
-            self.execute_requested.emit(
-                sql,
-                scope,
-            )
+            if scope == SqlScope.SELECTED_TEXT:
+
+                self.execute_requested.emit(
+                    [sql],
+                    scope,
+                )
+
+            elif scope == SqlScope.FULL_SCRIPT:
+
+                self.execute_requested.emit(
+                    self._split_sql_statements(sql),
+                    scope,
+                )
 
     # ====================
     # === QT OVERRIDES ===
@@ -319,7 +329,8 @@ class SqlEditor(QPlainTextEdit):
 
         return self._normalize_sql(text) if self._has_content(text) else None
 
-    def _normalize_sql(self, text: str) -> str:
+    @staticmethod
+    def _normalize_sql(text: str) -> str:
         """
         Convierte caracteres especiales utilizados
         por Qt en saltos de línea convencionales.
@@ -334,6 +345,25 @@ class SqlEditor(QPlainTextEdit):
         """
 
         return text.replace("\u2029", "\n").replace("\r\n", "\n").replace("\r", "\n")
+
+    @staticmethod
+    def _split_sql_statements(sql: str) -> list[str]:
+        """
+        Divide un script SQL en sentencias individuales.
+
+        Cada sentencia conserva el ';' final si estaba presente y se eliminan
+        espacios en blanco al principio y al final.
+        """
+
+        statements = []
+
+        for statement in sqlparse.split(sql):
+            cleaned_statement = statement.strip()
+
+            if cleaned_statement:
+                statements.append(cleaned_statement)
+
+        return statements
 
     # ==================
     # === PUBLIC API ===

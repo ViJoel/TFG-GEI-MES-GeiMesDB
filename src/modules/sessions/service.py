@@ -1,6 +1,6 @@
 from entities.connection import Connection
 from entities.query_result import QueryResult
-from entities.script_result_data import ScriptResultData
+from entities.script_result import ScriptResult
 from modules.sessions.manager import close_all_sessions as cas
 from modules.sessions.manager import close_session as cs
 from modules.sessions.manager import execute_query as eq
@@ -115,6 +115,6 @@ def is_editable_query(
 def execute_script(
     connection_id: str,
     queries: list[str],
-) -> ScriptResultData:
+) -> ScriptResult:
 
     return es(connection_id, queries)
