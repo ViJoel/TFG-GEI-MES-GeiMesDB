@@ -100,64 +100,6 @@ class ResultsView(QWidget):
 
         self.stacklayout.setCurrentWidget(self.table)
 
-    def show_result(
-        self,
-        result: QueryResult,
-        script_result: ScriptResult,
-        is_script: bool,
-    ) -> None:
-        """
-        Muestra el resultado de una ejecución.
-
-        Args:
-            result (QueryResult):
-                Resultado de la consulta ejecutada.
-
-            script_result (ScriptResult):
-                Resultado obtenido tras la ejecución
-                del script.
-
-            is_script (bool):
-                Indica si el resultado corresponde a
-                la ejecución de un script.
-        """
-
-        self.console.clear_output()
-
-        if not is_script:
-
-            self.console.write(
-                result.console_output,
-            )
-
-            # Sentencia DQL
-            if result.result_set is not None:
-
-                self.table.set_result_set(
-                    result.result_set,
-                )
-
-                self.show_table()
-
-                self.set_tab_buttons_state(
-                    True,
-                )
-
-                return
-
-        else:
-
-            self.console.show_script_result(
-                script_result,
-            )
-
-        # Resultado de script o Sentencia DDL o DML
-        self.show_console()
-
-        self.set_tab_buttons_state(
-            False,
-        )
-
     # ==================
     # === UI HELPERS ===
     # ==================
@@ -322,3 +264,61 @@ class ResultsView(QWidget):
         """
 
         self.table.set_editable(editable)
+
+    def show_result(
+        self,
+        result: QueryResult,
+        script_result: ScriptResult,
+        is_script: bool,
+    ) -> None:
+        """
+        Muestra el resultado de una ejecución.
+
+        Args:
+            result (QueryResult):
+                Resultado de la consulta ejecutada.
+
+            script_result (ScriptResult):
+                Resultado obtenido tras la ejecución
+                del script.
+
+            is_script (bool):
+                Indica si el resultado corresponde a
+                la ejecución de un script.
+        """
+
+        self.console.clear_output()
+
+        if not is_script:
+
+            self.console.write(
+                result.console_output,
+            )
+
+            # Sentencia DQL
+            if result.result_set is not None:
+
+                self.table.set_result_set(
+                    result.result_set,
+                )
+
+                self.show_table()
+
+                self.set_tab_buttons_state(
+                    True,
+                )
+
+                return
+
+        else:
+
+            self.console.show_script_result(
+                script_result,
+            )
+
+        # Resultado de script o Sentencia DDL o DML
+        self.show_console()
+
+        self.set_tab_buttons_state(
+            False,
+        )

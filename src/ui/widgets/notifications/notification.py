@@ -1,14 +1,3 @@
-"""
-Widget visual reutilizable para mostrar notificaciones
-temporales dentro de la interfaz.
-
-Permite representar mensajes informativos, de éxito
-o error mediante iconografía y estilos consistentes.
-
-Clases:
-    - Notification
-"""
-
 import qtawesome as qta
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QShowEvent
@@ -44,7 +33,7 @@ class Notification(QWidget):
         message: str,
         parent=None,
         duration_ms: int | None = None,
-    ):
+    ) -> None:
         """
         Inicializa una nueva notificación.
 
@@ -86,7 +75,9 @@ class Notification(QWidget):
     # === UI SETUP ===
     # ================
 
-    def _setup_ui(self) -> None:
+    def _setup_ui(
+        self,
+    ) -> None:
         """
         Construye la interfaz visual
         de la notificación.
@@ -130,7 +121,10 @@ class Notification(QWidget):
         main_layout.addSpacing(8)
         main_layout.addWidget(close_button)
 
-    def showEvent(self, event: QShowEvent) -> None:
+    def showEvent(
+        self,
+        event: QShowEvent,
+    ) -> None:
         """
         Posiciona la notificación respecto
         a la ventana principal al mostrarse.
@@ -165,7 +159,9 @@ class Notification(QWidget):
     # === HELPERS ===
     # ===============
 
-    def _get_icon_name(self) -> str:
+    def _get_icon_name(
+        self,
+    ) -> str:
         """
         Retorna el identificador del icono
         asociado al tipo de notificación.
@@ -184,7 +180,9 @@ class Notification(QWidget):
 
         return icons[self.notification_type]
 
-    def _get_duration(self) -> int:
+    def _get_duration(
+        self,
+    ) -> int:
         """
         Retorna la duración, en milisegundos, durante la cual
         la notificación permanecerá visible antes de cerrarse

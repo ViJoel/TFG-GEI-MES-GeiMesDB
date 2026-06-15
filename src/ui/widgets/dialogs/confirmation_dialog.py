@@ -1,14 +1,3 @@
-"""
-Diálogo reutilizable para solicitar confirmación
-antes de ejecutar acciones sensibles desde la interfaz.
-
-Permite mostrar mensajes personalizados y emitir
-eventos explícitos de aceptación o cancelación.
-
-Clases:
-    - ConfirmationDialog
-"""
-
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QDialog,
@@ -22,12 +11,13 @@ from ui.utils.layouts import hbox, vbox
 class ConfirmationDialog(QDialog):
     """
     Diálogo reutilizable para solicitar confirmación
-    antes de ejecutar acciones sensibles.
+    antes de ejecutar una acción.
 
     Responsabilidades:
     - Mostrar un mensaje configurable.
-    - Permitir confirmar o cancelar una acción.
-    - Emitir señales explícitas según la acción elegida.
+    - Permitir confirmar o cancelar la operación.
+    - Emitir señales explícitas según la decisión
+      tomada por el usuario.
     """
 
     # Señales emitidas por el diálogo.
@@ -43,7 +33,7 @@ class ConfirmationDialog(QDialog):
         title: str,
         message: str,
         parent=None,
-    ):
+    ) -> None:
         """
         Inicializa el diálogo de confirmación.
 
@@ -74,7 +64,10 @@ class ConfirmationDialog(QDialog):
     # === UI SETUP ===
     # ================
 
-    def _setup_ui(self, message: str) -> None:
+    def _setup_ui(
+        self,
+        message: str,
+    ) -> None:
         """
         Construye la interfaz visual del diálogo.
 
@@ -108,34 +101,42 @@ class ConfirmationDialog(QDialog):
     # === SIGNALS ===
     # ===============
 
-    def _connect_signals(self) -> None:
+    def _connect_signals(
+        self,
+    ) -> None:
         """
         Conecta señales de los widgets
         con sus handlers correspondientes.
         """
 
-        self.accept_button.clicked.connect(self._on_accept_clicked)
+        self.accept_button.clicked.connect(
+            self._on_accept_clicked,
+        )
 
-        self.cancel_button.clicked.connect(self._on_cancel_clicked)
+        self.cancel_button.clicked.connect(
+            self._on_cancel_clicked,
+        )
 
     # ======================
     # === EVENT HANDLERS ===
     # ======================
 
-    def _on_accept_clicked(self) -> None:
+    def _on_accept_clicked(
+        self,
+    ) -> None:
         """
         Maneja la confirmación de la acción.
         """
 
         self.confirmed.emit()
-
         self.accept()
 
-    def _on_cancel_clicked(self) -> None:
+    def _on_cancel_clicked(
+        self,
+    ) -> None:
         """
         Maneja la cancelación de la acción.
         """
 
         self.cancelled.emit()
-
         self.reject()

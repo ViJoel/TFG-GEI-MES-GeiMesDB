@@ -1,11 +1,13 @@
 """
-Ventana principal de la aplicación.
+Componente responsable de la ventana principal
+de la aplicación y de la coordinación global de
+la interfaz de usuario.
 
-Responsabilidades:
-- Construir la interfaz principal.
-- Coordinar navegación entre pantallas.
-- Orquestar eventos globales de UI.
-- Gestionar sesiones runtime de conexiones.
+Incluye la gestión de la navegación entre vistas
+y del ciclo de vida de las sesiones activas.
+
+Clases:
+    - MainWindow
 """
 
 import logging
@@ -31,11 +33,11 @@ class MainWindow(QMainWindow):
     """
     Ventana principal de la aplicación.
 
-    Centraliza:
-    - Navegación entre vistas,
-    - Coordinación entre widgets,
-    - Gestión de sesiones activas,
-    - Eventos globales de interfaz.
+    Responsabilidades:
+    - Construir la interfaz principal.
+    - Coordinar la navegación entre vistas.
+    - Gestionar las sesiones activas.
+    - Atender eventos globales de la interfaz.
     """
 
     # Señales emitidas por el widget.

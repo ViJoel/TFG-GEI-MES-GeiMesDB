@@ -1,15 +1,3 @@
-"""
-Widget reutilizable encargado de representar
-el logo principal de la aplicación.
-
-El logo se carga desde disco y se escala
-manteniendo la relación de aspecto original
-para evitar deformaciones visuales.
-
-Clases:
-    - AppLogo
-"""
-
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel
@@ -23,8 +11,8 @@ class AppLogo(QLabel):
     el logo principal de la aplicación.
 
     Responsabilidades:
-    - Cargar el logo desde disco.
-    - Escalar la imagen manteniendo proporciones.
+    - Mostrar el logo de la aplicación.
+    - Mantener las proporciones de la imagen.
     - Centrar visualmente el contenido.
     """
 
@@ -32,7 +20,10 @@ class AppLogo(QLabel):
     # === INIT ===
     # ============
 
-    def __init__(self, size: int = 60):
+    def __init__(
+        self,
+        size: int = 60,
+    ) -> None:
         """
         Inicializa el widget del logo.
 
@@ -53,7 +44,9 @@ class AppLogo(QLabel):
     # === UI SETUP ===
     # ================
 
-    def _setup_ui(self):
+    def _setup_ui(
+        self,
+    ) -> None:
         """
         Configura la interfaz visual
         del widget.

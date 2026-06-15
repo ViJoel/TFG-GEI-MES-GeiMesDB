@@ -50,13 +50,13 @@ class ScriptResultItem:
 @dataclass
 class ScriptResult:
     """
-    Contiene los resultados de la ejecución de un
-    script.
+    Contiene los resultados de la ejecución
+    de un script SQL.
 
     Attributes:
         items (list[ScriptResultItem]):
-            Resultados de las consultas ejecutadas
-            por el script.
+            Resultados individuales de las
+            consultas ejecutadas.
     """
 
     items: list[ScriptResultItem]
