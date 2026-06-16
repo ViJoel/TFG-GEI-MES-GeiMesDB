@@ -55,7 +55,7 @@ def get_connection():
         # ante cualquier excepción.
         conn.rollback()
 
-        logger.error(f"Transaction failed. Rollback executed. Exception: {e}")
+        logger.error(f"Transaction failed. Rollback executed.\n" f"Exception: {e}")
 
         raise
 
@@ -125,5 +125,5 @@ def init_database() -> None:
         logger.success("Application database initialized successfully.")
 
     except Exception as e:
-        logger.critical(f"Database initialization failed. Exception: {e}")
+        logger.critical(f"Database initialization failed.\n" f"Exception: {e}")
         raise

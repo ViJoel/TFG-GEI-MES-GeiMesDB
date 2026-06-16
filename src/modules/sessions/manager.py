@@ -96,7 +96,7 @@ def open_session(
     except Exception as e:
 
         logger.error(
-            f"Failed to open session for '{connection.name}'. " f"Exception: {e}"
+            f"Failed to open session for '{connection.name}'.\n" f"Exception: {e}"
         )
 
         if session is not None:
@@ -242,7 +242,7 @@ def test_connection(
     except SQLAlchemyError as e:
 
         logger.error(
-            f"Connection test failed for '{connection.name}'. " f"Exception: {e}"
+            f"Connection test failed for '{connection.name}'.\n" f"Exception: {e}"
         )
 
         return False
@@ -320,13 +320,30 @@ def execute_query(
                 result_set=None,
             )
 
-    except Exception as e:
+    except SQLAlchemyError as e:
 
-        logger.exception(f"Error executing SQL query: {e}")
+        logger.error(
+            f"SQL execution failed.\n"
+            f"Connection: '{session.connection.name}'.\n"
+            f"Exception: {e}"
+        )
 
         return QueryResult(
             success=False,
             console_output=str(e),
+            result_set=None,
+        )
+
+    except Exception:
+
+        logger.exception(
+            f"Unexpected error executing SQL.\n"
+            f"Connection: '{session.connection.name}'."
+        )
+
+        return QueryResult(
+            success=False,
+            console_output="Unexpected internal error.\nSee logs for details.",
             result_set=None,
         )
 
