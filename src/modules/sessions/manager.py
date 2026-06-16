@@ -406,9 +406,6 @@ def execute_script(
 
     items = []
 
-    print(queries)
-    print(len(queries))
-
     for query in queries:
 
         result = execute_query(

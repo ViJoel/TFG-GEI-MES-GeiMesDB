@@ -207,11 +207,6 @@ class ResultTableModel(QAbstractTableModel):
             value=value,
         )
 
-        print(
-            f"Old: {original_value!r} ({type(original_value).__name__}) "
-            f"-> New: {new_value!r} ({type(new_value).__name__})"
-        )
-
         self._modify_cell_value(
             row=row,
             column=column,

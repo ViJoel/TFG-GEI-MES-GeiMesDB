@@ -1,11 +1,16 @@
+import logging
+
 from PySide6.QtWidgets import QWidget
 
+from entities.connection import Connection
 from modules.sessions.service import execute_query, execute_script, is_editable_query
 from ui.state.state import get_selected_connection
 from ui.utils.layouts import hbox, vbox
 from ui.widgets.workspace.results_view.results_view import ResultsView
 from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
 from ui.widgets.workspace.sql_editor.sql_scope import SqlScope
+
+logger = logging.getLogger(__name__)
 
 
 class Workspace(QWidget):
@@ -101,15 +106,31 @@ class Workspace(QWidget):
                 Ámbito de ejecución solicitado.
         """
 
+        connection = self._get_selected_connection()
+
+        if connection is None:
+            return
+
         if scope == SqlScope.SELECTED_TEXT:
+
+            logger.info(
+                f"Query execution requested for "
+                f"'{connection.name}' (ID: {connection.id})."
+            )
 
             query = sql[0]
             self.current_query = query
 
+            logger.debug("Executing query...")
+
             result = execute_query(
-                connection_id=get_selected_connection().id,
+                connection_id=connection.id,
                 query=query,
             )
+
+            logger.debug("Query execution completed.")
+
+            logger.debug("Updating results view...")
 
             self.results_view.show_result(
                 result=result,
@@ -119,12 +140,30 @@ class Workspace(QWidget):
 
             self.results_view.set_editable(is_editable_query(query))
 
+            logger.debug("Results view updated.")
+
+            logger.success(
+                f"Query executed successfully for "
+                f"'{connection.name}' (ID: {connection.id})."
+            )
+
         elif scope == SqlScope.FULL_SCRIPT:
 
+            logger.info(
+                f"Script execution requested for "
+                f"'{connection.name}' (ID: {connection.id})."
+            )
+
+            logger.debug(f"Executing {len(sql)} SQL statements...")
+
             script_result = execute_script(
-                connection_id=get_selected_connection().id,
+                connection_id=connection.id,
                 queries=sql,
             )
+
+            logger.debug("Script execution completed.")
+
+            logger.debug("Updating results view...")
 
             self.results_view.show_result(
                 result=None,
@@ -133,6 +172,13 @@ class Workspace(QWidget):
             )
 
             self.results_view.set_editable(False)
+
+            logger.debug("Results view updated.")
+
+            logger.success(
+                f"Script executed successfully for "
+                f"'{connection.name}' (ID: {connection.id})."
+            )
 
         self.results_view.set_action_buttons_state(False)
 
@@ -145,17 +191,38 @@ class Workspace(QWidget):
         actualiza los resultados.
         """
 
+        connection = self._get_selected_connection()
+
+        if connection is None:
+            return
+
+        logger.info(f"Save requested for '{connection.name}' (ID: {connection.id}).")
+
+        logger.debug("Generating UPDATE queries...")
+
         queries = self.results_view.table.model.generate_update_queries()
 
+        logger.debug(f"{len(queries)} UPDATE queries generated.")
+
+        logger.debug(f"Executing {len(queries)} UPDATE queries...")
+
         script_result = execute_script(
-            connection_id=get_selected_connection().id,
+            connection_id=connection.id,
             queries=queries,
         )
 
+        logger.debug("UPDATE queries execution completed.")
+
+        logger.debug("Executing original query...")
+
         result = execute_query(
-            connection_id=get_selected_connection().id,
+            connection_id=connection.id,
             query=self.current_query,
         )
+
+        logger.debug("Original query execution completed.")
+
+        logger.debug("Refreshing results view...")
 
         self.results_view.show_result(
             result=result,
@@ -171,3 +238,31 @@ class Workspace(QWidget):
 
         self.results_view.set_tab_buttons_state(True)
         self.results_view.set_action_buttons_state(True)
+
+        logger.debug("Results view refreshed.")
+
+        logger.success(f"Changes saved for '{connection.name}' (ID: {connection.id}).")
+
+    # ===================
+    # === PRIVATE API ===
+    # ===================
+
+    def _get_selected_connection(
+        self,
+    ) -> Connection | None:
+        """
+        Retorna la conexión actualmente seleccionada.
+
+        Returns:
+            Connection | None:
+                Conexión seleccionada o `None`
+                si no existe selección.
+        """
+
+        connection = get_selected_connection()
+
+        if connection is None:
+            logger.warning("Operation requested without selected connection.")
+            return None
+
+        return connection
