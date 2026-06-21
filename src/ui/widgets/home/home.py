@@ -1,14 +1,3 @@
-"""
-Pantalla principal mostrada al iniciar
-la aplicación.
-
-Incluye un logo central y un mensaje
-de bienvenida simple.
-
-Clases:
-    - Home
-"""
-
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QSizePolicy, QWidget
 
@@ -19,18 +8,20 @@ from ui.widgets.logos.app_logo import AppLogo
 
 class Home(QWidget):
     """
-    Pantalla principal inicial de la aplicación.
+    Pantalla de inicio de la aplicación.
 
     Responsabilidades:
-    - Mostrar branding básico.
-    - Servir como pantalla de inicio.
+    - Mostrar la identidad visual de la aplicación.
+    - Actuar como pantalla de bienvenida.
     """
 
     # ============
     # === INIT ===
     # ============
 
-    def __init__(self):
+    def __init__(
+        self,
+    ) -> None:
         """
         Inicializa la pantalla HOME.
         """
@@ -43,7 +34,9 @@ class Home(QWidget):
     # === UI SETUP ===
     # ================
 
-    def _setup_ui(self) -> None:
+    def _setup_ui(
+        self,
+    ) -> None:
         """
         Construye la interfaz principal
         de la pantalla.

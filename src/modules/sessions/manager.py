@@ -1,10 +1,14 @@
 import logging
+from typing import Any
 
-from sqlalchemy import text
+from sqlalchemy import inspect, text
+from sqlalchemy.engine import CursorResult, Engine
 from sqlalchemy.exc import SQLAlchemyError
 
 from entities.connection import Connection
 from entities.driver import Driver
+from entities.query_result import QueryResult, ResultSet
+from entities.script_result import ScriptResult, ScriptResultItem
 from modules.sessions.session import Session
 
 logger = logging.getLogger(__name__)
@@ -18,8 +22,14 @@ logger = logging.getLogger(__name__)
 #     Session activa asociada.
 _active_sessions: dict[str, Session] = {}
 
+# ==================
+# === PUBLIC API ===
+# ==================
 
-def open_session(connection: Connection) -> Session:
+
+def open_session(
+    connection: Connection,
+) -> Session:
     """
     Crea y registra una nueva sesión activa.
 
@@ -86,7 +96,7 @@ def open_session(connection: Connection) -> Session:
     except Exception as e:
 
         logger.error(
-            f"Failed to open session for '{connection.name}'. " f"Exception: {e}"
+            f"Failed to open session for '{connection.name}'.\n" f"Exception: {e}"
         )
 
         if session is not None:
@@ -98,7 +108,9 @@ def open_session(connection: Connection) -> Session:
         raise
 
 
-def close_session(connection_id: str) -> None:
+def close_session(
+    connection_id: str,
+) -> None:
     """
     Cierra y elimina una sesión activa.
 
@@ -148,7 +160,9 @@ def get_session(
     return _active_sessions.get(connection_id)
 
 
-def has_session(connection_id: str) -> bool:
+def has_session(
+    connection_id: str,
+) -> bool:
     """
     Verifica si existe una sesión activa
     para la conexión especificada.
@@ -184,7 +198,9 @@ def close_all_sessions() -> None:
     logger.success("All active sessions were closed.")
 
 
-def test_connection(connection: Connection) -> bool:
+def test_connection(
+    connection: Connection,
+) -> bool:
     """
     Verifica si una conexión puede comunicarse
     correctamente con la base de datos asociada.
@@ -226,7 +242,7 @@ def test_connection(connection: Connection) -> bool:
     except SQLAlchemyError as e:
 
         logger.error(
-            f"Connection test failed for '{connection.name}'. " f"Exception: {e}"
+            f"Connection test failed for '{connection.name}'.\n" f"Exception: {e}"
         )
 
         return False
@@ -245,45 +261,513 @@ def test_connection(connection: Connection) -> bool:
 def execute_query(
     connection_id: str,
     query: str,
-) -> None:
+) -> QueryResult:
+    """
+    Ejecuta una consulta SQL utilizando una
+    sesión activa.
+
+    Args:
+        connection_id (str):
+            Identificador de la conexión cuya
+            sesión se utilizará.
+
+        query (str):
+            Consulta SQL que debe ejecutarse.
+
+    Returns:
+        QueryResult:
+            Resultado de la ejecución de la
+            consulta.
+    """
 
     session = get_session(connection_id)
 
     if session is None:
-        logger.warning(
-            f"There is no active session for the connection {connection_id}."
+        message = f"There is no active session for the connection {connection_id}."
+
+        logger.warning(message)
+
+        return QueryResult(
+            success=False,
+            console_output=message,
+            result_set=None,
         )
-        return
 
     logger.info(f"Executing SQL on '{session.connection.name}'...")
 
-    with session.engine.begin() as conn:
+    try:
 
-        result = conn.execute(text(query))
+        with session.engine.begin() as conn:
 
-        logger.success(f"SQL executed successfully on '{session.connection.name}'.")
+            result = conn.execute(text(query))
 
-        if result.returns_rows:
+            logger.success(f"SQL executed successfully on '{session.connection.name}'.")
 
-            for row in result:
-                print(row)
+            if result.returns_rows:
+
+                return _create_query_result(
+                    engine=session.engine,
+                    query=query,
+                    result=result,
+                )
+
+            return QueryResult(
+                success=True,
+                console_output=_create_console_output(
+                    query=query,
+                    result=result,
+                ),
+                result_set=None,
+            )
+
+    except SQLAlchemyError as e:
+
+        logger.error(
+            f"SQL execution failed.\n"
+            f"Connection: '{session.connection.name}'.\n"
+            f"Exception: {e}"
+        )
+
+        return QueryResult(
+            success=False,
+            console_output=str(e),
+            result_set=None,
+        )
+
+    except Exception:
+
+        logger.exception(
+            f"Unexpected error executing SQL.\n"
+            f"Connection: '{session.connection.name}'."
+        )
+
+        return QueryResult(
+            success=False,
+            console_output="Unexpected internal error.\nSee logs for details.",
+            result_set=None,
+        )
+
+
+def is_editable_query(
+    query: str,
+) -> bool:
+    """
+    Determina si una consulta permite
+    edición gráfica de resultados.
+
+    Solo se consideran editables las
+    consultas de la forma:
+
+        SELECT * FROM tabla
+
+    sin cláusulas adicionales.
+
+    Args:
+        query (str):
+            Consulta SQL a evaluar.
+
+    Returns:
+        bool:
+            - `True` si la consulta es editable.
+            - `False` en caso contrario.
+    """
+
+    normalized_query = " ".join(query.strip().split()).upper()
+
+    if not normalized_query.startswith("SELECT * FROM "):
+        return False
+
+    forbidden_keywords = (
+        " JOIN ",
+        " WHERE ",
+        " GROUP BY ",
+        " HAVING ",
+        " LIMIT ",
+        " DISTINCT ",
+        " UNION ",
+        " INTERSECT ",
+        " EXCEPT ",
+        " WITH ",
+        " OFFSET ",
+        " INTO ",
+    )
+
+    for keyword in forbidden_keywords:
+        if keyword in normalized_query:
+            return False
+
+    return True
+
+
+def execute_script(
+    connection_id: str,
+    queries: list[str],
+) -> ScriptResult:
+    """
+    Ejecuta secuencialmente varias consultas
+    SQL utilizando una sesión activa.
+
+    Args:
+        connection_id (str):
+            Identificador de la conexión cuya
+            sesión se utilizará.
+
+        queries (list[str]):
+            Consultas SQL que deben ejecutarse.
+
+    Returns:
+        ScriptResult:
+            Resultado agregado de las consultas
+            ejecutadas.
+    """
+
+    items = []
+
+    for query in queries:
+
+        result = execute_query(
+            connection_id=connection_id,
+            query=query,
+        )
+
+        if result.success:
+
+            items.append(
+                ScriptResultItem(
+                    query=query,
+                )
+            )
 
         else:
 
-            command = query.lstrip().split(None, 1)[0].upper()
+            items.append(
+                ScriptResultItem(
+                    query=query,
+                    error=result.console_output,
+                )
+            )
 
-            if command == "INSERT":
+    return ScriptResult(
+        items=items,
+    )
 
-                print(f"{result.rowcount} row(s) inserted.")
 
-            elif command == "UPDATE":
+# ===================
+# === PRIVATE API ===
+# ===================
 
-                print(f"{result.rowcount} row(s) updated.")
 
-            elif command == "DELETE":
+def _create_query_result(
+    engine: Engine,
+    query: str,
+    result: CursorResult,
+) -> QueryResult:
+    """
+    Construye un objeto de resultado a partir
+    del resultado devuelto por SQLAlchemy.
 
-                print(f"{result.rowcount} row(s) deleted.")
+    Args:
+        engine (Engine):
+            Motor asociado a la sesión activa.
 
-            else:
+        query (str):
+            Consulta SQL ejecutada.
 
-                print("Query executed successfully.")
+        result (CursorResult):
+            Resultado obtenido tras la ejecución.
+
+    Returns:
+        QueryResult:
+            Resultado enriquecido con los datos
+            tabulares y la salida de consola.
+    """
+
+    result_set = _create_result_set(
+        engine=engine,
+        query=query,
+        result=result,
+    )
+
+    console_output = (
+        _format_result_set(result_set)
+        + "\n\n"
+        + f"{len(result_set.rows)} row(s) returned."
+    )
+
+    return QueryResult(
+        success=True,
+        console_output=console_output,
+        result_set=result_set,
+    )
+
+
+def _create_result_set(
+    engine: Engine,
+    query: str,
+    result: CursorResult,
+) -> ResultSet:
+    """
+    Construye un conjunto de resultados a partir
+    del resultado devuelto por SQLAlchemy.
+
+    Args:
+        engine (Engine):
+            Motor asociado a la sesión activa.
+
+        query (str):
+            Consulta SQL ejecutada.
+
+        result (CursorResult):
+            Resultado obtenido tras la ejecución.
+
+    Returns:
+        ResultSet:
+            Estructura tabular con los datos
+            recuperados.
+    """
+
+    columns = list(result.keys())
+    rows = [list(row) for row in result.fetchall()]
+
+    table_name, primary_key_columns = _get_editable_metadata(
+        query=query,
+        engine=engine,
+    )
+
+    return ResultSet(
+        rows=rows,
+        columns=columns,
+        columns_types=_infer_column_types(
+            columns=columns,
+            rows=rows,
+        ),
+        table_name=table_name,
+        primary_key_columns=primary_key_columns,
+    )
+
+
+def _infer_column_types(
+    columns: list[str],
+    rows: list[list[Any]],
+) -> list[type]:
+    """
+    Infiere el tipo de cada columna a partir
+    de los valores recuperados.
+
+    Args:
+        columns (list[str]):
+            Nombres de las columnas.
+
+        rows (list[list[Any]]):
+            Filas obtenidas de la consulta.
+
+    Returns:
+        list[type]:
+            Tipos inferidos para cada columna.
+    """
+
+    columns_types = []
+
+    for i in range(len(columns)):
+
+        column_type = str
+
+        for row in rows:
+
+            value = row[i]
+
+            if value is not None:
+
+                column_type = type(value)
+                break
+
+        columns_types.append(column_type)
+
+    return columns_types
+
+
+def _format_result_set(
+    result_set: ResultSet,
+) -> str:
+    """
+    Convierte un conjunto de resultados en una
+    representación textual tabular.
+
+    Args:
+        result_set (ResultSet):
+            Resultado que se desea formatear.
+
+    Returns:
+        str:
+            Representación textual del conjunto
+            de resultados.
+    """
+
+    rows = result_set.rows
+    columns = result_set.columns
+
+    widths = [len(column) for column in columns]
+
+    for row in rows:
+
+        for i, value in enumerate(row):
+
+            widths[i] = max(
+                widths[i],
+                len(str(value)),
+            )
+
+    header = " | ".join(column.ljust(widths[i]) for i, column in enumerate(columns))
+
+    separator = "-+-".join("-" * width for width in widths)
+
+    body = []
+
+    for row in rows:
+
+        body.append(
+            " | ".join(str(value).ljust(widths[i]) for i, value in enumerate(row))
+        )
+
+    lines = [
+        header,
+        separator,
+        *body,
+    ]
+
+    return "\n".join(lines)
+
+
+def _create_console_output(
+    query: str,
+    result: CursorResult,
+) -> str:
+    """
+    Genera el mensaje mostrado en consola tras
+    ejecutar una consulta que no devuelve filas.
+
+    Args:
+        query (str):
+            Consulta SQL ejecutada.
+
+        result (CursorResult):
+            Resultado devuelto por SQLAlchemy.
+
+    Returns:
+        str:
+            Mensaje descriptivo del resultado
+            obtenido.
+    """
+
+    command = query.lstrip().split(None, 1)[0].upper()
+
+    if command == "INSERT":
+        console_output = f"{result.rowcount} row(s) inserted."
+
+    elif command == "UPDATE":
+        console_output = f"{result.rowcount} row(s) updated."
+
+    elif command == "DELETE":
+        console_output = f"{result.rowcount} row(s) deleted."
+
+    else:
+        console_output = "Query executed successfully."
+
+    return console_output
+
+
+def _extract_table_name(
+    query: str,
+) -> str | None:
+    """
+    Extrae el nombre de la tabla objetivo
+    de una consulta editable.
+
+    Args:
+        query (str):
+            Consulta SQL analizada.
+
+    Returns:
+        str | None:
+            Nombre de la tabla o `None`
+            si no puede determinarse.
+    """
+
+    normalized_query = " ".join(query.strip().split())
+
+    words = normalized_query.split()
+
+    if len(words) < 4:
+        return None
+
+    return words[3].rstrip(";")
+
+
+def _get_primary_key_columns(
+    engine: Engine,
+    table_name: str,
+) -> list[str]:
+    """
+    Recupera las columnas que forman la clave
+    primaria de una tabla.
+
+    Args:
+        engine (Engine):
+            Motor utilizado para acceder al
+            esquema de la base de datos.
+
+        table_name (str):
+            Nombre de la tabla.
+
+    Returns:
+        list[str]:
+            Columnas que componen la clave
+            primaria.
+    """
+
+    inspector = inspect(engine)
+
+    pk = inspector.get_pk_constraint(table_name)
+
+    return pk.get(
+        "constrained_columns",
+        [],
+    )
+
+
+def _get_editable_metadata(
+    query: str,
+    engine: Engine,
+) -> tuple[str | None, list[str]]:
+    """
+    Obtiene la información necesaria para
+    permitir la edición gráfica de una consulta.
+
+    Args:
+        query (str):
+            Consulta SQL ejecutada.
+
+        engine (Engine):
+            Motor asociado a la sesión activa.
+
+    Returns:
+        tuple[str | None, list[str]]:
+            Nombre de la tabla y columnas de la
+            clave primaria. Si la consulta no es
+            editable, se devuelve `(None, [])`.
+    """
+
+    if not is_editable_query(query):
+        return None, []
+
+    table_name = _extract_table_name(query)
+
+    if table_name is None:
+        return None, []
+
+    primary_key_columns = _get_primary_key_columns(
+        engine,
+        table_name,
+    )
+
+    return table_name, primary_key_columns

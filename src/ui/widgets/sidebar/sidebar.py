@@ -1,17 +1,3 @@
-"""
-Widget contenedor encargado de representar
-la barra lateral principal de la aplicación.
-
-El sidebar agrupa accesos y componentes
-persistentes de navegación como:
-- Logo de la aplicación.
-- Lista de conexiones.
-- Acceso a ajustes.
-
-Clases:
-    - Sidebar
-"""
-
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
 from ui.utils.layouts import vbox
@@ -22,20 +8,21 @@ from ui.widgets.sidebar.settings_button import SettingsButton
 
 class Sidebar(QWidget):
     """
-    Barra lateral principal utilizada
-    como contenedor de navegación.
+    Barra lateral principal de la aplicación.
 
     Responsabilidades:
-    - Mostrar branding de la aplicación.
+    - Mostrar la identidad visual de la aplicación.
     - Alojar la lista de conexiones.
-    - Proporcionar acceso a ajustes globales.
+    - Proporcionar acceso a los ajustes globales.
     """
 
     # ============
     # === INIT ===
     # ============
 
-    def __init__(self):
+    def __init__(
+        self,
+    ) -> None:
         """
         Inicializa el sidebar principal.
         """
@@ -48,7 +35,9 @@ class Sidebar(QWidget):
     # === UI SETUP ===
     # ================
 
-    def _setup_ui(self) -> None:
+    def _setup_ui(
+        self,
+    ) -> None:
         """
         Construye la interfaz visual
         del sidebar.
@@ -68,7 +57,9 @@ class Sidebar(QWidget):
         # Botón de ajustes globales.
         self.main_layout.addWidget(SettingsButton())
 
-    def _setup_layout(self) -> None:
+    def _setup_layout(
+        self,
+    ) -> None:
         """
         Configura el layout principal del sidebar.
         """

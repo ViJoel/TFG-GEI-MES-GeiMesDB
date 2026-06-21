@@ -1,25 +1,17 @@
-"""
-Editor SQL basado en QPlainTextEdit con soporte
-para numeración de líneas y ejecución de consultas.
-
-Permite:
-- Editar sentencias SQL.
-- Ejecutar el texto seleccionado.
-- Ejecutar el script completo.
-- Mostrar números de línea.
-- Resaltar la línea actual.
-- Gestionar atajos de teclado habituales.
-
-Clases:
-    - SqlEditor
-"""
-
+import sqlparse
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QColor, QKeyEvent, QPainter, QTextFormat
+from PySide6.QtGui import (
+    QColor,
+    QKeyEvent,
+    QPainter,
+    QPaintEvent,
+    QResizeEvent,
+    QTextFormat,
+)
 from PySide6.QtWidgets import QPlainTextEdit, QTextEdit
 
 from ui.widgets.workspace.sql_editor.line_number_area import LineNumberArea
-from ui.widgets.workspace.sql_scope import SqlScope
+from ui.widgets.workspace.sql_editor.sql_scope import SqlScope
 
 
 class SqlEditor(QPlainTextEdit):
@@ -39,13 +31,18 @@ class SqlEditor(QPlainTextEdit):
     # === VARIABLES ===
     # =================
 
-    execute_requested = Signal(str, object)
+    execute_requested = Signal(
+        list,
+        object,
+    )
 
     # ============
     # === INIT ===
     # ============
 
-    def __init__(self):
+    def __init__(
+        self,
+    ) -> None:
         """
         Inicializa el editor sql.
         """
@@ -59,7 +56,9 @@ class SqlEditor(QPlainTextEdit):
     # === UI SETUP ===
     # ================
 
-    def _setup_ui(self) -> None:
+    def _setup_ui(
+        self,
+    ) -> None:
         """
         Construye la interfaz principal del widget.
         """
@@ -74,7 +73,9 @@ class SqlEditor(QPlainTextEdit):
     # === UI HELPERS ===
     # ==================
 
-    def line_number_area_width(self) -> int:
+    def line_number_area_width(
+        self,
+    ) -> int:
         """
         Calcula el ancho necesario para mostrar
         correctamente los números de línea.
@@ -89,7 +90,9 @@ class SqlEditor(QPlainTextEdit):
 
         return 10 + self.fontMetrics().horizontalAdvance("9") * digits
 
-    def _update_line_number_area_width(self) -> None:
+    def _update_line_number_area_width(
+        self,
+    ) -> None:
         """
         Actualiza el margen izquierdo del editor
         para reservar espacio al área de números
@@ -135,7 +138,9 @@ class SqlEditor(QPlainTextEdit):
         if rect.contains(self.viewport().rect()):
             self._update_line_number_area_width()
 
-    def _highlight_current_line(self) -> None:
+    def _highlight_current_line(
+        self,
+    ) -> None:
         """
         Resalta visualmente la línea donde se
         encuentra el cursor.
@@ -167,23 +172,34 @@ class SqlEditor(QPlainTextEdit):
     # === SIGNALS ===
     # ===============
 
-    def _connect_signals(self) -> None:
+    def _connect_signals(
+        self,
+    ) -> None:
         """
         Conecta las señales del editor con
         sus handlers correspondientes.
         """
 
-        self.blockCountChanged.connect(self._update_line_number_area_width)
+        self.blockCountChanged.connect(
+            self._update_line_number_area_width,
+        )
 
-        self.updateRequest.connect(self._update_line_number_area)
+        self.updateRequest.connect(
+            self._update_line_number_area,
+        )
 
-        self.cursorPositionChanged.connect(self._highlight_current_line)
+        self.cursorPositionChanged.connect(
+            self._highlight_current_line,
+        )
 
     # =====================
     # === EVENT HELPERS ===
     # =====================
 
-    def _emit_execute_requested(self, scope: SqlScope) -> None:
+    def _emit_execute_requested(
+        self,
+        scope: SqlScope,
+    ) -> None:
         """
         Emite la solicitud de ejecución del SQL
         correspondiente al ámbito especificado.
@@ -198,10 +214,19 @@ class SqlEditor(QPlainTextEdit):
 
         if sql is not None:
 
-            self.execute_requested.emit(
-                sql,
-                scope,
-            )
+            if scope == SqlScope.SELECTED_TEXT:
+
+                self.execute_requested.emit(
+                    [sql],
+                    scope,
+                )
+
+            elif scope == SqlScope.FULL_SCRIPT:
+
+                self.execute_requested.emit(
+                    self._split_sql_statements(sql),
+                    scope,
+                )
 
     # ====================
     # === QT OVERRIDES ===
@@ -246,7 +271,10 @@ class SqlEditor(QPlainTextEdit):
 
         super().keyPressEvent(event)
 
-    def resizeEvent(self, event):
+    def resizeEvent(
+        self,
+        event: QResizeEvent,
+    ) -> None:
         """
         Reposiciona el área de números de línea
         cuando cambia el tamaño del editor.
@@ -292,7 +320,10 @@ class SqlEditor(QPlainTextEdit):
 
         return bool(text.strip())
 
-    def _get_sql(self, scope: SqlScope) -> str | None:
+    def _get_sql(
+        self,
+        scope: SqlScope,
+    ) -> str | None:
         """
         Obtiene el texto SQL correspondiente
         al ámbito solicitado.
@@ -319,7 +350,10 @@ class SqlEditor(QPlainTextEdit):
 
         return self._normalize_sql(text) if self._has_content(text) else None
 
-    def _normalize_sql(self, text: str) -> str:
+    @staticmethod
+    def _normalize_sql(
+        text: str,
+    ) -> str:
         """
         Convierte caracteres especiales utilizados
         por Qt en saltos de línea convencionales.
@@ -335,11 +369,45 @@ class SqlEditor(QPlainTextEdit):
 
         return text.replace("\u2029", "\n").replace("\r\n", "\n").replace("\r", "\n")
 
+    @staticmethod
+    def _split_sql_statements(
+        sql: str,
+    ) -> list[str]:
+        """
+        Divide un script SQL en sentencias
+        individuales.
+
+        Cada sentencia conserva su contenido y se
+        eliminan los espacios en blanco al principio
+        y al final.
+
+        Args:
+            sql (str):
+                Script SQL que se desea dividir.
+
+        Returns:
+            list[str]:
+                Lista de sentencias SQL obtenidas.
+        """
+
+        statements = []
+
+        for statement in sqlparse.split(sql):
+            cleaned_statement = statement.strip()
+
+            if cleaned_statement:
+                statements.append(cleaned_statement)
+
+        return statements
+
     # ==================
     # === PUBLIC API ===
     # ==================
 
-    def line_number_area_paint_event(self, event) -> None:
+    def line_number_area_paint_event(
+        self,
+        event: QPaintEvent,
+    ) -> None:
         """
         Dibuja los números de línea visibles
         en el área lateral del editor.

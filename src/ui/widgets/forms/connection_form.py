@@ -1,15 +1,3 @@
-"""
-Formulario encargado de crear y editar
-conexiones de bases de datos desde la interfaz.
-
-Incluye validación básica, test de conexión,
-adaptación dinámica según el driver seleccionado
-y persistencia de conexiones.
-
-Clases:
-    - ConnectionForm
-"""
-
 import logging
 
 from PySide6.QtCore import QRegularExpression, Signal
@@ -30,7 +18,6 @@ from modules.sessions.service import test_connection
 from ui.utils.layouts import hbox, vbox
 from ui.widgets.notifications.notification import Notification
 from ui.widgets.notifications.notifications_type import NotificationType
-from ui.widgets.sidebar.connections_list import ConnectionsList
 
 logger = logging.getLogger(__name__)
 
@@ -38,15 +25,16 @@ logger = logging.getLogger(__name__)
 class ConnectionForm(QWidget):
     """
     Formulario encargado de crear y editar
-    conexiones persistidas.
+    conexiones de bases de datos.
 
     Responsabilidades:
-    - Gestionar entrada de datos de conexión.
-    - Adaptar la interfaz según el driver seleccionado.
-    - Validar datos básicos de entrada.
-    - Ejecutar tests de conectividad.
+    - Gestionar la entrada de datos de conexión.
+    - Adaptar la interfaz al driver seleccionado.
+    - Validar la información introducida.
+    - Comprobar la conectividad con la base de datos.
     - Persistir conexiones nuevas o existentes.
-    - Emitir eventos de navegación y guardado.
+    - Emitir eventos relacionados con la navegación
+      y el guardado.
     """
 
     # Señales emitidas por el formulario.
@@ -57,7 +45,9 @@ class ConnectionForm(QWidget):
     # === INIT ===
     # ============
 
-    def __init__(self):
+    def __init__(
+        self,
+    ) -> None:
         """
         Inicializa el formulario de conexiones.
         """
@@ -74,7 +64,9 @@ class ConnectionForm(QWidget):
     # === UI SETUP ===
     # ================
 
-    def _setup_ui(self) -> None:
+    def _setup_ui(
+        self,
+    ) -> None:
         """
         Construye la interfaz principal
         del formulario.
@@ -93,7 +85,11 @@ class ConnectionForm(QWidget):
         # Aplicar estado visual inicial.
         self._update_fields_visibility()
 
-    def _build_form_title(self, parent_layout, title_text: str) -> None:
+    def _build_form_title(
+        self,
+        parent_layout,
+        title_text: str,
+    ) -> None:
         """
         Construye el título principal
         del formulario.
@@ -109,7 +105,10 @@ class ConnectionForm(QWidget):
 
         parent_layout.addWidget(title_label)
 
-    def _build_form_inputs(self, parent_layout) -> None:
+    def _build_form_inputs(
+        self,
+        parent_layout,
+    ) -> None:
         """
         Construye y registra todos los
         campos editables del formulario.
@@ -147,7 +146,10 @@ class ConnectionForm(QWidget):
     # === FIELD BUILDERS ===
     # ======================
 
-    def _build_name_field(self, parent_layout) -> None:
+    def _build_name_field(
+        self,
+        parent_layout,
+    ) -> None:
         """
         Construye el campo de nombre
         de conexión.
@@ -159,7 +161,10 @@ class ConnectionForm(QWidget):
 
         parent_layout.addWidget(self.name_field)
 
-    def _build_driver_field(self, parent_layout) -> None:
+    def _build_driver_field(
+        self,
+        parent_layout,
+    ) -> None:
         """
         Construye el selector de driver
         de base de datos.
@@ -178,7 +183,10 @@ class ConnectionForm(QWidget):
 
         parent_layout.addWidget(self.driver_field)
 
-    def _build_host_field(self, parent_layout) -> None:
+    def _build_host_field(
+        self,
+        parent_layout,
+    ) -> None:
         """
         Construye el campo de host.
         """
@@ -192,7 +200,10 @@ class ConnectionForm(QWidget):
 
         parent_layout.addWidget(self.host_field)
 
-    def _build_port_field(self, parent_layout) -> None:
+    def _build_port_field(
+        self,
+        parent_layout,
+    ) -> None:
         """
         Construye el campo de puerto.
         """
@@ -208,7 +219,10 @@ class ConnectionForm(QWidget):
 
         parent_layout.addWidget(self.port_field)
 
-    def _build_database_field(self, parent_layout) -> None:
+    def _build_database_field(
+        self,
+        parent_layout,
+    ) -> None:
         """
         Construye el campo de nombre
         de base de datos.
@@ -223,7 +237,10 @@ class ConnectionForm(QWidget):
 
         parent_layout.addWidget(self.database_field)
 
-    def _build_username_field(self, parent_layout) -> None:
+    def _build_username_field(
+        self,
+        parent_layout,
+    ) -> None:
         """
         Construye el campo de usuario.
         """
@@ -237,7 +254,10 @@ class ConnectionForm(QWidget):
 
         parent_layout.addWidget(self.username_field)
 
-    def _build_password_field(self, parent_layout) -> None:
+    def _build_password_field(
+        self,
+        parent_layout,
+    ) -> None:
         """
         Construye el campo de contraseña.
         """
@@ -254,7 +274,10 @@ class ConnectionForm(QWidget):
 
         parent_layout.addWidget(self.password_field)
 
-    def _build_path_field(self, parent_layout) -> None:
+    def _build_path_field(
+        self,
+        parent_layout,
+    ) -> None:
         """
         Construye el selector de archivo
         para conexiones SQLite.
@@ -280,7 +303,10 @@ class ConnectionForm(QWidget):
 
         parent_layout.addWidget(self.path_field)
 
-    def _build_action_buttons(self, parent_layout) -> None:
+    def _build_action_buttons(
+        self,
+        parent_layout,
+    ) -> None:
         """
         Construye los botones de acción del formulario.
         """
@@ -310,7 +336,10 @@ class ConnectionForm(QWidget):
     # === HELPERS ===
     # ===============
 
-    def _create_input_label(self, label_text: str) -> QLabel:
+    def _create_input_label(
+        self,
+        label_text: str,
+    ) -> QLabel:
         """
         Crea un label reutilizable para
         los campos del formulario.
@@ -328,7 +357,10 @@ class ConnectionForm(QWidget):
         label.setText(label_text)
         return label
 
-    def _create_input(self, placeholder: str) -> QLineEdit:
+    def _create_input(
+        self,
+        placeholder: str,
+    ) -> QLineEdit:
         """
         Crea un input reutilizable para
         el formulario.
@@ -347,7 +379,11 @@ class ConnectionForm(QWidget):
         input_field.setPlaceholderText(placeholder)
         return input_field
 
-    def _build_field(self, label_text, widget) -> QWidget:
+    def _build_field(
+        self,
+        label_text,
+        widget,
+    ) -> QWidget:
         """
         Construye un campo estándar compuesto por:
         - Contenedor vertical.
@@ -383,7 +419,9 @@ class ConnectionForm(QWidget):
     # === REGEX ===
     # =============
 
-    def _set_port_regex(self):
+    def _set_port_regex(
+        self,
+    ) -> None:
         """
         Restringe el campo de puerto
         a valores numéricos válidos
@@ -398,15 +436,21 @@ class ConnectionForm(QWidget):
     # === SIGNALS ===
     # ===============
 
-    def _connect_signals(self) -> None:
+    def _connect_signals(
+        self,
+    ) -> None:
         """
         Conecta señales de widgets
         con sus handlers correspondientes.
         """
 
-        self.browse_button.clicked.connect(self._select_file)
+        self.browse_button.clicked.connect(
+            self._select_file,
+        )
 
-        self.driver_input.currentTextChanged.connect(self._update_fields_visibility)
+        self.driver_input.currentTextChanged.connect(
+            self._update_fields_visibility,
+        )
 
         self.save_button.clicked.connect(
             self._save_button_clicked,
@@ -424,7 +468,9 @@ class ConnectionForm(QWidget):
     # === EVENT HANDLERS ===
     # ======================
 
-    def clear_form(self) -> None:
+    def clear_form(
+        self,
+    ) -> None:
         """
         Limpia el formulario y restablece
         su estado inicial.
@@ -444,7 +490,10 @@ class ConnectionForm(QWidget):
 
         self._update_fields_visibility()
 
-    def load_connection(self, connection: Connection) -> None:
+    def load_connection(
+        self,
+        connection: Connection,
+    ) -> None:
         """
         Carga una conexión existente
         dentro del formulario.
@@ -478,7 +527,9 @@ class ConnectionForm(QWidget):
             f"Connection '{connection.name}' (ID: {connection.id}) loaded into form."
         )
 
-    def _select_file(self) -> None:
+    def _select_file(
+        self,
+    ) -> None:
         """
         Abre un selector de archivos para
         elegir una base de datos SQLite.
@@ -500,7 +551,9 @@ class ConnectionForm(QWidget):
             logger.success(f"SQLite database file selected: {file_path}")
             self.path_input.setText(file_path)
 
-    def _save_button_clicked(self) -> None:
+    def _save_button_clicked(
+        self,
+    ) -> None:
         """
         Persiste la conexión actual
         del formulario.
@@ -555,7 +608,9 @@ class ConnectionForm(QWidget):
                 parent=self.window(),
             ).show()
 
-    def _test_connection_button_clicked(self) -> None:
+    def _test_connection_button_clicked(
+        self,
+    ) -> None:
         """
         Ejecuta un test de conectividad
         utilizando los datos actuales
@@ -596,7 +651,9 @@ class ConnectionForm(QWidget):
                 parent=self.window(),
             ).show()
 
-    def _build_connection_from_form(self) -> Connection:
+    def _build_connection_from_form(
+        self,
+    ) -> Connection:
         """
         Construye una entidad `Connection`
         utilizando el estado actual
@@ -639,7 +696,9 @@ class ConnectionForm(QWidget):
 
         return connection
 
-    def _cancel_button_clicked(self) -> None:
+    def _cancel_button_clicked(
+        self,
+    ) -> None:
         """
         Cancela la edición actual y solicita
         volver a la pantalla anterior.
@@ -654,7 +713,9 @@ class ConnectionForm(QWidget):
     # === UI STATE ===
     # ================
 
-    def _update_fields_visibility(self) -> None:
+    def _update_fields_visibility(
+        self,
+    ) -> None:
         """
         Actualiza la visibilidad de los campos
         según el driver seleccionado.
