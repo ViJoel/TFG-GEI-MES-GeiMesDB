@@ -2,7 +2,7 @@ import logging
 
 import qtawesome as qta
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QColor, QIcon
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QListWidget,
     QListWidgetItem,
@@ -12,15 +12,14 @@ from PySide6.QtWidgets import (
 )
 
 from entities.connection import Connection
-from entities.driver import Driver
 from modules.connections.service import delete_connection, get_connections
 from modules.sessions.service import has_session
-from ui.common.paths import MYSQL_LOGO, ORACLE_LOGO, POSTGRESQL_LOGO, SQLITE_LOGO
 from ui.state.state import set_selected_connection
 from ui.utils.layouts import hbox, vbox
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
 from ui.widgets.notifications.notification import Notification
 from ui.widgets.notifications.notifications_type import NotificationType
+from ui.widgets.sidebar.connection_item import ConnectionItem
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +79,8 @@ class ConnectionsList(QWidget):
         # Layout vertical principal.
         main_layout = vbox()
 
+        main_layout.setSpacing(8)
+
         self.setLayout(main_layout)
 
         # Barra de acciones.
@@ -108,11 +109,30 @@ class ConnectionsList(QWidget):
         buttons_layout = hbox()
 
         # Botones
-        self.add_button = self._create_icon_button("fa5s.plus")
-        self.edit_button = self._create_icon_button("fa5s.edit")
-        self.delete_button = self._create_icon_button("fa5s.trash")
-        self.connect_button = self._create_icon_button("mdi.wifi")
-        self.disconnect_button = self._create_icon_button("mdi.wifi-off")
+        self.add_button = self._create_icon_button(
+            "fa5s.plus",
+            "primary",
+        )
+
+        self.edit_button = self._create_icon_button(
+            "fa5s.edit",
+            "secondary",
+        )
+
+        self.delete_button = self._create_icon_button(
+            "fa5s.trash",
+            "red",
+        )
+
+        self.connect_button = self._create_icon_button(
+            "mdi.wifi",
+            "blue",
+        )
+
+        self.disconnect_button = self._create_icon_button(
+            "mdi.wifi-off",
+            "blue",
+        )
 
         # Añadir botones al layout
         buttons_layout.addWidget(self.add_button)
@@ -138,6 +158,14 @@ class ConnectionsList(QWidget):
         """
 
         self.list_widget = QListWidget()
+
+        self.list_widget.setObjectName("connections_list")
+        self.list_widget.setSpacing(2)
+
+        # Elimina el foco de teclado
+        # Usado para eliminar el rectángulo
+        # de selección que viene por defecto.
+        self.list_widget.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         # Permitir expansión vertical y horizontal.
         self.list_widget.setSizePolicy(
@@ -205,6 +233,37 @@ class ConnectionsList(QWidget):
 
         set_selected_connection(None)
 
+    def _update_items_selection_state(self):
+        """
+        Actualiza el estado de selección
+        de lis items de la lista.
+        """
+
+        for i in range(self.list_widget.count()):
+
+            item = self.list_widget.item(i)
+
+            widget = self.list_widget.itemWidget(item)
+
+            widget.set_selected(item == self.list_widget.currentItem())
+
+    def _sync_selection_state(
+        self,
+        connection: Connection | None,
+    ) -> None:
+        """
+        Sincroniza el estado visual de los elementos.
+
+        Args:
+            connection (Connection | None): Item de la conexión.
+        """
+
+        set_selected_connection(connection)
+
+        self._update_buttons_state(connection)
+
+        self._update_items_selection_state()
+
     # ==================
     # === UI HELPERS ===
     # ==================
@@ -212,6 +271,7 @@ class ConnectionsList(QWidget):
     def _create_icon_button(
         self,
         icon_name: str,
+        role: str,
     ) -> QPushButton:
         """
         Crea un botón cuadrado basado
@@ -222,41 +282,64 @@ class ConnectionsList(QWidget):
                 Nombre del icono compatible
                 con QtAwesome.
 
+            role (str):
+                Rol de color definido en QSS.
+
         Returns:
             QPushButton:
                 Botón configurado.
         """
 
         button = QPushButton()
-        button.setIcon(qta.icon(icon_name))
+
+        button.setIcon(
+            self._get_icon(
+                icon_name,
+                role,
+            )
+        )
+
         button.setFixedSize(32, 32)
+
+        button.setProperty("role", role)
+
         return button
 
-    def _get_driver_icon(
+    def _get_icon(
         self,
-        driver: Driver,
+        icon_name: str,
+        role: str,
     ) -> QIcon:
         """
-        Retorna el icono asociado
-        al driver de base de datos.
+        Retorna un icono QtAwesome coloreado
+        según el rol visual asociado.
 
         Args:
-            driver (Driver):
-                Driver de la conexión.
+            icon_name (str):
+                Nombre del icono compatible
+                con QtAwesome.
+
+            role (str):
+                Rol de color definido para
+                el botón.
 
         Returns:
             QIcon:
-                Icono correspondiente.
+                Icono configurado con el
+                color correspondiente.
         """
 
-        icons = {
-            Driver.POSTGRESQL: QIcon(POSTGRESQL_LOGO),
-            Driver.MYSQL: QIcon(MYSQL_LOGO),
-            Driver.SQLITE: QIcon(SQLITE_LOGO),
-            Driver.ORACLE: QIcon(ORACLE_LOGO),
+        colors = {
+            "primary": "white",
+            "secondary": "white",
+            "red": "white",
+            "blue": "white",
         }
 
-        return icons.get(driver, QIcon())
+        return qta.icon(
+            icon_name,
+            color=colors[role],
+        )
 
     def _add_connection_item(
         self,
@@ -270,17 +353,7 @@ class ConnectionsList(QWidget):
                 Conexión a representar.
         """
 
-        # Texto visible.
-        connection_name = connection.name or "Sin nombre"
-
-        item = QListWidgetItem(connection_name)
-
-        # Icono según driver.
-        item.setIcon(self._get_driver_icon(connection.driver))
-
-        # Resaltar conexiones con sesión activa.
-        if has_session(connection.id):
-            item.setBackground(QColor("green"))
+        item = QListWidgetItem()
 
         # Guardar objeto completo dentro del item.
         item.setData(
@@ -288,7 +361,16 @@ class ConnectionsList(QWidget):
             connection,
         )
 
+        widget = ConnectionItem(connection)
+
+        item.setSizeHint(widget.sizeHint())
+
         self.list_widget.addItem(item)
+
+        self.list_widget.setItemWidget(
+            item,
+            widget,
+        )
 
     # ===============
     # === SIGNALS ===
@@ -328,9 +410,7 @@ class ConnectionsList(QWidget):
 
         connection = self._get_selected_connection()
 
-        set_selected_connection(connection)
-
-        self._update_buttons_state(connection)
+        self._sync_selection_state(connection)
 
         if connection is not None:
             logger.debug(
@@ -543,11 +623,7 @@ class ConnectionsList(QWidget):
         # Reactivar señales
         self.list_widget.blockSignals(False)
 
-        # Actualizar conexión seleccionada en el estado global
-        set_selected_connection(restored_connection)
-
-        # Actualizar estado manualmente
-        self._update_buttons_state(restored_connection)
+        self._sync_selection_state(restored_connection)
 
     # ===================
     # === PRIVATE API ===

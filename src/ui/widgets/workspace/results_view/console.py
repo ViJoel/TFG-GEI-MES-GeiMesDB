@@ -1,4 +1,4 @@
-from PySide6.QtGui import QColor, QFont, QTextCursor
+from PySide6.QtGui import QColor, QTextCursor
 from PySide6.QtWidgets import QTextEdit
 
 from entities.script_result import ScriptResult
@@ -23,6 +23,8 @@ class Console(QTextEdit):
 
         super().__init__()
 
+        self.setObjectName("console")
+
         self._setup_ui()
 
     # ================
@@ -37,10 +39,6 @@ class Console(QTextEdit):
         """
 
         self.setReadOnly(True)
-
-        font = QFont("Consolas")
-        font.setStyleHint(QFont.StyleHint.Monospace)
-        self.setFont(font)
 
     # ===================
     # === PRIVATE API ===

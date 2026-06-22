@@ -1,0 +1,62 @@
+/* ========================= */
+/* === CONNECTIONS LIST ==== */
+/* ========================= */
+
+QListWidget#connections_list {
+    border: 2px solid $surface;
+    border-radius: 8px;
+}
+
+/* ========================= */
+/* ===== ITEM DEFAULT ====== */
+/* ========================= */
+
+QListWidget#connections_list::item,
+QListWidget#connections_list::item:hover,
+QListWidget#connections_list::item:selected {
+    background-color: transparent;
+}
+
+/* ========================= */
+/* === CONNECTION ITEM ===== */
+/* ========================= */
+
+QWidget#connection_item {
+    border-radius: 8px;
+}
+
+QWidget#connection_item QLabel {
+    background-color: transparent;
+}
+
+/* ========================= */
+/* === DISCONNECTED ITEM === */
+/* ========================= */
+
+QWidget#connection_item[state="disconnected"] {
+    background-color: transparent;
+}
+
+QWidget#connection_item[state="disconnected"]:hover {
+    background-color: $surface;
+}
+
+QWidget#connection_item[state="disconnected"][selected="true"] {
+    background-color: $surface_2;
+}
+
+/* ========================= */
+/* ==== CONNECTED ITEM ===== */
+/* ========================= */
+
+QWidget#connection_item[state="connected"] {
+    background-color: #1f5f2c;
+}
+
+QWidget#connection_item[state="connected"]:hover {
+    background-color: #29783a;
+}
+
+QWidget#connection_item[state="connected"][selected="true"] {
+    background-color: #34984a;
+}

@@ -17,6 +17,7 @@ from log.logger_config import setup_logging
 from modules.database.model import init_database
 from modules.sessions.service import close_all_sessions
 from ui.app.main_window import MainWindow
+from ui.themes.theme_manager import ThemeManager
 
 
 def shutdown() -> None:
@@ -50,6 +51,9 @@ def main() -> int:
 
     # Crear aplicación Qt.
     app = QtWidgets.QApplication(sys.argv)
+
+    # Inicializar tema.
+    ThemeManager.initialize(app)
 
     # Registrar cleanup global.
     app.aboutToQuit.connect(shutdown)

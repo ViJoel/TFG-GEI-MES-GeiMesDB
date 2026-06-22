@@ -1,0 +1,122 @@
+/*
+ * Botón por defecto
+ */
+
+QPushButton {
+    background-color: $surface;
+    border: 2px solid $border;
+    border-radius: 8px;
+    color: $text;
+    padding: 8px 16px;
+}
+
+QPushButton:hover {
+    background-color: $surface_2;
+}
+
+QPushButton:pressed {
+    background-color: $surface_3;
+}
+
+QPushButton:disabled {
+    background-color: $surface;
+    border: 1px solid $border;
+    color: $text_disabled;
+}
+
+/*
+ * Botón principal
+ */
+
+QPushButton[role="primary"] {
+    border-color: $primary;
+    color: white;
+}
+
+QPushButton[role="primary"]:hover {
+    background-color: $primary_hover;
+}
+
+QPushButton[role="primary"]:pressed {
+    background-color: $primary_pressed;
+}
+
+QPushButton[role="primary"]:disabled {
+    background-color: $surface;
+    border: 1px solid $border;
+    color: $text_disabled;
+}
+
+/*
+ * Botón secundario
+ */
+
+QPushButton[role="secondary"] {
+    border-color: $secondary;
+    color: white;
+}
+
+QPushButton[role="secondary"]:hover {
+    background-color: $secondary_hover;
+}
+
+QPushButton[role="secondary"]:pressed {
+    background-color: $secondary_pressed;
+}
+
+QPushButton[role="secondary"]:disabled {
+    background-color: $surface;
+    border: 1px solid $border;
+    color: $text_disabled;
+}
+
+/*
+ * Botón rojo
+ */
+
+QPushButton[role="red"] {
+    border-color: $red;
+    color: white;
+}
+
+
+QPushButton[role="red"]:hover {
+    background-color: $red_hover;
+}
+
+
+QPushButton[role="red"]:pressed {
+    background-color: $red_pressed;
+}
+
+QPushButton[role="red"]:disabled {
+    background-color: $surface;
+    border: 1px solid $border;
+    color: $text_disabled;
+}
+
+/*
+ * Botón rojo
+ */
+
+
+QPushButton[role="blue"] {
+    border-color: $blue;
+    color: white;
+}
+
+
+QPushButton[role="blue"]:hover {
+    background-color: $blue_hover;
+}
+
+
+QPushButton[role="blue"]:pressed {
+    background-color: $blue_pressed;
+}
+
+QPushButton[role="blue"]:disabled {
+    background-color: $surface;
+    border: 1px solid $border;
+    color: $text_disabled;
+}

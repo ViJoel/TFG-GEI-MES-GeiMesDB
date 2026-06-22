@@ -12,8 +12,8 @@ Clases:
 
 import logging
 
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import QLabel, QMainWindow, QStackedWidget, QWidget
+from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QMainWindow, QStackedWidget, QWidget
 
 from common.constants import APP_NAME
 from entities.connection import Connection
@@ -77,6 +77,9 @@ class MainWindow(QMainWindow):
 
         # Layout horizontal principal.
         main_layout = hbox()
+        main_layout.setContentsMargins(12, 12, 12, 12)
+        main_layout.setSpacing(6)
+
         central.setLayout(main_layout)
 
         # Sidebar lateral.

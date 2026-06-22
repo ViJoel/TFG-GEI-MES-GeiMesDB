@@ -49,6 +49,8 @@ class SqlEditor(QPlainTextEdit):
 
         super().__init__()
 
+        self.setObjectName("sql_editor")
+
         self._setup_ui()
         self._connect_signals()
 
