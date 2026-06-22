@@ -77,9 +77,7 @@ class ConnectionsList(QWidget):
         """
 
         # Layout vertical principal.
-        main_layout = vbox()
-
-        main_layout.setSpacing(8)
+        main_layout = vbox(sp=8)
 
         self.setLayout(main_layout)
 
@@ -236,7 +234,7 @@ class ConnectionsList(QWidget):
     def _update_items_selection_state(self):
         """
         Actualiza el estado de selección
-        de lis items de la lista.
+        de los items de la lista.
         """
 
         for i in range(self.list_widget.count()):

@@ -1,24 +1,22 @@
-/*
- * Fuente por defecto para toda la aplicación
- */
+/* ========================= */
+/* ======== GLOBAL ========= */
+/* ========================= */
 
 QWidget {
     font-family: "Segoe UI";
 }
 
-
-/*
- * Editor de código
- */
+/* ========================= */
+/* ===== TEXT EDITORS ====== */
+/* ========================= */
 
 QPlainTextEdit#sql_editor {
     font-family: "JetBrains Mono";
 }
 
-
-/*
- * Consola de salida
- */
+/* ========================= */
+/* ======== CONSOLE ======== */
+/* ========================= */
 
 QTextEdit#console {
     font-family: "Consolas";

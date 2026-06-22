@@ -23,6 +23,7 @@ BUTTONS_QSS = os.path.join(STYLES_DIR, "buttons.qss")
 CONNECTIONS_LIST_QSS = os.path.join(STYLES_DIR, "connections_list.qss")
 FONTS_QSS = os.path.join(STYLES_DIR, "fonts.qss")
 SIDEBAR_QSS = os.path.join(STYLES_DIR, "sidebar.qss")
+CONFIRMATION_DIALOG_QSS = os.path.join(STYLES_DIR, "confirmation_dialog.qss")
 
 STYLE_FILES = [
     BASE_QSS,
@@ -30,4 +31,5 @@ STYLE_FILES = [
     CONNECTIONS_LIST_QSS,
     FONTS_QSS,
     SIDEBAR_QSS,
+    CONFIRMATION_DIALOG_QSS,
 ]

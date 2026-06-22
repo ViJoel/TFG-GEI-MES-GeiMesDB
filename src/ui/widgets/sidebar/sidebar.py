@@ -70,10 +70,13 @@ class Sidebar(QWidget):
         """
 
         # Crear layout vertical.
-        self.main_layout = vbox()
-
-        self.main_layout.setContentsMargins(12, 12, 12, 12)
-        self.main_layout.setSpacing(16)
+        self.main_layout = vbox(
+            ml=12,
+            mt=12,
+            mr=12,
+            mb=12,
+            sp=16,
+        )
 
         # Asignar layout al widget.
         self.setLayout(self.main_layout)
