@@ -11,8 +11,8 @@ QWidget#dialog_overlay {
 /* ========================= */
 
 QWidget#dialog_container {
-    background-color: $background;
-    border: 1px solid $surface_2;
+    background-color: $dialog_background_color;
+    border: 1px solid $dialog_border_color;
     border-radius: 12px;
 }
 

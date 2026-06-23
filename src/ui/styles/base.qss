@@ -1,4 +1,4 @@
 QWidget {
-    background-color: $background;
-    color: $text;
+    background-color: $app_background_color;
+    color: $app_color;
 }

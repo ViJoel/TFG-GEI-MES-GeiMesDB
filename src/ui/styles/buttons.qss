@@ -1,122 +1,25 @@
-/*
- * Botón por defecto
- */
-
 QPushButton {
-    background-color: $surface;
-    border: 2px solid $border;
+    background-color: $button_background_color;
+    border: 2px solid $button_border_color;
     border-radius: 8px;
-    color: $text;
+    color: $button_color;
     padding: 8px 16px;
 }
 
 QPushButton:hover {
-    background-color: $surface_2;
+    background-color: $button_background_color_hover;
+    border-color: $button_border_color_hover;
+    color: $button_color_hover;
 }
 
 QPushButton:pressed {
-    background-color: $surface_3;
+    background-color: $button_background_color_pressed;
+    border-color: $button_border_color_pressed;
+    color: $button_color_pressed;
 }
 
 QPushButton:disabled {
-    background-color: $surface;
-    border: 1px solid $border;
-    color: $text_disabled;
-}
-
-/*
- * Botón principal
- */
-
-QPushButton[role="primary"] {
-    border-color: $primary;
-    color: white;
-}
-
-QPushButton[role="primary"]:hover {
-    background-color: $primary_hover;
-}
-
-QPushButton[role="primary"]:pressed {
-    background-color: $primary_pressed;
-}
-
-QPushButton[role="primary"]:disabled {
-    background-color: $surface;
-    border: 1px solid $border;
-    color: $text_disabled;
-}
-
-/*
- * Botón secundario
- */
-
-QPushButton[role="secondary"] {
-    border-color: $secondary;
-    color: white;
-}
-
-QPushButton[role="secondary"]:hover {
-    background-color: $secondary_hover;
-}
-
-QPushButton[role="secondary"]:pressed {
-    background-color: $secondary_pressed;
-}
-
-QPushButton[role="secondary"]:disabled {
-    background-color: $surface;
-    border: 1px solid $border;
-    color: $text_disabled;
-}
-
-/*
- * Botón rojo
- */
-
-QPushButton[role="red"] {
-    border-color: $red;
-    color: white;
-}
-
-
-QPushButton[role="red"]:hover {
-    background-color: $red_hover;
-}
-
-
-QPushButton[role="red"]:pressed {
-    background-color: $red_pressed;
-}
-
-QPushButton[role="red"]:disabled {
-    background-color: $surface;
-    border: 1px solid $border;
-    color: $text_disabled;
-}
-
-/*
- * Botón rojo
- */
-
-
-QPushButton[role="blue"] {
-    border-color: $blue;
-    color: white;
-}
-
-
-QPushButton[role="blue"]:hover {
-    background-color: $blue_hover;
-}
-
-
-QPushButton[role="blue"]:pressed {
-    background-color: $blue_pressed;
-}
-
-QPushButton[role="blue"]:disabled {
-    background-color: $surface;
-    border: 1px solid $border;
-    color: $text_disabled;
+    background-color: $button_background_color_disabled;
+    border-color: $button_border_color_disabled;
+    color: $button_color_disabled;
 }

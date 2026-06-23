@@ -1,0 +1,133 @@
+QPushButton#add_connection {
+    background-color: $button_add_connection_background_color;
+    border: 2px solid $button_add_connection_border_color;
+    border-radius: 8px;
+    color: $button_add_connection_color;
+    padding: 8px 16px;
+}
+
+QPushButton#add_connection:hover {
+    background-color: $button_add_connection_background_color_hover;
+    border-color: $button_add_connection_border_color_hover;
+    color: $button_add_connection_color_hover;
+}
+
+QPushButton#add_connection:pressed {
+    background-color: $button_add_connection_background_color_pressed;
+    border-color: $button_add_connection_border_color_pressed;
+    color: $button_add_connection_color_pressed;
+}
+
+QPushButton#add_connection:disabled {
+    background-color: $button_add_connection_background_color_disabled;
+    border-color: $button_add_connection_border_color_disabled;
+    color: $button_add_connection_color_disabled;
+}
+
+
+QPushButton#edit_connection {
+    background-color: $button_edit_connection_background_color;
+    border: 2px solid $button_edit_connection_border_color;
+    border-radius: 8px;
+    color: $button_edit_connection_color;
+    padding: 8px 16px;
+}
+
+QPushButton#edit_connection:hover {
+    background-color: $button_edit_connection_background_color_hover;
+    border-color: $button_edit_connection_border_color_hover;
+    color: $button_edit_connection_color_hover;
+}
+
+QPushButton#edit_connection:pressed {
+    background-color: $button_edit_connection_background_color_pressed;
+    border-color: $button_edit_connection_border_color_pressed;
+    color: $button_edit_connection_color_pressed;
+}
+
+QPushButton#edit_connection:disabled {
+    background-color: $button_edit_connection_background_color_disabled;
+    border-color: $button_edit_connection_border_color_disabled;
+    color: $button_edit_connection_color_disabled;
+}
+
+
+QPushButton#delete_connection {
+    background-color: $button_delete_connection_background_color;
+    border: 2px solid $button_delete_connection_border_color;
+    border-radius: 8px;
+    color: $button_delete_connection_color;
+    padding: 8px 16px;
+}
+
+QPushButton#delete_connection:hover {
+    background-color: $button_delete_connection_background_color_hover;
+    border-color: $button_delete_connection_border_color_hover;
+    color: $button_delete_connection_color_hover;
+}
+
+QPushButton#delete_connection:pressed {
+    background-color: $button_delete_connection_background_color_pressed;
+    border-color: $button_delete_connection_border_color_pressed;
+    color: $button_delete_connection_color_pressed;
+}
+
+QPushButton#delete_connection:disabled {
+    background-color: $button_delete_connection_background_color_disabled;
+    border-color: $button_delete_connection_border_color_disabled;
+    color: $button_delete_connection_color_disabled;
+}
+
+
+QPushButton#connect {
+    background-color: $button_connect_background_color;
+    border: 2px solid $button_connect_border_color;
+    border-radius: 8px;
+    color: $button_connect_color;
+    padding: 8px 16px;
+}
+
+QPushButton#connect:hover {
+    background-color: $button_connect_background_color_hover;
+    border-color: $button_connect_border_color_hover;
+    color: $button_connect_color_hover;
+}
+
+QPushButton#connect:pressed {
+    background-color: $button_connect_background_color_pressed;
+    border-color: $button_connect_border_color_pressed;
+    color: $button_connect_color_pressed;
+}
+
+QPushButton#connect:disabled {
+    background-color: $button_connect_background_color_disabled;
+    border-color: $button_connect_border_color_disabled;
+    color: $button_connect_color_disabled;
+}
+
+
+QPushButton#disconnect {
+    background-color: $button_disconnect_background_color;
+    border: 2px solid $button_disconnect_border_color;
+    border-radius: 8px;
+    color: $button_disconnect_color;
+    padding: 8px 16px;
+}
+
+QPushButton#disconnect:hover {
+    background-color: $button_disconnect_background_color_hover;
+    border-color: $button_disconnect_border_color_hover;
+    color: $button_disconnect_color_hover;
+}
+
+QPushButton#disconnect:pressed {
+    background-color: $button_disconnect_background_color_pressed;
+    border-color: $button_disconnect_border_color_pressed;
+    color: $button_disconnect_color_pressed;
+}
+
+QPushButton#disconnect:disabled {
+    background-color: $button_disconnect_background_color_disabled;
+    border-color: $button_disconnect_border_color_disabled;
+    color: $button_disconnect_color_disabled;
+}

@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
 
 from entities.query_result import QueryResult
 from entities.script_result import ScriptResult
+from ui.utils.layouts import hbox, vbox
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
 from ui.widgets.notifications.notification import Notification
 from ui.widgets.notifications.notifications_type import NotificationType
@@ -60,11 +61,11 @@ class ResultsView(QWidget):
         Construye la interfaz principal del widget.
         """
 
-        pagelayout = QVBoxLayout()
+        pagelayout = vbox(mt=12)
 
-        toolbar_layout = QHBoxLayout()
-        self.left_toolbar_layout = QHBoxLayout()
-        self.right_toolbar_layout = QHBoxLayout()
+        toolbar_layout = hbox(mb=8)
+        self.left_toolbar_layout = hbox()
+        self.right_toolbar_layout = hbox()
 
         self.stacklayout = QStackedLayout()
 

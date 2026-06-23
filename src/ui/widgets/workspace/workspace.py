@@ -1,6 +1,7 @@
 import logging
 
-from PySide6.QtWidgets import QWidget
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QSplitter, QWidget
 
 from entities.connection import Connection
 from modules.sessions.service import execute_query, execute_script, is_editable_query
@@ -52,17 +53,27 @@ class Workspace(QWidget):
         """
         Construye la interfaz principal del widget.
         """
+
         main_layout = hbox()
         self.setLayout(main_layout)
 
-        sql_layout = vbox()
-        main_layout.addLayout(sql_layout)
-
         self.sql_editor = SqlEditor()
-        sql_layout.addWidget(self.sql_editor)
-
         self.results_view = ResultsView()
-        sql_layout.addWidget(self.results_view)
+
+        self.splitter = QSplitter(Qt.Vertical)
+
+        self.splitter.addWidget(self.sql_editor)
+        self.splitter.addWidget(self.results_view)
+
+        # Tamaños iniciales (en píxeles)
+        self.splitter.setSizes([1, 3])
+
+        # Evita que alguno de los paneles desaparezca
+        self.splitter.setChildrenCollapsible(False)
+
+        main_layout.addWidget(self.splitter)
+
+        self.splitter.setHandleWidth(6)
 
     # ===============
     # === SIGNALS ===

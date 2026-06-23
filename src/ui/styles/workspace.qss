@@ -1,0 +1,7 @@
+QSplitter::handle {
+    background-color: #4d4d4d;
+}
+
+QSplitter::handle:hover {
+    background-color: #6a9fff;
+}

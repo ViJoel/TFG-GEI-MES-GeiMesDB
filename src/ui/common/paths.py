@@ -20,16 +20,25 @@ STYLES_DIR = os.path.join(RESOURCE_ROOT, "ui", "styles")
 
 BASE_QSS = os.path.join(STYLES_DIR, "base.qss")
 BUTTONS_QSS = os.path.join(STYLES_DIR, "buttons.qss")
+CONFIRMATION_DIALOG_QSS = os.path.join(STYLES_DIR, "confirmation_dialog.qss")
 CONNECTIONS_LIST_QSS = os.path.join(STYLES_DIR, "connections_list.qss")
+CONNECTIONS_LIST_BUTTONS_QSS = os.path.join(STYLES_DIR, "connections_list_buttons.qss")
 FONTS_QSS = os.path.join(STYLES_DIR, "fonts.qss")
 SIDEBAR_QSS = os.path.join(STYLES_DIR, "sidebar.qss")
-CONFIRMATION_DIALOG_QSS = os.path.join(STYLES_DIR, "confirmation_dialog.qss")
+SQL_EDITOR_QSS = os.path.join(STYLES_DIR, "sql_editor.qss")
+RESULTS_VIEW_QSS = os.path.join(STYLES_DIR, "results_view.qss")
+WORKSPACE_QSS = os.path.join(STYLES_DIR, "workspace.qss")
+
 
 STYLE_FILES = [
     BASE_QSS,
     BUTTONS_QSS,
+    CONFIRMATION_DIALOG_QSS,
     CONNECTIONS_LIST_QSS,
+    CONNECTIONS_LIST_BUTTONS_QSS,
     FONTS_QSS,
     SIDEBAR_QSS,
-    CONFIRMATION_DIALOG_QSS,
+    # SQL_EDITOR_QSS,
+    # RESULTS_VIEW_QSS,
+    # WORKSPACE_QSS,
 ]

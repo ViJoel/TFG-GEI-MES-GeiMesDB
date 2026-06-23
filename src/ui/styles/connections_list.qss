@@ -3,7 +3,8 @@
 /* ========================= */
 
 QListWidget#connections_list {
-    border: 2px solid $surface;
+    background-color: $connections_list_background_color;
+    border: 2px solid $connections_list_border_color;
     border-radius: 8px;
 }
 
@@ -38,11 +39,11 @@ QWidget#connection_item[state="disconnected"] {
 }
 
 QWidget#connection_item[state="disconnected"]:hover {
-    background-color: $surface;
+    background-color: $connection_item_disconnected_background_color_hover;
 }
 
 QWidget#connection_item[state="disconnected"][selected="true"] {
-    background-color: $surface_2;
+    background-color: $connection_item_disconnected_selected_background_color;
 }
 
 /* ========================= */
@@ -50,13 +51,13 @@ QWidget#connection_item[state="disconnected"][selected="true"] {
 /* ========================= */
 
 QWidget#connection_item[state="connected"] {
-    background-color: #1f5f2c;
+    background-color: $connection_item_connected_background_color;
 }
 
 QWidget#connection_item[state="connected"]:hover {
-    background-color: #29783a;
+    background-color: $connection_item_connected_background_color_hover;
 }
 
 QWidget#connection_item[state="connected"][selected="true"] {
-    background-color: #34984a;
+    background-color: $connection_item_connected_selected_background_color;
 }

@@ -20,6 +20,7 @@ from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
 from ui.widgets.notifications.notification import Notification
 from ui.widgets.notifications.notifications_type import NotificationType
 from ui.widgets.sidebar.connection_item import ConnectionItem
+from ui.widgets.sidebar.icon_button import IconButton
 
 logger = logging.getLogger(__name__)
 
@@ -109,27 +110,27 @@ class ConnectionsList(QWidget):
         # Botones
         self.add_button = self._create_icon_button(
             "fa5s.plus",
-            "primary",
+            "add_connection",
         )
 
         self.edit_button = self._create_icon_button(
             "fa5s.edit",
-            "secondary",
+            "edit_connection",
         )
 
         self.delete_button = self._create_icon_button(
             "fa5s.trash",
-            "red",
+            "delete_connection",
         )
 
         self.connect_button = self._create_icon_button(
             "mdi.wifi",
-            "blue",
+            "connect",
         )
 
         self.disconnect_button = self._create_icon_button(
             "mdi.wifi-off",
-            "blue",
+            "disconnect",
         )
 
         # Añadir botones al layout
@@ -269,75 +270,46 @@ class ConnectionsList(QWidget):
     def _create_icon_button(
         self,
         icon_name: str,
-        role: str,
-    ) -> QPushButton:
+        object_name: str,
+    ) -> IconButton:
         """
         Crea un botón cuadrado basado
         únicamente en iconografía.
 
+        El nombre del objeto se utiliza
+        para identificar visualmente el
+        botón y resolver los colores del
+        icono definidos en el tema activo.
+
         Args:
             icon_name (str):
                 Nombre del icono compatible
                 con QtAwesome.
 
-            role (str):
-                Rol de color definido en QSS.
+            object_name (str):
+                Nombre único asignado al
+                botón. Se emplea tanto para
+                la selección mediante QSS
+                como para obtener los colores
+                correspondientes del tema.
 
         Returns:
-            QPushButton:
-                Botón configurado.
+            IconButton:
+                Botón configurado con el
+                icono y nombre de objeto
+                especificados.
         """
 
-        button = QPushButton()
-
-        button.setIcon(
-            self._get_icon(
-                icon_name,
-                role,
-            )
+        button = IconButton(
+            icon_name=icon_name,
+            object_name=object_name,
         )
+
+        button.setObjectName(object_name)
 
         button.setFixedSize(32, 32)
 
-        button.setProperty("role", role)
-
         return button
-
-    def _get_icon(
-        self,
-        icon_name: str,
-        role: str,
-    ) -> QIcon:
-        """
-        Retorna un icono QtAwesome coloreado
-        según el rol visual asociado.
-
-        Args:
-            icon_name (str):
-                Nombre del icono compatible
-                con QtAwesome.
-
-            role (str):
-                Rol de color definido para
-                el botón.
-
-        Returns:
-            QIcon:
-                Icono configurado con el
-                color correspondiente.
-        """
-
-        colors = {
-            "primary": "white",
-            "secondary": "white",
-            "red": "white",
-            "blue": "white",
-        }
-
-        return qta.icon(
-            icon_name,
-            color=colors[role],
-        )
 
     def _add_connection_item(
         self,
