@@ -35,6 +35,8 @@ class AppLogo(QLabel):
 
         super().__init__()
 
+        self.setObjectName("app_logo")
+
         # Tamaño máximo del logo.
         self.size = size
 

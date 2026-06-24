@@ -1,7 +1,7 @@
 QPushButton {
     background-color: $button_background_color;
     border: 2px solid $button_border_color;
-    border-radius: 8px;
+    border-radius: 4px;
     color: $button_color;
     padding: 8px 16px;
 }

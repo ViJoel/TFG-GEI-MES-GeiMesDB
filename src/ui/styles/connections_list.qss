@@ -23,7 +23,7 @@ QListWidget#connections_list::item:selected {
 /* ========================= */
 
 QWidget#connection_item {
-    border-radius: 8px;
+    border-radius: 4px;
 }
 
 QWidget#connection_item QLabel {

@@ -108,8 +108,18 @@ COLORS = {
     "button_color_hover": GRAY_100,
     "button_color_pressed": GRAY_100,
     "button_color_disabled": GRAY_100,
+    # ========================
+    # === CONNECTIONS LIST ===
+    # ========================
+    "connection_item_connected_background_color": "#1f5f2c",
+    "connection_item_connected_background_color_hover": "#29783a",
+    "connection_item_connected_selected_background_color": "#34984a",
+    "connection_item_disconnected_background_color_hover": GRAY_700,
+    "connection_item_disconnected_selected_background_color": GRAY_600,
+    "connections_list_background_color": GRAY_800,
+    "connections_list_border_color": GRAY_700,
     # ================================
-    # === BUTTONS CONNECTIONS LIST ===
+    # === CONNECTIONS LIST BUTTONS ===
     # ================================
     # Add connection
     "button_add_connection_background_color": GRAY_800,
@@ -176,16 +186,6 @@ COLORS = {
     "button_disconnect_color_hover": GRAY_800,
     "button_disconnect_color_pressed": GRAY_800,
     "button_disconnect_color_disabled": BLUE_DISABLED,
-    # ========================
-    # === CONNECTIONS LIST ===
-    # ========================
-    "connection_item_connected_background_color": "#1f5f2c",
-    "connection_item_connected_background_color_hover": "#29783a",
-    "connection_item_connected_selected_background_color": "#34984a",
-    "connection_item_disconnected_background_color_hover": GRAY_700,
-    "connection_item_disconnected_selected_background_color": GRAY_600,
-    "connections_list_background_color": GRAY_800,
-    "connections_list_border_color": GRAY_700,
     # ===============
     # === DIALOGS ===
     # ===============
@@ -237,5 +237,6 @@ COLORS = {
     # ===============
     # === SIDEBAR ===
     # ===============
+    "sidebar_background_color": GRAY_900,
     "sidebar_border_color": GREEN,
 }

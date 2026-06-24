@@ -54,6 +54,8 @@ class ConnectionItem(QWidget):
         layout = hbox()
         self.setLayout(layout)
 
+        layout.setSpacing(8)
+
         icon = QLabel()
         icon.setPixmap(self._get_driver_icon().pixmap(24, 24))
         icon.setFixedSize(24, 24)
