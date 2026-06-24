@@ -12,8 +12,8 @@ QWidget#dialog_overlay {
 
 QWidget#dialog_container {
     background-color: $dialog_background_color;
-    border: 1px solid $dialog_border_color;
-    border-radius: 12px;
+    border: 2px solid $dialog_border_color;
+    border-radius: 4px;
 }
 
 /* ============================== */
@@ -23,4 +23,8 @@ QWidget#dialog_container {
 QWidget#dialog_container QLabel,
 QWidget#dialog_container QPushButton {
     font-size: 14px;
+}
+
+QWidget#dialog_container QLabel {
+    background-color: $dialog_label_background_color;
 }

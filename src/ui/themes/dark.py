@@ -1,3 +1,8 @@
+# ====================
+# === TRANSPARENCY ===
+# ====================
+TRANSPARENT = "transparent"
+
 # =================
 # === GRAYSCALE ===
 # =================
@@ -114,6 +119,7 @@ COLORS = {
     "connection_item_connected_background_color": "#1f5f2c",
     "connection_item_connected_background_color_hover": "#29783a",
     "connection_item_connected_selected_background_color": "#34984a",
+    "connection_item_disconnected_background_color": TRANSPARENT,
     "connection_item_disconnected_background_color_hover": GRAY_700,
     "connection_item_disconnected_selected_background_color": GRAY_600,
     "connections_list_background_color": GRAY_800,
@@ -191,6 +197,7 @@ COLORS = {
     # ===============
     "dialog_background_color": GRAY_800,
     "dialog_border_color": GRAY_700,
+    "dialog_label_background_color": TRANSPARENT,
     # ===============
     # === GENERAL ===
     # ===============

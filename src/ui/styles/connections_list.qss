@@ -35,7 +35,7 @@ QWidget#connection_item QLabel {
 /* ========================= */
 
 QWidget#connection_item[state="disconnected"] {
-    background-color: transparent;
+    background-color: $connection_item_disconnected_background_color;
 }
 
 QWidget#connection_item[state="disconnected"]:hover {
