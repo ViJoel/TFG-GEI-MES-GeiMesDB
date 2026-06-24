@@ -1,12 +1,9 @@
 import logging
 
-import qtawesome as qta
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QListWidget,
     QListWidgetItem,
-    QPushButton,
     QSizePolicy,
     QWidget,
 )
