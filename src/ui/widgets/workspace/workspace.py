@@ -72,18 +72,19 @@ class Workspace(QWidget):
 
         self.splitter = QSplitter(Qt.Vertical)
 
+        # Grosor de la barra.
+        self.splitter.setHandleWidth(4)
+
+        # Proporciones de tamaño iniciales de los widgets.
+        self.splitter.setSizes([1, 3])
+
+        # Evita que alguno de los paneles desaparezca.
+        self.splitter.setChildrenCollapsible(False)
+
         self.splitter.addWidget(self.sql_editor)
         self.splitter.addWidget(self.results_view)
 
-        # Tamaños iniciales (en píxeles)
-        self.splitter.setSizes([1, 3])
-
-        # Evita que alguno de los paneles desaparezca
-        self.splitter.setChildrenCollapsible(False)
-
         main_layout.addWidget(self.splitter)
-
-        self.splitter.setHandleWidth(6)
 
     # ===============
     # === SIGNALS ===
@@ -252,7 +253,7 @@ class Workspace(QWidget):
         )
 
         self.results_view.set_tab_buttons_state(True)
-        self.results_view.set_action_buttons_state(True)
+        self.results_view.set_action_buttons_state(False)
 
         logger.debug("Results view refreshed.")
 

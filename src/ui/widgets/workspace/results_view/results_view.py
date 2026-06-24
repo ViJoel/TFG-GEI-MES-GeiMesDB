@@ -1,10 +1,8 @@
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
-    QHBoxLayout,
     QPushButton,
     QSizePolicy,
     QStackedLayout,
-    QVBoxLayout,
     QWidget,
 )
 
@@ -67,6 +65,9 @@ class ResultsView(QWidget):
         self.left_toolbar_layout = hbox()
         self.right_toolbar_layout = hbox()
 
+        self.left_toolbar_layout.setSpacing(4)
+        self.right_toolbar_layout.setSpacing(4)
+
         self.stacklayout = QStackedLayout()
 
         toolbar_layout.addLayout(self.left_toolbar_layout)
@@ -111,6 +112,7 @@ class ResultsView(QWidget):
     @staticmethod
     def _create_button(
         text: str,
+        button_type: str,
     ) -> QPushButton:
         """
         Crea un botón con tamaño fijo.
@@ -125,6 +127,8 @@ class ResultsView(QWidget):
         """
 
         btn = QPushButton(text)
+
+        btn.setProperty("type", button_type)
 
         btn.setSizePolicy(
             QSizePolicy.Policy.Fixed,
@@ -141,10 +145,18 @@ class ResultsView(QWidget):
         entre las distintas vistas.
         """
 
-        self.console_button = self._create_button("Console")
+        self.console_button = self._create_button(
+            "Console",
+            "primary",
+        )
+
         self.left_toolbar_layout.addWidget(self.console_button)
 
-        self.table_button = self._create_button("Table")
+        self.table_button = self._create_button(
+            "Table",
+            "primary",
+        )
+
         self.left_toolbar_layout.addWidget(self.table_button)
 
     def _create_action_buttons(
@@ -155,10 +167,18 @@ class ResultsView(QWidget):
         disponibles sobre los resultados.
         """
 
-        self.save_button = self._create_button("Save")
+        self.save_button = self._create_button(
+            "Save",
+            "secondary",
+        )
+
         self.right_toolbar_layout.addWidget(self.save_button)
 
-        self.discard_button = self._create_button("Discard")
+        self.discard_button = self._create_button(
+            "Discard",
+            "secondary",
+        )
+
         self.right_toolbar_layout.addWidget(self.discard_button)
 
         self._set_action_buttons_initial_state()

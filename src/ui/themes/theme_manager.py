@@ -1,9 +1,13 @@
+import logging
 from string import Template
 
 from ui.common.paths import STYLE_FILES
 from ui.themes import dark
 
+logger = logging.getLogger(__name__)
 
+
+# TODO: Actualizar para que use la instancia de la aplicación desde el estado global.
 class ThemeManager:
     """
     Gestor central de temas de la aplicación.
@@ -17,7 +21,7 @@ class ThemeManager:
     """
 
     _themes = {
-        "dark": dark.COLORS,
+        "dark": dark.THEME,
     }
 
     _current_theme = "dark"
@@ -37,7 +41,11 @@ class ThemeManager:
                 Instancia de la aplicación Qt.
         """
 
+        logger.info("Initializing theme manager...")
+
         cls.apply(app)
+
+        logger.success("Theme manager initialized.")
 
     # ===================
     # === APPLY THEME ===
@@ -54,7 +62,17 @@ class ThemeManager:
                 Instancia de la aplicación Qt.
         """
 
+        logger.info(
+            "Applying theme '%s'...",
+            cls._current_theme,
+        )
+
         app.setStyleSheet(cls._build_stylesheet())
+
+        logger.success(
+            "Theme '%s' applied successfully.",
+            cls._current_theme,
+        )
 
     # =======================
     # === THEME SWITCHING ===
@@ -78,7 +96,19 @@ class ThemeManager:
         """
 
         if theme_name not in cls._themes:
+
+            logger.error(
+                "Theme '%s' is not registered.",
+                theme_name,
+            )
+
             raise ValueError(f"Theme '{theme_name}' is not registered.")
+
+        logger.info(
+            "Switching theme from '%s' to '%s'.",
+            cls._current_theme,
+            theme_name,
+        )
 
         cls._current_theme = theme_name
 
@@ -116,22 +146,49 @@ class ThemeManager:
                 QSS final con variables resueltas.
         """
 
+        logger.debug(
+            "Building stylesheet for theme '%s'.",
+            cls._current_theme,
+        )
+
         stylesheet = ""
 
         for file in STYLE_FILES:
+
+            logger.debug(
+                "Loading stylesheet file: %s",
+                file,
+            )
 
             with open(file, encoding="utf-8") as f:
 
                 stylesheet += f.read()
 
-        return Template(stylesheet).substitute(cls._themes[cls._current_theme])
+        try:
+
+            stylesheet = Template(stylesheet).substitute(
+                cls._themes[cls._current_theme]
+            )
+
+        except KeyError as e:
+
+            logger.error(
+                "Missing theme variable in QSS: %s",
+                e,
+            )
+
+            raise
+
+        logger.debug("Stylesheet built successfully.")
+
+        return stylesheet
 
     # ====================
     # === COLOR ACCESS ===
     # ====================
 
     @classmethod
-    def get(
+    def get_color(
         cls,
         key: str,
     ):
@@ -144,7 +201,23 @@ class ThemeManager:
 
         Returns:
             str:
-                Valor asociado a la clave (normalmente un hex color).
+                Valor asociado a la clave.
+                Si la clave no existe, devuelve el fallback
+                definido por el tema actual.
         """
 
-        return cls._themes[cls._current_theme][key]
+        colors = cls._themes[cls._current_theme]
+
+        if key in colors:
+            return colors[key]
+
+        fallback_color = colors.get("fallback_color", "transparent")
+
+        logger.warning(
+            "Theme color '%s' not found in theme '%s'. Using fallback color '%s'.",
+            key,
+            cls._current_theme,
+            fallback_color,
+        )
+
+        return fallback_color

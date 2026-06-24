@@ -91,7 +91,9 @@ PINK_HOVER = "#F06292"
 PINK_PRESSED = "#D81B60"
 PINK_DISABLED = "#8E4560"
 
-COLORS = {
+THEME = {
+    "theme_type": "dark",
+    "fallback_color": "#FFFFFF",
     # ===========
     # === APP ===
     # ===========
@@ -247,3 +249,59 @@ COLORS = {
     "sidebar_background_color": GRAY_900,
     "sidebar_border_color": GREEN,
 }
+# ===============
+# === BUTTONS ===
+# ===============
+THEME.update(
+    {
+        # Primary
+        "button_primary_background_color": TRANSPARENT,
+        "button_primary_background_color_hover": GREEN_HOVER,
+        "button_primary_background_color_pressed": GREEN_PRESSED,
+        "button_primary_background_color_disabled": TRANSPARENT,
+        "button_primary_border_color": GREEN,
+        "button_primary_border_color_hover": GREEN_HOVER,
+        "button_primary_border_color_pressed": GREEN_PRESSED,
+        "button_primary_border_color_disabled": GREEN_DISABLED,
+        "button_primary_color": GREEN,
+        "button_primary_color_hover": GRAY_800,
+        "button_primary_color_pressed": GRAY_800,
+        "button_primary_color_disabled": GREEN_DISABLED,
+        # Secondary
+        "button_secondary_background_color": TRANSPARENT,
+        "button_secondary_background_color_hover": THEME["secondary_hover"],
+        "button_secondary_background_color_pressed": THEME["secondary_pressed"],
+        "button_secondary_background_color_disabled": TRANSPARENT,
+        "button_secondary_border_color": THEME["secondary"],
+        "button_secondary_border_color_hover": THEME["secondary_hover"],
+        "button_secondary_border_color_pressed": THEME["secondary_pressed"],
+        "button_secondary_border_color_disabled": THEME["secondary_disabled"],
+        "button_secondary_color": THEME["secondary"],
+        "button_secondary_color_hover": GRAY_800,
+        "button_secondary_color_pressed": GRAY_800,
+        "button_secondary_color_disabled": THEME["secondary_disabled"],
+        # Danger
+        "button_danger_background_color": TRANSPARENT,
+        "button_danger_background_color_hover": THEME["danger_hover"],
+        "button_danger_background_color_pressed": THEME["danger_pressed"],
+        "button_danger_background_color_disabled": TRANSPARENT,
+        "button_danger_border_color": THEME["danger"],
+        "button_danger_border_color_hover": THEME["danger_hover"],
+        "button_danger_border_color_pressed": THEME["danger_pressed"],
+        "button_danger_border_color_disabled": THEME["danger_disabled"],
+        "button_danger_color": THEME["danger"],
+        "button_danger_color_hover": GRAY_800,
+        "button_danger_color_pressed": GRAY_800,
+        "button_danger_color_disabled": THEME["danger_disabled"],
+    }
+)
+# =================
+# === SPLITTERS ===
+# =================
+THEME.update(
+    {
+        "splitter_background_color": TRANSPARENT,
+        "splitter_background_color_hover": THEME["accent"],
+        "splitter_background_color_pressed": THEME["accent_hover"],
+    }
+)

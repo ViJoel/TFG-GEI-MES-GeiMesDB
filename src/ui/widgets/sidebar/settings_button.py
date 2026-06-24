@@ -14,6 +14,8 @@ class SettingsButton(QPushButton):
     def __init__(self):
         super().__init__()
 
+        self.setObjectName("settings_button")
+
         self._setup_ui()
 
     def _setup_ui(self):

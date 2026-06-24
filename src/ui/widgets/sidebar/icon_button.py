@@ -61,7 +61,7 @@ class IconButton(QPushButton):
         self,
         suffix: str = "",
     ):
-        return ThemeManager.get(self._prefix() + suffix)
+        return ThemeManager.get_color(self._prefix() + suffix)
 
     def _make_icon(
         self,
