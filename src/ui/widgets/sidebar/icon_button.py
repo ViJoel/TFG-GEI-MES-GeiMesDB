@@ -1,5 +1,4 @@
 import qtawesome as qta
-from PySide6.QtCore import QEvent
 from PySide6.QtWidgets import QPushButton
 
 from ui.themes.theme_manager import ThemeManager

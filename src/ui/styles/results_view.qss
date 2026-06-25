@@ -1,0 +1,5 @@
+QTextEdit#console {
+    background-color: $console_background_color;
+    border: 2px solid $console_border_color;
+    border-radius: 8px;
+}

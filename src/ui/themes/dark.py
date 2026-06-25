@@ -7,15 +7,25 @@ TRANSPARENT = "transparent"
 # === GRAYSCALE ===
 # =================
 BLACK = "#000000"
+GRAY_950 = "#121314"
 GRAY_900 = "#1B1D1E"
+GRAY_850 = "#1F2123"
 GRAY_800 = "#242628"
+GRAY_750 = "#282B2D"
 GRAY_700 = "#2D3033"
+GRAY_650 = "#313437"
 GRAY_600 = "#35383C"
+GRAY_550 = "#404348"
 GRAY_500 = "#4A4D52"
+GRAY_450 = "#5A5D62"
 GRAY_400 = "#6B6E73"
+GRAY_350 = "#7A7D81"
 GRAY_300 = "#8A8D91"
+GRAY_250 = "#A1A3A6"
 GRAY_200 = "#B8B8B8"
+GRAY_150 = "#D5D5D5"
 GRAY_100 = "#F2F2F2"
+GRAY_50 = "#F8F8F8"
 WHITE = "#FFFFFF"
 
 # =============
@@ -91,118 +101,13 @@ PINK_HOVER = "#F06292"
 PINK_PRESSED = "#D81B60"
 PINK_DISABLED = "#8E4560"
 
+# ===============
+# === GENERAL ===
+# ===============
 THEME = {
+    # Theme
     "theme_type": "dark",
-    "fallback_color": "#FFFFFF",
-    # ===========
-    # === APP ===
-    # ===========
-    "app_background_color": GRAY_900,
-    "app_color": GRAY_100,
-    # ===============
-    # === BUTTONS ===
-    # ===============
-    # Default
-    "button_background_color": GRAY_800,
-    "button_background_color_hover": GRAY_700,
-    "button_background_color_pressed": GRAY_600,
-    "button_background_color_disabled": GRAY_800,
-    "button_border_color": "#404040",
-    "button_border_color_hover": "#404040",
-    "button_border_color_pressed": "#404040",
-    "button_border_color_disabled": "#404040",
-    "button_color": GRAY_100,
-    "button_color_hover": GRAY_100,
-    "button_color_pressed": GRAY_100,
-    "button_color_disabled": GRAY_100,
-    # ========================
-    # === CONNECTIONS LIST ===
-    # ========================
-    "connection_item_connected_background_color": "#1f5f2c",
-    "connection_item_connected_background_color_hover": "#29783a",
-    "connection_item_connected_selected_background_color": "#34984a",
-    "connection_item_disconnected_background_color": TRANSPARENT,
-    "connection_item_disconnected_background_color_hover": GRAY_700,
-    "connection_item_disconnected_selected_background_color": GRAY_600,
-    "connections_list_background_color": GRAY_800,
-    "connections_list_border_color": GRAY_700,
-    # ================================
-    # === CONNECTIONS LIST BUTTONS ===
-    # ================================
-    # Add connection
-    "button_add_connection_background_color": GRAY_800,
-    "button_add_connection_background_color_hover": GREEN_HOVER,
-    "button_add_connection_background_color_pressed": GREEN_PRESSED,
-    "button_add_connection_background_color_disabled": GRAY_800,
-    "button_add_connection_border_color": GREEN,
-    "button_add_connection_border_color_hover": GREEN_HOVER,
-    "button_add_connection_border_color_pressed": GREEN_PRESSED,
-    "button_add_connection_border_color_disabled": GREEN_DISABLED,
-    "button_add_connection_color": GREEN,
-    "button_add_connection_color_hover": GRAY_800,
-    "button_add_connection_color_pressed": GRAY_800,
-    "button_add_connection_color_disabled": GREEN_DISABLED,
-    # Edit connection
-    "button_edit_connection_background_color": GRAY_800,
-    "button_edit_connection_background_color_hover": ORANGE_HOVER,
-    "button_edit_connection_background_color_pressed": ORANGE_PRESSED,
-    "button_edit_connection_background_color_disabled": GRAY_800,
-    "button_edit_connection_border_color": ORANGE,
-    "button_edit_connection_border_color_hover": ORANGE_HOVER,
-    "button_edit_connection_border_color_pressed": ORANGE_PRESSED,
-    "button_edit_connection_border_color_disabled": ORANGE_DISABLED,
-    "button_edit_connection_color": ORANGE,
-    "button_edit_connection_color_hover": GRAY_800,
-    "button_edit_connection_color_pressed": GRAY_800,
-    "button_edit_connection_color_disabled": ORANGE_DISABLED,
-    # Delete connection
-    "button_delete_connection_background_color": GRAY_800,
-    "button_delete_connection_background_color_hover": RED_HOVER,
-    "button_delete_connection_background_color_pressed": RED_PRESSED,
-    "button_delete_connection_background_color_disabled": GRAY_800,
-    "button_delete_connection_border_color": RED,
-    "button_delete_connection_border_color_hover": RED_HOVER,
-    "button_delete_connection_border_color_pressed": RED_PRESSED,
-    "button_delete_connection_border_color_disabled": RED_DISABLED,
-    "button_delete_connection_color": RED,
-    "button_delete_connection_color_hover": GRAY_800,
-    "button_delete_connection_color_pressed": GRAY_800,
-    "button_delete_connection_color_disabled": RED_DISABLED,
-    # Connect
-    "button_connect_background_color": GRAY_800,
-    "button_connect_background_color_hover": BLUE_HOVER,
-    "button_connect_background_color_pressed": BLUE_PRESSED,
-    "button_connect_background_color_disabled": GRAY_800,
-    "button_connect_border_color": BLUE,
-    "button_connect_border_color_hover": BLUE_HOVER,
-    "button_connect_border_color_pressed": BLUE_PRESSED,
-    "button_connect_border_color_disabled": BLUE_DISABLED,
-    "button_connect_color": BLUE,
-    "button_connect_color_hover": GRAY_800,
-    "button_connect_color_pressed": GRAY_800,
-    "button_connect_color_disabled": BLUE_DISABLED,
-    # Disconnect
-    "button_disconnect_background_color": GRAY_800,
-    "button_disconnect_background_color_hover": BLUE_HOVER,
-    "button_disconnect_background_color_pressed": BLUE_PRESSED,
-    "button_disconnect_background_color_disabled": GRAY_800,
-    "button_disconnect_border_color": BLUE,
-    "button_disconnect_border_color_hover": BLUE_HOVER,
-    "button_disconnect_border_color_pressed": BLUE_PRESSED,
-    "button_disconnect_border_color_disabled": BLUE_DISABLED,
-    "button_disconnect_color": BLUE,
-    "button_disconnect_color_hover": GRAY_800,
-    "button_disconnect_color_pressed": GRAY_800,
-    "button_disconnect_color_disabled": BLUE_DISABLED,
-    # ===============
-    # === DIALOGS ===
-    # ===============
-    "dialog_background_color": GRAY_800,
-    "dialog_border_color": GRAY_700,
-    "dialog_label_background_color": TRANSPARENT,
-    # ===============
-    # === GENERAL ===
-    # ===============
+    "fallback_color": WHITE,
     # Primary
     "primary": GREEN,
     "primary_hover": GREEN_HOVER,
@@ -243,17 +148,36 @@ THEME = {
     "text_hover": WHITE,
     "text_pressed": GRAY_200,
     "text_disabled": GRAY_400,
-    # ===============
-    # === SIDEBAR ===
-    # ===============
-    "sidebar_background_color": GRAY_900,
-    "sidebar_border_color": GREEN,
 }
+
+# ===========
+# === APP ===
+# ===========
+THEME.update(
+    {
+        "app_background_color": GRAY_900,
+        "app_color": GRAY_100,
+    }
+)
+
 # ===============
 # === BUTTONS ===
 # ===============
 THEME.update(
     {
+        # Default
+        "button_background_color": GRAY_800,
+        "button_background_color_hover": GRAY_700,
+        "button_background_color_pressed": GRAY_600,
+        "button_background_color_disabled": GRAY_800,
+        "button_border_color": "#404040",
+        "button_border_color_hover": "#404040",
+        "button_border_color_pressed": "#404040",
+        "button_border_color_disabled": "#404040",
+        "button_color": GRAY_100,
+        "button_color_hover": GRAY_100,
+        "button_color_pressed": GRAY_100,
+        "button_color_disabled": GRAY_100,
         # Primary
         "button_primary_background_color": TRANSPARENT,
         "button_primary_background_color_hover": GREEN_HOVER,
@@ -295,6 +219,117 @@ THEME.update(
         "button_danger_color_disabled": THEME["danger_disabled"],
     }
 )
+
+# ========================
+# === CONNECTIONS LIST ===
+# ========================
+THEME.update(
+    {
+        "connection_item_connected_background_color": "#1f5f2c",
+        "connection_item_connected_background_color_hover": "#29783a",
+        "connection_item_connected_selected_background_color": "#34984a",
+        "connection_item_disconnected_background_color": TRANSPARENT,
+        "connection_item_disconnected_background_color_hover": GRAY_700,
+        "connection_item_disconnected_selected_background_color": GRAY_600,
+        "connections_list_background_color": GRAY_800,
+        "connections_list_border_color": GRAY_700,
+    }
+)
+
+# ================================
+# === CONNECTIONS LIST BUTTONS ===
+# ================================
+THEME.update(
+    {
+        # Add connection
+        "button_add_connection_background_color": GRAY_800,
+        "button_add_connection_background_color_hover": GREEN_HOVER,
+        "button_add_connection_background_color_pressed": GREEN_PRESSED,
+        "button_add_connection_background_color_disabled": GRAY_800,
+        "button_add_connection_border_color": GREEN,
+        "button_add_connection_border_color_hover": GREEN_HOVER,
+        "button_add_connection_border_color_pressed": GREEN_PRESSED,
+        "button_add_connection_border_color_disabled": GREEN_DISABLED,
+        "button_add_connection_color": GREEN,
+        "button_add_connection_color_hover": GRAY_800,
+        "button_add_connection_color_pressed": GRAY_800,
+        "button_add_connection_color_disabled": GREEN_DISABLED,
+        # Edit connection
+        "button_edit_connection_background_color": GRAY_800,
+        "button_edit_connection_background_color_hover": ORANGE_HOVER,
+        "button_edit_connection_background_color_pressed": ORANGE_PRESSED,
+        "button_edit_connection_background_color_disabled": GRAY_800,
+        "button_edit_connection_border_color": ORANGE,
+        "button_edit_connection_border_color_hover": ORANGE_HOVER,
+        "button_edit_connection_border_color_pressed": ORANGE_PRESSED,
+        "button_edit_connection_border_color_disabled": ORANGE_DISABLED,
+        "button_edit_connection_color": ORANGE,
+        "button_edit_connection_color_hover": GRAY_800,
+        "button_edit_connection_color_pressed": GRAY_800,
+        "button_edit_connection_color_disabled": ORANGE_DISABLED,
+        # Delete connection
+        "button_delete_connection_background_color": GRAY_800,
+        "button_delete_connection_background_color_hover": RED_HOVER,
+        "button_delete_connection_background_color_pressed": RED_PRESSED,
+        "button_delete_connection_background_color_disabled": GRAY_800,
+        "button_delete_connection_border_color": RED,
+        "button_delete_connection_border_color_hover": RED_HOVER,
+        "button_delete_connection_border_color_pressed": RED_PRESSED,
+        "button_delete_connection_border_color_disabled": RED_DISABLED,
+        "button_delete_connection_color": RED,
+        "button_delete_connection_color_hover": GRAY_800,
+        "button_delete_connection_color_pressed": GRAY_800,
+        "button_delete_connection_color_disabled": RED_DISABLED,
+        # Connect
+        "button_connect_background_color": GRAY_800,
+        "button_connect_background_color_hover": BLUE_HOVER,
+        "button_connect_background_color_pressed": BLUE_PRESSED,
+        "button_connect_background_color_disabled": GRAY_800,
+        "button_connect_border_color": BLUE,
+        "button_connect_border_color_hover": BLUE_HOVER,
+        "button_connect_border_color_pressed": BLUE_PRESSED,
+        "button_connect_border_color_disabled": BLUE_DISABLED,
+        "button_connect_color": BLUE,
+        "button_connect_color_hover": GRAY_800,
+        "button_connect_color_pressed": GRAY_800,
+        "button_connect_color_disabled": BLUE_DISABLED,
+        # Disconnect
+        "button_disconnect_background_color": GRAY_800,
+        "button_disconnect_background_color_hover": BLUE_HOVER,
+        "button_disconnect_background_color_pressed": BLUE_PRESSED,
+        "button_disconnect_background_color_disabled": GRAY_800,
+        "button_disconnect_border_color": BLUE,
+        "button_disconnect_border_color_hover": BLUE_HOVER,
+        "button_disconnect_border_color_pressed": BLUE_PRESSED,
+        "button_disconnect_border_color_disabled": BLUE_DISABLED,
+        "button_disconnect_color": BLUE,
+        "button_disconnect_color_hover": GRAY_800,
+        "button_disconnect_color_pressed": GRAY_800,
+        "button_disconnect_color_disabled": BLUE_DISABLED,
+    }
+)
+
+# ===============
+# === DIALOGS ===
+# ===============
+THEME.update(
+    {
+        "dialog_background_color": GRAY_800,
+        "dialog_border_color": GRAY_700,
+        "dialog_label_background_color": TRANSPARENT,
+    }
+)
+
+# ===============
+# === SIDEBAR ===
+# ===============
+THEME.update(
+    {
+        "sidebar_background_color": GRAY_900,
+        "sidebar_border_color": GREEN,
+    }
+)
+
 # =================
 # === SPLITTERS ===
 # =================
@@ -303,5 +338,18 @@ THEME.update(
         "splitter_background_color": TRANSPARENT,
         "splitter_background_color_hover": THEME["accent"],
         "splitter_background_color_pressed": THEME["accent_hover"],
+    }
+)
+
+# ===============
+# === CONSOLE ===
+# ===============
+THEME.update(
+    {
+        "console_background_color": GRAY_950,
+        "console_border_color": THEME["primary"],
+        "console_color": THEME["text"],
+        "console_success_color": THEME["success"],
+        "console_error_color": THEME["danger"],
     }
 )
