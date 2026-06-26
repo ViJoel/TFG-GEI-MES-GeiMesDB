@@ -145,11 +145,15 @@ class Notification(QWidget):
 
         margin = 16
 
-        # Coordenadas globales reales de la ventana
-        global_pos = parent.mapToGlobal(parent.rect().topLeft())
+        # Esquina superior derecha en coordenadas locales
+        top_right = parent.rect().topRight()
 
+        # Convertir a coordenadas globales
+        global_pos = parent.mapToGlobal(top_right)
+
+        # Ajuste para que no se salga por la derecha
         self.move(
-            global_pos.x() + margin,
+            global_pos.x() - self.width() - margin,
             global_pos.y() + margin,
         )
 
