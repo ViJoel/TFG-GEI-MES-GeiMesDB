@@ -44,6 +44,13 @@ LIGHT_GREEN_HOVER = "#B5DE84"
 LIGHT_GREEN_PRESSED = "#95C85A"
 LIGHT_GREEN_DISABLED = "#6F8F4D"
 
+# ==================
+# === DARK GREEN ===
+# ==================
+DARK_GREEN = "#1F5F2C"
+DARK_GREEN_HOVER = "#29783A"
+DARK_GREEN_PRESSED = "#34984A"
+
 # ==============
 # === ORANGE ===
 # ==============
@@ -51,6 +58,7 @@ ORANGE = "#F28C38"
 ORANGE_HOVER = "#F59E50"
 ORANGE_PRESSED = "#E67E22"
 ORANGE_DISABLED = "#9A6738"
+ORANGE_SOFT = "#F4AE63"
 
 # ===========
 # === RED ===
@@ -225,9 +233,9 @@ THEME.update(
 # ========================
 THEME.update(
     {
-        "connection_item_connected_background_color": "#1f5f2c",
-        "connection_item_connected_background_color_hover": "#29783a",
-        "connection_item_connected_selected_background_color": "#34984a",
+        "connection_item_connected_background_color": DARK_GREEN,
+        "connection_item_connected_background_color_hover": DARK_GREEN_HOVER,
+        "connection_item_connected_selected_background_color": DARK_GREEN_PRESSED,
         "connection_item_disconnected_background_color": TRANSPARENT,
         "connection_item_disconnected_background_color_hover": GRAY_700,
         "connection_item_disconnected_selected_background_color": GRAY_600,
@@ -325,7 +333,7 @@ THEME.update(
 # ===============
 THEME.update(
     {
-        "sidebar_background_color": GRAY_900,
+        "sidebar_background_color": GRAY_950,
         "sidebar_border_color": GREEN,
     }
 )
@@ -351,5 +359,37 @@ THEME.update(
         "console_color": THEME["text"],
         "console_success_color": THEME["success"],
         "console_error_color": THEME["danger"],
+    }
+)
+
+# =============
+# === TABLE ===
+# =============
+THEME.update(
+    {
+        # Tabla
+        "table_background_color": GRAY_950,
+        "table_border_color": THEME["primary"],
+        "table_color": THEME["text"],
+        # Cabecera
+        "table_header_background_color": TRANSPARENT,
+        # Celdas de la cabecera
+        "table_header_cell_background_color": THEME["primary"],
+        "table_header_cell_color": GRAY_800,
+        # Celdas de la tabla
+        "table_cell_background_color_hover": THEME["secondary"],
+        "table_cell_color_hover": GRAY_800,
+        "table_cell_selected_background_color": ORANGE,
+        "table_cell_selected_color": GRAY_800,
+        "table_cell_modified_background_color": THEME["accent"],
+        "table_cell_modified_color": GRAY_800,
+        # Alternancia de filas
+        "table_row_alternate_background_color": GRAY_900,
+        "table_grid_color": TRANSPARENT,
+        # Scrollbar
+        "table_scrollbar_background_color": TRANSPARENT,
+        "table_scrollbar_handle_color": THEME["primary"],
+        "table_scrollbar_handle_color_hover": THEME["primary_hover"],
+        "table_scrollbar_handle_color_pressed": THEME["primary_pressed"],
     }
 )
