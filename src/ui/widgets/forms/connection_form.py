@@ -15,9 +15,9 @@ from entities.connection import Connection
 from entities.driver import Driver
 from modules.connections.service import create_connection, update_connection
 from modules.sessions.service import test_connection
+from ui.app.app_actions import notify
 from ui.utils.layouts import hbox, vbox
-from ui.widgets.notifications.notification import Notification
-from ui.widgets.notifications.notifications_type import NotificationType
+from ui.widgets.notifications.notification_type import NotificationType
 
 logger = logging.getLogger(__name__)
 
@@ -574,21 +574,19 @@ class ConnectionForm(QWidget):
             if self.current_connection is not None:
                 update_connection(connection)
 
-                Notification(
+                notify(
                     NotificationType.SUCCESS,
                     "Connection updated",
-                    parent=self.window(),
-                ).show()
+                )
 
             # CREATE
             else:
                 create_connection(connection)
 
-                Notification(
+                notify(
                     NotificationType.SUCCESS,
                     "Connection saved",
-                    parent=self.window(),
-                ).show()
+                )
 
             logger.success(f"Connection saved '{connection.name}'...")
 
@@ -602,11 +600,10 @@ class ConnectionForm(QWidget):
                 f"Failed to save connection '{connection.name}'. " f"Exception: {e}"
             )
 
-            Notification(
+            notify(
                 NotificationType.ERROR,
                 "Error saving",
-                parent=self.window(),
-            ).show()
+            )
 
     def _test_connection_button_clicked(
         self,
@@ -627,29 +624,26 @@ class ConnectionForm(QWidget):
 
             if success:
 
-                Notification(
+                notify(
                     NotificationType.SUCCESS,
                     "Connection successful",
-                    parent=self.window(),
-                ).show()
+                )
 
             else:
 
-                Notification(
+                notify(
                     NotificationType.ERROR,
                     "Connection failed",
-                    parent=self.window(),
-                ).show()
+                )
 
         except Exception as e:
 
             logger.error(f"Error testing connection: {e}.")
 
-            Notification(
+            notify(
                 NotificationType.ERROR,
                 "Invalid connection data",
-                parent=self.window(),
-            ).show()
+            )
 
     def _build_connection_from_form(
         self,

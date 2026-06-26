@@ -1,6 +1,5 @@
 import qtawesome as qta
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QShowEvent
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtWidgets import (
     QLabel,
     QPushButton,
@@ -9,7 +8,7 @@ from PySide6.QtWidgets import (
 )
 
 from ui.utils.layouts import hbox
-from ui.widgets.notifications.notifications_type import NotificationType
+from ui.widgets.notifications.notification_type import NotificationType
 
 
 class Notification(QWidget):
@@ -23,6 +22,12 @@ class Notification(QWidget):
     - Permitir cerrar manualmente la notificación.
     """
 
+    # =================
+    # === VARIABLES ===
+    # =================
+
+    close_requested = Signal()
+
     # ============
     # === INIT ===
     # ============
@@ -31,7 +36,6 @@ class Notification(QWidget):
         self,
         notification_type: NotificationType,
         message: str,
-        parent=None,
         duration_ms: int | None = None,
     ) -> None:
         """
@@ -44,9 +48,6 @@ class Notification(QWidget):
             message (str):
                 Texto principal de la notificación.
 
-            parent:
-                Widget padre de la notificación.
-
             duration_ms (int | None):
                 Tiempo que permanecerá visible la
                 notificación antes de cerrarse
@@ -58,7 +59,7 @@ class Notification(QWidget):
 
         """
 
-        super().__init__(parent)
+        super().__init__()
 
         self.notification_type = notification_type
 
@@ -69,7 +70,11 @@ class Notification(QWidget):
         # Ventana flotante sin bordes nativos.
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.ToolTip)
 
+        self._set_type_property()
+
         self._setup_ui()
+
+        self._connect_signals()
 
     # ================
     # === UI SETUP ===
@@ -107,11 +112,9 @@ class Notification(QWidget):
         message_label = QLabel(f"[{self.notification_type.value}] {self.message}")
 
         # Botón de cierre.
-        close_button = QPushButton()
+        self.close_button = QPushButton()
 
-        close_button.setIcon(qta.icon("fa5s.times"))
-
-        close_button.clicked.connect(self.close)
+        self.close_button.setIcon(qta.icon("fa5s.times"))
 
         main_layout.setContentsMargins(12, 8, 12, 8)
         main_layout.setSpacing(8)
@@ -119,49 +122,11 @@ class Notification(QWidget):
         main_layout.addWidget(icon_label)
         main_layout.addWidget(message_label)
         main_layout.addSpacing(8)
-        main_layout.addWidget(close_button)
+        main_layout.addWidget(self.close_button)
 
-    def showEvent(
-        self,
-        event: QShowEvent,
-    ) -> None:
-        """
-        Posiciona la notificación respecto
-        a la ventana principal al mostrarse.
-
-        La posición se calcula utilizando
-        coordenadas globales para garantizar
-        compatibilidad con ventanas flotantes
-        (`Qt.ToolTip`) y distintos entornos
-        de escritorio.
-        """
-
-        super().showEvent(event)
-
-        parent = self.parentWidget()
-
-        if parent is None:
-            return
-
-        margin = 16
-
-        # Esquina superior derecha en coordenadas locales
-        top_right = parent.rect().topRight()
-
-        # Convertir a coordenadas globales
-        global_pos = parent.mapToGlobal(top_right)
-
-        # Ajuste para que no se salga por la derecha
-        self.move(
-            global_pos.x() - self.width() - margin,
-            global_pos.y() + margin,
-        )
-
-        QTimer.singleShot(self._get_duration(), self.close)
-
-    # ===============
-    # === HELPERS ===
-    # ===============
+    # ==================
+    # === UI HELPERS ===
+    # ==================
 
     def _get_icon_name(
         self,
@@ -184,34 +149,94 @@ class Notification(QWidget):
 
         return icons[self.notification_type]
 
+    def _set_type_property(
+        self,
+    ) -> None:
+        """
+        Asigna la propiedad Qt 'type' basada en NotificationType.
+        Usada para estilizado con QSS.
+        """
+
+        mapping = {
+            NotificationType.SUCCESS: "success",
+            NotificationType.ERROR: "error",
+            NotificationType.INFO: "info",
+        }
+
+        self.setProperty("type", mapping[self.notification_type])
+
+        self.style().unpolish(self)
+        self.style().polish(self)
+        self.update()
+
+    # ===============
+    # === SIGNALS ===
+    # ===============
+
+    def _connect_signals(
+        self,
+    ) -> None:
+        """
+        Conecta señales de widgets
+        con sus handlers correspondientes.
+        """
+
+        self.close_button.clicked.connect(self._request_close)
+
+    def _request_close(
+        self,
+    ) -> None:
+        """
+        Solicita el cierre de la notificación.
+        Punto único de entrada para cierre manual.
+        """
+
+        self.close_requested.emit()
+
+    # ===================
+    # === PRIVATE API ===
+    # ===================
+
     def _get_duration(
         self,
     ) -> int:
         """
-        Retorna la duración, en milisegundos, durante la cual
-        la notificación permanecerá visible antes de cerrarse
-        automáticamente.
+        Retorna la duración de visualización
+        de la notificación.
 
-        Si se ha especificado una duración personalizada mediante
-        ``duration_ms``, esta tendrá prioridad sobre los valores
-        predeterminados asociados al tipo de notificación.
+        Si existe una duración personalizada,
+        esta tiene prioridad sobre la duración
+        predeterminada.
 
         Duraciones por defecto:
-            - SUCCESS: 5000 ms
-            - INFO: 5000 ms
-            - ERROR: 10000 ms
+            - SUCCESS: 3000 ms
+            - INFO: 3000 ms
+            - ERROR: 3000 ms
 
         Returns:
             int:
-                Tiempo de visualización de la notificación
-                expresado en milisegundos.
+                Duración en milisegundos.
         """
 
         if self.duration_ms is not None:
             return self.duration_ms
 
         return {
-            NotificationType.SUCCESS: 5000,
-            NotificationType.INFO: 5000,
-            NotificationType.ERROR: 10000,
+            NotificationType.SUCCESS: 3000,
+            NotificationType.INFO: 3000,
+            NotificationType.ERROR: 3000,
         }[self.notification_type]
+
+    # ==================
+    # === PUBLIC API ===
+    # ==================
+
+    def start_timer(
+        self,
+    ) -> None:
+        """
+        Inicia el temporizador de cierre
+        automático.
+        """
+
+        QTimer.singleShot(self._get_duration(), self._request_close)

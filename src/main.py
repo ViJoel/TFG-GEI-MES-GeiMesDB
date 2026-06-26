@@ -16,6 +16,7 @@ from PySide6 import QtWidgets
 from log.logger_config import setup_logging
 from modules.database.model import init_database
 from modules.sessions.service import close_all_sessions
+from ui.app.app_context import AppContext
 from ui.app.main_window import MainWindow
 from ui.themes.theme_manager import ThemeManager
 
@@ -60,6 +61,9 @@ def main() -> int:
 
     # Crear ventana principal.
     window = MainWindow()
+
+    # Crear manejador de notificaciones.
+    AppContext.notification_manager.set_main_window(window)
 
     # Mostrar maximizada.
     window.showMaximized()

@@ -8,10 +8,10 @@ from PySide6.QtWidgets import (
 
 from entities.query_result import QueryResult
 from entities.script_result import ScriptResult
+from ui.app.app_actions import notify
 from ui.utils.layouts import hbox, vbox
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
-from ui.widgets.notifications.notification import Notification
-from ui.widgets.notifications.notifications_type import NotificationType
+from ui.widgets.notifications.notification_type import NotificationType
 from ui.widgets.workspace.results_view.console import Console
 from ui.widgets.workspace.results_view.table import Table
 
@@ -284,11 +284,10 @@ class ResultsView(QWidget):
 
         self.save_requested.emit()
 
-        Notification(
+        notify(
             NotificationType.SUCCESS,
             "Changes saved",
-            parent=self.window(),
-        ).show()
+        )
 
     def _discard_changes(
         self,
@@ -296,11 +295,10 @@ class ResultsView(QWidget):
 
         self.table.discard_changes()
 
-        Notification(
+        notify(
             NotificationType.INFO,
             "Changes discarded",
-            parent=self.window(),
-        ).show()
+        )
 
     # ==================
     # === PUBLIC API ===

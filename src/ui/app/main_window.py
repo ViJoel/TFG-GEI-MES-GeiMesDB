@@ -12,17 +12,17 @@ Clases:
 
 import logging
 
-from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QMainWindow, QStackedWidget, QWidget
 
 from common.constants import APP_NAME
 from entities.connection import Connection
 from modules.sessions.service import close_session, open_session
+from ui.app.app_actions import notify
+from ui.app.app_context import AppContext
 from ui.utils.layouts import hbox
 from ui.widgets.forms.connection_form import ConnectionForm
 from ui.widgets.home.home import Home
-from ui.widgets.notifications.notification import Notification
-from ui.widgets.notifications.notifications_type import NotificationType
+from ui.widgets.notifications.notification_type import NotificationType
 from ui.widgets.sidebar.sidebar import Sidebar
 from ui.widgets.workspace.workspace import Workspace
 
@@ -108,6 +108,66 @@ class MainWindow(QMainWindow):
         # Añadir stack al layout principal.
         main_layout.addWidget(self.stack)
 
+    # ================
+    # === UI STATE ===
+    # ================
+
+    def _show_home_page(
+        self,
+    ) -> None:
+        """
+        Navega hacia la pantalla principal.
+        """
+
+        self.stack.setCurrentWidget(self.home_page)
+
+    def _show_connection_form(
+        self,
+    ) -> None:
+        """
+        Muestra el formulario de creación
+        de conexiones.
+        """
+
+        self.connection_form.clear_form()
+
+        self.stack.setCurrentWidget(self.connection_form)
+
+    def _show_edit_connection_form(
+        self,
+        connection: Connection,
+    ) -> None:
+        """
+        Muestra el formulario cargando una
+        conexión existente.
+
+        Args:
+            connection (Connection):
+                Conexión a editar.
+        """
+
+        self.connection_form.load_connection(connection)
+
+        self.stack.setCurrentWidget(self.connection_form)
+
+    def _show_workspace(
+        self,
+        connection: Connection,
+    ) -> None:
+        """
+        Muestra el espacio de trabajo asociado
+        a la conexión indicada.
+
+        Args:
+            connection (Connection):
+                Conexión cuyo espacio de trabajo
+                debe mostrarse.
+        """
+        workspace = self.workspaces.get(connection.id)
+
+        if workspace:
+            self.stack.setCurrentWidget(workspace)
+
     # ===============
     # === SIGNALS ===
     # ===============
@@ -185,11 +245,10 @@ class MainWindow(QMainWindow):
 
             open_session(connection)
 
-            Notification(
+            notify(
                 NotificationType.SUCCESS,
                 "Connection opened",
-                parent=self,
-            ).show()
+            )
 
             # Crear espacio de trabajo.
             if connection.id not in self.workspaces:
@@ -207,11 +266,10 @@ class MainWindow(QMainWindow):
 
             logger.error(f"Error opening session: {e}")
 
-            Notification(
+            notify(
                 NotificationType.ERROR,
                 "Connection failed",
-                parent=self,
-            ).show()
+            )
 
     def _close_connection_session(
         self,
@@ -230,11 +288,10 @@ class MainWindow(QMainWindow):
 
             close_session(connection.id)
 
-            Notification(
+            notify(
                 NotificationType.SUCCESS,
                 "Connection closed",
-                parent=self,
-            ).show()
+            )
 
             # Eliminar espacio de trabajo.
             workspace = self.workspaces.pop(connection.id, None)
@@ -250,11 +307,10 @@ class MainWindow(QMainWindow):
 
             logger.error(f"Error closing session: {e}")
 
-            Notification(
+            notify(
                 NotificationType.ERROR,
                 "Error disconnecting",
-                parent=self,
-            ).show()
+            )
 
     def _on_connection_selected(
         self,
@@ -278,62 +334,26 @@ class MainWindow(QMainWindow):
         else:
             self._show_home_page()
 
-    # ================
-    # === UI STATE ===
-    # ================
+    # ====================
+    # === QT OVERRIDES ===
+    # ====================
 
-    def _show_home_page(
-        self,
-    ) -> None:
+    def moveEvent(self, event):
         """
-        Navega hacia la pantalla principal.
-        """
-
-        self.stack.setCurrentWidget(self.home_page)
-
-    def _show_connection_form(
-        self,
-    ) -> None:
-        """
-        Muestra el formulario de creación
-        de conexiones.
+        Reposiciona las notificaciones cuando
+        la ventana principal cambia de posición.
         """
 
-        self.connection_form.clear_form()
+        super().moveEvent(event)
 
-        self.stack.setCurrentWidget(self.connection_form)
+        AppContext.notification_manager.reposition()
 
-    def _show_edit_connection_form(
-        self,
-        connection: Connection,
-    ) -> None:
+    def resizeEvent(self, event):
         """
-        Muestra el formulario cargando una
-        conexión existente.
-
-        Args:
-            connection (Connection):
-                Conexión a editar.
+        Reposiciona las notificaciones cuando
+        la ventana principal cambia de tamaño.
         """
 
-        self.connection_form.load_connection(connection)
+        super().resizeEvent(event)
 
-        self.stack.setCurrentWidget(self.connection_form)
-
-    def _show_workspace(
-        self,
-        connection: Connection,
-    ) -> None:
-        """
-        Muestra el espacio de trabajo asociado
-        a la conexión indicada.
-
-        Args:
-            connection (Connection):
-                Conexión cuyo espacio de trabajo
-                debe mostrarse.
-        """
-        workspace = self.workspaces.get(connection.id)
-
-        if workspace:
-            self.stack.setCurrentWidget(workspace)
+        AppContext.notification_manager.reposition()
