@@ -8,7 +8,3 @@ QPlainTextEdit#sql_editor {
 QPlainTextEdit#sql_editor:focus {
     border-color: $sql_editor_border_color_focused;
 }
-
-QWidget#sql_editor_line_number_area {
-    background-color: $sql_editor_line_number_background_color;
-}

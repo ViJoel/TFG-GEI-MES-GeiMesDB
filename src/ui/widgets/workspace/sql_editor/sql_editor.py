@@ -1,9 +1,10 @@
 import sqlparse
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import QRectF, Qt, Signal
 from PySide6.QtGui import (
     QColor,
     QKeyEvent,
     QPainter,
+    QPainterPath,
     QPaintEvent,
     QResizeEvent,
     QTextFormat,
@@ -69,6 +70,8 @@ class SqlEditor(QPlainTextEdit):
         self.setPlaceholderText("Write SQL query...")
 
         self.line_number_area = LineNumberArea(self)
+        self.line_number_area.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.line_number_area.setAutoFillBackground(False)
 
         self._update_line_number_area_width()
 
@@ -420,8 +423,7 @@ class SqlEditor(QPlainTextEdit):
         event: QPaintEvent,
     ) -> None:
         """
-        Dibuja los números de línea visibles
-        en el área lateral del editor.
+        Dibuja el área lateral de números de línea.
 
         Args:
             event:
@@ -431,14 +433,116 @@ class SqlEditor(QPlainTextEdit):
 
         painter = QPainter(self.line_number_area)
 
-        painter.fillRect(
-            event.rect(),
+        self._paint_line_number_background(
+            painter,
+        )
+
+        self._paint_line_numbers(
+            painter,
+            event,
+        )
+
+    def _paint_line_number_background(
+        self,
+        painter: QPainter,
+    ) -> None:
+        """
+        Dibuja el fondo del área de numeración
+        con las esquinas izquierdas redondeadas.
+
+        Args:
+            painter:
+                Painter utilizado para el dibujado.
+        """
+
+        radius = 8
+
+        rect = QRectF(self.line_number_area.rect())
+
+        path = QPainterPath()
+
+        path.moveTo(
+            rect.right(),
+            rect.top(),
+        )
+
+        path.lineTo(
+            rect.left() + radius,
+            rect.top(),
+        )
+        path.quadTo(
+            rect.left(),
+            rect.top(),
+            rect.left(),
+            rect.top() + radius,
+        )
+
+        path.lineTo(
+            rect.left(),
+            rect.bottom() - radius,
+        )
+        path.quadTo(
+            rect.left(),
+            rect.bottom(),
+            rect.left() + radius,
+            rect.bottom(),
+        )
+
+        path.lineTo(
+            rect.right(),
+            rect.bottom(),
+        )
+
+        path.closeSubpath()
+
+        painter.setClipPath(path)
+
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+
+        painter.setPen(Qt.PenStyle.NoPen)
+
+        painter.setBrush(
+            QColor(
+                ThemeManager.get_color("sql_editor_line_number_background_color"),
+            )
+        )
+
+        painter.drawPath(path)
+
+        # Dibujar el separador con el editor
+        painter.setPen(
             QColor(
                 ThemeManager.get_color(
-                    "sql_editor_line_number_background_color",
+                    "sql_editor_border_color",
                 )
-            ),
+            )
         )
+
+        x = self.line_number_area.width() - 1
+
+        painter.drawLine(
+            x,
+            0,
+            x,
+            self.line_number_area.height(),
+        )
+
+    def _paint_line_numbers(
+        self,
+        painter: QPainter,
+        event: QPaintEvent,
+    ) -> None:
+        """
+        Dibuja los números de línea visibles.
+
+        Args:
+            painter:
+                Painter utilizado para el dibujado.
+
+            event:
+                Evento de pintado recibido desde
+                el widget de numeración.
+        """
 
         block = self.firstVisibleBlock()
 
@@ -491,4 +595,5 @@ class SqlEditor(QPlainTextEdit):
 
             top = bottom
             bottom = top + round(self.blockBoundingRect(block).height())
+
             block_number += 1
