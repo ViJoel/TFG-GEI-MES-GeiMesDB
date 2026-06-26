@@ -10,6 +10,7 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import QPlainTextEdit, QTextEdit
 
+from ui.themes.theme_manager import ThemeManager
 from ui.widgets.workspace.sql_editor.line_number_area import LineNumberArea
 from ui.widgets.workspace.sql_editor.sql_scope import SqlScope
 
@@ -154,7 +155,13 @@ class SqlEditor(QPlainTextEdit):
 
             selection = QTextEdit.ExtraSelection()
 
-            selection.format.setBackground(QColor("#2d2d2d"))
+            selection.format.setBackground(
+                QColor(
+                    ThemeManager.get_color(
+                        "sql_editor_current_line_background_color",
+                    )
+                )
+            )
 
             selection.format.setProperty(
                 QTextFormat.Property.FullWidthSelection,
@@ -169,6 +176,8 @@ class SqlEditor(QPlainTextEdit):
             selections.append(selection)
 
         self.setExtraSelections(selections)
+
+        self.line_number_area.update()
 
     # ===============
     # === SIGNALS ===
@@ -424,7 +433,11 @@ class SqlEditor(QPlainTextEdit):
 
         painter.fillRect(
             event.rect(),
-            QColor("#1e1e1e"),
+            QColor(
+                ThemeManager.get_color(
+                    "sql_editor_line_number_background_color",
+                )
+            ),
         )
 
         block = self.firstVisibleBlock()
@@ -437,13 +450,33 @@ class SqlEditor(QPlainTextEdit):
 
         bottom = top + round(self.blockBoundingRect(block).height())
 
+        current_block = self.textCursor().blockNumber()
+
         while block.isValid() and top <= event.rect().bottom():
 
             if block.isVisible() and bottom >= event.rect().top():
 
                 number = str(block_number + 1)
 
-                painter.setPen(QColor("#808080"))
+                if block_number == current_block:
+
+                    painter.setPen(
+                        QColor(
+                            ThemeManager.get_color(
+                                "sql_editor_current_line_number_color",
+                            )
+                        )
+                    )
+
+                else:
+
+                    painter.setPen(
+                        QColor(
+                            ThemeManager.get_color(
+                                "sql_editor_line_number_color",
+                            )
+                        )
+                    )
 
                 painter.drawText(
                     0,
@@ -457,7 +490,5 @@ class SqlEditor(QPlainTextEdit):
             block = block.next()
 
             top = bottom
-
             bottom = top + round(self.blockBoundingRect(block).height())
-
             block_number += 1

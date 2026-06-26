@@ -165,6 +165,9 @@ THEME.update(
     {
         "app_background_color": GRAY_900,
         "app_color": GRAY_100,
+        # Tipografía
+        "app_font_family": "'Segoe UI'",
+        "app_font_size": "12px",
     }
 )
 
@@ -359,6 +362,9 @@ THEME.update(
         "console_color": THEME["text"],
         "console_success_color": THEME["success"],
         "console_error_color": THEME["danger"],
+        # Tipografía
+        "console_font_family": "'Consolas'",
+        "console_font_size": "14px",
     }
 )
 
@@ -391,5 +397,27 @@ THEME.update(
         "table_scrollbar_handle_color": THEME["primary"],
         "table_scrollbar_handle_color_hover": THEME["primary_hover"],
         "table_scrollbar_handle_color_pressed": THEME["primary_pressed"],
+    }
+)
+
+# ==================
+# === SQL EDITOR ===
+# ==================
+THEME.update(
+    {
+        # Editor
+        "sql_editor_background_color": GRAY_950,
+        "sql_editor_border_color": THEME["primary"],
+        "sql_editor_border_color_focused": THEME["accent"],
+        "sql_editor_color": THEME["text"],
+        # Tipografía
+        "sql_editor_font_family": "'JetBrains Mono'",
+        "sql_editor_font_size": "14px",
+        # Línea actual
+        "sql_editor_current_line_background_color": GRAY_900,
+        # Área de números de línea
+        "sql_editor_line_number_background_color": GRAY_900,
+        "sql_editor_line_number_color": GRAY_350,
+        "sql_editor_current_line_number_color": THEME["primary"],
     }
 )

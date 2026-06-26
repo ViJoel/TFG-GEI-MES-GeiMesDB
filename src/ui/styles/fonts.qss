@@ -3,7 +3,8 @@
 /* ========================= */
 
 QWidget {
-    font-family: "Segoe UI";
+    font-family: $app_font_family;
+    font-size: $app_font_size;
 }
 
 /* ========================= */
@@ -11,7 +12,8 @@ QWidget {
 /* ========================= */
 
 QPlainTextEdit#sql_editor {
-    font-family: "JetBrains Mono";
+    font-family: $sql_editor_font_family;
+    font-size: $sql_editor_font_size;
 }
 
 /* ========================= */
@@ -19,5 +21,6 @@ QPlainTextEdit#sql_editor {
 /* ========================= */
 
 QTextEdit#console {
-    font-family: "Consolas";
+    font-family: $console_font_family;
+    font-size: $console_font_size;
 }
