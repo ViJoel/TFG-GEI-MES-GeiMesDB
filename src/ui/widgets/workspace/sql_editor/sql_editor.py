@@ -144,44 +144,6 @@ class SqlEditor(QPlainTextEdit):
         if rect.contains(self.viewport().rect()):
             self._update_line_number_area_width()
 
-    def _highlight_current_line(
-        self,
-    ) -> None:
-        """
-        Resalta visualmente la línea donde se
-        encuentra el cursor.
-        """
-
-        selections = []
-
-        if not self.isReadOnly():
-
-            selection = QTextEdit.ExtraSelection()
-
-            selection.format.setBackground(
-                QColor(
-                    ThemeManager.get_color(
-                        "sql_editor_current_line_background_color",
-                    )
-                )
-            )
-
-            selection.format.setProperty(
-                QTextFormat.Property.FullWidthSelection,
-                True,
-            )
-
-            selection.cursor = self.textCursor()
-
-            # Evitar seleccionar texto
-            selection.cursor.clearSelection()
-
-            selections.append(selection)
-
-        self.setExtraSelections(selections)
-
-        self.line_number_area.update()
-
     # ===============
     # === SIGNALS ===
     # ===============
@@ -200,10 +162,6 @@ class SqlEditor(QPlainTextEdit):
 
         self.updateRequest.connect(
             self._update_line_number_area,
-        )
-
-        self.cursorPositionChanged.connect(
-            self._highlight_current_line,
         )
 
     # =====================
@@ -309,6 +267,68 @@ class SqlEditor(QPlainTextEdit):
             self.line_number_area_width(),
             rect.height(),
         )
+
+    def paintEvent(
+        self,
+        event: QPaintEvent,
+    ) -> None:
+        """
+        Dibuja el contenido del editor.
+
+        Antes de delegar el pintado del texto a
+        ``QPlainTextEdit``, se dibuja manualmente
+        el fondo de la línea donde se encuentra
+        el cursor.
+
+        Este enfoque sustituye al uso de
+        ``ExtraSelection`` para el resaltado de
+        la línea actual, proporcionando un
+        resultado visual más uniforme y evitando
+        el efecto de "rectángulo superpuesto"
+        generado por ``FullWidthSelection``.
+
+        Args:
+            event:
+                Evento de pintado recibido desde
+                Qt.
+        """
+
+        # Crear un painter asociado únicamente al
+        # viewport del editor, que es la zona donde
+        # se dibuja el contenido del documento.
+        painter = QPainter(self.viewport())
+
+        # Obtener el bloque (una línea lógica del
+        # documento) donde se encuentra el cursor.
+        block = self.textCursor().block()
+
+        # Obtener el rectángulo ocupado por el
+        # bloque dentro del viewport, teniendo en
+        # cuenta el desplazamiento del contenido.
+        rect = (
+            self.blockBoundingGeometry(block).translated(self.contentOffset()).toRect()
+        )
+
+        # Ajustar la altura al alto real de la
+        # fuente para evitar pequeños desfases
+        # verticales producidos por el layout del
+        # documento.
+        rect.setHeight(self.fontMetrics().height())
+
+        # Obtener el color configurado para el
+        # resaltado de la línea actual.
+        color = QColor(
+            ThemeManager.get_color("sql_editor_current_line_background_color")
+        )
+
+        # Pintar el fondo de la línea antes de que
+        # Qt dibuje el texto, de forma que el texto
+        # quede visible por encima del resaltado.
+        painter.fillRect(rect, color)
+
+        # Delegar el resto del proceso de pintado
+        # al comportamiento estándar del editor.
+        super().paintEvent(event)
 
     # ===================
     # === PRIVATE API ===
@@ -426,17 +446,22 @@ class SqlEditor(QPlainTextEdit):
         Dibuja el área lateral de números de línea.
 
         Args:
-            event:
+            event (QPaintEvent):
                 Evento de pintado recibido desde
                 el widget de numeración.
         """
 
+        # Crear el painter asociado al área
+        # de numeración.
         painter = QPainter(self.line_number_area)
 
+        # Dibujar el fondo del panel lateral.
         self._paint_line_number_background(
             painter,
         )
 
+        # Dibujar los números de las líneas
+        # visibles.
         self._paint_line_numbers(
             painter,
             event,
@@ -451,14 +476,20 @@ class SqlEditor(QPlainTextEdit):
         con las esquinas izquierdas redondeadas.
 
         Args:
-            painter:
+            painter (QPainter):
                 Painter utilizado para el dibujado.
         """
 
+        # Radio de las esquinas
+        # redondeadas del panel.
         radius = 8
 
+        # Área completa del panel lateral.
         rect = QRectF(self.line_number_area.rect())
 
+        # Construir el contorno del panel.
+        # Solo las esquinas izquierdas se
+        # redondean.
         path = QPainterPath()
 
         path.moveTo(
@@ -493,14 +524,22 @@ class SqlEditor(QPlainTextEdit):
             rect.bottom(),
         )
 
+        # Cerrar el contorno para
+        # completar la figura.
         path.closeSubpath()
 
+        # Limitar el área de pintado al
+        # contorno definido.
         painter.setClipPath(path)
 
+        # Suavizar los bordes redondeados.
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
 
+        # Desactivar el contorno para dibujar
+        # únicamente el relleno del panel.
         painter.setPen(Qt.PenStyle.NoPen)
 
+        # Dibujar el fondo del panel.
         painter.setBrush(
             QColor(
                 ThemeManager.get_color("sql_editor_line_number_background_color"),
@@ -509,7 +548,7 @@ class SqlEditor(QPlainTextEdit):
 
         painter.drawPath(path)
 
-        # Dibujar el separador con el editor
+        # Dibujar el separador entre el panel y el editor.
         painter.setPen(
             QColor(
                 ThemeManager.get_color(
@@ -518,6 +557,7 @@ class SqlEditor(QPlainTextEdit):
             )
         )
 
+        # Última columna del panel.
         x = self.line_number_area.width() - 1
 
         painter.drawLine(
@@ -536,32 +576,38 @@ class SqlEditor(QPlainTextEdit):
         Dibuja los números de línea visibles.
 
         Args:
-            painter:
+            painter (QPainter):
                 Painter utilizado para el dibujado.
 
-            event:
+            event (QPaintEvent):
                 Evento de pintado recibido desde
                 el widget de numeración.
         """
 
+        # Primer bloque actualmente visible.
         block = self.firstVisibleBlock()
 
         block_number = block.blockNumber()
 
+        # Coordenadas verticales del bloque
+        # dentro del viewport.
         top = round(
             self.blockBoundingGeometry(block).translated(self.contentOffset()).top()
         )
 
         bottom = top + round(self.blockBoundingRect(block).height())
 
+        # Bloque donde se encuentra el cursor.
         current_block = self.textCursor().blockNumber()
 
+        # Recorrer únicamente los bloques visibles.
         while block.isValid() and top <= event.rect().bottom():
 
             if block.isVisible() and bottom >= event.rect().top():
 
                 number = str(block_number + 1)
 
+                # Resaltar el número de la línea actual.
                 if block_number == current_block:
 
                     painter.setPen(
@@ -582,6 +628,7 @@ class SqlEditor(QPlainTextEdit):
                         )
                     )
 
+                # Dibujar el número alineado a la derecha.
                 painter.drawText(
                     0,
                     top,
@@ -591,6 +638,8 @@ class SqlEditor(QPlainTextEdit):
                     number,
                 )
 
+            # Avanzar al siguiente bloque del
+            # documento y actualizar su posición.
             block = block.next()
 
             top = bottom
