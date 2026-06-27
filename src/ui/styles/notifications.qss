@@ -1,0 +1,67 @@
+QWidget#notification {
+    background-color: $notification_background_color;
+    border: 1px solid $notification_border_color;
+}
+
+QWidget#notification QLabel {
+    background-color: transparent;
+    border: none;
+    color: $notification_color;
+}
+
+QWidget#notification QPushButton {
+    background-color: transparent;
+    border: 1px solid $notification_color;
+    border-radius: 10px;
+    min-width: 20px;
+    max-width: 20px;
+    min-height: 20px;
+    max-height: 20px;
+    padding: 0px;
+}
+
+QWidget#notification QPushButton:hover {
+    background-color: rgba(0, 0, 0, 20);
+}
+
+QWidget#notification QPushButton:pressed {
+    background-color: rgba(0, 0, 0, 40);
+}
+
+QWidget#notification[type="success"] {
+    background-color: $notification_success_background_color;
+    border: 1px solid $notification_success_border_color;
+}
+
+QWidget#notification[type="success"] QLabel {
+    color: $notification_success_color;
+}
+
+QWidget#notification[type="success"] QPushButton {
+    border-color: $notification_success_color;
+}
+
+QWidget#notification[type="error"] {
+    background-color: $notification_error_background_color;
+    border: 1px solid $notification_error_border_color;
+}
+
+QWidget#notification[type="error"] QLabel {
+    color: $notification_error_color;
+}
+QWidget#notification[type="error"] QPushButton {
+    border-color: $notification_error_color;
+}
+
+QWidget#notification[type="info"] {
+    background-color: $notification_info_background_color;
+    border: 1px solid $notification_info_border_color;
+}
+
+QWidget#notification[type="info"] QLabel {
+    color: $notification_info_color;
+}
+
+QWidget#notification[type="info"] QPushButton {
+    border-color: $notification_info_color;
+}

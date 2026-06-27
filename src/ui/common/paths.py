@@ -27,6 +27,7 @@ FONTS_QSS = os.path.join(STYLES_DIR, "fonts.qss")
 SIDEBAR_QSS = os.path.join(STYLES_DIR, "sidebar.qss")
 SQL_EDITOR_QSS = os.path.join(STYLES_DIR, "sql_editor.qss")
 RESULTS_VIEW_QSS = os.path.join(STYLES_DIR, "results_view.qss")
+NOTIFICATIONS_QSS = os.path.join(STYLES_DIR, "notifications.qss")
 WORKSPACE_QSS = os.path.join(STYLES_DIR, "workspace.qss")
 
 
@@ -40,5 +41,6 @@ STYLE_FILES = [
     SIDEBAR_QSS,
     SQL_EDITOR_QSS,
     RESULTS_VIEW_QSS,
+    NOTIFICATIONS_QSS,
     WORKSPACE_QSS,
 ]

@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ui.themes.theme_manager import ThemeManager
 from ui.utils.layouts import hbox
 from ui.widgets.notifications.notification_type import NotificationType
 
@@ -61,6 +62,8 @@ class Notification(QWidget):
 
         super().__init__()
 
+        self.setObjectName("notification")
+
         self.notification_type = notification_type
 
         self.message = message
@@ -69,6 +72,8 @@ class Notification(QWidget):
 
         # Ventana flotante sin bordes nativos.
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.ToolTip)
+
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
 
         self._set_type_property()
 
@@ -105,6 +110,7 @@ class Notification(QWidget):
         icon_label.setPixmap(
             qta.icon(
                 self._get_icon_name(),
+                color=self._get_icon_color(),
             ).pixmap(18, 18)
         )
 
@@ -114,7 +120,12 @@ class Notification(QWidget):
         # Botón de cierre.
         self.close_button = QPushButton()
 
-        self.close_button.setIcon(qta.icon("fa5s.times"))
+        self.close_button.setIcon(
+            qta.icon(
+                "fa5s.times",
+                color=self._get_icon_color(),
+            )
+        )
 
         main_layout.setContentsMargins(12, 8, 12, 8)
         main_layout.setSpacing(8)
@@ -148,6 +159,27 @@ class Notification(QWidget):
         }
 
         return icons[self.notification_type]
+
+    def _get_icon_color(
+        self,
+    ) -> str:
+        """
+        Retorna el color del icono asociado al
+        tipo de notificación.
+
+        Returns:
+            str:
+                Color del icono en formato
+                hexadecimal.
+        """
+
+        colors = {
+            NotificationType.SUCCESS: "notification_success_color",
+            NotificationType.ERROR: "notification_error_color",
+            NotificationType.INFO: "notification_info_color",
+        }
+
+        return ThemeManager.get_color(colors[self.notification_type])
 
     def _set_type_property(
         self,

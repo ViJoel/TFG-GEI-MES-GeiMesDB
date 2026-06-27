@@ -68,6 +68,21 @@ RED_HOVER = "#E05353"
 RED_PRESSED = "#C03A3A"
 RED_DISABLED = "#7D4141"
 
+# =================
+# === LIGHT RED ===
+# =================
+LIGHT_RED = "#E57373"
+LIGHT_RED_HOVER = "#EF9A9A"
+LIGHT_RED_PRESSED = "#D96464"
+LIGHT_RED_DISABLED = "#9A6A6A"
+
+# ================
+# === DARK RED ===
+# ================
+DARK_RED = "#7A2F2F"
+DARK_RED_HOVER = "#914040"
+DARK_RED_PRESSED = "#632424"
+
 # ============
 # === BLUE ===
 # ============
@@ -83,6 +98,21 @@ CYAN = "#26C6DA"
 CYAN_HOVER = "#4DD0E1"
 CYAN_PRESSED = "#00ACC1"
 CYAN_DISABLED = "#2A7D88"
+
+# ==================
+# === LIGHT CYAN ===
+# ==================
+LIGHT_CYAN = "#6EDAE7"
+LIGHT_CYAN_HOVER = "#8BE3EC"
+LIGHT_CYAN_PRESSED = "#57CFDF"
+LIGHT_CYAN_DISABLED = "#5E9097"
+
+# =================
+# === DARK CYAN ===
+# =================
+DARK_CYAN = "#176C78"
+DARK_CYAN_HOVER = "#1E8593"
+DARK_CYAN_PRESSED = "#125964"
 
 # ==============
 # === PURPLE ===
@@ -141,6 +171,11 @@ THEME = {
     "success_hover": LIGHT_GREEN_HOVER,
     "success_pressed": LIGHT_GREEN_PRESSED,
     "success_disabled": LIGHT_GREEN_DISABLED,
+    # Error
+    "error": LIGHT_RED,
+    "error_hover": LIGHT_RED_HOVER,
+    "error_pressed": LIGHT_RED_PRESSED,
+    "error_disabled": LIGHT_RED_DISABLED,
     # Info
     "info": CYAN,
     "info_hover": CYAN_HOVER,
@@ -419,5 +454,29 @@ THEME.update(
         "sql_editor_line_number_background_color": GRAY_900,
         "sql_editor_line_number_color": GRAY_350,
         "sql_editor_current_line_number_color": THEME["primary"],
+    }
+)
+
+# =====================
+# === NOTIFICATIONS ===
+# =====================
+THEME.update(
+    {
+        # Default
+        "notification_background_color": GRAY_100,
+        "notification_border_color": GRAY_300,
+        "notification_color": GRAY_900,
+        # Success
+        "notification_success_background_color": THEME["success"],
+        "notification_success_border_color": DARK_GREEN,
+        "notification_success_color": DARK_GREEN,
+        # Error
+        "notification_error_background_color": THEME["error"],
+        "notification_error_border_color": DARK_RED,
+        "notification_error_color": DARK_RED,
+        # Info
+        "notification_info_background_color": LIGHT_CYAN,
+        "notification_info_border_color": DARK_CYAN,
+        "notification_info_color": DARK_CYAN,
     }
 )
