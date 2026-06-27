@@ -19,6 +19,7 @@ from modules.sessions.service import close_all_sessions
 from ui.app.app_context import AppContext
 from ui.app.main_window import MainWindow
 from ui.themes.theme_manager import ThemeManager
+from ui.widgets.notifications.notification_manager import NotificationManager
 
 
 def shutdown() -> None:
@@ -53,8 +54,11 @@ def main() -> int:
     # Crear aplicación Qt.
     app = QtWidgets.QApplication(sys.argv)
 
+    # Inicializar contexto de la aplicación.
+    AppContext.initialize(app)
+
     # Inicializar tema.
-    ThemeManager.initialize(app)
+    ThemeManager.initialize()
 
     # Registrar cleanup global.
     app.aboutToQuit.connect(shutdown)
@@ -63,7 +67,8 @@ def main() -> int:
     window = MainWindow()
 
     # Crear manejador de notificaciones.
-    AppContext.notification_manager.set_main_window(window)
+    AppContext.set_notification_manager(NotificationManager())
+    AppContext.get_notification_manager().set_main_window(window)
 
     # Mostrar maximizada.
     window.showMaximized()

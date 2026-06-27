@@ -1,49 +1,54 @@
 import logging
 from string import Template
 
+from ui.app.app_context import AppContext
 from ui.common.paths import STYLE_FILES
 from ui.themes import dark
 
 logger = logging.getLogger(__name__)
 
+type ThemePalette = dict[str, str]
 
-# TODO: Actualizar para que use la instancia de la aplicación desde el estado global.
+
 class ThemeManager:
     """
     Gestor central de temas de la aplicación.
 
-    Responsible de cargar, aplicar y resolver valores
-    de la paleta de colores activa, así como de inyectarlos
-    en los archivos QSS mediante sustitución de variables.
+    Responsable de gestionar los temas disponibles,
+    aplicar el tema activo a la aplicación y resolver
+    las variables utilizadas en los archivos QSS.
 
-    El sistema permite definir múltiples temas (dark, light, etc.)
-    y cambiar dinámicamente entre ellos en tiempo de ejecución.
+    Permite cambiar dinámicamente el tema en tiempo
+    de ejecución y consultar los valores de la paleta
+    activa.
     """
 
-    _themes = {
+    _themes: dict[str, ThemePalette] = {
         "dark": dark.THEME,
     }
 
-    _current_theme = "dark"
+    _current_theme: str = "dark"
 
     # ======================
     # === INITIALIZATION ===
     # ======================
 
     @classmethod
-    def initialize(cls, app):
+    def initialize(
+        cls,
+    ) -> None:
         """
-        Inicializa el ThemeManager aplicando el tema activo
-        al QApplication.
+        Inicializa el gestor de temas aplicando
+        el tema activo a la aplicación.
 
-        Args:
-            app (QApplication):
-                Instancia de la aplicación Qt.
+        Raises:
+            RuntimeError:
+                Si AppContext no ha sido inicializado.
         """
 
         logger.info("Initializing theme manager...")
 
-        cls.apply(app)
+        cls.apply()
 
         logger.success("Theme manager initialized.")
 
@@ -52,15 +57,22 @@ class ThemeManager:
     # ===================
 
     @classmethod
-    def apply(cls, app):
+    def apply(
+        cls,
+    ) -> None:
         """
-        Aplica el tema actual generando y estableciendo
-        la hoja de estilos global (QSS).
+        Aplica el tema activo a la aplicación.
 
-        Args:
-            app (QApplication):
-                Instancia de la aplicación Qt.
+        Genera la hoja de estilos (QSS) correspondiente
+        al tema actual y la establece como hoja de estilos
+        global de la aplicación.
+
+        Raises:
+            RuntimeError:
+                Si AppContext no ha sido inicializado.
         """
+
+        app = AppContext.get_app()
 
         logger.info(
             "Applying theme '%s'...",
@@ -79,14 +91,14 @@ class ThemeManager:
     # =======================
 
     @classmethod
-    def set_theme(cls, app, theme_name):
+    def set_theme(
+        cls,
+        theme_name: str,
+    ) -> None:
         """
         Cambia el tema activo de la aplicación.
 
         Args:
-            app (QApplication):
-                Instancia de la aplicación Qt.
-
             theme_name (str):
                 Nombre del tema a activar.
 
@@ -112,14 +124,16 @@ class ThemeManager:
 
         cls._current_theme = theme_name
 
-        cls.apply(app)
+        cls.apply()
 
     # ==================
     # === THEME INFO ===
     # ==================
 
     @classmethod
-    def current_theme(cls):
+    def current_theme(
+        cls,
+    ) -> str:
         """
         Retorna el nombre del tema actualmente activo.
 
@@ -135,15 +149,24 @@ class ThemeManager:
     # ===========================
 
     @classmethod
-    def _build_stylesheet(cls):
+    def _build_stylesheet(
+        cls,
+    ) -> str:
         """
         Construye la hoja de estilos global (QSS)
-        reemplazando variables definidas en el tema
-        dentro de los archivos de estilo.
+        reemplazando las variables definidas en el
+        tema activo dentro de los archivos QSS.
 
         Returns:
             str:
-                QSS final con variables resueltas.
+                Hoja de estilos QSS con todas las
+                variables del tema resueltas.
+
+        Raises:
+            KeyError:
+                Si alguna variable utilizada en un
+                archivo QSS no existe en la paleta
+                del tema activo.
         """
 
         logger.debug(
@@ -191,7 +214,7 @@ class ThemeManager:
     def get_color(
         cls,
         key: str,
-    ):
+    ) -> str:
         """
         Obtiene un color o valor de la paleta del tema actual.
 
@@ -201,9 +224,10 @@ class ThemeManager:
 
         Returns:
             str:
-                Valor asociado a la clave.
-                Si la clave no existe, devuelve el fallback
-                definido por el tema actual.
+                Valor asociado a la clave. Si la clave
+                no existe, devuelve el color de reserva
+                definido por el tema activo o
+                `"transparent"` si no está definido.
         """
 
         colors = cls._themes[cls._current_theme]
