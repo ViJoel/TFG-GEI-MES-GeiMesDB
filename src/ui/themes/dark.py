@@ -423,6 +423,18 @@ THEME.update(
     }
 )
 
+# =================
+# === HOME PAGE ===
+# =================
+THEME.update(
+    {
+        "home_page_background_color": GRAY_950,
+        "home_page_border_color": THEME["primary"],
+        "home_page_title_color": THEME["primary"],
+        "home_page_slogan_color": THEME["secondary"],
+    }
+)
+
 # =====================
 # === NOTIFICATIONS ===
 # =====================
