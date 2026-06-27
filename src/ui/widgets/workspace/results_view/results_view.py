@@ -1,18 +1,17 @@
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
-    QHBoxLayout,
     QPushButton,
     QSizePolicy,
     QStackedLayout,
-    QVBoxLayout,
     QWidget,
 )
 
 from entities.query_result import QueryResult
 from entities.script_result import ScriptResult
+from ui.app.app_actions import notify
+from ui.utils.layouts import hbox, vbox
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
-from ui.widgets.notifications.notification import Notification
-from ui.widgets.notifications.notifications_type import NotificationType
+from ui.widgets.notifications.notification_type import NotificationType
 from ui.widgets.workspace.results_view.console import Console
 from ui.widgets.workspace.results_view.table import Table
 
@@ -60,11 +59,14 @@ class ResultsView(QWidget):
         Construye la interfaz principal del widget.
         """
 
-        pagelayout = QVBoxLayout()
+        pagelayout = vbox(mt=12)
 
-        toolbar_layout = QHBoxLayout()
-        self.left_toolbar_layout = QHBoxLayout()
-        self.right_toolbar_layout = QHBoxLayout()
+        toolbar_layout = hbox(mb=8)
+        self.left_toolbar_layout = hbox()
+        self.right_toolbar_layout = hbox()
+
+        self.left_toolbar_layout.setSpacing(4)
+        self.right_toolbar_layout.setSpacing(4)
 
         self.stacklayout = QStackedLayout()
 
@@ -110,6 +112,7 @@ class ResultsView(QWidget):
     @staticmethod
     def _create_button(
         text: str,
+        button_type: str,
     ) -> QPushButton:
         """
         Crea un botón con tamaño fijo.
@@ -124,6 +127,8 @@ class ResultsView(QWidget):
         """
 
         btn = QPushButton(text)
+
+        btn.setProperty("type", button_type)
 
         btn.setSizePolicy(
             QSizePolicy.Policy.Fixed,
@@ -140,10 +145,18 @@ class ResultsView(QWidget):
         entre las distintas vistas.
         """
 
-        self.console_button = self._create_button("Console")
+        self.console_button = self._create_button(
+            "Console",
+            "primary",
+        )
+
         self.left_toolbar_layout.addWidget(self.console_button)
 
-        self.table_button = self._create_button("Table")
+        self.table_button = self._create_button(
+            "Table",
+            "primary",
+        )
+
         self.left_toolbar_layout.addWidget(self.table_button)
 
     def _create_action_buttons(
@@ -154,10 +167,18 @@ class ResultsView(QWidget):
         disponibles sobre los resultados.
         """
 
-        self.save_button = self._create_button("Save")
+        self.save_button = self._create_button(
+            "Save",
+            "secondary",
+        )
+
         self.right_toolbar_layout.addWidget(self.save_button)
 
-        self.discard_button = self._create_button("Discard")
+        self.discard_button = self._create_button(
+            "Discard",
+            "secondary",
+        )
+
         self.right_toolbar_layout.addWidget(self.discard_button)
 
         self._set_action_buttons_initial_state()
@@ -263,11 +284,10 @@ class ResultsView(QWidget):
 
         self.save_requested.emit()
 
-        Notification(
+        notify(
             NotificationType.SUCCESS,
             "Changes saved",
-            parent=self.window(),
-        ).show()
+        )
 
     def _discard_changes(
         self,
@@ -275,11 +295,10 @@ class ResultsView(QWidget):
 
         self.table.discard_changes()
 
-        Notification(
+        notify(
             NotificationType.INFO,
             "Changes discarded",
-            parent=self.window(),
-        ).show()
+        )
 
     # ==================
     # === PUBLIC API ===

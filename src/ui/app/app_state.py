@@ -12,6 +12,10 @@ def set_selected_connection(
 ) -> None:
     """
     Actualiza la conexión seleccionada.
+
+    Args:
+        connection (Connection):
+            Objeto de la conexión.
     """
 
     global _selected_connection
@@ -31,6 +35,10 @@ def set_selected_connection(
 def get_selected_connection() -> Connection | None:
     """
     Retorna la conexión seleccionada.
+
+    Returns:
+        Connection | None:
+            Objeto de la conexión.
     """
 
     return _selected_connection

@@ -1,11 +1,11 @@
 import logging
 
-from PySide6.QtWidgets import QWidget
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QSplitter, QWidget
 
 from entities.connection import Connection
 from modules.sessions.service import execute_query, execute_script, is_editable_query
-from ui.state.state import get_selected_connection
-from ui.utils.layouts import hbox, vbox
+from ui.utils.layouts import hbox
 from ui.widgets.workspace.results_view.results_view import ResultsView
 from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
 from ui.widgets.workspace.sql_editor.sql_scope import SqlScope
@@ -32,12 +32,23 @@ class Workspace(QWidget):
 
     def __init__(
         self,
+        connection: Connection,
     ) -> None:
         """
-        Inicializa el espacio de trabajo.
+        Inicializa el espacio de trabajo asociado
+        a una conexión concreta.
+
+        Args:
+            connection (Connection):
+                Conexión utilizada para ejecutar
+                consultas y operaciones SQL dentro
+                del espacio de trabajo.
         """
 
         super().__init__()
+
+        self.connection = connection
+        self.current_query: str | None = None
 
         self._setup_ui()
         self._connect_signals()
@@ -52,17 +63,28 @@ class Workspace(QWidget):
         """
         Construye la interfaz principal del widget.
         """
+
         main_layout = hbox()
         self.setLayout(main_layout)
 
-        sql_layout = vbox()
-        main_layout.addLayout(sql_layout)
-
         self.sql_editor = SqlEditor()
-        sql_layout.addWidget(self.sql_editor)
-
         self.results_view = ResultsView()
-        sql_layout.addWidget(self.results_view)
+
+        self.splitter = QSplitter(Qt.Vertical)
+
+        # Grosor de la barra.
+        self.splitter.setHandleWidth(4)
+
+        # Proporciones de tamaño iniciales de los widgets.
+        self.splitter.setSizes([1, 3])
+
+        # Evita que alguno de los paneles desaparezca.
+        self.splitter.setChildrenCollapsible(False)
+
+        self.splitter.addWidget(self.sql_editor)
+        self.splitter.addWidget(self.results_view)
+
+        main_layout.addWidget(self.splitter)
 
     # ===============
     # === SIGNALS ===
@@ -106,10 +128,7 @@ class Workspace(QWidget):
                 Ámbito de ejecución solicitado.
         """
 
-        connection = self._get_selected_connection()
-
-        if connection is None:
-            return
+        connection = self.connection
 
         if scope == SqlScope.SELECTED_TEXT:
 
@@ -191,10 +210,7 @@ class Workspace(QWidget):
         actualiza los resultados.
         """
 
-        connection = self._get_selected_connection()
-
-        if connection is None:
-            return
+        connection = self.connection
 
         logger.info(f"Save requested for '{connection.name}' (ID: {connection.id}).")
 
@@ -237,32 +253,8 @@ class Workspace(QWidget):
         )
 
         self.results_view.set_tab_buttons_state(True)
-        self.results_view.set_action_buttons_state(True)
+        self.results_view.set_action_buttons_state(False)
 
         logger.debug("Results view refreshed.")
 
         logger.success(f"Changes saved for '{connection.name}' (ID: {connection.id}).")
-
-    # ===================
-    # === PRIVATE API ===
-    # ===================
-
-    def _get_selected_connection(
-        self,
-    ) -> Connection | None:
-        """
-        Retorna la conexión actualmente seleccionada.
-
-        Returns:
-            Connection | None:
-                Conexión seleccionada o `None`
-                si no existe selección.
-        """
-
-        connection = get_selected_connection()
-
-        if connection is None:
-            logger.warning("Operation requested without selected connection.")
-            return None
-
-        return connection

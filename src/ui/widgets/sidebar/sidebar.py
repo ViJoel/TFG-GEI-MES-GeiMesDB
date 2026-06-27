@@ -1,3 +1,4 @@
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
 from ui.utils.layouts import vbox
@@ -29,6 +30,8 @@ class Sidebar(QWidget):
 
         super().__init__()
 
+        self.setObjectName("sidebar")
+
         self._setup_ui()
 
     # ================
@@ -42,6 +45,11 @@ class Sidebar(QWidget):
         Construye la interfaz visual
         del sidebar.
         """
+
+        self.setAttribute(
+            Qt.WA_StyledBackground,
+            True,
+        )
 
         # Configurar layout principal.
         self._setup_layout()
@@ -65,7 +73,13 @@ class Sidebar(QWidget):
         """
 
         # Crear layout vertical.
-        self.main_layout = vbox()
+        self.main_layout = vbox(
+            ml=12,
+            mt=12,
+            mr=12,
+            mb=12,
+            sp=16,
+        )
 
         # Asignar layout al widget.
         self.setLayout(self.main_layout)
@@ -78,4 +92,4 @@ class Sidebar(QWidget):
         )
 
         # Ancho fijo del sidebar.
-        self.setFixedWidth(200)
+        self.setFixedWidth(240)

@@ -1,0 +1,26 @@
+QSplitter {
+    background-color: transparent;
+}
+
+QSplitter::handle {
+    background-color: $splitter_background_color;
+    border-radius: 2px;
+}
+
+QSplitter::handle:horizontal {
+    background-color: $splitter_background_color;
+    margin: 12px 0px 12px 0px;
+}
+
+QSplitter::handle:vertical {
+    background-color: $splitter_background_color;
+    margin: 4px 12px 0px 12px;
+}
+
+QSplitter::handle:hover {
+    background-color: $splitter_background_color_hover;
+}
+
+QSplitter::handle:pressed {
+    background-color: $splitter_background_color_pressed;
+}

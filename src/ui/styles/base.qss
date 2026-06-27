@@ -1,0 +1,8 @@
+QWidget {
+    background-color: $app_background_color;
+    color: $app_color;
+}
+
+QWidget#app_logo{
+    background-color: transparent;
+}

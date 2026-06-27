@@ -1,7 +1,8 @@
-from PySide6.QtGui import QColor, QFont, QTextCursor
+from PySide6.QtGui import QColor, QTextCursor
 from PySide6.QtWidgets import QTextEdit
 
 from entities.script_result import ScriptResult
+from ui.themes.theme_manager import ThemeManager
 
 
 class Console(QTextEdit):
@@ -23,6 +24,8 @@ class Console(QTextEdit):
 
         super().__init__()
 
+        self.setObjectName("console")
+
         self._setup_ui()
 
     # ================
@@ -37,10 +40,6 @@ class Console(QTextEdit):
         """
 
         self.setReadOnly(True)
-
-        font = QFont("Consolas")
-        font.setStyleHint(QFont.StyleHint.Monospace)
-        self.setFont(font)
 
     # ===================
     # === PRIVATE API ===
@@ -100,7 +99,7 @@ class Console(QTextEdit):
 
         self._append_colored_text(
             text=text,
-            color=QColor("white"),
+            color=QColor(ThemeManager.get_color("console_color")),
         )
 
     def write_success(
@@ -117,7 +116,7 @@ class Console(QTextEdit):
 
         self._append_colored_text(
             text=text,
-            color=QColor("green"),
+            color=QColor(ThemeManager.get_color("console_success_color")),
         )
 
     def write_error(
@@ -134,7 +133,7 @@ class Console(QTextEdit):
 
         self._append_colored_text(
             text=text,
-            color=QColor("red"),
+            color=QColor(ThemeManager.get_color("console_error_color")),
         )
 
     def show_script_result(
@@ -159,9 +158,7 @@ class Console(QTextEdit):
         for item in script_result.items:
 
             if item.success:
-
-                self.write_success(f"{item.query}\n")
+                self.write_success(f"{item.query}\n\n")
 
             else:
-
-                self.write_error(f"{item.query}\n" f"Error: {item.error}\n")
+                self.write_error(f"{item.query}\n" f"Error: {item.error}\n\n")

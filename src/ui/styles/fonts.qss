@@ -1,0 +1,26 @@
+/* ========================= */
+/* ======== GLOBAL ========= */
+/* ========================= */
+
+QWidget {
+    font-family: $app_font_family;
+    font-size: $app_font_size;
+}
+
+/* ========================= */
+/* ===== TEXT EDITORS ====== */
+/* ========================= */
+
+QPlainTextEdit#sql_editor {
+    font-family: $sql_editor_font_family;
+    font-size: $sql_editor_font_size;
+}
+
+/* ========================= */
+/* ======== CONSOLE ======== */
+/* ========================= */
+
+QTextEdit#console {
+    font-family: $console_font_family;
+    font-size: $console_font_size;
+}

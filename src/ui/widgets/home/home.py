@@ -28,6 +28,8 @@ class Home(QWidget):
 
         super().__init__()
 
+        self.setObjectName("home_page")
+
         self._setup_ui()
 
     # ================
@@ -46,6 +48,11 @@ class Home(QWidget):
         main_layout = vbox()
 
         self.setLayout(main_layout)
+
+        self.setAttribute(
+            Qt.WidgetAttribute.WA_StyledBackground,
+            True,
+        )
 
         # Permitir expansión completa.
         self.setSizePolicy(
@@ -68,11 +75,21 @@ class Home(QWidget):
 
         # Texto principal.
         title_label = QLabel(APP_NAME)
-
-        title_label.setObjectName("homeTitle")
+        title_label.setObjectName("home_page_title")
+        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         main_layout.addWidget(
             title_label,
+            alignment=Qt.AlignmentFlag.AlignCenter,
+        )
+
+        # Texto principal.
+        slogan_label = QLabel("Everything you need. Nothing you don't.")
+        slogan_label.setObjectName("home_page_slogan")
+        slogan_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        main_layout.addWidget(
+            slogan_label,
             alignment=Qt.AlignmentFlag.AlignCenter,
         )
 

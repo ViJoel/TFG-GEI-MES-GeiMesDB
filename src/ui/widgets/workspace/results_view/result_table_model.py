@@ -8,6 +8,7 @@ from PySide6.QtCore import QAbstractTableModel, Qt, Signal
 from PySide6.QtGui import QColor
 
 from entities.query_result import ResultSet
+from ui.themes.theme_manager import ThemeManager
 
 
 class ResultTableModel(QAbstractTableModel):
@@ -115,11 +116,21 @@ class ResultTableModel(QAbstractTableModel):
 
             return self.result_set.rows[row][column]
 
-        if role == Qt.BackgroundRole:
+        if (row, column) in self.modified_cells:
 
-            if (row, column) in self.modified_cells:
+            if role == Qt.BackgroundRole:
+                return QColor(
+                    ThemeManager.get_color(
+                        "table_cell_modified_background_color",
+                    )
+                )
 
-                return QColor("red")
+            if role == Qt.ForegroundRole:
+                return QColor(
+                    ThemeManager.get_color(
+                        "table_cell_modified_color",
+                    )
+                )
 
     def headerData(
         self,

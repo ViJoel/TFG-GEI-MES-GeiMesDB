@@ -1,0 +1,121 @@
+QPushButton {
+    background-color: $button_background_color;
+    border: 2px solid $button_border_color;
+    border-radius: 4px;
+    color: $button_color;
+    padding: 4px 8px;
+}
+
+QPushButton:hover {
+    background-color: $button_background_color_hover;
+    border-color: $button_border_color_hover;
+    color: $button_color_hover;
+}
+
+QPushButton:pressed {
+    background-color: $button_background_color_pressed;
+    border-color: $button_border_color_pressed;
+    color: $button_color_pressed;
+}
+
+QPushButton:disabled {
+    background-color: $button_background_color_disabled;
+    border-color: $button_border_color_disabled;
+    color: $button_color_disabled;
+}
+
+QPushButton[type="primary"] {
+    background-color: $button_primary_background_color;
+    border-color: $button_primary_border_color;
+    color: $button_primary_color;
+}
+
+QPushButton[type="primary"]:hover {
+    background-color: $button_primary_background_color_hover;
+    border-color: $button_primary_border_color_hover;
+    color: $button_primary_color_hover;
+}
+
+QPushButton[type="primary"]:pressed {
+    background-color: $button_primary_background_color_pressed;
+    border-color: $button_primary_border_color_pressed;
+    color: $button_primary_color_pressed;
+}
+
+QPushButton[type="primary"]:disabled {
+    background-color: $button_primary_background_color_disabled;
+    border-color: $button_primary_border_color_disabled;
+    color: $button_primary_color_disabled;
+}
+
+QPushButton[type="secondary"] {
+    background-color: $button_secondary_background_color;
+    border-color: $button_secondary_border_color;
+    color: $button_secondary_color;
+}
+
+QPushButton[type="secondary"]:hover {
+    background-color: $button_secondary_background_color_hover;
+    border-color: $button_secondary_border_color_hover;
+    color: $button_secondary_color_hover;
+}
+
+QPushButton[type="secondary"]:pressed {
+    background-color: $button_secondary_background_color_pressed;
+    border-color: $button_secondary_border_color_pressed;
+    color: $button_secondary_color_pressed;
+}
+
+QPushButton[type="secondary"]:disabled {
+    background-color: $button_secondary_background_color_disabled;
+    border-color: $button_secondary_border_color_disabled;
+    color: $button_secondary_color_disabled;
+}
+
+QPushButton[type="danger"] {
+    background-color: $button_danger_background_color;
+    border-color: $button_danger_border_color;
+    color: $button_danger_color;
+}
+
+QPushButton[type="danger"]:hover {
+    background-color: $button_danger_background_color_hover;
+    border-color: $button_danger_border_color_hover;
+    color: $button_danger_color_hover;
+}
+
+QPushButton[type="danger"]:pressed {
+    background-color: $button_danger_background_color_pressed;
+    border-color: $button_danger_border_color_pressed;
+    color: $button_danger_color_pressed;
+}
+
+QPushButton[type="danger"]:disabled {
+    background-color: $button_danger_background_color_disabled;
+    border-color: $button_danger_border_color_disabled;
+    color: $button_danger_color_disabled;
+}
+
+QPushButton[type="accent"] {
+    background-color: $button_accent_background_color;
+    border-color: $button_accent_border_color;
+    color: $button_accent_color;
+}
+
+QPushButton[type="accent"]:hover {
+    background-color: $button_accent_background_color_hover;
+    border-color: $button_accent_border_color_hover;
+    color: $button_accent_color_hover;
+}
+
+QPushButton[type="accent"]:pressed {
+    background-color: $button_accent_background_color_pressed;
+    border-color: $button_accent_border_color_pressed;
+    color: $button_accent_color_pressed;
+}
+
+QPushButton[type="accent"]:disabled {
+    background-color: $button_accent_background_color_disabled;
+    border-color: $button_accent_border_color_disabled;
+    color: $button_accent_color_disabled;
+}

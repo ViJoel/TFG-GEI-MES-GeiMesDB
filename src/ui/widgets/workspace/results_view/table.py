@@ -1,4 +1,4 @@
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QTableView,
@@ -37,7 +37,42 @@ class Table(QTableView):
 
         super().__init__()
 
+        self.setObjectName("table")
+
+        self._setup_ui()
+
         self.model: ResultTableModel | None = None
+
+    # ================
+    # === UI SETUP ===
+    # ================
+
+    def _setup_ui(
+        self,
+    ) -> None:
+        """
+        Construye la interfaz principal del widget.
+        """
+
+        self.setCornerButtonEnabled(False)
+
+        self.verticalHeader().hide()
+
+        self.setAlternatingRowColors(True)
+
+        self.setSelectionBehavior(
+            QAbstractItemView.SelectionBehavior.SelectRows,
+        )
+
+        self.horizontalHeader().setSectionsClickable(False)
+
+        self.horizontalHeader().setHighlightSections(False)
+
+        self.setSortingEnabled(False)
+
+        self.setShowGrid(True)
+
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
     # ==================
     # === PUBLIC API ===
