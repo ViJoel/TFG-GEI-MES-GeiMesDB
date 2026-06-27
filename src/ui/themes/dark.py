@@ -132,7 +132,6 @@ YELLOW_HOVER = "#FFEE58"
 YELLOW_PRESSED = "#FBC02D"
 YELLOW_DISABLED = "#A3913A"
 
-
 # ============
 # === PINK ===
 # ============
@@ -265,6 +264,46 @@ THEME.update(
         "button_danger_color_hover": GRAY_800,
         "button_danger_color_pressed": GRAY_800,
         "button_danger_color_disabled": THEME["danger_disabled"],
+        # Accent
+        "button_accent_background_color": TRANSPARENT,
+        "button_accent_background_color_hover": THEME["accent_hover"],
+        "button_accent_background_color_pressed": THEME["accent_pressed"],
+        "button_accent_background_color_disabled": TRANSPARENT,
+        "button_accent_border_color": THEME["accent"],
+        "button_accent_border_color_hover": THEME["accent_hover"],
+        "button_accent_border_color_pressed": THEME["accent_pressed"],
+        "button_accent_border_color_disabled": THEME["accent_disabled"],
+        "button_accent_color": THEME["accent"],
+        "button_accent_color_hover": GRAY_800,
+        "button_accent_color_pressed": GRAY_800,
+        "button_accent_color_disabled": THEME["accent_disabled"],
+    }
+)
+
+# =======================
+# === CONNECTION FORM ===
+# =======================
+THEME.update(
+    {
+        # Formulario
+        "connection_form_background_color": GRAY_950,
+        "connection_form_border_color": THEME["primary"],
+        # Título
+        "connection_form_title_background_color": TRANSPARENT,
+        # Labels
+        "connection_form_input_label_color": THEME["text"],
+        # Inputs
+        "connection_form_input_background_color": GRAY_900,
+        "connection_form_input_background_color_hover": GRAY_800,
+        "connection_form_input_background_color_focus": GRAY_900,
+        "connection_form_input_border_color": GRAY_800,
+        "connection_form_input_border_color_hover": GRAY_700,
+        "connection_form_input_border_color_focus": THEME["primary"],
+        "connection_form_input_color": THEME["text"],
+        "connection_form_input_color_hover": THEME["text_hover"],
+        "connection_form_input_color_focus": THEME["primary"],
+        "connection_form_input_placeholder_color": GRAY_450,
+        "connection_form_arrow_icon": ARROW_DOWN_ICON.replace("\\", "/"),
     }
 )
 
@@ -358,6 +397,22 @@ THEME.update(
 )
 
 # ===============
+# === CONSOLE ===
+# ===============
+THEME.update(
+    {
+        "console_background_color": GRAY_950,
+        "console_border_color": THEME["primary"],
+        "console_color": THEME["text"],
+        "console_success_color": THEME["success"],
+        "console_error_color": THEME["danger"],
+        # Tipografía
+        "console_font_family": "'Consolas'",
+        "console_font_size": "14px",
+    }
+)
+
+# ===============
 # === DIALOGS ===
 # ===============
 THEME.update(
@@ -365,6 +420,30 @@ THEME.update(
         "dialog_background_color": GRAY_800,
         "dialog_border_color": GRAY_700,
         "dialog_label_background_color": TRANSPARENT,
+    }
+)
+
+# =====================
+# === NOTIFICATIONS ===
+# =====================
+THEME.update(
+    {
+        # Default
+        "notification_background_color": GRAY_100,
+        "notification_border_color": GRAY_300,
+        "notification_color": GRAY_900,
+        # Success
+        "notification_success_background_color": THEME["success"],
+        "notification_success_border_color": DARK_GREEN,
+        "notification_success_color": DARK_GREEN,
+        # Error
+        "notification_error_background_color": THEME["error"],
+        "notification_error_border_color": DARK_RED,
+        "notification_error_color": DARK_RED,
+        # Info
+        "notification_info_background_color": LIGHT_CYAN,
+        "notification_info_border_color": DARK_CYAN,
+        "notification_info_color": DARK_CYAN,
     }
 )
 
@@ -389,19 +468,25 @@ THEME.update(
     }
 )
 
-# ===============
-# === CONSOLE ===
-# ===============
+# ==================
+# === SQL EDITOR ===
+# ==================
 THEME.update(
     {
-        "console_background_color": GRAY_950,
-        "console_border_color": THEME["primary"],
-        "console_color": THEME["text"],
-        "console_success_color": THEME["success"],
-        "console_error_color": THEME["danger"],
+        # Editor
+        "sql_editor_background_color": GRAY_950,
+        "sql_editor_border_color": THEME["primary"],
+        "sql_editor_border_color_focused": THEME["accent"],
+        "sql_editor_color": THEME["text"],
         # Tipografía
-        "console_font_family": "'Consolas'",
-        "console_font_size": "14px",
+        "sql_editor_font_family": "'JetBrains Mono'",
+        "sql_editor_font_size": "14px",
+        # Línea actual
+        "sql_editor_current_line_background_color": GRAY_900,
+        # Área de números de línea
+        "sql_editor_line_number_background_color": GRAY_900,
+        "sql_editor_line_number_color": GRAY_350,
+        "sql_editor_current_line_number_color": THEME["primary"],
     }
 )
 
@@ -434,78 +519,5 @@ THEME.update(
         "table_scrollbar_handle_color": THEME["primary"],
         "table_scrollbar_handle_color_hover": THEME["primary_hover"],
         "table_scrollbar_handle_color_pressed": THEME["primary_pressed"],
-    }
-)
-
-# ==================
-# === SQL EDITOR ===
-# ==================
-THEME.update(
-    {
-        # Editor
-        "sql_editor_background_color": GRAY_950,
-        "sql_editor_border_color": THEME["primary"],
-        "sql_editor_border_color_focused": THEME["accent"],
-        "sql_editor_color": THEME["text"],
-        # Tipografía
-        "sql_editor_font_family": "'JetBrains Mono'",
-        "sql_editor_font_size": "14px",
-        # Línea actual
-        "sql_editor_current_line_background_color": GRAY_900,
-        # Área de números de línea
-        "sql_editor_line_number_background_color": GRAY_900,
-        "sql_editor_line_number_color": GRAY_350,
-        "sql_editor_current_line_number_color": THEME["primary"],
-    }
-)
-
-# =====================
-# === NOTIFICATIONS ===
-# =====================
-THEME.update(
-    {
-        # Default
-        "notification_background_color": GRAY_100,
-        "notification_border_color": GRAY_300,
-        "notification_color": GRAY_900,
-        # Success
-        "notification_success_background_color": THEME["success"],
-        "notification_success_border_color": DARK_GREEN,
-        "notification_success_color": DARK_GREEN,
-        # Error
-        "notification_error_background_color": THEME["error"],
-        "notification_error_border_color": DARK_RED,
-        "notification_error_color": DARK_RED,
-        # Info
-        "notification_info_background_color": LIGHT_CYAN,
-        "notification_info_border_color": DARK_CYAN,
-        "notification_info_color": DARK_CYAN,
-    }
-)
-
-# =======================
-# === CONNECTION FORM ===
-# =======================
-THEME.update(
-    {
-        # Formulario
-        "connection_form_background_color": GRAY_950,
-        "connection_form_border_color": THEME["primary"],
-        # Título
-        "connection_form_title_background_color": TRANSPARENT,
-        # Labels
-        "connection_form_input_label_color": THEME["text"],
-        # Inputs
-        "connection_form_input_background_color": GRAY_900,
-        "connection_form_input_background_color_hover": GRAY_800,
-        "connection_form_input_background_color_focus": GRAY_900,
-        "connection_form_input_border_color": GRAY_800,
-        "connection_form_input_border_color_hover": GRAY_700,
-        "connection_form_input_border_color_focus": THEME["primary"],
-        "connection_form_input_color": THEME["text"],
-        "connection_form_input_color_hover": THEME["text_hover"],
-        "connection_form_input_color_focus": THEME["primary"],
-        "connection_form_input_placeholder_color": GRAY_450,
-        "connection_form_arrow_icon": ARROW_DOWN_ICON.replace("\\", "/"),
     }
 )

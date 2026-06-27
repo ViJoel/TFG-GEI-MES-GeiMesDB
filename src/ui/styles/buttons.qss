@@ -95,3 +95,27 @@ QPushButton[type="danger"]:disabled {
     border-color: $button_danger_border_color_disabled;
     color: $button_danger_color_disabled;
 }
+
+QPushButton[type="accent"] {
+    background-color: $button_accent_background_color;
+    border-color: $button_accent_border_color;
+    color: $button_accent_color;
+}
+
+QPushButton[type="accent"]:hover {
+    background-color: $button_accent_background_color_hover;
+    border-color: $button_accent_border_color_hover;
+    color: $button_accent_color_hover;
+}
+
+QPushButton[type="accent"]:pressed {
+    background-color: $button_accent_background_color_pressed;
+    border-color: $button_accent_border_color_pressed;
+    color: $button_accent_color_pressed;
+}
+
+QPushButton[type="accent"]:disabled {
+    background-color: $button_accent_background_color_disabled;
+    border-color: $button_accent_border_color_disabled;
+    color: $button_accent_color_disabled;
+}

@@ -104,10 +104,6 @@ QComboBox#connection_form_input QAbstractItemView {
     outline: 0;
 }
 
-/* Path de SQLite */
-
-
-
 /* Botones */
 
 QWidget#connection_form_buttons {

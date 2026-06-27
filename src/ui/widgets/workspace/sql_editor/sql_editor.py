@@ -75,6 +75,9 @@ class SqlEditor(QPlainTextEdit):
 
         self._update_line_number_area_width()
 
+        # Inicializar el resaltado de la línea actual.
+        self._highlight_current_line()
+
     # ==================
     # === UI HELPERS ===
     # ==================
@@ -144,6 +147,41 @@ class SqlEditor(QPlainTextEdit):
         if rect.contains(self.viewport().rect()):
             self._update_line_number_area_width()
 
+    def _highlight_current_line(
+        self,
+    ) -> None:
+        """
+        Resalta la línea donde se encuentra el cursor.
+
+        El resaltado se implementa mediante
+        ``QTextEdit.ExtraSelection`` con la propiedad
+        ``FullWidthSelection`` para cubrir todo el
+        ancho visible del editor.
+
+        El resaltado se actualiza automáticamente cada
+        vez que cambia la posición del cursor.
+        """
+
+        selection = QTextEdit.ExtraSelection()
+
+        selection.cursor = self.textCursor()
+        selection.cursor.clearSelection()
+
+        selection.format.setBackground(
+            QColor(
+                ThemeManager.get_color(
+                    "sql_editor_current_line_background_color",
+                )
+            )
+        )
+
+        selection.format.setProperty(
+            QTextFormat.Property.FullWidthSelection,
+            True,
+        )
+
+        self.setExtraSelections([selection])
+
     # ===============
     # === SIGNALS ===
     # ===============
@@ -162,6 +200,11 @@ class SqlEditor(QPlainTextEdit):
 
         self.updateRequest.connect(
             self._update_line_number_area,
+        )
+
+        # Actualizar el resaltado cuando cambia el cursor.
+        self.cursorPositionChanged.connect(
+            self._highlight_current_line,
         )
 
     # =====================
@@ -267,68 +310,6 @@ class SqlEditor(QPlainTextEdit):
             self.line_number_area_width(),
             rect.height(),
         )
-
-    def paintEvent(
-        self,
-        event: QPaintEvent,
-    ) -> None:
-        """
-        Dibuja el contenido del editor.
-
-        Antes de delegar el pintado del texto a
-        ``QPlainTextEdit``, se dibuja manualmente
-        el fondo de la línea donde se encuentra
-        el cursor.
-
-        Este enfoque sustituye al uso de
-        ``ExtraSelection`` para el resaltado de
-        la línea actual, proporcionando un
-        resultado visual más uniforme y evitando
-        el efecto de "rectángulo superpuesto"
-        generado por ``FullWidthSelection``.
-
-        Args:
-            event:
-                Evento de pintado recibido desde
-                Qt.
-        """
-
-        # Crear un painter asociado únicamente al
-        # viewport del editor, que es la zona donde
-        # se dibuja el contenido del documento.
-        painter = QPainter(self.viewport())
-
-        # Obtener el bloque (una línea lógica del
-        # documento) donde se encuentra el cursor.
-        block = self.textCursor().block()
-
-        # Obtener el rectángulo ocupado por el
-        # bloque dentro del viewport, teniendo en
-        # cuenta el desplazamiento del contenido.
-        rect = (
-            self.blockBoundingGeometry(block).translated(self.contentOffset()).toRect()
-        )
-
-        # Ajustar la altura al alto real de la
-        # fuente para evitar pequeños desfases
-        # verticales producidos por el layout del
-        # documento.
-        rect.setHeight(self.fontMetrics().height())
-
-        # Obtener el color configurado para el
-        # resaltado de la línea actual.
-        color = QColor(
-            ThemeManager.get_color("sql_editor_current_line_background_color")
-        )
-
-        # Pintar el fondo de la línea antes de que
-        # Qt dibuje el texto, de forma que el texto
-        # quede visible por encima del resaltado.
-        painter.fillRect(rect, color)
-
-        # Delegar el resto del proceso de pintado
-        # al comportamiento estándar del editor.
-        super().paintEvent(event)
 
     # ===================
     # === PRIVATE API ===

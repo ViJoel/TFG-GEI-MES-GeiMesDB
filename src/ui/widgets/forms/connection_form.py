@@ -338,7 +338,10 @@ class ConnectionForm(QWidget):
         sub_layout.addStretch()
 
         self.browse_button = QPushButton("Browse")
-        self.browse_button.setObjectName("connection_form_sqlite_path_browse_button")
+        self.browse_button.setProperty(
+            "type",
+            "accent",
+        )
         sub_layout.addWidget(self.browse_button)
 
         self.path_input = self._create_input("/path/to/the/file.db")
