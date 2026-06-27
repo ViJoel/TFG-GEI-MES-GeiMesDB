@@ -46,7 +46,10 @@ class Sidebar(QWidget):
         del sidebar.
         """
 
-        self.setAttribute(Qt.WA_StyledBackground, True)
+        self.setAttribute(
+            Qt.WA_StyledBackground,
+            True,
+        )
 
         # Configurar layout principal.
         self._setup_layout()

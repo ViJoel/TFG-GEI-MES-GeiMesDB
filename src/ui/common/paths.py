@@ -21,6 +21,7 @@ STYLES_DIR = os.path.join(RESOURCE_ROOT, "ui", "styles")
 BASE_QSS = os.path.join(STYLES_DIR, "base.qss")
 BUTTONS_QSS = os.path.join(STYLES_DIR, "buttons.qss")
 CONFIRMATION_DIALOG_QSS = os.path.join(STYLES_DIR, "confirmation_dialog.qss")
+CONNECTION_FORM_QSS = os.path.join(STYLES_DIR, "connection_form.qss")
 CONNECTIONS_LIST_QSS = os.path.join(STYLES_DIR, "connections_list.qss")
 CONNECTIONS_LIST_BUTTONS_QSS = os.path.join(STYLES_DIR, "connections_list_buttons.qss")
 FONTS_QSS = os.path.join(STYLES_DIR, "fonts.qss")
@@ -35,6 +36,7 @@ STYLE_FILES = [
     BASE_QSS,
     BUTTONS_QSS,
     CONFIRMATION_DIALOG_QSS,
+    CONNECTION_FORM_QSS,
     CONNECTIONS_LIST_QSS,
     CONNECTIONS_LIST_BUTTONS_QSS,
     FONTS_QSS,
@@ -44,3 +46,5 @@ STYLE_FILES = [
     NOTIFICATIONS_QSS,
     WORKSPACE_QSS,
 ]
+
+ARROW_DOWN_ICON = os.path.join(IMAGES_DIR, "arrow_down.png")

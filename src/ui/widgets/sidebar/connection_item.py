@@ -45,10 +45,15 @@ class ConnectionItem(QWidget):
         """
 
         self.setAttribute(Qt.WidgetAttribute.WA_Hover)
-        self.setAttribute(Qt.WA_StyledBackground, True)
+
+        self.setAttribute(
+            Qt.WA_StyledBackground,
+            True,
+        )
 
         self.setProperty(
-            "state", "connected" if has_session(self.connection.id) else "disconnected"
+            "state",
+            "connected" if has_session(self.connection.id) else "disconnected",
         )
 
         layout = hbox()

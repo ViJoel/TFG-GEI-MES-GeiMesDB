@@ -45,7 +45,10 @@ class LineNumberArea(QWidget):
 
         self.setObjectName("sql_editor_line_number_area")
 
-        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.setAttribute(
+            Qt.WidgetAttribute.WA_StyledBackground,
+            True,
+        )
 
         self.editor = editor
 

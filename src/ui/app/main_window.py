@@ -12,6 +12,7 @@ Clases:
 
 import logging
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMainWindow, QStackedWidget, QWidget
 
 from common.constants import APP_NAME
@@ -93,14 +94,21 @@ class MainWindow(QMainWindow):
         self.home_page = Home()
 
         # Formulario de conexiones.
+        self.connection_form_page = QWidget()
+        connection_form_layout = hbox()
+        connection_form_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.connection_form_page.setLayout(connection_form_layout)
+
         self.connection_form = ConnectionForm()
+
+        connection_form_layout.addWidget(self.connection_form)
 
         # Espacio de trabajo
         self.workspaces: dict[str, Workspace] = {}
 
         # Registrar páginas.
         self.stack.addWidget(self.home_page)
-        self.stack.addWidget(self.connection_form)
+        self.stack.addWidget(self.connection_form_page)
 
         # Mostrar pantalla inicial.
         self._show_home_page()
@@ -131,7 +139,7 @@ class MainWindow(QMainWindow):
 
         self.connection_form.clear_form()
 
-        self.stack.setCurrentWidget(self.connection_form)
+        self.stack.setCurrentWidget(self.connection_form_page)
 
     def _show_edit_connection_form(
         self,
@@ -148,7 +156,7 @@ class MainWindow(QMainWindow):
 
         self.connection_form.load_connection(connection)
 
-        self.stack.setCurrentWidget(self.connection_form)
+        self.stack.setCurrentWidget(self.connection_form_page)
 
     def _show_workspace(
         self,

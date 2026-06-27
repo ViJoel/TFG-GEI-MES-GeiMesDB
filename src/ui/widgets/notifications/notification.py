@@ -73,7 +73,10 @@ class Notification(QWidget):
         # Ventana flotante sin bordes nativos.
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.ToolTip)
 
-        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.setAttribute(
+            Qt.WidgetAttribute.WA_StyledBackground,
+            True,
+        )
 
         self._set_type_property()
 

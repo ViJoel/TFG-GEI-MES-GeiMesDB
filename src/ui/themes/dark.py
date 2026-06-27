@@ -1,3 +1,5 @@
+from ui.common.paths import ARROW_DOWN_ICON
+
 # ====================
 # === TRANSPARENCY ===
 # ====================
@@ -478,5 +480,32 @@ THEME.update(
         "notification_info_background_color": LIGHT_CYAN,
         "notification_info_border_color": DARK_CYAN,
         "notification_info_color": DARK_CYAN,
+    }
+)
+
+# =======================
+# === CONNECTION FORM ===
+# =======================
+THEME.update(
+    {
+        # Formulario
+        "connection_form_background_color": GRAY_950,
+        "connection_form_border_color": THEME["primary"],
+        # Título
+        "connection_form_title_background_color": TRANSPARENT,
+        # Labels
+        "connection_form_input_label_color": THEME["text"],
+        # Inputs
+        "connection_form_input_background_color": GRAY_900,
+        "connection_form_input_background_color_hover": GRAY_800,
+        "connection_form_input_background_color_focus": GRAY_900,
+        "connection_form_input_border_color": GRAY_800,
+        "connection_form_input_border_color_hover": GRAY_700,
+        "connection_form_input_border_color_focus": THEME["primary"],
+        "connection_form_input_color": THEME["text"],
+        "connection_form_input_color_hover": THEME["text_hover"],
+        "connection_form_input_color_focus": THEME["primary"],
+        "connection_form_input_placeholder_color": GRAY_450,
+        "connection_form_arrow_icon": ARROW_DOWN_ICON.replace("\\", "/"),
     }
 )

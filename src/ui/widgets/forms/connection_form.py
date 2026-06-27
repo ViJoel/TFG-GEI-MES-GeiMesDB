@@ -1,6 +1,6 @@
 import logging
 
-from PySide6.QtCore import QRegularExpression, Signal
+from PySide6.QtCore import QRegularExpression, Qt, Signal
 from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import (
     QComboBox,
@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
+    QSizePolicy,
     QWidget,
 )
 
@@ -54,6 +55,8 @@ class ConnectionForm(QWidget):
 
         super().__init__()
 
+        self.setObjectName("connection_form")
+
         # Conexión actualmente cargada en edición.
         self.current_connection: Connection | None = None
 
@@ -72,15 +75,31 @@ class ConnectionForm(QWidget):
         del formulario.
         """
 
-        # Layout vertical principal
-        main_layout = vbox()
+        self.setFixedWidth(480)
+
+        self.setAttribute(
+            Qt.WidgetAttribute.WA_StyledBackground,
+            True,
+        )
+
+        main_layout = vbox(
+            ml=32,
+            mt=24,
+            mr=32,
+            mb=24,
+            sp=16,
+        )
         self.setLayout(main_layout)
 
-        self._build_form_title(main_layout, "Connection form")
+        self._build_form_title(main_layout)
 
-        self._build_form_inputs(main_layout)
+        self._build_form_fields(main_layout)
+
+        main_layout.addStretch()
 
         self._build_action_buttons(main_layout)
+
+        self.setFixedHeight(self.sizeHint().height())
 
         # Aplicar estado visual inicial.
         self._update_fields_visibility()
@@ -88,24 +107,28 @@ class ConnectionForm(QWidget):
     def _build_form_title(
         self,
         parent_layout,
-        title_text: str,
     ) -> None:
         """
         Construye el título principal
         del formulario.
-
-        Args:
-            title_text (str):
-                Texto mostrado como título.
         """
 
         title_label = QLabel()
 
-        title_label.setText(title_text)
+        title_label.setObjectName("connection_form_title")
+
+        title_label.setSizePolicy(
+            QSizePolicy.Policy.Preferred,
+            QSizePolicy.Policy.Maximum,
+        )
+
+        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        title_label.setText("Connection form")
 
         parent_layout.addWidget(title_label)
 
-    def _build_form_inputs(
+    def _build_form_fields(
         self,
         parent_layout,
     ) -> None:
@@ -114,15 +137,26 @@ class ConnectionForm(QWidget):
         campos editables del formulario.
         """
 
-        inputs_layout = vbox()
+        inputs_layout = vbox(sp=16)
+        inputs_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         self._build_name_field(inputs_layout)
         self._build_driver_field(inputs_layout)
-        self._build_host_field(inputs_layout)
-        self._build_port_field(inputs_layout)
+
+        layout_1 = hbox(sp=8)
+        inputs_layout.addLayout(layout_1)
+
+        self._build_host_field(layout_1)
+        self._build_port_field(layout_1)
+
         self._build_database_field(inputs_layout)
-        self._build_username_field(inputs_layout)
-        self._build_password_field(inputs_layout)
+
+        layout_2 = hbox(sp=8)
+        inputs_layout.addLayout(layout_2)
+
+        self._build_username_field(layout_2)
+        self._build_password_field(layout_2)
+
         self._build_path_field(inputs_layout)
 
         parent_layout.addLayout(inputs_layout)
@@ -157,7 +191,10 @@ class ConnectionForm(QWidget):
 
         self.name_input = self._create_input("My personal DB")
 
-        self.name_field = self._build_field("Name", self.name_input)
+        self.name_field = self._build_field(
+            "Name",
+            self.name_input,
+        )
 
         parent_layout.addWidget(self.name_field)
 
@@ -171,6 +208,7 @@ class ConnectionForm(QWidget):
         """
 
         self.driver_input = QComboBox()
+        self.driver_input.setObjectName("connection_form_input")
 
         # Registrar drivers disponibles.
         for driver in Driver:
@@ -283,23 +321,31 @@ class ConnectionForm(QWidget):
         para conexiones SQLite.
         """
 
+        field_widget = QWidget()
+        field_widget.setObjectName("connection_form_field")
+
+        field_layout = vbox(sp=4)
+        field_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+        field_widget.setLayout(field_layout)
+
+        sub_layout = hbox(sp=4)
+        field_layout.addLayout(sub_layout)
+
+        label = self._create_input_label("Path to the file")
+        sub_layout.addWidget(label)
+
+        sub_layout.addStretch()
+
+        self.browse_button = QPushButton("Browse")
+        self.browse_button.setObjectName("connection_form_sqlite_path_browse_button")
+        sub_layout.addWidget(self.browse_button)
+
         self.path_input = self._create_input("/path/to/the/file.db")
 
-        self.browse_button = QPushButton("Browse...")
+        field_layout.addWidget(self.path_input)
 
-        file_selection_widget = QWidget()
-
-        file_selection_layout = hbox()
-
-        file_selection_widget.setLayout(file_selection_layout)
-
-        file_selection_layout.addWidget(self.path_input)
-        file_selection_layout.addWidget(self.browse_button)
-
-        self.path_field = self._build_field(
-            "Path to the file",
-            file_selection_widget,
-        )
+        self.path_field = field_widget
 
         parent_layout.addWidget(self.path_field)
 
@@ -312,22 +358,36 @@ class ConnectionForm(QWidget):
         """
 
         buttons_widget = QWidget()
+        buttons_widget.setObjectName("connection_form_buttons")
 
         buttons_layout = hbox()
+        buttons_layout.setSpacing(8)
 
         buttons_widget.setLayout(buttons_layout)
 
         # Botones
-        self.test_connection_button = QPushButton("Test connection")
-        self.cancel_button = QPushButton("Cancel")
-        self.save_button = QPushButton("Save")
+        self.test_connection_button = self._create_button(
+            "Test connection",
+            "type",
+            "secondary",
+        )
 
-        buttons_layout.addWidget(self.test_connection_button)
+        self.cancel_button = self._create_button(
+            "Cancel",
+            "type",
+            "danger",
+        )
 
-        # Espacio extensible entre los botones
+        self.save_button = self._create_button(
+            "Save",
+            "type",
+            "primary",
+        )
+
         buttons_layout.addStretch()
 
         buttons_layout.addWidget(self.cancel_button)
+        buttons_layout.addWidget(self.test_connection_button)
         buttons_layout.addWidget(self.save_button)
 
         parent_layout.addWidget(buttons_widget)
@@ -354,7 +414,9 @@ class ConnectionForm(QWidget):
         """
 
         label = QLabel()
+        label.setObjectName("connection_form_input_label")
         label.setText(label_text)
+
         return label
 
     def _create_input(
@@ -376,13 +438,15 @@ class ConnectionForm(QWidget):
         """
 
         input_field = QLineEdit()
+        input_field.setObjectName("connection_form_input")
         input_field.setPlaceholderText(placeholder)
+
         return input_field
 
     def _build_field(
         self,
-        label_text,
-        widget,
+        label_text: str,
+        widget: QWidget,
     ) -> QWidget:
         """
         Construye un campo estándar compuesto por:
@@ -394,7 +458,7 @@ class ConnectionForm(QWidget):
             label_text (str):
                 Texto del label principal.
 
-            widget:
+            widget (QWidget):
                 Widget principal del campo.
 
         Returns:
@@ -403,8 +467,10 @@ class ConnectionForm(QWidget):
         """
 
         field_widget = QWidget()
+        field_widget.setObjectName("connection_form_field")
 
-        field_layout = vbox()
+        field_layout = vbox(sp=4)
+        field_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         field_widget.setLayout(field_layout)
 
@@ -414,6 +480,40 @@ class ConnectionForm(QWidget):
         field_layout.addWidget(widget)
 
         return field_widget
+
+    def _create_button(
+        self,
+        text: str,
+        property_name: str,
+        property_value: str,
+    ) -> QPushButton:
+        """
+        Crea un botón del formulario.
+
+        Args:
+            text (str):
+                Texto que aparecerá en el botón.
+
+            property_name (str):
+                Nombre de la propiedad QSS.
+
+            property_value (str):
+                Valor de la propiedad QSS.
+
+        Returns:
+            QPushButton: Botón creado.
+        """
+
+        button = QPushButton(text)
+
+        button.setObjectName("connection_form_button")
+
+        button.setProperty(
+            property_name,
+            property_value,
+        )
+
+        return button
 
     # =============
     # === REGEX ===

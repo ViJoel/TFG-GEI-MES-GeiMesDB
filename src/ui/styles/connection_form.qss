@@ -1,0 +1,119 @@
+/* ======================= */
+/* === CONNECTION FORM === */
+/* ======================= */
+
+/* Formulario */
+
+QWidget#connection_form {
+    background: $connection_form_background_color;
+    border: 2px solid $connection_form_border_color;
+    border-radius: 8px;
+}
+
+/* Título */
+
+QLabel#connection_form_title {
+    background-color: $connection_form_title_background_color;
+    border-bottom: 2px solid $connection_form_border_color;
+    border-top: 2px solid $connection_form_border_color;
+    border-radius: 8px;
+    font-size: 20px;
+    padding: 4px 8px 4px 8px;
+}
+
+/* Campos */
+
+QWidget#connection_form_field {
+    background: transparent;
+}
+
+QLabel#connection_form_input_label {
+    background-color: transparent;
+    color: $connection_form_input_label_color;
+    font-size: 14px;
+}
+
+QLineEdit#connection_form_input {
+    background-color: $connection_form_input_background_color;
+    border: 1px solid $connection_form_input_border_color;
+    border-radius: 4px;
+    color: $connection_form_input_color;
+    font-size: 12px;
+    padding: 8px 12px;
+}
+
+QLineEdit#connection_form_input:hover {
+    background-color: $connection_form_input_background_color_hover;
+    border-color: $connection_form_input_border_color_hover;
+    color: $connection_form_input_color_hover;
+}
+
+QLineEdit#connection_form_input:focus {
+    background-color: $connection_form_input_background_color_focus;
+    border: 1px solid $connection_form_input_border_color_focus;
+    color: $connection_form_input_color_focus;
+}
+
+QLineEdit#connection_form_input::placeholder {
+    color: $connection_form_input_placeholder_color;
+}
+
+/* Desplegable del driver */
+
+QComboBox#connection_form_input {
+    background-color: $connection_form_input_background_color;
+    border: 1px solid $connection_form_input_border_color;
+    border-radius: 4px;
+    color: $connection_form_input_color;
+    font-size: 12px;
+    padding: 8px 12px;
+}
+
+QComboBox#connection_form_input:hover {
+    background-color: $connection_form_input_background_color_hover;
+    border-color: $connection_form_input_border_color_hover;
+    color: $connection_form_input_color_hover;
+}
+
+QComboBox#connection_form_input:focus {
+    background-color: $connection_form_input_background_color_focus;
+    border: 1px solid $connection_form_input_border_color_focus;
+    color: $connection_form_input_color_focus;
+}
+
+QComboBox#connection_form_input::drop-down {
+    background-color: $connection_form_input_background_color_hover;
+    border-left: 1px solid $connection_form_input_border_color;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 28px;
+}
+
+QComboBox#connection_form_input::down-arrow {
+    image: url($connection_form_arrow_icon);
+    width: 12px;
+    height: 12px;
+}
+
+QComboBox#connection_form_input QAbstractItemView {
+    background-color: $connection_form_background_color;
+    border: 1px solid $connection_form_border_color;
+    selection-background-color: $connection_form_input_background_color_hover;
+    outline: 0;
+}
+
+/* Path de SQLite */
+
+
+
+/* Botones */
+
+QWidget#connection_form_buttons {
+    background-color: transparent;
+}
+
+QPushButton#connection_form_button {
+    padding: 8px 16px;
+}
