@@ -5,8 +5,18 @@ import pytest
 
 from modules.database.wrapper import handle_db_errors
 
+# =============================================================================
+# handle_db_errors
+# =============================================================================
+
 
 def test_handle_db_errors_integrity():
+    """
+    Verifica que el decorador handle_db_errors captura
+    correctamente errores de integridad (IntegrityError)
+    y registra un warning en el logger.
+    """
+
     @handle_db_errors("insert test")
     def func():
         raise IntegrityError("duplicate key")
@@ -19,6 +29,12 @@ def test_handle_db_errors_integrity():
 
 
 def test_handle_db_errors_operational():
+    """
+    Verifica que el decorador handle_db_errors captura
+    errores operacionales de SQLite (OperationalError)
+    y registra un error en el logger.
+    """
+
     @handle_db_errors("query test")
     def func():
         raise OperationalError("db locked")
@@ -31,6 +47,12 @@ def test_handle_db_errors_operational():
 
 
 def test_handle_db_errors_generic_exception():
+    """
+    Verifica que el decorador handle_db_errors captura
+    excepciones genéricas no controladas y las registra
+    como error en el logger.
+    """
+
     @handle_db_errors("unknown op")
     def func():
         raise Exception("boom")
