@@ -24,3 +24,6 @@ dist/
 # Carpetas autogeneradas del proyecto
 geimesdb_logs/
 geimesdb_data/
+
+# Tests
+.coverage

@@ -38,7 +38,10 @@ class ConnectionForm(QWidget):
       y el guardado.
     """
 
-    # Señales emitidas por el formulario.
+    # =================
+    # === VARIABLES ===
+    # =================
+
     connection_saved = Signal()
     cancel_requested = Signal()
 
@@ -175,6 +178,157 @@ class ConnectionForm(QWidget):
         self.sqlite_fields = [
             self.path_field,
         ]
+
+    # ================
+    # === UI STATE ===
+    # ================
+
+    def _update_fields_visibility(
+        self,
+    ) -> None:
+        """
+        Actualiza la visibilidad de los campos
+        según el driver seleccionado.
+
+        SQLite utiliza archivo local,
+        mientras que el resto de drivers
+        requieren configuración de red.
+        """
+
+        selected_driver = self.driver_input.currentText()
+
+        is_sqlite = selected_driver == Driver.SQLITE.value
+
+        # Campos de conexiones remotas.
+        for field in self.network_fields:
+            field.setVisible(not is_sqlite)
+
+        # Campos exclusivos de SQLite.
+        for field in self.sqlite_fields:
+            field.setVisible(is_sqlite)
+
+    # ==================
+    # === UI HELPERS ===
+    # ==================
+
+    def _create_input_label(
+        self,
+        label_text: str,
+    ) -> QLabel:
+        """
+        Crea un label reutilizable para
+        los campos del formulario.
+
+        Args:
+            label_text (str):
+                Texto mostrado en el label.
+
+        Returns:
+            QLabel:
+                Label configurado.
+        """
+
+        label = QLabel()
+        label.setObjectName("connection_form_input_label")
+        label.setText(label_text)
+
+        return label
+
+    def _create_input(
+        self,
+        placeholder: str,
+    ) -> QLineEdit:
+        """
+        Crea un input reutilizable para
+        el formulario.
+
+        Args:
+            placeholder (str):
+                Texto guía mostrado cuando
+                el campo está vacío.
+
+        Returns:
+            QLineEdit:
+                Input configurado.
+        """
+
+        input_field = QLineEdit()
+        input_field.setObjectName("connection_form_input")
+        input_field.setPlaceholderText(placeholder)
+
+        return input_field
+
+    def _build_field(
+        self,
+        label_text: str,
+        widget: QWidget,
+    ) -> QWidget:
+        """
+        Construye un campo estándar compuesto por:
+        - Contenedor vertical.
+        - Etiqueta descriptiva,
+        - Widget principal,
+
+        Args:
+            label_text (str):
+                Texto del label principal.
+
+            widget (QWidget):
+                Widget principal del campo.
+
+        Returns:
+            QWidget:
+                Contenedor completo del campo.
+        """
+
+        field_widget = QWidget()
+        field_widget.setObjectName("connection_form_field")
+
+        field_layout = vbox(sp=4)
+        field_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+        field_widget.setLayout(field_layout)
+
+        field_label = self._create_input_label(label_text)
+
+        field_layout.addWidget(field_label)
+        field_layout.addWidget(widget)
+
+        return field_widget
+
+    def _create_button(
+        self,
+        text: str,
+        property_name: str,
+        property_value: str,
+    ) -> QPushButton:
+        """
+        Crea un botón del formulario.
+
+        Args:
+            text (str):
+                Texto que aparecerá en el botón.
+
+            property_name (str):
+                Nombre de la propiedad QSS.
+
+            property_value (str):
+                Valor de la propiedad QSS.
+
+        Returns:
+            QPushButton: Botón creado.
+        """
+
+        button = QPushButton(text)
+
+        button.setObjectName("connection_form_button")
+
+        button.setProperty(
+            property_name,
+            property_value,
+        )
+
+        return button
 
     # ======================
     # === FIELD BUILDERS ===
@@ -394,129 +548,6 @@ class ConnectionForm(QWidget):
         buttons_layout.addWidget(self.save_button)
 
         parent_layout.addWidget(buttons_widget)
-
-    # ===============
-    # === HELPERS ===
-    # ===============
-
-    def _create_input_label(
-        self,
-        label_text: str,
-    ) -> QLabel:
-        """
-        Crea un label reutilizable para
-        los campos del formulario.
-
-        Args:
-            label_text (str):
-                Texto mostrado en el label.
-
-        Returns:
-            QLabel:
-                Label configurado.
-        """
-
-        label = QLabel()
-        label.setObjectName("connection_form_input_label")
-        label.setText(label_text)
-
-        return label
-
-    def _create_input(
-        self,
-        placeholder: str,
-    ) -> QLineEdit:
-        """
-        Crea un input reutilizable para
-        el formulario.
-
-        Args:
-            placeholder (str):
-                Texto guía mostrado cuando
-                el campo está vacío.
-
-        Returns:
-            QLineEdit:
-                Input configurado.
-        """
-
-        input_field = QLineEdit()
-        input_field.setObjectName("connection_form_input")
-        input_field.setPlaceholderText(placeholder)
-
-        return input_field
-
-    def _build_field(
-        self,
-        label_text: str,
-        widget: QWidget,
-    ) -> QWidget:
-        """
-        Construye un campo estándar compuesto por:
-        - Contenedor vertical.
-        - Etiqueta descriptiva,
-        - Widget principal,
-
-        Args:
-            label_text (str):
-                Texto del label principal.
-
-            widget (QWidget):
-                Widget principal del campo.
-
-        Returns:
-            QWidget:
-                Contenedor completo del campo.
-        """
-
-        field_widget = QWidget()
-        field_widget.setObjectName("connection_form_field")
-
-        field_layout = vbox(sp=4)
-        field_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-
-        field_widget.setLayout(field_layout)
-
-        field_label = self._create_input_label(label_text)
-
-        field_layout.addWidget(field_label)
-        field_layout.addWidget(widget)
-
-        return field_widget
-
-    def _create_button(
-        self,
-        text: str,
-        property_name: str,
-        property_value: str,
-    ) -> QPushButton:
-        """
-        Crea un botón del formulario.
-
-        Args:
-            text (str):
-                Texto que aparecerá en el botón.
-
-            property_name (str):
-                Nombre de la propiedad QSS.
-
-            property_value (str):
-                Valor de la propiedad QSS.
-
-        Returns:
-            QPushButton: Botón creado.
-        """
-
-        button = QPushButton(text)
-
-        button.setObjectName("connection_form_button")
-
-        button.setProperty(
-            property_name,
-            property_value,
-        )
-
-        return button
 
     # =============
     # === REGEX ===
@@ -805,31 +836,3 @@ class ConnectionForm(QWidget):
 
         self.clear_form()
         self.cancel_requested.emit()
-
-    # ================
-    # === UI STATE ===
-    # ================
-
-    def _update_fields_visibility(
-        self,
-    ) -> None:
-        """
-        Actualiza la visibilidad de los campos
-        según el driver seleccionado.
-
-        SQLite utiliza archivo local,
-        mientras que el resto de drivers
-        requieren configuración de red.
-        """
-
-        selected_driver = self.driver_input.currentText()
-
-        is_sqlite = selected_driver == Driver.SQLITE.value
-
-        # Campos de conexiones remotas.
-        for field in self.network_fields:
-            field.setVisible(not is_sqlite)
-
-        # Campos exclusivos de SQLite.
-        for field in self.sqlite_fields:
-            field.setVisible(is_sqlite)
