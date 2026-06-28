@@ -1,6 +1,6 @@
 import pytest
 
-from src.entities.driver import Driver
+from entities.driver import Driver
 
 # ========================
 # === VALORES DEL ENUM ===
