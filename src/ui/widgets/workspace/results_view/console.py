@@ -161,4 +161,4 @@ class Console(QTextEdit):
                 self.write_success(f"{item.query}\n\n")
 
             else:
-                self.write_error(f"{item.query}\n" f"Error: {item.error}\n\n")
+                self.write_error(f"{item.query}\nError: {item.error}\n\n")

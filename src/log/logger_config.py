@@ -23,7 +23,9 @@ def success(self, message, *args, **kwargs):
 logging.Logger.success = success
 
 
-def setup_logging():
+def setup_logging(
+    base_dir: str | None = None,
+):
     """
     Configura el sistema global de logging de la aplicación.
 
@@ -36,16 +38,21 @@ def setup_logging():
     La configuración soporta tanto:
         - Ejecución en desarrollo
         - Ejecutables empaquetados (PyInstaller)
+
+    Args:
+        base_dir (str):
+            Directorio base.
     """
 
-    # En aplicaciones empaquetadas, el ejecutable es
-    # la referencia correcta para resolver rutas.
-    if getattr(sys, "frozen", False):
-        base_dir = os.path.dirname(sys.executable)
+    if base_dir is None:
+        # En aplicaciones empaquetadas, el ejecutable es
+        # la referencia correcta para resolver rutas.
+        if getattr(sys, "frozen", False):
+            base_dir = os.path.dirname(sys.executable)
 
-    # En desarrollo se toma la raíz del proyecto.
-    else:
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        # En desarrollo se toma la raíz del proyecto.
+        else:
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     # Directorio donde se almacenarán los logs.
     log_dir = os.path.join(base_dir, "geimesdb_logs")

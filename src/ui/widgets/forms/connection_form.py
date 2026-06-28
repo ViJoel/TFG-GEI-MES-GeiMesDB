@@ -731,7 +731,7 @@ class ConnectionForm(QWidget):
         except Exception as e:
 
             logger.error(
-                f"Failed to save connection '{connection.name}'. " f"Exception: {e}"
+                f"Failed to save connection '{connection.name}'.\nException: {e}"
             )
 
             notify(

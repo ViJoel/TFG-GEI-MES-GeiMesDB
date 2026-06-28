@@ -95,9 +95,7 @@ def open_session(
 
     except Exception as e:
 
-        logger.error(
-            f"Failed to open session for '{connection.name}'.\n" f"Exception: {e}"
-        )
+        logger.error(f"Failed to open session for '{connection.name}'.\nException: {e}")
 
         if session is not None:
             try:
@@ -241,9 +239,7 @@ def test_connection(
 
     except SQLAlchemyError as e:
 
-        logger.error(
-            f"Connection test failed for '{connection.name}'.\n" f"Exception: {e}"
-        )
+        logger.error(f"Connection test failed for '{connection.name}'.\nException: {e}")
 
         return False
 
