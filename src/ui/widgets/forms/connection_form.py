@@ -17,6 +17,7 @@ from entities.driver import Driver
 from modules.connections.service import create_connection, update_connection
 from modules.sessions.service import test_connection
 from ui.app.app_actions import notify
+from ui.app.app_context import AppContext
 from ui.utils.layouts import hbox, vbox
 from ui.widgets.notifications.notification_type import NotificationType
 
@@ -749,6 +750,15 @@ class ConnectionForm(QWidget):
         """
 
         try:
+
+            notify(
+                NotificationType.WARNING,
+                "Testing connection...",
+            )
+
+            # Forzar el repintado de la UI antes de iniciar una operación
+            # síncrona que bloqueará temporalmente el hilo principal.
+            AppContext.get_app().processEvents()
 
             connection = self._build_connection_from_form()
 

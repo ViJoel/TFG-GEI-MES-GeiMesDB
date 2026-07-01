@@ -251,6 +251,11 @@ class MainWindow(QMainWindow):
 
         try:
 
+            notify(
+                NotificationType.WARNING,
+                "Opening connection...",
+            )
+
             open_session(connection)
 
             notify(
@@ -293,6 +298,11 @@ class MainWindow(QMainWindow):
         """
 
         try:
+
+            notify(
+                NotificationType.WARNING,
+                "Closing connection...",
+            )
 
             close_session(connection.id)
 

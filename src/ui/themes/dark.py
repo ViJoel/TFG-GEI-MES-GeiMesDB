@@ -132,6 +132,21 @@ YELLOW_HOVER = "#FFEE58"
 YELLOW_PRESSED = "#FBC02D"
 YELLOW_DISABLED = "#A3913A"
 
+# ====================
+# === LIGHT YELLOW ===
+# ====================
+LIGHT_YELLOW = "#FFE082"
+LIGHT_YELLOW_HOVER = "#FFECB3"
+LIGHT_YELLOW_PRESSED = "#FFD54F"
+LIGHT_YELLOW_DISABLED = "#B8A66A"
+
+# ===================
+# === DARK YELLOW ===
+# ===================
+DARK_YELLOW = "#8A6D00"
+DARK_YELLOW_HOVER = "#A37F00"
+DARK_YELLOW_PRESSED = "#705900"
+
 # ============
 # === PINK ===
 # ============
@@ -456,6 +471,10 @@ THEME.update(
         "notification_info_background_color": LIGHT_CYAN,
         "notification_info_border_color": DARK_CYAN,
         "notification_info_color": DARK_CYAN,
+        # Warning
+        "notification_warning_background_color": LIGHT_YELLOW,
+        "notification_warning_border_color": DARK_YELLOW,
+        "notification_warning_color": DARK_YELLOW,
     }
 )
 

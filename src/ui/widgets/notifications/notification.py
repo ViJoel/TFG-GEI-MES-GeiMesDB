@@ -159,6 +159,7 @@ class Notification(QWidget):
             NotificationType.SUCCESS: "fa5s.check-circle",
             NotificationType.ERROR: "fa5s.times-circle",
             NotificationType.INFO: "fa5s.info-circle",
+            NotificationType.WARNING: "fa5s.info-circle",
         }
 
         return icons[self.notification_type]
@@ -176,13 +177,19 @@ class Notification(QWidget):
                 hexadecimal.
         """
 
+        string_1 = "notification_"
+        string_2 = "_color"
+
         colors = {
-            NotificationType.SUCCESS: "notification_success_color",
-            NotificationType.ERROR: "notification_error_color",
-            NotificationType.INFO: "notification_info_color",
+            NotificationType.SUCCESS: "success",
+            NotificationType.ERROR: "error",
+            NotificationType.INFO: "info",
+            NotificationType.WARNING: "warning",
         }
 
-        return ThemeManager.get_color(colors[self.notification_type])
+        return ThemeManager.get_color(
+            string_1 + colors[self.notification_type] + string_2
+        )
 
     def _set_type_property(
         self,
@@ -196,6 +203,7 @@ class Notification(QWidget):
             NotificationType.SUCCESS: "success",
             NotificationType.ERROR: "error",
             NotificationType.INFO: "info",
+            NotificationType.WARNING: "warning",
         }
 
         self.setProperty("type", mapping[self.notification_type])
@@ -247,6 +255,7 @@ class Notification(QWidget):
             - SUCCESS: 3000 ms
             - INFO: 3000 ms
             - ERROR: 3000 ms
+            - WARNING: 3000 ms
 
         Returns:
             int:
@@ -260,6 +269,7 @@ class Notification(QWidget):
             NotificationType.SUCCESS: 3000,
             NotificationType.INFO: 3000,
             NotificationType.ERROR: 3000,
+            NotificationType.WARNING: 3000,
         }[self.notification_type]
 
     # ==================
