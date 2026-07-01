@@ -9,7 +9,7 @@ from entities.connection import Connection
 from entities.driver import Driver
 from entities.query_result import QueryResult, ResultSet
 from entities.script_result import ScriptResult, ScriptResultItem
-from modules.sessions.session import Session
+from entities.session import Session
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,7 @@
 from entities.connection import Connection
 from entities.query_result import QueryResult
 from entities.script_result import ScriptResult
+from entities.session import Session
 from modules.sessions.manager import close_all_sessions as cas
 from modules.sessions.manager import close_session as cs
 from modules.sessions.manager import execute_query as eq
@@ -10,7 +11,6 @@ from modules.sessions.manager import has_session as hs
 from modules.sessions.manager import is_editable_query as ieq
 from modules.sessions.manager import open_session as os
 from modules.sessions.manager import test_connection as tc
-from modules.sessions.session import Session
 
 
 def open_session(
