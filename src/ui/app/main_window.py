@@ -256,6 +256,10 @@ class MainWindow(QMainWindow):
                 "Opening connection...",
             )
 
+            # Forzar el repintado de la UI antes de iniciar una operación
+            # síncrona que bloqueará temporalmente el hilo principal.
+            AppContext.get_app().processEvents()
+
             open_session(connection)
 
             notify(
@@ -303,6 +307,10 @@ class MainWindow(QMainWindow):
                 NotificationType.WARNING,
                 "Closing connection...",
             )
+
+            # Forzar el repintado de la UI antes de iniciar una operación
+            # síncrona que bloqueará temporalmente el hilo principal.
+            AppContext.get_app().processEvents()
 
             close_session(connection.id)
 
