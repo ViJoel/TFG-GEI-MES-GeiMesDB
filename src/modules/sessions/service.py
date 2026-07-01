@@ -96,8 +96,8 @@ def test_connection(
     Verifica conectividad de una sesión activa.
 
     Args:
-        connection_id (str):
-            Identificador único de la conexión.
+        connection (Connection):
+            Configuración de conexión que se desea comprobar.
 
     Returns:
         bool:
