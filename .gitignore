@@ -8,7 +8,8 @@ sakila/
 *.sh
 
 # Visual Studio Code
-.vscode/
+.vscode/*
+!.vscode/settings.json
 
 # Entornos virtuales
 .venv/
@@ -27,3 +28,6 @@ geimesdb_data/
 
 # Tests
 .coverage
+coverage.*
+htmlcov/
+.pytest_cache/
