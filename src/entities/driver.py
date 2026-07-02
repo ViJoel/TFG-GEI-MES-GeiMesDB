@@ -12,7 +12,7 @@ class Driver(Enum):
         ORACLE: Driver para bases de datos Oracle.
     """
 
+    SQLITE = "sqlite"
     POSTGRESQL = "postgresql"
     MYSQL = "mysql"
-    SQLITE = "sqlite"
     ORACLE = "oracle"
