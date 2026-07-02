@@ -227,21 +227,13 @@ class SqlEditor(QPlainTextEdit):
 
         sql = self._get_sql(scope)
 
-        if sql is not None:
+        if sql is None:
+            return
 
-            if scope == SqlScope.SELECTED_TEXT:
-
-                self.execute_requested.emit(
-                    [sql],
-                    scope,
-                )
-
-            elif scope == SqlScope.FULL_SCRIPT:
-
-                self.execute_requested.emit(
-                    self._split_sql_statements(sql),
-                    scope,
-                )
+        self.execute_requested.emit(
+            self._split_sql_statements(sql),
+            scope,
+        )
 
     # ====================
     # === QT OVERRIDES ===

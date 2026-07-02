@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from entities.message_type import MessageType
 from entities.query_result import QueryResult
 from entities.script_result import ScriptResult
 from ui.app.app_actions import notify
@@ -379,6 +380,7 @@ class ResultsView(QWidget):
 
             self.console.write(
                 result.console_output,
+                MessageType.DEFAULT,
             )
 
             # Sentencia DQL
@@ -407,4 +409,29 @@ class ResultsView(QWidget):
 
         self.set_tab_buttons_state(
             False,
+        )
+
+    def write_message(
+        self,
+        text: str,
+        message_type: MessageType = MessageType.DEFAULT,
+    ) -> None:
+        """
+        Escribe un mensaje en la consola.
+
+        Args:
+            text (str):
+                Texto que se mostrará en la consola.
+
+            message_type (MessageType):
+                Tipo de mensaje que determina el
+                color con el que se mostrará
+                el texto.
+        """
+
+        self.console.clear_output()
+
+        self.console.write(
+            text=text,
+            message_type=message_type,
         )
