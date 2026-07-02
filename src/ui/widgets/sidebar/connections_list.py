@@ -9,13 +9,13 @@ from PySide6.QtWidgets import (
 )
 
 from entities.connection import Connection
+from entities.message_type import MessageType
 from modules.connections.service import delete_connection, get_connections
 from modules.sessions.service import has_session
 from ui.app.app_actions import notify
 from ui.app.app_state import set_selected_connection
 from ui.utils.layouts import hbox, vbox
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
-from ui.widgets.notifications.notification_type import NotificationType
 from ui.widgets.sidebar.connection_item import ConnectionItem
 from ui.widgets.sidebar.icon_button import IconButton
 
@@ -529,7 +529,7 @@ class ConnectionsList(QWidget):
             )
 
             notify(
-                NotificationType.SUCCESS,
+                MessageType.SUCCESS,
                 "Connection deleted",
             )
 
@@ -545,7 +545,7 @@ class ConnectionsList(QWidget):
             )
 
             notify(
-                NotificationType.ERROR,
+                MessageType.ERROR,
                 "Error deleting",
             )
 

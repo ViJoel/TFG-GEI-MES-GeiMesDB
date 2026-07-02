@@ -17,13 +17,13 @@ from PySide6.QtWidgets import QMainWindow, QStackedWidget, QWidget
 
 from common.constants import APP_NAME
 from entities.connection import Connection
+from entities.message_type import MessageType
 from modules.sessions.service import close_session, open_session
 from ui.app.app_actions import notify
 from ui.app.app_context import AppContext
 from ui.utils.layouts import hbox
 from ui.widgets.forms.connection_form import ConnectionForm
 from ui.widgets.home.home import Home
-from ui.widgets.notifications.notification_type import NotificationType
 from ui.widgets.sidebar.sidebar import Sidebar
 from ui.widgets.workspace.workspace import Workspace
 
@@ -252,7 +252,7 @@ class MainWindow(QMainWindow):
         try:
 
             notify(
-                NotificationType.WARNING,
+                MessageType.WARNING,
                 "Opening connection...",
             )
 
@@ -263,7 +263,7 @@ class MainWindow(QMainWindow):
             open_session(connection)
 
             notify(
-                NotificationType.SUCCESS,
+                MessageType.SUCCESS,
                 "Connection opened",
             )
 
@@ -284,7 +284,7 @@ class MainWindow(QMainWindow):
             logger.error(f"Error opening session: {e}")
 
             notify(
-                NotificationType.ERROR,
+                MessageType.ERROR,
                 "Connection failed",
             )
 
@@ -304,7 +304,7 @@ class MainWindow(QMainWindow):
         try:
 
             notify(
-                NotificationType.WARNING,
+                MessageType.WARNING,
                 "Closing connection...",
             )
 
@@ -315,7 +315,7 @@ class MainWindow(QMainWindow):
             close_session(connection.id)
 
             notify(
-                NotificationType.SUCCESS,
+                MessageType.SUCCESS,
                 "Connection closed",
             )
 
@@ -334,7 +334,7 @@ class MainWindow(QMainWindow):
             logger.error(f"Error closing session: {e}")
 
             notify(
-                NotificationType.ERROR,
+                MessageType.ERROR,
                 "Error disconnecting",
             )
 

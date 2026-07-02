@@ -7,9 +7,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from entities.message_type import MessageType
 from ui.themes.theme_manager import ThemeManager
 from ui.utils.layouts import hbox
-from ui.widgets.notifications.notification_type import NotificationType
 
 
 class Notification(QWidget):
@@ -35,7 +35,7 @@ class Notification(QWidget):
 
     def __init__(
         self,
-        notification_type: NotificationType,
+        message_type: MessageType,
         message: str,
         duration_ms: int | None = None,
     ) -> None:
@@ -43,7 +43,7 @@ class Notification(QWidget):
         Inicializa una nueva notificación.
 
         Args:
-            notification_type (NotificationType):
+            message_type (MessageType):
                 Tipo de notificación a mostrar.
 
             message (str):
@@ -64,7 +64,7 @@ class Notification(QWidget):
 
         self.setObjectName("notification")
 
-        self.notification_type = notification_type
+        self.message_type = message_type
 
         self.message = message
 
@@ -118,7 +118,7 @@ class Notification(QWidget):
         )
 
         # Texto.
-        message_label = QLabel(f"[{self.notification_type.value}] {self.message}")
+        message_label = QLabel(f"[{self.message_type.value}] {self.message}")
 
         # Botón de cierre.
         self.close_button = QPushButton()
@@ -156,13 +156,13 @@ class Notification(QWidget):
         """
 
         icons = {
-            NotificationType.SUCCESS: "fa5s.check-circle",
-            NotificationType.ERROR: "fa5s.times-circle",
-            NotificationType.INFO: "fa5s.info-circle",
-            NotificationType.WARNING: "fa5s.info-circle",
+            MessageType.SUCCESS: "fa5s.check-circle",
+            MessageType.ERROR: "fa5s.times-circle",
+            MessageType.INFO: "fa5s.info-circle",
+            MessageType.WARNING: "fa5s.info-circle",
         }
 
-        return icons[self.notification_type]
+        return icons[self.message_type]
 
     def _get_icon_color(
         self,
@@ -177,36 +177,22 @@ class Notification(QWidget):
                 hexadecimal.
         """
 
-        string_1 = "notification_"
-        string_2 = "_color"
-
-        colors = {
-            NotificationType.SUCCESS: "success",
-            NotificationType.ERROR: "error",
-            NotificationType.INFO: "info",
-            NotificationType.WARNING: "warning",
-        }
-
         return ThemeManager.get_color(
-            string_1 + colors[self.notification_type] + string_2
+            f"notification_{self.message_type.value}_color",
         )
 
     def _set_type_property(
         self,
     ) -> None:
         """
-        Asigna la propiedad Qt 'type' basada en NotificationType.
+        Asigna la propiedad Qt 'type' basada en MessageType.
         Usada para estilizado con QSS.
         """
 
-        mapping = {
-            NotificationType.SUCCESS: "success",
-            NotificationType.ERROR: "error",
-            NotificationType.INFO: "info",
-            NotificationType.WARNING: "warning",
-        }
-
-        self.setProperty("type", mapping[self.notification_type])
+        self.setProperty(
+            "type",
+            self.message_type.value,
+        )
 
         self.style().unpolish(self)
         self.style().polish(self)
@@ -265,12 +251,17 @@ class Notification(QWidget):
         if self.duration_ms is not None:
             return self.duration_ms
 
-        return {
-            NotificationType.SUCCESS: 3000,
-            NotificationType.INFO: 3000,
-            NotificationType.ERROR: 3000,
-            NotificationType.WARNING: 3000,
-        }[self.notification_type]
+        return 3000
+
+        # Diccionario (utilizar si se quiere
+        # poner diferentes duraciones por defecto)
+
+        # return {
+        #     MessageType.SUCCESS: 3000,
+        #     MessageType.INFO: 3000,
+        #     MessageType.ERROR: 3000,
+        #     MessageType.WARNING: 3000,
+        # }[self.message_type]
 
     # ==================
     # === PUBLIC API ===

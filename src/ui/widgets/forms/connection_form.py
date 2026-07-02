@@ -14,12 +14,12 @@ from PySide6.QtWidgets import (
 
 from entities.connection import Connection
 from entities.driver import Driver
+from entities.message_type import MessageType
 from modules.connections.service import create_connection, update_connection
 from modules.sessions.service import test_connection
 from ui.app.app_actions import notify
 from ui.app.app_context import AppContext
 from ui.utils.layouts import hbox, vbox
-from ui.widgets.notifications.notification_type import NotificationType
 
 logger = logging.getLogger(__name__)
 
@@ -710,7 +710,7 @@ class ConnectionForm(QWidget):
                 update_connection(connection)
 
                 notify(
-                    NotificationType.SUCCESS,
+                    MessageType.SUCCESS,
                     "Connection updated",
                 )
 
@@ -719,7 +719,7 @@ class ConnectionForm(QWidget):
                 create_connection(connection)
 
                 notify(
-                    NotificationType.SUCCESS,
+                    MessageType.SUCCESS,
                     "Connection saved",
                 )
 
@@ -736,7 +736,7 @@ class ConnectionForm(QWidget):
             )
 
             notify(
-                NotificationType.ERROR,
+                MessageType.ERROR,
                 "Error saving",
             )
 
@@ -752,7 +752,7 @@ class ConnectionForm(QWidget):
         try:
 
             notify(
-                NotificationType.WARNING,
+                MessageType.WARNING,
                 "Testing connection...",
             )
 
@@ -769,14 +769,14 @@ class ConnectionForm(QWidget):
             if success:
 
                 notify(
-                    NotificationType.SUCCESS,
+                    MessageType.SUCCESS,
                     "Connection successful",
                 )
 
             else:
 
                 notify(
-                    NotificationType.ERROR,
+                    MessageType.ERROR,
                     "Connection failed",
                 )
 
@@ -785,7 +785,7 @@ class ConnectionForm(QWidget):
             logger.error(f"Error testing connection: {e}.")
 
             notify(
-                NotificationType.ERROR,
+                MessageType.ERROR,
                 "Invalid connection data",
             )
 

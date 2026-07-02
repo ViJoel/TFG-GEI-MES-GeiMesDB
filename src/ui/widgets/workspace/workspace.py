@@ -8,7 +8,6 @@ from entities.message_type import MessageType
 from modules.sessions.service import execute_query, execute_script, is_editable_query
 from ui.app.app_actions import notify
 from ui.utils.layouts import hbox
-from ui.widgets.notifications.notification_type import NotificationType
 from ui.widgets.workspace.results_view.results_view import ResultsView
 from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
 from ui.widgets.workspace.sql_editor.sql_scope import SqlScope
@@ -242,7 +241,7 @@ class Workspace(QWidget):
             self.results_view.show_console()
 
             notify(
-                NotificationType.WARNING,
+                MessageType.WARNING,
                 "Execution aborted.",
             )
 

@@ -12,7 +12,6 @@ from entities.script_result import ScriptResult
 from ui.app.app_actions import notify
 from ui.utils.layouts import hbox, vbox
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
-from ui.widgets.notifications.notification_type import NotificationType
 from ui.widgets.workspace.results_view.console import Console
 from ui.widgets.workspace.results_view.table import Table
 
@@ -286,7 +285,7 @@ class ResultsView(QWidget):
         self.save_requested.emit()
 
         notify(
-            NotificationType.SUCCESS,
+            MessageType.SUCCESS,
             "Changes saved",
         )
 
@@ -297,8 +296,8 @@ class ResultsView(QWidget):
         self.table.discard_changes()
 
         notify(
-            NotificationType.INFO,
-            "Changes discarded",
+            MessageType.INFO,
+            "Changes discarted",
         )
 
     # ==================
