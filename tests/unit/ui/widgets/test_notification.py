@@ -1,5 +1,4 @@
 import pytest
-from PySide6.QtCore import Qt
 
 from entities.message_type import MessageType
 from ui.widgets.notifications.notification import Notification
