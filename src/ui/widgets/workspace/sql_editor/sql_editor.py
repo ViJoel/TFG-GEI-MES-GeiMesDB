@@ -11,9 +11,9 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import QPlainTextEdit, QTextEdit
 
+from entities.sql_scope import SqlScope
 from ui.themes.theme_manager import ThemeManager
 from ui.widgets.workspace.sql_editor.line_number_area import LineNumberArea
-from ui.widgets.workspace.sql_editor.sql_scope import SqlScope
 
 
 class SqlEditor(QPlainTextEdit):
@@ -227,21 +227,13 @@ class SqlEditor(QPlainTextEdit):
 
         sql = self._get_sql(scope)
 
-        if sql is not None:
+        if sql is None:
+            return
 
-            if scope == SqlScope.SELECTED_TEXT:
-
-                self.execute_requested.emit(
-                    [sql],
-                    scope,
-                )
-
-            elif scope == SqlScope.FULL_SCRIPT:
-
-                self.execute_requested.emit(
-                    self._split_sql_statements(sql),
-                    scope,
-                )
+        self.execute_requested.emit(
+            self._split_sql_statements(sql),
+            scope,
+        )
 
     # ====================
     # === QT OVERRIDES ===

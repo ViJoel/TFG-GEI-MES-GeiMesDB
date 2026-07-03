@@ -6,12 +6,12 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from entities.message_type import MessageType
 from entities.query_result import QueryResult
 from entities.script_result import ScriptResult
 from ui.app.app_actions import notify
 from ui.utils.layouts import hbox, vbox
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
-from ui.widgets.notifications.notification_type import NotificationType
 from ui.widgets.workspace.results_view.console import Console
 from ui.widgets.workspace.results_view.table import Table
 
@@ -285,7 +285,7 @@ class ResultsView(QWidget):
         self.save_requested.emit()
 
         notify(
-            NotificationType.SUCCESS,
+            MessageType.SUCCESS,
             "Changes saved",
         )
 
@@ -296,8 +296,8 @@ class ResultsView(QWidget):
         self.table.discard_changes()
 
         notify(
-            NotificationType.INFO,
-            "Changes discarded",
+            MessageType.INFO,
+            "Changes discarted",
         )
 
     # ==================
@@ -379,6 +379,7 @@ class ResultsView(QWidget):
 
             self.console.write(
                 result.console_output,
+                MessageType.DEFAULT,
             )
 
             # Sentencia DQL
@@ -407,4 +408,29 @@ class ResultsView(QWidget):
 
         self.set_tab_buttons_state(
             False,
+        )
+
+    def write_message(
+        self,
+        text: str,
+        message_type: MessageType = MessageType.DEFAULT,
+    ) -> None:
+        """
+        Escribe un mensaje en la consola.
+
+        Args:
+            text (str):
+                Texto que se mostrará en la consola.
+
+            message_type (MessageType):
+                Tipo de mensaje que determina el
+                color con el que se mostrará
+                el texto.
+        """
+
+        self.console.clear_output()
+
+        self.console.write(
+            text=text,
+            message_type=message_type,
         )

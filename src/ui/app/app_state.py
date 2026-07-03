@@ -1,8 +1,7 @@
-import logging
-
 from entities.connection import Connection
+from log.app_logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 _selected_connection: Connection | None = None
 

@@ -65,3 +65,16 @@ QWidget#notification[type="info"] QLabel {
 QWidget#notification[type="info"] QPushButton {
     border-color: $notification_info_color;
 }
+
+QWidget#notification[type="warning"] {
+    background-color: $notification_warning_background_color;
+    border: 1px solid $notification_warning_border_color;
+}
+
+QWidget#notification[type="warning"] QLabel {
+    color: $notification_warning_color;
+}
+
+QWidget#notification[type="warning"] QPushButton {
+    border-color: $notification_warning_color;
+}

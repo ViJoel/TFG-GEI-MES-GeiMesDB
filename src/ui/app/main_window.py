@@ -10,24 +10,23 @@ Clases:
     - MainWindow
 """
 
-import logging
-
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMainWindow, QStackedWidget, QWidget
 
 from common.constants import APP_NAME
 from entities.connection import Connection
+from entities.message_type import MessageType
+from log.app_logger import get_logger
 from modules.sessions.service import close_session, open_session
 from ui.app.app_actions import notify
 from ui.app.app_context import AppContext
 from ui.utils.layouts import hbox
 from ui.widgets.forms.connection_form import ConnectionForm
 from ui.widgets.home.home import Home
-from ui.widgets.notifications.notification_type import NotificationType
 from ui.widgets.sidebar.sidebar import Sidebar
 from ui.widgets.workspace.workspace import Workspace
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class MainWindow(QMainWindow):
@@ -251,10 +250,19 @@ class MainWindow(QMainWindow):
 
         try:
 
+            notify(
+                MessageType.WARNING,
+                "Opening connection...",
+            )
+
+            # Forzar el repintado de la UI antes de iniciar una operación
+            # síncrona que bloqueará temporalmente el hilo principal.
+            AppContext.get_app().processEvents()
+
             open_session(connection)
 
             notify(
-                NotificationType.SUCCESS,
+                MessageType.SUCCESS,
                 "Connection opened",
             )
 
@@ -275,7 +283,7 @@ class MainWindow(QMainWindow):
             logger.error(f"Error opening session: {e}")
 
             notify(
-                NotificationType.ERROR,
+                MessageType.ERROR,
                 "Connection failed",
             )
 
@@ -294,10 +302,19 @@ class MainWindow(QMainWindow):
 
         try:
 
+            notify(
+                MessageType.WARNING,
+                "Closing connection...",
+            )
+
+            # Forzar el repintado de la UI antes de iniciar una operación
+            # síncrona que bloqueará temporalmente el hilo principal.
+            AppContext.get_app().processEvents()
+
             close_session(connection.id)
 
             notify(
-                NotificationType.SUCCESS,
+                MessageType.SUCCESS,
                 "Connection closed",
             )
 
@@ -316,7 +333,7 @@ class MainWindow(QMainWindow):
             logger.error(f"Error closing session: {e}")
 
             notify(
-                NotificationType.ERROR,
+                MessageType.ERROR,
                 "Error disconnecting",
             )
 

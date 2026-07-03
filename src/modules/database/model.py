@@ -1,22 +1,34 @@
-import logging
 import os
 import sqlite3
+from collections.abc import Generator
 from contextlib import contextmanager
 
 from common.paths import DATA_DIR, DB_PATH, SQL_PATH
+from log.app_logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @contextmanager
-def get_connection():
+def get_connection(
+    db_path: str = DB_PATH,
+) -> Generator[sqlite3.Connection, None, None]:
     """
-    Abre una conexión SQLite gestionando automáticamente
-    commit, rollback y cierre de recursos.
+    Context manager para abrir una conexión SQLite.
+
+    Gestiona automáticamente:
+        - Apertura de la conexión
+        - Commit al finalizar correctamente
+        - Rollback en caso de error
+        - Cierre de la conexión
 
     La conexión se abre en modo lectura/escritura (`mode=rw`)
-    para evitar que SQLite cree automáticamente una base
-    de datos vacía si el archivo no existe.
+    para evitar la creación automática de bases de datos vacías
+    si el archivo no existe.
+
+    Args:
+        db_path (str):
+            Ruta al archivo de base de datos SQLite.
 
     Yields:
         sqlite3.Connection:
@@ -24,14 +36,14 @@ def get_connection():
 
     Raises:
         sqlite3.Error:
-            Si ocurre un error durante la conexión
-            o la transacción.
+            Propaga cualquier error de SQLite ocurrido durante
+            la conexión o transacción.
     """
 
     logger.debug("Opening SQLite connection.")
 
     conn = sqlite3.connect(
-        f"file:{DB_PATH}?mode=rw",
+        f"file:{db_path}?mode=rw",
         uri=True,
     )
 
@@ -55,7 +67,7 @@ def get_connection():
         # ante cualquier excepción.
         conn.rollback()
 
-        logger.error(f"Transaction failed. Rollback executed.\n" f"Exception: {e}")
+        logger.error(f"Transaction failed. Rollback executed.\nException: {e}")
 
         raise
 
@@ -68,32 +80,52 @@ def get_connection():
         logger.debug("SQLite connection closed.")
 
 
-def init_database() -> None:
+def init_database(
+    db_path: str = DB_PATH,
+    sql_path: str = SQL_PATH,
+    data_dir: str = DATA_DIR,
+) -> None:
     """
     Inicializa la base de datos de la aplicación.
 
     Responsabilidades:
         - Crear el directorio de datos si no existe.
-        - Crear la base de datos inicial.
-        - Aplicar el esquema SQL base.
-        - Evitar reinicializaciones accidentales.
+        - Verificar si la base de datos ya existe.
+        - Crear la base de datos si no existe.
+        - Aplicar el esquema SQL inicial.
+
+    Comportamiento:
+        - Si la base de datos ya existe, la inicialización se omite.
+        - Si el archivo SQL no existe, se lanza FileNotFoundError.
+
+    Args:
+        db_path (str):
+            Ruta del archivo SQLite.
+
+        sql_path (str):
+            Ruta del archivo SQL con el esquema inicial.
+
+        data_dir (str):
+            Directorio donde se almacenará la base de datos.
 
     Raises:
         FileNotFoundError:
-            Si el archivo de esquema SQL no existe.
+            Si no se encuentra el archivo de esquema SQL.
 
-        sqlite3.Error:
-            Si ocurre un error durante la creación
-            o inicialización de la base de datos.
+        Exception:
+            Propaga cualquier error durante la conexión o transacción.
     """
 
     logger.info("Initializing application database...")
 
     # Garantiza que el directorio de datos exista
     # antes de crear la base de datos.
-    os.makedirs(DATA_DIR, exist_ok=True)
+    os.makedirs(
+        data_dir,
+        exist_ok=True,
+    )
 
-    if os.path.exists(DB_PATH):
+    if os.path.exists(db_path):
         logger.info("Application database already exists. Initialization skipped.")
         return
 
@@ -101,16 +133,20 @@ def init_database() -> None:
 
         # El esquema SQL debe existir incluso en builds
         # empaquetadas (ej. PyInstaller).
-        if not os.path.exists(SQL_PATH):
-            raise FileNotFoundError(f"SQL file not found at: {SQL_PATH}")
+        if not os.path.exists(sql_path):
+            raise FileNotFoundError(f"SQL file not found at: {sql_path}")
 
         # Leer el esquema SQL completo.
-        with open(SQL_PATH, "r", encoding="utf-8") as f:
+        with open(
+            sql_path,
+            "r",
+            encoding="utf-8",
+        ) as f:
             schema = f.read()
 
         # La inicialización utiliza una conexión estándar
         # porque en este punto la base de datos aún no existe.
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(db_path) as conn:
 
             # SQLite requiere activar foreign keys
             # manualmente por sesión.
@@ -125,5 +161,5 @@ def init_database() -> None:
         logger.success("Application database initialized successfully.")
 
     except Exception as e:
-        logger.critical(f"Database initialization failed.\n" f"Exception: {e}")
+        logger.critical(f"Database initialization failed.\nException: {e}")
         raise

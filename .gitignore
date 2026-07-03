@@ -8,7 +8,8 @@ sakila/
 *.sh
 
 # Visual Studio Code
-.vscode/
+.vscode/*
+!.vscode/settings.json
 
 # Entornos virtuales
 .venv/
@@ -24,3 +25,9 @@ dist/
 # Carpetas autogeneradas del proyecto
 geimesdb_logs/
 geimesdb_data/
+
+# Tests
+.coverage
+coverage.*
+htmlcov/
+.pytest_cache/

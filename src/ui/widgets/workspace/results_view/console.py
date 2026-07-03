@@ -1,6 +1,7 @@
 from PySide6.QtGui import QColor, QTextCursor
 from PySide6.QtWidgets import QTextEdit
 
+from entities.message_type import MessageType
 from entities.script_result import ScriptResult
 from ui.themes.theme_manager import ThemeManager
 
@@ -88,52 +89,39 @@ class Console(QTextEdit):
     def write(
         self,
         text: str,
+        message_type: MessageType = MessageType.DEFAULT,
     ) -> None:
         """
-        Escribe texto en color blanco.
+        Escribe texto en el color correspondiente.
 
         Args:
             text (str):
                 Texto que se mostrará en la consola.
+
+            message_type (MessageType):
+                Tipo de mensaje.
         """
+
+        match message_type:
+
+            case MessageType.DEFAULT:
+                color_name = "console_color"
+
+            case MessageType.INFO:
+                color_name = "console_info_color"
+
+            case MessageType.SUCCESS:
+                color_name = "console_success_color"
+
+            case MessageType.WARNING:
+                color_name = "console_warning_color"
+
+            case MessageType.ERROR:
+                color_name = "console_error_color"
 
         self._append_colored_text(
             text=text,
-            color=QColor(ThemeManager.get_color("console_color")),
-        )
-
-    def write_success(
-        self,
-        text: str,
-    ) -> None:
-        """
-        Escribe texto en color verde.
-
-        Args:
-            text (str):
-                Texto que se mostrará en la consola.
-        """
-
-        self._append_colored_text(
-            text=text,
-            color=QColor(ThemeManager.get_color("console_success_color")),
-        )
-
-    def write_error(
-        self,
-        text: str,
-    ) -> None:
-        """
-        Escribe texto en color rojo.
-
-        Args:
-            text (str):
-                Texto que se mostrará en la consola.
-        """
-
-        self._append_colored_text(
-            text=text,
-            color=QColor(ThemeManager.get_color("console_error_color")),
+            color=QColor(ThemeManager.get_color(color_name)),
         )
 
     def show_script_result(
@@ -158,7 +146,13 @@ class Console(QTextEdit):
         for item in script_result.items:
 
             if item.success:
-                self.write_success(f"{item.query}\n\n")
+                self.write(
+                    f"{item.query}\n\n",
+                    MessageType.SUCCESS,
+                )
 
             else:
-                self.write_error(f"{item.query}\n" f"Error: {item.error}\n\n")
+                self.write(
+                    f"{item.query}\nError: {item.error}\n\n",
+                    MessageType.ERROR,
+                )

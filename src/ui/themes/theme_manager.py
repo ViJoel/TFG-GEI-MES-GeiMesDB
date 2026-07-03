@@ -1,11 +1,11 @@
-import logging
 from string import Template
 
+from log.app_logger import get_logger
 from ui.app.app_context import AppContext
 from ui.common.paths import STYLE_FILES
 from ui.themes import dark
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 type ThemePalette = dict[str, str]
 

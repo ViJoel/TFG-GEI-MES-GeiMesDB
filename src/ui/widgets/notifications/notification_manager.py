@@ -1,10 +1,9 @@
-import logging
-
 from PySide6.QtWidgets import QMainWindow
 
+from log.app_logger import get_logger
 from ui.widgets.notifications.notification import Notification
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class NotificationManager:

@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, auto
 
 
 class SqlScope(Enum):
@@ -15,5 +15,5 @@ class SqlScope(Enum):
             como un único script SQL.
     """
 
-    SELECTED_TEXT = 0
-    FULL_SCRIPT = 1
+    SELECTED_TEXT = auto()
+    FULL_SCRIPT = auto()

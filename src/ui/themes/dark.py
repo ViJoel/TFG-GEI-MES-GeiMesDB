@@ -132,6 +132,21 @@ YELLOW_HOVER = "#FFEE58"
 YELLOW_PRESSED = "#FBC02D"
 YELLOW_DISABLED = "#A3913A"
 
+# ====================
+# === LIGHT YELLOW ===
+# ====================
+LIGHT_YELLOW = "#FFE082"
+LIGHT_YELLOW_HOVER = "#FFECB3"
+LIGHT_YELLOW_PRESSED = "#FFD54F"
+LIGHT_YELLOW_DISABLED = "#B8A66A"
+
+# ===================
+# === DARK YELLOW ===
+# ===================
+DARK_YELLOW = "#8A6D00"
+DARK_YELLOW_HOVER = "#A37F00"
+DARK_YELLOW_PRESSED = "#705900"
+
 # ============
 # === PINK ===
 # ============
@@ -404,8 +419,10 @@ THEME.update(
         "console_background_color": GRAY_950,
         "console_border_color": THEME["primary"],
         "console_color": THEME["text"],
+        "console_info_color": THEME["info"],
         "console_success_color": THEME["success"],
         "console_error_color": THEME["danger"],
+        "console_warning_color": THEME["warning"],
         # Tipografía
         "console_font_family": "'Consolas'",
         "console_font_size": "14px",
@@ -456,6 +473,10 @@ THEME.update(
         "notification_info_background_color": LIGHT_CYAN,
         "notification_info_border_color": DARK_CYAN,
         "notification_info_color": DARK_CYAN,
+        # Warning
+        "notification_warning_background_color": LIGHT_YELLOW,
+        "notification_warning_border_color": DARK_YELLOW,
+        "notification_warning_color": DARK_YELLOW,
     }
 )
 
