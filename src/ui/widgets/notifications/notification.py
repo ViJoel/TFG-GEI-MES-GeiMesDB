@@ -159,7 +159,7 @@ class Notification(QWidget):
             MessageType.SUCCESS: "fa5s.check-circle",
             MessageType.ERROR: "fa5s.times-circle",
             MessageType.INFO: "fa5s.info-circle",
-            MessageType.WARNING: "fa5s.info-circle",
+            MessageType.WARNING: "fa5s.exclamation-triangle",
         }
 
         return icons[self.message_type]

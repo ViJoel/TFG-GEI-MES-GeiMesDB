@@ -68,7 +68,7 @@ def test_notification_sets_type_property(notification):
         (MessageType.SUCCESS, "fa5s.check-circle"),
         (MessageType.ERROR, "fa5s.times-circle"),
         (MessageType.INFO, "fa5s.info-circle"),
-        (MessageType.WARNING, "fa5s.info-circle"),
+        (MessageType.WARNING, "fa5s.exclamation-triangle"),
     ],
 )
 def test_get_icon_name_returns_expected_icon(message_type, expected_icon):
