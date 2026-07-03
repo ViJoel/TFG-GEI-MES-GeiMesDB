@@ -1,4 +1,3 @@
-import logging
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -36,16 +35,6 @@ def workspace(qtbot, connection):
     qtbot.addWidget(widget)
 
     return widget
-
-
-@pytest.fixture(autouse=True)
-def patch_logger_success(monkeypatch):
-    """
-    Evita fallos por logger.success.
-    """
-
-    logger = logging.getLogger("ui.widgets.workspace.workspace")
-    monkeypatch.setattr(logger, "success", logger.info, raising=False)
 
 
 # =============================================================================

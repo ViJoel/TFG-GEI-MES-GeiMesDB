@@ -1,10 +1,9 @@
-import logging
-
+from entities.message_type import MessageType
+from log.app_logger import get_logger
 from ui.app.app_context import AppContext
 from ui.widgets.notifications.notification import Notification
-from entities.message_type import MessageType
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def notify(

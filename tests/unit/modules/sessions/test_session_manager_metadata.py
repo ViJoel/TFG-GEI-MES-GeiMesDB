@@ -1,24 +1,6 @@
-import logging
 from unittest.mock import MagicMock
 
-import pytest
-
 import modules.sessions.manager as manager
-
-# =============================================================================
-# FIXTURES
-# =============================================================================
-
-
-@pytest.fixture(autouse=True)
-def patch_logger_success(monkeypatch):
-    """
-    Evita fallos por logger.success.
-    """
-
-    logger = logging.getLogger("modules.sessions.manager")
-    monkeypatch.setattr(logger, "success", logger.info, raising=False)
-
 
 # =============================================================================
 # _get_primary_key_columns

@@ -13,7 +13,7 @@ import sys
 
 from PySide6 import QtWidgets
 
-from log.logger_config import setup_logging
+from log.app_logger import setup_logging
 from modules.database.model import init_database
 from modules.sessions.service import close_all_sessions
 from ui.app.app_context import AppContext

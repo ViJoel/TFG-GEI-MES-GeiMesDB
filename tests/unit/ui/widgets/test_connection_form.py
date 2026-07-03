@@ -1,4 +1,3 @@
-import logging
 from unittest.mock import MagicMock
 
 import pytest
@@ -21,16 +20,6 @@ def form(qtbot):
     form.show()
 
     return form
-
-
-@pytest.fixture(autouse=True)
-def patch_logger_success(monkeypatch):
-    """
-    Evita fallos por logger.success.
-    """
-
-    logger = logging.getLogger("ui.widgets.forms.connection_form")
-    monkeypatch.setattr(logger, "success", logger.info, raising=False)
 
 
 @pytest.fixture

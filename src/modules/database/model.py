@@ -1,12 +1,12 @@
-import logging
 import os
 import sqlite3
 from collections.abc import Generator
 from contextlib import contextmanager
 
 from common.paths import DATA_DIR, DB_PATH, SQL_PATH
+from log.app_logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @contextmanager

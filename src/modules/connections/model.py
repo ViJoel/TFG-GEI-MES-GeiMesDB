@@ -1,12 +1,12 @@
-import logging
 import sqlite3
 
 from entities.connection import Connection
 from entities.driver import Driver
+from log.app_logger import get_logger
 from modules.database.model import get_connection as get_db_connection
 from modules.database.wrapper import handle_db_errors
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def _map_row_to_connection(row: sqlite3.Row) -> Connection:

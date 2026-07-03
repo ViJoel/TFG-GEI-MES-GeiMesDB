@@ -1,8 +1,9 @@
-import logging
 from functools import wraps
 from sqlite3 import IntegrityError, OperationalError
 
-logger = logging.getLogger(__name__)
+from log.app_logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def handle_db_errors(operation_name):

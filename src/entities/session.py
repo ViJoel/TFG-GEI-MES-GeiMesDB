@@ -1,4 +1,3 @@
-import logging
 from dataclasses import dataclass
 
 from sqlalchemy import create_engine
@@ -7,8 +6,9 @@ from sqlalchemy.pool import NullPool
 
 from entities.connection import Connection
 from entities.driver import Driver
+from log.app_logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass(slots=True)

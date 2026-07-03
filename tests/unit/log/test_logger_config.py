@@ -1,5 +1,4 @@
 import logging
-import sys
 from unittest.mock import patch
 
 from log.logger_config import SUCCESS, setup_logging
@@ -16,42 +15,6 @@ def test_success_level_is_registered():
     """
 
     assert logging.getLevelName(SUCCESS) == "SUCCESS"
-
-
-def test_logger_has_success_method():
-    """
-    Los objetos Logger deben disponer del método
-    success().
-    """
-
-    logger = logging.getLogger("test")
-
-    assert hasattr(logger, "success")
-
-
-def test_logger_success_does_not_raise_exception():
-    """
-    El método success() debe poder invocarse sin
-    producir excepciones.
-    """
-
-    logger = logging.getLogger("test")
-    logger.success("Mensaje de prueba")
-
-
-def test_logger_success_calls_log():
-    """
-    success() debe invocar al método interno
-    _log() cuando el nivel SUCCESS está habilitado.
-    """
-
-    logger = logging.getLogger("test")
-    logger.setLevel(SUCCESS)
-
-    with patch.object(logger, "_log") as mock_log:
-        logger.success("Mensaje")
-
-    mock_log.assert_called_once()
 
 
 # =============================================================================

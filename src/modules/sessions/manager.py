@@ -1,4 +1,3 @@
-import logging
 from typing import Any
 
 from sqlalchemy import inspect, text
@@ -10,8 +9,9 @@ from entities.driver import Driver
 from entities.query_result import QueryResult, ResultSet
 from entities.script_result import ScriptResult, ScriptResultItem
 from entities.session import Session
+from log.app_logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Registro global de sesiones activas.
 #

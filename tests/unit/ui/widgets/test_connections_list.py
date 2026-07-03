@@ -1,4 +1,3 @@
-import logging
 from unittest.mock import MagicMock
 
 import pytest
@@ -42,16 +41,6 @@ def widget(qtbot, connections):
     w = ConnectionsList()
     qtbot.addWidget(w)
     return w
-
-
-@pytest.fixture(autouse=True)
-def patch_logger_success(monkeypatch):
-    """
-    Evita fallos por logger.success.
-    """
-
-    logger = logging.getLogger("ui.widgets.sidebar.connections_list")
-    monkeypatch.setattr(logger, "success", logger.info, raising=False)
 
 
 # =============================================================================

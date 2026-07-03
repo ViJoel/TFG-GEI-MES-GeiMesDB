@@ -1,4 +1,3 @@
-import logging
 import sqlite3
 
 import pytest
@@ -58,19 +57,6 @@ def sqlite_db(tmp_path, monkeypatch):
     )
 
     return db
-
-
-@pytest.fixture(autouse=True)
-def patch_logger_success(monkeypatch):
-    """
-    Evita errores si el código usa
-    logger.success (no estándar en logging).
-
-    Se redirige a logger.info.
-    """
-
-    logger = logging.getLogger("modules.connections.model")
-    monkeypatch.setattr(logger, "success", logger.info, raising=False)
 
 
 # =============================================================================

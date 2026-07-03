@@ -21,7 +21,7 @@ def test_handle_db_errors_integrity():
     def func():
         raise IntegrityError("duplicate key")
 
-    with patch("logging.Logger.warning") as mock_log:
+    with patch("modules.database.wrapper.logger.warning") as mock_log:
         with pytest.raises(IntegrityError):
             func()
 
@@ -39,7 +39,7 @@ def test_handle_db_errors_operational():
     def func():
         raise OperationalError("db locked")
 
-    with patch("logging.Logger.error") as mock_log:
+    with patch("modules.database.wrapper.logger.error") as mock_log:
         with pytest.raises(OperationalError):
             func()
 
@@ -57,7 +57,7 @@ def test_handle_db_errors_generic_exception():
     def func():
         raise Exception("boom")
 
-    with patch("logging.Logger.error") as mock_log:
+    with patch("modules.database.wrapper.logger.error") as mock_log:
         with pytest.raises(Exception):
             func()
 

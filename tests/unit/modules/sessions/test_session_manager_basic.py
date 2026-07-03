@@ -1,4 +1,3 @@
-import logging
 from unittest.mock import MagicMock
 
 import pytest
@@ -26,16 +25,6 @@ def clear_sessions():
     yield
 
     manager._active_sessions.clear()
-
-
-@pytest.fixture(autouse=True)
-def patch_logger_success(monkeypatch):
-    """
-    Evita fallos por logger.success.
-    """
-
-    logger = logging.getLogger("modules.sessions.manager")
-    monkeypatch.setattr(logger, "success", logger.info, raising=False)
 
 
 def create_connection():

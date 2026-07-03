@@ -4,28 +4,13 @@ import sys
 
 from colorlog import ColoredFormatter
 
-# Nivel personalizado para operaciones
-# completadas correctamente.
 SUCCESS = 25
-
 logging.addLevelName(SUCCESS, "SUCCESS")
-
-
-def success(self, message, *args, **kwargs):
-    """
-    Añade soporte para logger.success().
-    """
-
-    if self.isEnabledFor(SUCCESS):
-        self._log(SUCCESS, message, args, **kwargs)
-
-
-logging.Logger.success = success
 
 
 def setup_logging(
     base_dir: str | None = None,
-):
+) -> None:
     """
     Configura el sistema global de logging de la aplicación.
 

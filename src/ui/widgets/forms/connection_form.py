@@ -1,5 +1,3 @@
-import logging
-
 from PySide6.QtCore import QRegularExpression, Qt, Signal
 from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import (
@@ -15,13 +13,14 @@ from PySide6.QtWidgets import (
 from entities.connection import Connection
 from entities.driver import Driver
 from entities.message_type import MessageType
+from log.app_logger import get_logger
 from modules.connections.service import create_connection, update_connection
 from modules.sessions.service import test_connection
 from ui.app.app_actions import notify
 from ui.app.app_context import AppContext
 from ui.utils.layouts import hbox, vbox
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class ConnectionForm(QWidget):

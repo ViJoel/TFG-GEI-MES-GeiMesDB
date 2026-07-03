@@ -1,4 +1,3 @@
-import logging
 from unittest.mock import MagicMock
 
 import pytest
@@ -10,16 +9,6 @@ from entities.session import Session
 # =============================================================================
 # FIXTURES
 # =============================================================================
-
-
-@pytest.fixture(autouse=True)
-def patch_logger_success(monkeypatch):
-    """
-    Evita fallos cuando el logger utiliza success().
-    """
-
-    logger = logging.getLogger("entities.session")
-    monkeypatch.setattr(logger, "success", logger.info, raising=False)
 
 
 @pytest.fixture
