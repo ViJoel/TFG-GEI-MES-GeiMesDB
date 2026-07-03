@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from entities.connection import Connection
-from ui.widgets.workspace.sql_editor.sql_scope import SqlScope
+from entities.sql_scope import SqlScope
 from ui.widgets.workspace.workspace import Workspace
 
 # =============================================================================

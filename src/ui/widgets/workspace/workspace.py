@@ -5,12 +5,12 @@ from PySide6.QtWidgets import QSplitter, QWidget
 
 from entities.connection import Connection
 from entities.message_type import MessageType
+from entities.sql_scope import SqlScope
 from modules.sessions.service import execute_query, execute_script, is_editable_query
 from ui.app.app_actions import notify
 from ui.utils.layouts import hbox
 from ui.widgets.workspace.results_view.results_view import ResultsView
 from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
-from ui.widgets.workspace.sql_editor.sql_scope import SqlScope
 
 logger = logging.getLogger(__name__)
 

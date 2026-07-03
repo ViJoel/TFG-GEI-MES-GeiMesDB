@@ -11,9 +11,9 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import QPlainTextEdit, QTextEdit
 
+from entities.sql_scope import SqlScope
 from ui.themes.theme_manager import ThemeManager
 from ui.widgets.workspace.sql_editor.line_number_area import LineNumberArea
-from ui.widgets.workspace.sql_editor.sql_scope import SqlScope
 
 
 class SqlEditor(QPlainTextEdit):
