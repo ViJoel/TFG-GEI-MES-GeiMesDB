@@ -1,0 +1,30 @@
+/* ========================= */
+/* ======== OVERLAY ======== */
+/* ========================= */
+
+QWidget#dialog_overlay {
+    background-color: rgba(0, 0, 0, 120);
+}
+
+/* ========================= */
+/* ===== DIALOG BOX ======== */
+/* ========================= */
+
+QWidget#dialog_container {
+    background-color: $dialog_background_color;
+    border: 2px solid $dialog_border_color;
+    border-radius: 4px;
+}
+
+/* ============================== */
+/* ===== DIALOG ELEMENTS ======== */
+/* ============================== */
+
+QWidget#dialog_container QLabel,
+QWidget#dialog_container QPushButton {
+    font-size: 14px;
+}
+
+QWidget#dialog_container QLabel {
+    background-color: $dialog_label_background_color;
+}

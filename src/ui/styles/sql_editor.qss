@@ -1,0 +1,10 @@
+QPlainTextEdit#sql_editor {
+    background-color: $sql_editor_background_color;
+    border: 2px solid $sql_editor_border_color;
+    border-radius: 8px;
+    color: $sql_editor_color
+}
+
+QPlainTextEdit#sql_editor:focus {
+    border-color: $sql_editor_border_color_focused;
+}
