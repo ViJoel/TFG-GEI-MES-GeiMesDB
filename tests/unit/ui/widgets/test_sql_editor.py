@@ -178,7 +178,7 @@ def test_execute_signal_emits_correct_data(editor, qtbot):
     editor.setPlainText("SELECT 1; SELECT 2;")
 
     with qtbot.waitSignal(editor.execute_requested) as blocker:
-        editor._emit_execute_requested(SqlScope.FULL_SCRIPT)
+        editor.execute(SqlScope.FULL_SCRIPT)
 
     statements, scope = blocker.args
 

@@ -9,7 +9,7 @@ from modules.sessions.service import execute_query, execute_script, is_editable_
 from ui.app.app_actions import notify
 from ui.utils.layouts import hbox
 from ui.widgets.workspace.results_view.results_view import ResultsView
-from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
+from ui.widgets.workspace.sql_editor.sql_editor_area import SqlEditorArea
 
 logger = get_logger(__name__)
 
@@ -68,7 +68,7 @@ class Workspace(QWidget):
         main_layout = hbox()
         self.setLayout(main_layout)
 
-        self.sql_editor = SqlEditor()
+        self.sql_editor = SqlEditorArea()
         self.results_view = ResultsView()
 
         self.splitter = QSplitter(Qt.Vertical)

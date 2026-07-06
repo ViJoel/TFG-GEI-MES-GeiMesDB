@@ -211,7 +211,7 @@ class SqlEditor(QPlainTextEdit):
     # === EVENT HELPERS ===
     # =====================
 
-    def _emit_execute_requested(
+    def execute(
         self,
         scope: SqlScope,
     ) -> None:
@@ -265,7 +265,7 @@ class SqlEditor(QPlainTextEdit):
             and modifiers & Qt.KeyboardModifier.ControlModifier
             and modifiers & Qt.KeyboardModifier.ShiftModifier
         ):
-            self._emit_execute_requested(SqlScope.FULL_SCRIPT)
+            self.execute(SqlScope.FULL_SCRIPT)
             return
 
         # Ctrl + Enter -> Ejecutar texto seleccionado
@@ -273,7 +273,7 @@ class SqlEditor(QPlainTextEdit):
             event.key() == Qt.Key.Key_Return
             and modifiers & Qt.KeyboardModifier.ControlModifier
         ):
-            self._emit_execute_requested(SqlScope.SELECTED_TEXT)
+            self.execute(SqlScope.SELECTED_TEXT)
             return
 
         super().keyPressEvent(event)
