@@ -27,9 +27,12 @@ CONNECTIONS_LIST_BUTTONS_QSS = os.path.join(STYLES_DIR, "connections_list_button
 FONTS_QSS = os.path.join(STYLES_DIR, "fonts.qss")
 HOME_QSS = os.path.join(STYLES_DIR, "home.qss")
 NOTIFICATIONS_QSS = os.path.join(STYLES_DIR, "notifications.qss")
+RESULTS_VIEW_QSS = os.path.join(STYLES_DIR, "results_view.qss")
 SIDEBAR_QSS = os.path.join(STYLES_DIR, "sidebar.qss")
 SQL_EDITOR_QSS = os.path.join(STYLES_DIR, "sql_editor.qss")
-RESULTS_VIEW_QSS = os.path.join(STYLES_DIR, "results_view.qss")
+TOOLBAR_QSS = os.path.join(STYLES_DIR, "toolbar.qss")
+TOOLBAR_BUTTON_QSS = os.path.join(STYLES_DIR, "toolbar_button.qss")
+TOOLBAR_SEPARATOR_QSS = os.path.join(STYLES_DIR, "toolbar_separator.qss")
 WORKSPACE_QSS = os.path.join(STYLES_DIR, "workspace.qss")
 
 
@@ -43,9 +46,12 @@ STYLE_FILES = [
     FONTS_QSS,
     HOME_QSS,
     NOTIFICATIONS_QSS,
+    RESULTS_VIEW_QSS,
     SIDEBAR_QSS,
     SQL_EDITOR_QSS,
-    RESULTS_VIEW_QSS,
+    TOOLBAR_QSS,
+    TOOLBAR_BUTTON_QSS,
+    TOOLBAR_SEPARATOR_QSS,
     WORKSPACE_QSS,
 ]
 

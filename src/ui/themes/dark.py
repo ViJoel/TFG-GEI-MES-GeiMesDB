@@ -554,3 +554,38 @@ THEME.update(
         "table_scrollbar_handle_color_pressed": THEME["primary_pressed"],
     }
 )
+
+# ===============
+# === TOOLBAR ===
+# ===============
+THEME.update(
+    {
+        # Default
+        "toolbar_background_color": "rgba(139, 195, 74, 0.3)",
+        "toolbar_border_color": THEME["primary"],
+        "toolbar_color": THEME["text"],
+        # Separador
+        "toolbar_separator": GRAY_900,
+    }
+)
+
+# ======================
+# === TOOLBAR BUTTON ===
+# ======================
+
+THEME.update(
+    {
+        # Botones
+        "toolbar_button_background_color": "transparent",
+        "toolbar_button_background_color_hover": GRAY_950,
+        "toolbar_button_background_color_pressed": GRAY_800,
+        "toolbar_button_color": THEME["text"],
+        "toolbar_button_color_hover": WHITE,
+        "toolbar_button_color_pressed": WHITE,
+        # Iconos
+        "toolbar_button_execute_query_icon_color": THEME["primary"],
+        "toolbar_button_execute_script_icon_color": THEME["primary"],
+        "toolbar_button_undo_icon_color": THEME["secondary"],
+        "toolbar_button_redo_icon_color": THEME["secondary"],
+    }
+)

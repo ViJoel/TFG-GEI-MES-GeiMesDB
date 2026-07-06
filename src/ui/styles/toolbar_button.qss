@@ -1,0 +1,16 @@
+QToolButton#toolbar_button {
+    background-color: $toolbar_button_background_color;
+    border-radius: 4px;
+    color: $toolbar_button_color;
+    padding: 2px 0px 2px 4px;
+}
+
+QToolButton#toolbar_button:hover {
+    background-color: $toolbar_button_background_color_hover;
+    color: $toolbar_button_color_hover;
+}
+
+QToolButton#toolbar_button:pressed {
+    background-color: $toolbar_button_background_color_pressed;
+    color: $toolbar_button_color_pressed;
+}

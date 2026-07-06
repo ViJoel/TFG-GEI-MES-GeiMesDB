@@ -1,0 +1,6 @@
+QWidget#toolbar {
+    background-color: $toolbar_background_color;
+    border: none;
+    border-radius: 8px;
+    color: $toolbar_color;
+}
