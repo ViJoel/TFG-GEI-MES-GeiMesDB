@@ -8,6 +8,10 @@ from log.app_logger import get_logger
 
 logger = get_logger(__name__)
 
+# True: Evita reinicializar la base de datos si el archivo ya existe.
+# False: Fuerza la creación del esquema y la inicialización siempre.
+SKIP_INIT_IF_DB_EXISTS = False
+
 
 @contextmanager
 def get_connection(
@@ -125,9 +129,10 @@ def init_database(
         exist_ok=True,
     )
 
-    if os.path.exists(db_path):
-        logger.info("Application database already exists. Initialization skipped.")
-        return
+    if SKIP_INIT_IF_DB_EXISTS:
+        if os.path.exists(db_path):
+            logger.info("Application database already exists. Initialization skipped.")
+            return
 
     try:
 
