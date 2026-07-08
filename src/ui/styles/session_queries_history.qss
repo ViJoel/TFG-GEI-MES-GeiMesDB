@@ -14,6 +14,12 @@ QWidget#session_queries_history_item:hover {
     background-color: $session_queries_history_item_background_hover_color;
 }
 
+QListWidget#session_queries_history::item:selected {
+    background-color: $session_queries_history_item_background_selected_color;
+    border: none;
+    border-radius: 4px;
+}
+
 QWidget#session_queries_history_item QLabel {
     background-color: transparent;
 }

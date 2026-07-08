@@ -66,6 +66,11 @@ class SessionQueriesHistory(QListWidget):
         )
         self.horizontalScrollBar().setSingleStep(10)
 
+        # Elimina el foco de teclado
+        # Usado para eliminar el rectángulo
+        # de selección que viene por defecto.
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+
     # ==================
     # === UI HELPERS ===
     # ==================

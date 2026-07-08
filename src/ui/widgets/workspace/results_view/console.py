@@ -45,8 +45,8 @@ class Console(QTextEdit):
 
         self.setReadOnly(True)
 
-        self.verticalScrollBar().setSingleStep(10)
-        self.horizontalScrollBar().setSingleStep(10)
+        self.verticalScrollBar().setSingleStep(20)
+        self.horizontalScrollBar().setSingleStep(20)
 
     # ===================
     # === PRIVATE API ===

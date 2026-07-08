@@ -509,6 +509,7 @@ THEME.update(
     {
         "session_queries_history_item_background_color": TRANSPARENT,
         "session_queries_history_item_background_hover_color": GRAY_900,
+        "session_queries_history_item_background_selected_color": GRAY_800,
         "session_queries_history_item_date_color": THEME["text_disabled"],
         "session_queries_history_item_query_color": THEME["text"],
     }

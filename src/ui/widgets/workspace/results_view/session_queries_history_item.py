@@ -69,7 +69,7 @@ class SessionQueriesHistoryItem(QWidget):
         self.setLayout(layout)
 
         date = QLabel(
-            text=self.entry.executed_at.strftime("%Y/%m/%d\t-\t%H:%M:%S"),
+            text=self.entry.executed_at.strftime("%Y/%m/%d\t%H:%M:%S"),
         )
         date.setObjectName("session_queries_history_item_date")
 
