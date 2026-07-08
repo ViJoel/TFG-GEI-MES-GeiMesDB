@@ -76,6 +76,9 @@ class SqlEditor(QPlainTextEdit):
 
         self.setPlaceholderText("Write SQL query...")
 
+        self.verticalScrollBar().setSingleStep(1)
+        self.horizontalScrollBar().setSingleStep(1)
+
         self.line_number_area = LineNumberArea(self)
         self.line_number_area.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.line_number_area.setAutoFillBackground(False)

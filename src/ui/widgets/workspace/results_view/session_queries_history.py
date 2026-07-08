@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from PySide6.QtGui import QFocusEvent
 
-
 from PySide6.QtCore import (
     Qt,
     Signal,
 )
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QListWidget,
     QListWidgetItem,
 )
@@ -55,6 +55,16 @@ class SessionQueriesHistory(QListWidget):
         """
 
         self.setSpacing(4)
+
+        self.setVerticalScrollMode(
+            QAbstractItemView.ScrollMode.ScrollPerPixel,
+        )
+        self.verticalScrollBar().setSingleStep(10)
+
+        self.setHorizontalScrollMode(
+            QAbstractItemView.ScrollMode.ScrollPerPixel,
+        )
+        self.horizontalScrollBar().setSingleStep(10)
 
     # ==================
     # === UI HELPERS ===

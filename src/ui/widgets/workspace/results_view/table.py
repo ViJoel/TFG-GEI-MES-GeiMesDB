@@ -1,4 +1,7 @@
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import (
+    Qt,
+    Signal,
+)
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QTableView,
@@ -73,6 +76,16 @@ class Table(QTableView):
         self.setShowGrid(True)
 
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+
+        self.setVerticalScrollMode(
+            QAbstractItemView.ScrollMode.ScrollPerPixel,
+        )
+        self.verticalScrollBar().setSingleStep(10)
+
+        self.setHorizontalScrollMode(
+            QAbstractItemView.ScrollMode.ScrollPerPixel,
+        )
+        self.horizontalScrollBar().setSingleStep(10)
 
     # ==================
     # === PUBLIC API ===

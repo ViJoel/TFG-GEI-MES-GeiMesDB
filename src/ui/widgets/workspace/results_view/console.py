@@ -1,4 +1,7 @@
-from PySide6.QtGui import QColor, QTextCursor
+from PySide6.QtGui import (
+    QColor,
+    QTextCursor,
+)
 from PySide6.QtWidgets import QTextEdit
 
 from entities.message_type import MessageType
@@ -41,6 +44,9 @@ class Console(QTextEdit):
         """
 
         self.setReadOnly(True)
+
+        self.verticalScrollBar().setSingleStep(10)
+        self.horizontalScrollBar().setSingleStep(10)
 
     # ===================
     # === PRIVATE API ===
