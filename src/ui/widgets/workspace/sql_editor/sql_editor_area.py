@@ -108,3 +108,18 @@ class SqlEditorArea(QWidget):
     # ==================
     # === PUBLIC API ===
     # ==================
+
+    def set_query_text(
+        self,
+        text: str,
+    ) -> None:
+        """
+        Inserta el texto SQL proporcionado dentro del editor
+        en la posición actual del cursor.
+
+        Args:
+            text (str):
+                Texto a insertar.
+        """
+
+        self.editor.insert_query_at_cursor(text)

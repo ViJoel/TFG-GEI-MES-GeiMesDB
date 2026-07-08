@@ -1,4 +1,7 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import (
+    MagicMock,
+    patch,
+)
 
 import pytest
 
@@ -71,6 +74,21 @@ def test_show_table_switches_view(results_view):
     )
 
 
+def test_show_session_queries_history_switches_view(results_view):
+    """
+    Verifica que se muestra el historial de consultas de la sesión.
+    """
+
+    results_view.session_queries_history = MagicMock()
+    results_view.stacklayout = MagicMock()
+
+    results_view._show_session_queries_history()
+
+    results_view.stacklayout.setCurrentWidget.assert_called_once_with(
+        results_view.session_queries_history
+    )
+
+
 # =============================================================================
 # BUTTON STATE
 # =============================================================================
@@ -95,12 +113,10 @@ def test_set_tab_buttons_state(results_view):
     Verifica enable/disable de botones de tabs.
     """
 
-    results_view.console_button = MagicMock()
     results_view.table_button = MagicMock()
 
     results_view.set_tab_buttons_state(False)
 
-    results_view.console_button.setEnabled.assert_called_once_with(False)
     results_view.table_button.setEnabled.assert_called_once_with(False)
 
 
@@ -335,3 +351,47 @@ def test_on_discard_button_clicked_connects_and_execs(results_view, monkeypatch)
     )
 
     dialog_mock.exec.assert_called_once()
+
+
+# =============================================================================
+# PUBLIC API
+# =============================================================================
+
+
+def test_add_entry_to_session_queries_history_forwards_to_widget(results_view):
+    """
+    Verifica que la inserción de entradas se delega
+    al widget del historial.
+    """
+
+    results_view.session_queries_history = MagicMock()
+
+    entry = MagicMock()
+
+    results_view.add_entry_to_session_queries_history(entry)
+
+    results_view.session_queries_history.add_entry.assert_called_once_with(
+        entry,
+        None,
+    )
+
+
+def test_add_entry_to_session_queries_history_forwards_row(results_view):
+    """
+    Verifica que la posición de inserción se reenvía
+    correctamente.
+    """
+
+    results_view.session_queries_history = MagicMock()
+
+    entry = MagicMock()
+
+    results_view.add_entry_to_session_queries_history(
+        entry,
+        row=0,
+    )
+
+    results_view.session_queries_history.add_entry.assert_called_once_with(
+        entry,
+        0,
+    )

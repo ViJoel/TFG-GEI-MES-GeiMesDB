@@ -1,4 +1,7 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import (
+    MagicMock,
+    patch,
+)
 
 import pytest
 
@@ -93,6 +96,60 @@ def test_full_script_executes_script(workspace):
     workspace.results_view.set_action_buttons_state.assert_called_once_with(
         False,
     )
+
+
+def test_execute_requested_adds_query_to_session_history(workspace):
+    """
+    Verifica que cada consulta ejecutada se añade
+    al historial de consultas de la sesión.
+    """
+
+    workspace._execute_query = MagicMock()
+    workspace.results_view.add_entry_to_session_queries_history = MagicMock()
+    workspace.results_view.set_action_buttons_state = MagicMock()
+
+    queries = ["SELECT * FROM users"]
+
+    workspace._on_execute_requested(
+        queries,
+        SqlScope.SELECTED_TEXT,
+    )
+
+    workspace.results_view.add_entry_to_session_queries_history.assert_called_once()
+
+    call = workspace.results_view.add_entry_to_session_queries_history.call_args
+    entry = call.kwargs["entry"]
+
+    assert entry.connection_id == workspace.connection.id
+    assert entry.query == "SELECT * FROM users"
+
+
+def test_execute_requested_adds_all_script_queries_to_session_history(workspace):
+    """
+    Verifica que cada sentencia de un script se
+    registra individualmente en el historial.
+    """
+
+    workspace._execute_script = MagicMock()
+    workspace.results_view.add_entry_to_session_queries_history = MagicMock()
+    workspace.results_view.set_action_buttons_state = MagicMock()
+
+    queries = [
+        "CREATE TABLE test(id INTEGER);",
+        "SELECT * FROM test;",
+    ]
+
+    workspace._on_execute_requested(
+        queries,
+        SqlScope.FULL_SCRIPT,
+    )
+
+    assert workspace.results_view.add_entry_to_session_queries_history.call_count == 2
+
+    calls = workspace.results_view.add_entry_to_session_queries_history.call_args_list
+
+    assert calls[0].kwargs["entry"].query == queries[0]
+    assert calls[1].kwargs["entry"].query == queries[1]
 
 
 # =============================================================================
@@ -288,4 +345,26 @@ def test_save_requested_refreshes_results(
 
     workspace.results_view.set_action_buttons_state.assert_called_once_with(
         False,
+    )
+
+
+# =============================================================================
+# ON QUERY SELECTED FROM SESSION QUERIES HISTORY
+# =============================================================================
+
+
+def test_query_selected_from_session_history_updates_editor(workspace):
+    """
+    Verifica que seleccionar una consulta del
+    historial la inserta en el editor SQL.
+    """
+
+    workspace.sql_editor.set_query_text = MagicMock()
+
+    query = "SELECT * FROM users"
+
+    workspace._on_query_selected_from_session_queries_history(query)
+
+    workspace.sql_editor.set_query_text.assert_called_once_with(
+        query,
     )

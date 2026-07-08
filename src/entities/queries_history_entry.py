@@ -1,5 +1,11 @@
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from dataclasses import (
+    dataclass,
+    field,
+)
+from datetime import (
+    datetime,
+    timezone,
+)
 
 
 # slots: Optimiza memoria y restringe atributos fijos.

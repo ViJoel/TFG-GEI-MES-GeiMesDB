@@ -1,0 +1,53 @@
+/* ================= */
+/* === SCROLLBAR === */
+/* ================= */
+
+/* Scrollbar */
+
+QScrollBar {
+    background-color: $scrollbar_background_color;
+    border: none;
+    padding: 2px;
+}
+
+QScrollBar::handle {
+    background-color: $scrollbar_handle_color;
+    border: none;
+}
+
+QScrollBar::handle:hover {
+    background-color: $scrollbar_handle_color_hover;
+}
+
+QScrollBar::handle:pressed {
+    background-color: $scrollbar_handle_color_pressed;
+}
+
+QScrollBar::add-line,
+QScrollBar::sub-line {
+    background-color: transparent;
+    border: none;
+    height: 0px;
+    width: 0px;
+}
+
+/* Scrollbar vertical */
+
+QScrollBar:vertical {
+    width: 10px;
+}
+
+QScrollBar::handle:vertical {
+    min-height: 30px;
+}
+
+/* Scrollbar horizontal */
+
+QScrollBar:horizontal {
+    height: 10px;
+}
+
+QScrollBar::handle:horizontal {
+    min-width: 30px;
+}
+

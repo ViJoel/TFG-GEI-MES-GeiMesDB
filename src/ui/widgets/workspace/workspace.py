@@ -1,11 +1,19 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QSplitter, QWidget
+from PySide6.QtWidgets import (
+    QSplitter,
+    QWidget,
+)
 
 from entities.connection import Connection
 from entities.message_type import MessageType
+from entities.queries_history_entry import QueriesHistoryEntry
 from entities.sql_scope import SqlScope
 from log.app_logger import get_logger
-from modules.sessions.service import execute_query, execute_script, is_editable_query
+from modules.sessions.service import (
+    execute_query,
+    execute_script,
+    is_editable_query,
+)
 from ui.app.app_actions import notify
 from ui.utils.layouts import hbox
 from ui.widgets.workspace.results_view.results_view import ResultsView
@@ -107,6 +115,10 @@ class Workspace(QWidget):
             self._on_save_requested,
         )
 
+        self.results_view.query_selected_from_session_queries_history.connect(
+            self._on_query_selected_from_session_queries_history
+        )
+
     # ======================
     # === EVENT HANDLERS ===
     # ======================
@@ -134,6 +146,14 @@ class Workspace(QWidget):
 
         elif scope == SqlScope.FULL_SCRIPT:
             self._execute_script(sql)
+
+        for s in sql:
+            self.results_view.add_entry_to_session_queries_history(
+                entry=QueriesHistoryEntry(
+                    connection_id=self.connection.id,
+                    query=s,
+                )
+            )
 
         self.results_view.set_action_buttons_state(False)
 
@@ -194,6 +214,13 @@ class Workspace(QWidget):
         logger.debug("Results view refreshed.")
 
         logger.success(f"Changes saved for '{connection.name}' (ID: {connection.id}).")
+
+    def _on_query_selected_from_session_queries_history(
+        self,
+        query: str,
+    ) -> None:
+
+        self.sql_editor.set_query_text(query)
 
     # =====================
     # === EVENT HELPERS ===

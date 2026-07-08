@@ -480,6 +480,40 @@ THEME.update(
     }
 )
 
+# ==================
+# === SCROLLBARS ===
+# ==================
+THEME.update(
+    {
+        "scrollbar_background_color": GRAY_950,
+        "scrollbar_handle_color": THEME["primary"],
+        "scrollbar_handle_color_hover": THEME["primary_hover"],
+        "scrollbar_handle_color_pressed": THEME["primary_pressed"],
+    }
+)
+
+# ===============================
+# === SESSION QUERIES HISTORY ===
+# ===============================
+THEME.update(
+    {
+        "session_queries_history_background_color": GRAY_950,
+        "session_queries_history_border_color": GREEN,
+    }
+)
+
+# ====================================
+# === SESSION QUERIES HISTORY ITEM ===
+# ====================================
+THEME.update(
+    {
+        "session_queries_history_item_background_color": TRANSPARENT,
+        "session_queries_history_item_background_hover_color": GRAY_900,
+        "session_queries_history_item_date_color": THEME["text_disabled"],
+        "session_queries_history_item_query_color": THEME["text"],
+    }
+)
+
 # ===============
 # === SIDEBAR ===
 # ===============
@@ -547,11 +581,6 @@ THEME.update(
         # Alternancia de filas
         "table_row_alternate_background_color": GRAY_900,
         "table_grid_color": TRANSPARENT,
-        # Scrollbar
-        "table_scrollbar_background_color": TRANSPARENT,
-        "table_scrollbar_handle_color": THEME["primary"],
-        "table_scrollbar_handle_color_hover": THEME["primary_hover"],
-        "table_scrollbar_handle_color_pressed": THEME["primary_pressed"],
     }
 )
 

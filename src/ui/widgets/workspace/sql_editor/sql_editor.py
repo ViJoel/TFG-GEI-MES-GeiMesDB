@@ -1,5 +1,9 @@
 import sqlparse
-from PySide6.QtCore import QRectF, Qt, Signal
+from PySide6.QtCore import (
+    QRectF,
+    Qt,
+    Signal,
+)
 from PySide6.QtGui import (
     QColor,
     QKeyEvent,
@@ -9,7 +13,10 @@ from PySide6.QtGui import (
     QResizeEvent,
     QTextFormat,
 )
-from PySide6.QtWidgets import QPlainTextEdit, QTextEdit
+from PySide6.QtWidgets import (
+    QPlainTextEdit,
+    QTextEdit,
+)
 
 from entities.sql_scope import SqlScope
 from ui.themes.theme_manager import ThemeManager
@@ -455,7 +462,7 @@ class SqlEditor(QPlainTextEdit):
 
         # Radio de las esquinas
         # redondeadas del panel.
-        radius = 8
+        radius = 4
 
         # Área completa del panel lateral.
         rect = QRectF(self.line_number_area.rect())
@@ -619,3 +626,24 @@ class SqlEditor(QPlainTextEdit):
             bottom = top + round(self.blockBoundingRect(block).height())
 
             block_number += 1
+
+    def insert_query_at_cursor(
+        self,
+        text: str,
+    ) -> None:
+        """
+        Inserta un fragmento de texto SQL en la posición
+        actual del cursor, reemplazando la selección si existe.
+
+        Args:
+            text (str): Texto SQL a insertar.
+        """
+
+        if not text:
+            return
+
+        # Insertar el texto en la posición del cursor actual
+        self.insertPlainText(text)
+
+        # Asegurar que el editor recupere el foco visual
+        self.setFocus()

@@ -208,3 +208,38 @@ def test_line_number_area_width(editor):
 
     assert isinstance(width, int)
     assert width > 0
+
+
+# =============================================================================
+# INSERT QUERY AT CURSOR
+# =============================================================================
+
+
+def test_insert_query_at_cursor_inserts_text(editor):
+    """
+    Verifica que el texto SQL se inserta en la posición
+    actual del cursor.
+    """
+
+    editor.setPlainText("SELECT ")
+
+    cursor = editor.textCursor()
+    cursor.movePosition(cursor.MoveOperation.End)
+    editor.setTextCursor(cursor)
+
+    editor.insert_query_at_cursor("* FROM users")
+
+    assert editor.toPlainText() == "SELECT * FROM users"
+
+
+def test_insert_query_at_cursor_ignores_empty_text(editor):
+    """
+    Verifica que no se modifica el contenido cuando
+    el texto a insertar está vacío.
+    """
+
+    editor.setPlainText("SELECT *")
+
+    editor.insert_query_at_cursor("")
+
+    assert editor.toPlainText() == "SELECT *"

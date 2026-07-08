@@ -28,6 +28,8 @@ FONTS_QSS = os.path.join(STYLES_DIR, "fonts.qss")
 HOME_QSS = os.path.join(STYLES_DIR, "home.qss")
 NOTIFICATIONS_QSS = os.path.join(STYLES_DIR, "notifications.qss")
 RESULTS_VIEW_QSS = os.path.join(STYLES_DIR, "results_view.qss")
+SCROLLBAR_QSS = os.path.join(STYLES_DIR, "scrollbar.qss")
+SESSION_QUERIES_HISTORY_QSS = os.path.join(STYLES_DIR, "session_queries_history.qss")
 SIDEBAR_QSS = os.path.join(STYLES_DIR, "sidebar.qss")
 SQL_EDITOR_QSS = os.path.join(STYLES_DIR, "sql_editor.qss")
 TOOLBAR_QSS = os.path.join(STYLES_DIR, "toolbar.qss")
@@ -47,6 +49,8 @@ STYLE_FILES = [
     HOME_QSS,
     NOTIFICATIONS_QSS,
     RESULTS_VIEW_QSS,
+    SCROLLBAR_QSS,
+    SESSION_QUERIES_HISTORY_QSS,
     SIDEBAR_QSS,
     SQL_EDITOR_QSS,
     TOOLBAR_QSS,
