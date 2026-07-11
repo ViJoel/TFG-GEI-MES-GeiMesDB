@@ -19,7 +19,7 @@ class TaskManager:
         self,
         fn: Callable,
         *args,
-        on_result: Callable | None = None,
+        on_success: Callable | None = None,
         on_error: Callable | None = None,
         on_finished: Callable | None = None,
         **kwargs,
@@ -33,8 +33,8 @@ class TaskManager:
 
         self._workers.add(worker)
 
-        if on_result:
-            worker.signals.result.connect(on_result)
+        if on_success:
+            worker.signals.result.connect(on_success)
 
         if on_error:
             worker.signals.error.connect(on_error)

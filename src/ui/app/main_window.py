@@ -248,17 +248,21 @@ class MainWindow(QMainWindow):
     ) -> None:
         """
         Abre una sesión runtime para la conexión especificada.
+
+        Args:
+            connection (Connection):
+                Conexión sobre la que se abrirá la sesión.
         """
 
         notify(
             MessageType.WARNING,
-            "Opening connection session...",
+            "Connecting...",
         )
 
         AppContext.get_task_manager().run(
             open_session,
             connection,
-            on_result=lambda _: self._on_open_connection_session_success(connection),
+            on_success=lambda _: self._on_open_connection_session_success(connection),
             on_error=self._on_open_connection_session_error,
         )
 
@@ -275,42 +279,17 @@ class MainWindow(QMainWindow):
                 Conexión asociada a la sesión.
         """
 
-        try:
+        notify(
+            MessageType.WARNING,
+            "Disconnecting...",
+        )
 
-            notify(
-                MessageType.WARNING,
-                "Closing connection...",
-            )
-
-            # Forzar el repintado de la UI antes de iniciar una operación
-            # síncrona que bloqueará temporalmente el hilo principal.
-            AppContext.get_app().processEvents()
-
-            close_session(connection.id)
-
-            notify(
-                MessageType.SUCCESS,
-                "Connection closed",
-            )
-
-            # Eliminar espacio de trabajo.
-            workspace = self.workspaces.pop(connection.id, None)
-
-            if workspace:
-                self.stack.removeWidget(workspace)
-                workspace.deleteLater()
-
-            # Refrescar estado visual.
-            self.sidebar.connections_list.reload_connections()
-
-        except Exception as e:
-
-            logger.error(f"Error closing session: {e}")
-
-            notify(
-                MessageType.ERROR,
-                "Error disconnecting",
-            )
+        AppContext.get_task_manager().run(
+            close_session,
+            connection.id,
+            on_success=lambda _: self._on_close_connection_session_success(connection),
+            on_error=self._on_close_connection_session_error,
+        )
 
     def _on_connection_selected(
         self,
@@ -345,7 +324,7 @@ class MainWindow(QMainWindow):
 
         notify(
             MessageType.SUCCESS,
-            "Connection session opened.",
+            "Connected.",
         )
 
         if connection.id not in self.workspaces:
@@ -363,11 +342,43 @@ class MainWindow(QMainWindow):
         error: WorkerError,
     ) -> None:
 
-        logger.error("Error opening connection session:\n%s", error.traceback)
+        logger.error(error.traceback)
 
         notify(
             MessageType.ERROR,
-            "Connection session opening failed.",
+            "Connection failed.",
+        )
+
+    def _on_close_connection_session_success(
+        self,
+        connection: Connection,
+    ) -> None:
+
+        notify(
+            MessageType.SUCCESS,
+            "Disconnected.",
+        )
+
+        # Eliminar espacio de trabajo.
+        workspace = self.workspaces.pop(connection.id, None)
+
+        if workspace:
+            self.stack.removeWidget(workspace)
+            workspace.deleteLater()
+
+        # Refrescar estado visual.
+        self.sidebar.connections_list.reload_connections()
+
+    def _on_close_connection_session_error(
+        self,
+        error: WorkerError,
+    ) -> None:
+
+        logger.error(error.traceback)
+
+        notify(
+            MessageType.ERROR,
+            "Disconnection failed.",
         )
 
     # ====================
