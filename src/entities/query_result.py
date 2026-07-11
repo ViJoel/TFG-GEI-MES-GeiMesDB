@@ -15,7 +15,10 @@ from dataclasses import dataclass
 from typing import Any
 
 
-@dataclass
+@dataclass(
+    slots=True,
+    kw_only=True,
+)
 class ResultSet:
     """
     Contiene el conjunto de resultados devuelto
@@ -64,7 +67,10 @@ class ResultSet:
         return self.table_name is not None and len(self.primary_key_columns) > 0
 
 
-@dataclass
+@dataclass(
+    slots=True,
+    kw_only=True,
+)
 class QueryResult:
     """
     Representa el resultado de la ejecución de una

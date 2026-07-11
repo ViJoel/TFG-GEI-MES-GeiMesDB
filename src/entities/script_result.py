@@ -14,7 +14,10 @@ Clases:
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(
+    slots=True,
+    kw_only=True,
+)
 class ScriptResultItem:
     """
     Representa el resultado de la ejecución de una
@@ -47,7 +50,10 @@ class ScriptResultItem:
         return self.error is None
 
 
-@dataclass
+@dataclass(
+    slots=True,
+    kw_only=True,
+)
 class ScriptResult:
     """
     Contiene los resultados de la ejecución

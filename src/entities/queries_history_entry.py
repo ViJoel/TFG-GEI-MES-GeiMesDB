@@ -8,8 +8,6 @@ from datetime import (
 )
 
 
-# slots: Optimiza memoria y restringe atributos fijos.
-# kw_only: Fuerza la inicialización explícita mediante nombres de argumentos.
 @dataclass(
     slots=True,
     kw_only=True,
