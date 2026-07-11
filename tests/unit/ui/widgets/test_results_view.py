@@ -5,6 +5,8 @@ from unittest.mock import (
 
 import pytest
 
+from entities.connection import Connection
+from entities.driver import Driver
 from entities.message_type import MessageType
 from ui.widgets.workspace.results_view.results_view import ResultsView
 
@@ -13,28 +15,53 @@ from ui.widgets.workspace.results_view.results_view import ResultsView
 # =============================================================================
 
 
-@pytest.fixture
-def results_view(qtbot):
-    """
-    Crea una instancia de ResultsView.
-    """
-
-    widget = ResultsView()
-    qtbot.addWidget(widget)
-
-    return widget
-
-
 @pytest.fixture(autouse=True)
 def patch_dependencies():
     """
-    Evita dependencias externas (notify, dialogs, etc).
+    Evita dependencias externas e intercepta las llamadas síncronas
+    y de notificación durante la inicialización de los widgets.
     """
-
     with patch("ui.widgets.workspace.results_view.results_view.notify"), patch(
         "ui.widgets.workspace.results_view.results_view.ConfirmationDialog"
+    ), patch(
+        "ui.widgets.workspace.results_view.connection_queries_history.notify"
+    ), patch(
+        "ui.widgets.workspace.results_view.connection_queries_history.get_queries_history",
+        return_value=[],
+    ), patch(
+        "ui.widgets.workspace.results_view.connection_queries_history.AppContext.get_app"
     ):
         yield
+
+
+@pytest.fixture
+def mock_connection():
+    """
+    Crea una instancia válida de la dataclass
+    Connection para los componentes visuales.
+    """
+
+    return Connection(
+        name="Test Connection",
+        driver=Driver.POSTGRESQL,
+        host="localhost",
+        port=5432,
+        database="test_db",
+        username="admin",
+        password="password",
+    )
+
+
+@pytest.fixture
+def results_view(qtbot, mock_connection):
+    """
+    Crea una instancia de ResultsView pasándole la conexión requerida.
+    """
+
+    widget = ResultsView(connection=mock_connection)
+    qtbot.addWidget(widget)
+
+    return widget
 
 
 # =============================================================================

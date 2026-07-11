@@ -35,10 +35,11 @@ def test_message_type_contains_all_members() -> None:
 
     assert list(MessageType) == [
         MessageType.DEFAULT,
+        MessageType.DISABLED,
+        MessageType.ERROR,
         MessageType.INFO,
         MessageType.SUCCESS,
         MessageType.WARNING,
-        MessageType.ERROR,
     ]
 
 

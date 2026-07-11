@@ -14,6 +14,27 @@ from ui.widgets.workspace.workspace import Workspace
 # =============================================================================
 
 
+@pytest.fixture(autouse=True)
+def patch_dependencies():
+    """
+    Evita dependencias externas e intercepta las llamadas síncronas
+    y de notificación durante la inicialización y ejecución del workspace.
+    """
+    with patch("ui.widgets.workspace.workspace.notify"), patch(
+        "ui.widgets.workspace.results_view.results_view.notify"
+    ), patch(
+        "ui.widgets.workspace.results_view.results_view.ConfirmationDialog"
+    ), patch(
+        "ui.widgets.workspace.results_view.connection_queries_history.notify"
+    ), patch(
+        "ui.widgets.workspace.results_view.connection_queries_history.get_queries_history",
+        return_value=[],
+    ), patch(
+        "ui.widgets.workspace.results_view.connection_queries_history.AppContext.get_app"
+    ):
+        yield
+
+
 @pytest.fixture
 def connection():
     """
@@ -31,7 +52,8 @@ def connection():
 def workspace(qtbot, connection):
     """
     Crea una instancia de Workspace y la registra
-    en qtbot.
+    en qtbot asegurando que los parches de inicialización
+    estén activos.
     """
 
     widget = Workspace(connection)
