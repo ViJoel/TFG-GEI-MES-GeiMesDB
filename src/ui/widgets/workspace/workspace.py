@@ -9,12 +9,14 @@ from entities.message_type import MessageType
 from entities.queries_history_entry import QueriesHistoryEntry
 from entities.sql_scope import SqlScope
 from log.app_logger import get_logger
+from modules.queries_history.service import save_queries_history_batch
 from modules.sessions.service import (
     execute_query,
     execute_script,
     is_editable_query,
 )
 from ui.app.app_actions import notify
+from ui.app.app_context import AppContext
 from ui.utils.layouts import hbox
 from ui.widgets.workspace.results_view.results_view import ResultsView
 from ui.widgets.workspace.sql_editor.sql_editor_area import SqlEditorArea
@@ -77,7 +79,7 @@ class Workspace(QWidget):
         self.setLayout(main_layout)
 
         self.sql_editor = SqlEditorArea()
-        self.results_view = ResultsView()
+        self.results_view = ResultsView(connection=self.connection)
 
         self.splitter = QSplitter(Qt.Vertical)
 
@@ -141,21 +143,29 @@ class Workspace(QWidget):
                 Ámbito de ejecución solicitado.
         """
 
+        notify(
+            MessageType.WARNING,
+            "Executing sql...",
+        )
+
+        # Forzar el repintado de la UI antes de iniciar una operación
+        # síncrona que bloqueará temporalmente el hilo principal.
+        AppContext.get_app().processEvents()
+
         if scope == SqlScope.SELECTED_TEXT:
             self._execute_query(sql)
 
         elif scope == SqlScope.FULL_SCRIPT:
             self._execute_script(sql)
 
-        for s in sql:
-            self.results_view.add_entry_to_session_queries_history(
-                entry=QueriesHistoryEntry(
-                    connection_id=self.connection.id,
-                    query=s,
-                )
-            )
+        self._save_queries_history(sql)
 
         self.results_view.set_action_buttons_state(False)
+
+        notify(
+            MessageType.SUCCESS,
+            "SQL executed.",
+        )
 
     def _on_save_requested(
         self,
@@ -347,3 +357,43 @@ class Workspace(QWidget):
             f"Script executed successfully for "
             f"'{self.connection.name}' (ID: {self.connection.id})."
         )
+
+    def _save_queries_history(self, queries: list[str]) -> None:
+
+        notify(
+            MessageType.WARNING,
+            "Saving queries history...",
+        )
+
+        # Forzar el repintado de la UI antes de iniciar una operación
+        # síncrona que bloqueará temporalmente el hilo principal.
+        AppContext.get_app().processEvents()
+
+        try:
+
+            entries: list[QueriesHistoryEntry] = []
+
+            for q in queries:
+
+                entry = QueriesHistoryEntry(
+                    connection_id=self.connection.id,
+                    query=q,
+                )
+
+                entries.append(entry)
+
+                self.results_view.add_entry_to_session_queries_history(entry=entry)
+
+            save_queries_history_batch(
+                connection=self.connection,
+                entries=entries,
+            )
+
+            notify(MessageType.SUCCESS, "Queries history updated.")
+
+        except:
+
+            notify(
+                MessageType.SUCCESS,
+                "Error updating queries history.\nSee logs for details.",
+            )

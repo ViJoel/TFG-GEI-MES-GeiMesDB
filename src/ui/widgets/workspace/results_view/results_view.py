@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from entities.connection import Connection
 from entities.message_type import MessageType
 from entities.queries_history_entry import QueriesHistoryEntry
 from entities.query_result import QueryResult
@@ -16,6 +17,9 @@ from ui.utils.layouts import (
     vbox,
 )
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
+from ui.widgets.workspace.results_view.connection_queries_history import (
+    ConnectionQueriesHistory,
+)
 from ui.widgets.workspace.results_view.console import Console
 from ui.widgets.workspace.results_view.session_queries_history import (
     SessionQueriesHistory,
@@ -46,12 +50,15 @@ class ResultsView(QWidget):
 
     def __init__(
         self,
+        connection: Connection,
     ) -> None:
         """
         Inicializa la vista de resultados.
         """
 
         super().__init__()
+
+        self.connection = connection
 
         self._setup_ui()
         self._connect_signals()
@@ -122,6 +129,15 @@ class ResultsView(QWidget):
 
         self.stacklayout.setCurrentWidget(self.session_queries_history)
 
+    def _show_connection_queries_history(
+        self,
+    ) -> None:
+        """
+        Muestra la vista del historial de consultas de la conexión.
+        """
+
+        self.stacklayout.setCurrentWidget(self.connection_queries_history)
+
     # ==================
     # === UI HELPERS ===
     # ==================
@@ -183,6 +199,13 @@ class ResultsView(QWidget):
 
         self.left_toolbar_layout.addWidget(self.session_queries_history_button)
 
+        self.connection_queries_history_button = self._create_button(
+            "Connection queries history",
+            "primary",
+        )
+
+        self.left_toolbar_layout.addWidget(self.connection_queries_history_button)
+
     def _create_action_buttons(
         self,
     ) -> None:
@@ -224,6 +247,9 @@ class ResultsView(QWidget):
         self.session_queries_history = SessionQueriesHistory()
         self.stacklayout.addWidget(self.session_queries_history)
 
+        self.connection_queries_history = ConnectionQueriesHistory(connection=self.connection)
+        self.stacklayout.addWidget(self.connection_queries_history)
+
     def _set_action_buttons_initial_state(
         self,
     ) -> None:
@@ -255,6 +281,10 @@ class ResultsView(QWidget):
 
         self.session_queries_history_button.pressed.connect(
             self._show_session_queries_history
+        )
+
+        self.connection_queries_history_button.pressed.connect(
+            self._show_connection_queries_history
         )
 
         self.save_button.clicked.connect(

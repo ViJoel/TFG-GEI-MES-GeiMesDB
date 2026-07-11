@@ -418,11 +418,12 @@ THEME.update(
     {
         "console_background_color": GRAY_950,
         "console_border_color": THEME["primary"],
-        "console_color": THEME["text"],
+        "console_default_color": THEME["text"],
         "console_info_color": THEME["info"],
         "console_success_color": THEME["success"],
         "console_error_color": THEME["danger"],
         "console_warning_color": THEME["warning"],
+        "console_disabled_color": THEME["text_disabled"],
         # Tipografía
         "console_font_family": "'Consolas'",
         "console_font_size": "14px",
