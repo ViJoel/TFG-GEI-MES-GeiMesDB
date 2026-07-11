@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from PySide6.QtCore import QDate
@@ -9,14 +10,18 @@ from PySide6.QtWidgets import (
 
 from entities.connection import Connection
 from entities.message_type import MessageType
+from log.app_logger import get_logger
 from modules.queries_history.service import get_queries_history
 from ui.app.app_actions import notify
 from ui.app.app_context import AppContext
+from ui.app.worker_error import WorkerError
 from ui.utils.layouts import (
     hbox,
     vbox,
 )
 from ui.widgets.workspace.results_view.console import Console
+
+logger = get_logger(__name__)
 
 
 class ConnectionQueriesHistory(QWidget):
@@ -113,15 +118,11 @@ class ConnectionQueriesHistory(QWidget):
 
         notify(
             MessageType.WARNING,
-            "Loading queries history...",
+            "Loading history...",
         )
 
-        # Forzar el repintado de la UI antes de iniciar una operación
-        # síncrona que bloqueará temporalmente el hilo principal.
-        AppContext.get_app().processEvents()
-
-        # Convertimos el QDateTime de PySide a un datetime nativo de Python (.toPython())
         start_date = self.start_date.dateTime().toPython()
+
         end_date = (
             self.end_date.dateTime()
             .toPython()
@@ -133,11 +134,22 @@ class ConnectionQueriesHistory(QWidget):
             )
         )
 
-        history = get_queries_history(
+        self.btn_filter.setEnabled(False)
+
+        AppContext.get_task_manager().run(
+            get_queries_history,
             connection=self.connection,
             start=start_date,
             end=end_date,
+            on_success=self._on_load_history_success,
+            on_error=self._on_load_history_error,
+            on_finished=lambda: self.btn_filter.setEnabled(True),
         )
+
+    def _on_load_history_success(
+        self,
+        history,
+    ) -> None:
 
         self.console.clear_output()
 
@@ -155,8 +167,8 @@ class ConnectionQueriesHistory(QWidget):
                 MessageType.DEFAULT,
             )
 
-            # Si no es la última entrada, añade el separador
             if index < total_entries - 1:
+
                 self.console.write(
                     "\n\n" + "-" * 100 + "\n\n",
                     MessageType.INFO,
@@ -164,5 +176,17 @@ class ConnectionQueriesHistory(QWidget):
 
         notify(
             MessageType.SUCCESS,
-            "Queries history loaded.",
+            "History loaded.",
+        )
+
+    def _on_load_history_error(
+        self,
+        error: WorkerError,
+    ) -> None:
+
+        logger.error(error.traceback)
+
+        notify(
+            MessageType.ERROR,
+            "History load failed.",
         )
