@@ -1,4 +1,8 @@
-from ui.common.paths import ARROW_DOWN_ICON
+from ui.common.paths import (
+    ARROW_DOWN_ICON,
+    ARROW_LINE_DOWN,
+    ARROW_LINE_UP,
+)
 
 # ====================
 # === TRANSPARENCY ===
@@ -37,6 +41,9 @@ GREEN = "#8BC34A"
 GREEN_HOVER = "#9CCC65"
 GREEN_PRESSED = "#7CB342"
 GREEN_DISABLED = "#5E7F39"
+
+GREEN_RGBA_50 = "rgba(139, 195, 74, 128)"
+GREEN_DISABLED_RGBA_50 = "rgba(94, 127, 57, 128)"
 
 # ===================
 # === LIGHT GREEN ===
@@ -408,6 +415,72 @@ THEME.update(
         "button_disconnect_color_hover": GRAY_800,
         "button_disconnect_color_pressed": GRAY_800,
         "button_disconnect_color_disabled": BLUE_DISABLED,
+    }
+)
+
+# ==================================
+# === CONNECTION QUERIES HISTORY ===
+# ==================================
+THEME.update(
+    {
+        # Contenedor de los inputs
+        "connection_queries_history_inputs_background_color": GRAY_950,
+        "connection_queries_history_inputs_border_color": THEME["primary"],
+        # Inputs
+        "connection_queries_history_date_input_background_color": GRAY_900,
+        "connection_queries_history_date_input_background_color_hover": GRAY_800,
+        "connection_queries_history_date_input_background_color_focus": GRAY_900,
+        "connection_queries_history_date_input_border_color": GRAY_800,
+        "connection_queries_history_date_input_border_color_hover": GRAY_700,
+        "connection_queries_history_date_input_border_color_focus": THEME["primary"],
+        "connection_queries_history_date_input_color": THEME["text"],
+        "connection_queries_history_date_input_color_hover": THEME["text_hover"],
+        "connection_queries_history_date_input_color_focus": THEME["primary"],
+        # Tipografía de los inputs
+        "connection_queries_history_date_input_font_family": "'Consolas'",
+        "connection_queries_history_date_input_font_size": "12px",
+        # Icono dropdown
+        "connection_queries_history_date_input_arrow_icon": ARROW_DOWN_ICON.replace(
+            "\\", "/"
+        ),
+        # Calendario desplegable
+        "connection_queries_history_date_input_calendar_background_color": GRAY_950,
+        "connection_queries_history_date_input_calendar_border_color": THEME["primary"],
+        # Calendario desplegable: Inputs de año y mes
+        "connection_queries_history_date_input_calendar_year_and_month_inputs_color": THEME[
+            "text"
+        ],
+        "connection_queries_history_date_input_calendar_year_and_month_inputs_color_hover": THEME[
+            "primary"
+        ],
+        "connection_queries_history_date_input_calendar_year_and_month_inputs_color_pressed": THEME[
+            "primary"
+        ],
+        "connection_queries_history_date_input_calendar_year_input_arrow_up": ARROW_LINE_UP,
+        "connection_queries_history_date_input_calendar_year_input_arrow_down": ARROW_LINE_DOWN,
+        # Calendario desplegable: Menu del input de los meses
+        "connection_queries_history_date_input_calendar_year_input_menu_background_color": GRAY_950,
+        "connection_queries_history_date_input_calendar_year_input_menu_border_color": THEME[
+            "primary"
+        ],
+        "connection_queries_history_date_input_calendar_year_input_menu_item_color": THEME[
+            "text"
+        ],
+        "connection_queries_history_date_input_calendar_year_input_menu_item_background_color_hover": GREEN_DISABLED_RGBA_50,
+        "connection_queries_history_date_input_calendar_year_input_menu_item_color_hover": THEME[
+            "primary"
+        ],
+        "connection_queries_history_date_input_calendar_year_input_menu_separator_color": THEME[
+            "primary"
+        ],
+        # Calendario desplegable: Botones de las flechas
+        "connection_queries_history_date_input_calendar_arrow_button_background_color_hover": GREEN_DISABLED_RGBA_50,
+        "connection_queries_history_date_input_calendar_arrow_button_background_color_pressed": GREEN_RGBA_50,
+        # Calendario desplegable: Celdas de los días
+        "connection_queries_history_date_input_calendar_cell_background_color_hover": GREEN_DISABLED_RGBA_50,
+        "connection_queries_history_date_input_calendar_cell_background_color_selected": GREEN_RGBA_50,
+        # Calendario desplegable: Tipografía
+        "connection_queries_history_date_input_calendar_font_size": "14px",
     }
 )
 

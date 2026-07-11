@@ -22,7 +22,9 @@ class TaskManager:
     de basura.
     """
 
-    def __init__(self):
+    def __init__(
+        self,
+    ) -> None:
         """
         Inicializa el gestor de tareas.
 
@@ -43,7 +45,7 @@ class TaskManager:
         on_error: Callable | None = None,
         on_finished: Callable | None = None,
         **kwargs,
-    ) -> None:
+    ) -> Worker:
         """
         Ejecuta una función en segundo plano.
 
@@ -79,6 +81,14 @@ class TaskManager:
             **kwargs:
                 Argumentos nombrados que serán
                 pasados a la función.
+
+        Returns:
+            Worker:
+                Worker creado y enviado al
+                ``QThreadPool`` para su ejecución.
+                Puede conservarse como referencia
+                para consultar su estado o ampliar
+                su funcionalidad en el futuro.
         """
 
         worker = Worker(
@@ -101,3 +111,5 @@ class TaskManager:
         worker.signals.finished.connect(lambda: self._workers.discard(worker))
 
         self._pool.start(worker)
+
+        return worker
