@@ -21,10 +21,6 @@ from ui.widgets.workspace.results_view.console import Console
 
 class ConnectionQueriesHistory(QWidget):
 
-    # =================
-    # === VARIABLES ===
-    # =================
-
     # ============
     # === INIT ===
     # ============
@@ -89,14 +85,6 @@ class ConnectionQueriesHistory(QWidget):
 
         self._load_history()
 
-    # ================
-    # === UI STATE ===
-    # ================
-
-    # ==================
-    # === UI HELPERS ===
-    # ==================
-
     # ===============
     # === SIGNALS ===
     # ===============
@@ -111,13 +99,9 @@ class ConnectionQueriesHistory(QWidget):
 
         self.btn_filter.clicked.connect(self._load_history)
 
-    # ======================
-    # === EVENT HANDLERS ===
-    # ======================
-
-    # =====================
-    # === EVENT HELPERS ===
-    # =====================
+    # ===================
+    # === PRIVATE API ===
+    # ===================
 
     def _load_history(
         self,
@@ -182,15 +166,3 @@ class ConnectionQueriesHistory(QWidget):
             MessageType.SUCCESS,
             "Queries history loaded.",
         )
-
-    # ====================
-    # === QT OVERRIDES ===
-    # ====================
-
-    # ===================
-    # === PRIVATE API ===
-    # ===================
-
-    # ==================
-    # === PUBLIC API ===
-    # ==================

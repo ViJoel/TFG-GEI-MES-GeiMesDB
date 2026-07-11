@@ -247,7 +247,9 @@ class ResultsView(QWidget):
         self.session_queries_history = SessionQueriesHistory()
         self.stacklayout.addWidget(self.session_queries_history)
 
-        self.connection_queries_history = ConnectionQueriesHistory(connection=self.connection)
+        self.connection_queries_history = ConnectionQueriesHistory(
+            connection=self.connection
+        )
         self.stacklayout.addWidget(self.connection_queries_history)
 
     def _set_action_buttons_initial_state(

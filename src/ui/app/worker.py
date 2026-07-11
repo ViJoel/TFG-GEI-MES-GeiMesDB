@@ -35,7 +35,7 @@ class Worker(QRunnable):
                 **self._kwargs,
             )
 
-            self.signals.result.emit(result)
+            self.signals.success.emit(result)
 
         except Exception as e:
 

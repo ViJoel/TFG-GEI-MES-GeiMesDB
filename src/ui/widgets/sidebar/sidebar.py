@@ -1,5 +1,8 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QSizePolicy, QWidget
+from PySide6.QtWidgets import (
+    QSizePolicy,
+    QWidget,
+)
 
 from ui.utils.layouts import vbox
 from ui.widgets.logos.app_logo import AppLogo

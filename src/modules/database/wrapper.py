@@ -1,5 +1,8 @@
 from functools import wraps
-from sqlite3 import IntegrityError, OperationalError
+from sqlite3 import (
+    IntegrityError,
+    OperationalError,
+)
 
 from log.app_logger import get_logger
 

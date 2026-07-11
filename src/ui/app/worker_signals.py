@@ -11,6 +11,6 @@ class WorkerSignals(QObject):
     Señales emitidas por un Worker.
     """
 
-    result = Signal(object)
+    success = Signal(object)
     error = Signal(object)
     finished = Signal()

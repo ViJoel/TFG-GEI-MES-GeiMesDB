@@ -1,5 +1,9 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QLabel, QSizePolicy, QWidget
+from PySide6.QtWidgets import (
+    QLabel,
+    QSizePolicy,
+    QWidget,
+)
 
 from common.constants import APP_NAME
 from ui.utils.layouts import vbox

@@ -1,5 +1,8 @@
 import qtawesome as qta
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import (
+    QSize,
+    Qt,
+)
 from PySide6.QtWidgets import QToolButton
 
 from ui.themes.theme_manager import ThemeManager

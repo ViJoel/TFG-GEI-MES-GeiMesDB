@@ -1,4 +1,7 @@
-from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout
+from PySide6.QtWidgets import (
+    QHBoxLayout,
+    QVBoxLayout,
+)
 
 
 def vbox(
