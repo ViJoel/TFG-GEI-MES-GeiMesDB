@@ -11,15 +11,23 @@ Clases:
 """
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QMainWindow, QStackedWidget, QWidget
+from PySide6.QtWidgets import (
+    QMainWindow,
+    QStackedWidget,
+    QWidget,
+)
 
 from common.constants import APP_NAME
 from entities.connection import Connection
 from entities.message_type import MessageType
 from log.app_logger import get_logger
-from modules.sessions.service import close_session, open_session
+from modules.sessions.service import (
+    close_session,
+    open_session,
+)
 from ui.app.app_actions import notify
 from ui.app.app_context import AppContext
+from ui.app.worker_error import WorkerError
 from ui.utils.layouts import hbox
 from ui.widgets.forms.connection_form import ConnectionForm
 from ui.widgets.home.home import Home
@@ -239,53 +247,20 @@ class MainWindow(QMainWindow):
         connection: Connection,
     ) -> None:
         """
-        Abre una sesión runtime para la conexión
-        especificada y crea su espacio de trabajo
-        asociado si todavía no existe.
-
-        Args:
-            connection (Connection):
-                Conexión persistida a abrir.
+        Abre una sesión runtime para la conexión especificada.
         """
 
-        try:
+        notify(
+            MessageType.WARNING,
+            "Opening connection session...",
+        )
 
-            notify(
-                MessageType.WARNING,
-                "Opening connection...",
-            )
-
-            # Forzar el repintado de la UI antes de iniciar una operación
-            # síncrona que bloqueará temporalmente el hilo principal.
-            AppContext.get_app().processEvents()
-
-            open_session(connection)
-
-            notify(
-                MessageType.SUCCESS,
-                "Connection opened",
-            )
-
-            # Crear espacio de trabajo.
-            if connection.id not in self.workspaces:
-
-                workspace = Workspace(connection)
-                self.workspaces[connection.id] = workspace
-                self.stack.addWidget(workspace)
-
-            self._show_workspace(connection)
-
-            # Refrescar estado visual.
-            self.sidebar.connections_list.reload_connections()
-
-        except Exception as e:
-
-            logger.error(f"Error opening session: {e}")
-
-            notify(
-                MessageType.ERROR,
-                "Connection failed",
-            )
+        AppContext.get_task_manager().run(
+            open_session,
+            connection,
+            on_result=lambda _: self._on_open_connection_session_success(connection),
+            on_error=self._on_open_connection_session_error,
+        )
 
     def _close_connection_session(
         self,
@@ -358,6 +333,42 @@ class MainWindow(QMainWindow):
             self._show_workspace(connection)
         else:
             self._show_home_page()
+
+    # =====================
+    # === EVENT HELPERS ===
+    # =====================
+
+    def _on_open_connection_session_success(
+        self,
+        connection: Connection,
+    ) -> None:
+
+        notify(
+            MessageType.SUCCESS,
+            "Connection session opened.",
+        )
+
+        if connection.id not in self.workspaces:
+
+            workspace = Workspace(connection)
+            self.workspaces[connection.id] = workspace
+            self.stack.addWidget(workspace)
+
+        self._show_workspace(connection)
+
+        self.sidebar.connections_list.reload_connections()
+
+    def _on_open_connection_session_error(
+        self,
+        error: WorkerError,
+    ) -> None:
+
+        logger.error("Error opening connection session:\n%s", error.traceback)
+
+        notify(
+            MessageType.ERROR,
+            "Connection session opening failed.",
+        )
 
     # ====================
     # === QT OVERRIDES ===
