@@ -1,6 +1,18 @@
+from unittest.mock import (
+    MagicMock,
+    patch,
+)
+
 import pytest
-from PySide6.QtCore import QEvent, Qt
-from PySide6.QtGui import QKeyEvent, QTextCursor
+from PySide6.QtCore import (
+    QEvent,
+    QRect,
+    Qt,
+)
+from PySide6.QtGui import (
+    QKeyEvent,
+    QTextCursor,
+)
 
 from entities.sql_scope import SqlScope
 from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
@@ -43,7 +55,27 @@ def test_tab_inserts_spaces(editor):
     assert editor.toPlainText() == "    "
 
 
-def test_ctrl_enter_emits_selected_scope(editor, qtbot):
+def test_ctrl_enter_emits_actual_query_scope(editor, qtbot):
+    """
+    Verifica ejecución de la consulta actual (ACTUAL_QUERY).
+    """
+
+    editor.setPlainText("SELECT 1;")
+
+    with qtbot.waitSignal(editor.execute_requested) as blocker:
+        qtbot.keyPress(
+            editor,
+            Qt.Key_Return,
+            modifier=Qt.ControlModifier,
+        )
+
+    statements, scope = blocker.args
+
+    assert scope == SqlScope.ACTUAL_QUERY
+    assert statements == ["SELECT 1;"]
+
+
+def test_ctrl_alt_enter_emits_selected_scope(editor, qtbot):
     """
     Verifica ejecución de texto seleccionado (SELECTED_TEXT).
     """
@@ -58,7 +90,7 @@ def test_ctrl_enter_emits_selected_scope(editor, qtbot):
         qtbot.keyPress(
             editor,
             Qt.Key_Return,
-            modifier=Qt.ControlModifier,
+            modifier=Qt.ControlModifier | Qt.AltModifier,
         )
 
     statements, scope = blocker.args
@@ -187,6 +219,23 @@ def test_execute_signal_emits_correct_data(editor, qtbot):
 
 
 # =============================================================================
+# EXECUTE
+# =============================================================================
+
+
+def test_execute_does_not_emit_signal_when_sql_is_none(editor, qtbot):
+    """
+    Verifica que no se emite la señal de ejecución
+    cuando no existe SQL válido.
+    """
+
+    editor.setPlainText("")
+
+    with qtbot.assertNotEmitted(editor.execute_requested):
+        editor.execute(SqlScope.FULL_SCRIPT)
+
+
+# =============================================================================
 # LINE NUMBER AREA
 # =============================================================================
 
@@ -208,6 +257,28 @@ def test_line_number_area_width(editor):
 
     assert isinstance(width, int)
     assert width > 0
+
+
+def test_update_line_number_area_scrolls_when_dy_is_not_zero(editor):
+    """
+    Verifica que el área de números se desplaza cuando
+    existe un desplazamiento vertical.
+    """
+
+    editor.line_number_area.scroll = MagicMock()
+    editor._update_line_number_area_width = MagicMock()
+
+    rect = QRect(0, 0, 100, 100)
+
+    editor._update_line_number_area(
+        rect,
+        10,
+    )
+
+    editor.line_number_area.scroll.assert_called_once_with(
+        0,
+        10,
+    )
 
 
 # =============================================================================
@@ -243,3 +314,85 @@ def test_insert_query_at_cursor_ignores_empty_text(editor):
     editor.insert_query_at_cursor("")
 
     assert editor.toPlainText() == "SELECT *"
+
+
+# =============================================================================
+# CURRENT QUERY
+# =============================================================================
+
+
+def test_get_current_query_returns_first_statement(editor):
+    """
+    Verifica que devuelve la sentencia donde está
+    situado el cursor.
+    """
+
+    editor.setPlainText("SELECT 1;\n" "SELECT 2;")
+
+    cursor = editor.textCursor()
+    cursor.setPosition(3)
+    editor.setTextCursor(cursor)
+
+    result = editor._get_current_query()
+
+    assert result == "SELECT 1;"
+
+
+def test_get_current_query_returns_second_statement(editor):
+    """
+    Verifica que detecta correctamente una sentencia
+    posterior dentro del documento.
+    """
+
+    editor.setPlainText("SELECT 1;\n" "SELECT 2;")
+
+    cursor = editor.textCursor()
+    cursor.setPosition(editor.toPlainText().find("SELECT 2") + 3)
+    editor.setTextCursor(cursor)
+
+    result = editor._get_current_query()
+
+    assert result == "SELECT 2;"
+
+
+def test_get_current_query_returns_none_between_statements(editor):
+    """
+    Verifica que no devuelve una consulta cuando
+    el cursor está fuera de cualquier sentencia.
+    """
+
+    editor.setPlainText("SELECT 1;\n\n\nSELECT 2;")
+
+    cursor = editor.textCursor()
+    cursor.setPosition(editor.toPlainText().find("\n\n\n") + 1)
+    editor.setTextCursor(cursor)
+
+    result = editor._get_current_query()
+
+    assert result is None
+
+
+def test_get_current_query_empty_editor_returns_none(editor):
+    """
+    Verifica que no devuelve consulta si el editor está vacío.
+    """
+
+    editor.setPlainText("")
+
+    result = editor._get_current_query()
+
+    assert result is None
+
+
+def test_get_current_query_ignores_statement_not_found(editor):
+    editor.setPlainText("SELECT 1;")
+
+    fake_statement = "SELECT 2;"
+
+    with patch(
+        "ui.widgets.workspace.sql_editor.sql_editor.sqlparse.parse",
+        return_value=[fake_statement],
+    ):
+        result = editor._get_current_query()
+
+    assert result is None

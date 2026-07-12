@@ -74,7 +74,7 @@ class SqlEditorArea(QWidget):
         con sus handlers correspondientes.
         """
 
-        self.toolbar.execute_text_requested.connect(
+        self.toolbar.execute_selection_requested.connect(
             lambda: self.editor.execute(SqlScope.SELECTED_TEXT)
         )
 

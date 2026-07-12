@@ -687,7 +687,7 @@ THEME.update(
         "toolbar_button_color_hover": WHITE,
         "toolbar_button_color_pressed": WHITE,
         # Iconos
-        "toolbar_button_execute_text_icon_color": THEME["primary"],
+        "toolbar_button_execute_selection_icon_color": THEME["primary"],
         "toolbar_button_execute_query_icon_color": THEME["primary"],
         "toolbar_button_execute_script_icon_color": THEME["primary"],
         "toolbar_button_undo_icon_color": THEME["secondary"],

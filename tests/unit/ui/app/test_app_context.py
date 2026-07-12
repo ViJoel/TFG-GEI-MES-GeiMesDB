@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from ui.app.app_context import AppContext
+from ui.app.task_manager import TaskManager
 
 # =============================================================================
 # FIXTURE
@@ -10,18 +11,20 @@ from ui.app.app_context import AppContext
 
 
 @pytest.fixture(autouse=True)
-def clean_context():
+def reset_app_context():
     """
     Restablece el estado global antes y después de cada test.
     """
 
     AppContext.app = None
     AppContext.notification_manager = None
+    AppContext.task_manager = None
 
     yield
 
     AppContext.app = None
     AppContext.notification_manager = None
+    AppContext.task_manager = None
 
 
 # =============================================================================
@@ -98,3 +101,34 @@ def test_get_notification_manager_raises_if_not_initialized():
 
     with pytest.raises(RuntimeError):
         AppContext.get_notification_manager()
+
+
+# =============================================================================
+# TaskManager
+# =============================================================================
+
+
+def test_set_and_get_task_manager():
+    """
+    Verifica que el TaskManager puede registrarse
+    y recuperarse desde AppContext.
+    """
+
+    manager = TaskManager()
+
+    AppContext.set_task_manager(manager)
+
+    assert AppContext.get_task_manager() is manager
+
+
+def test_get_task_manager_not_initialized():
+    """
+    Verifica que get_task_manager lanza RuntimeError
+    si no se ha registrado ningún TaskManager.
+    """
+
+    with pytest.raises(
+        RuntimeError,
+        match="TaskManager has not been initialized.",
+    ):
+        AppContext.get_task_manager()
