@@ -366,7 +366,10 @@ class MainWindow(QMainWindow):
             self.stack.removeWidget(workspace)
             workspace.deleteLater()
 
-        # Refrescar estado visual.
+        # Volver explícitamente al Home.
+        self._show_home_page()
+
+        # Refrescar estado visual del sidebar.
         self.sidebar.connections_list.reload_connections()
 
     def _on_close_connection_session_error(
