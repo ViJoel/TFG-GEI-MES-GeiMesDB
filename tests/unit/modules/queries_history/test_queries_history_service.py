@@ -6,10 +6,10 @@ from entities.driver import Driver
 from entities.queries_history_entry import QueriesHistoryEntry
 from modules.queries_history import service
 
-
 # =============================================================================
 # FIXTURES
 # =============================================================================
+
 
 def create_connection():
 

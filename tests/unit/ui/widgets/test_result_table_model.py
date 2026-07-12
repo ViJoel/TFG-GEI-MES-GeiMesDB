@@ -1,6 +1,12 @@
-from datetime import date, datetime
+from datetime import (
+    date,
+    datetime,
+)
 from decimal import Decimal
-from unittest.mock import MagicMock, patch
+from unittest.mock import (
+    MagicMock,
+    patch,
+)
 
 import pytest
 from PySide6.QtCore import Qt
@@ -494,7 +500,10 @@ def test_format_sql_value_date_and_datetime():
     Verifica que date y datetime se formatean correctamente a SQL.
     """
 
-    from datetime import date, datetime
+    from datetime import (
+        date,
+        datetime,
+    )
 
     from ui.widgets.workspace.results_view.result_table_model import ResultTableModel
 
