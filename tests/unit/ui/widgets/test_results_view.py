@@ -18,9 +18,12 @@ from ui.widgets.workspace.results_view.results_view import ResultsView
 @pytest.fixture(autouse=True)
 def patch_dependencies():
     """
-    Evita dependencias externas e intercepta las llamadas síncronas
-    y de notificación durante la inicialización de los widgets.
+    Evita dependencias externas e intercepta llamadas externas
+    durante la inicialización de widgets.
     """
+
+    task_manager = MagicMock()
+
     with patch("ui.widgets.workspace.results_view.results_view.notify"), patch(
         "ui.widgets.workspace.results_view.results_view.ConfirmationDialog"
     ), patch(
@@ -29,7 +32,8 @@ def patch_dependencies():
         "ui.widgets.workspace.results_view.connection_queries_history.get_queries_history",
         return_value=[],
     ), patch(
-        "ui.widgets.workspace.results_view.connection_queries_history.AppContext.get_app"
+        "ui.widgets.workspace.results_view.connection_queries_history.AppContext.get_task_manager",
+        return_value=task_manager,
     ):
         yield
 
@@ -113,6 +117,21 @@ def test_show_session_queries_history_switches_view(results_view):
 
     results_view.stacklayout.setCurrentWidget.assert_called_once_with(
         results_view.session_queries_history
+    )
+
+
+def test_show_connection_queries_history_switches_view(results_view):
+    """
+    Verifica que se muestra el historial de consultas de la conexión.
+    """
+
+    results_view.connection_queries_history = MagicMock()
+    results_view.stacklayout = MagicMock()
+
+    results_view._show_connection_queries_history()
+
+    results_view.stacklayout.setCurrentWidget.assert_called_once_with(
+        results_view.connection_queries_history
     )
 
 
