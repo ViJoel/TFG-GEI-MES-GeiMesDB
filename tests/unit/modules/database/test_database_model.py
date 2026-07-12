@@ -2,7 +2,10 @@ import sqlite3
 
 import pytest
 
-from modules.database.model import get_connection, init_database
+from modules.database.model import (
+    get_connection,
+    init_database,
+)
 
 # =============================================================================
 # Fixture local
@@ -149,3 +152,67 @@ def test_init_database_raises_if_sql_missing(tmp_path):
             sql_path=str(sql_file),
             data_dir=str(tmp_path),
         )
+
+
+def test_init_database_skips_if_db_exists_when_enabled(
+    tmp_path,
+    monkeypatch,
+):
+    """
+    Si SKIP_INIT_IF_DB_EXISTS está habilitado y la base
+    de datos existe, la inicialización debe omitirse.
+    """
+
+    from modules.database import model
+
+    db_file = tmp_path / "app.db"
+    sqlite3.connect(db_file).close()
+
+    assert db_file.exists()
+
+    monkeypatch.setattr(
+        model,
+        "SKIP_INIT_IF_DB_EXISTS",
+        True,
+    )
+
+    # Si no hiciera el return, lanzaría FileNotFoundError.
+    model.init_database(
+        db_path=str(db_file),
+        sql_path="missing.sql",
+        data_dir=str(tmp_path),
+    )
+
+
+def test_init_database_does_not_skip_when_db_does_not_exist(
+    tmp_path,
+    monkeypatch,
+):
+    """
+    Si SKIP_INIT_IF_DB_EXISTS está habilitado pero la base de
+    datos no existe, debe continuar con la inicialización.
+    """
+
+    import modules.database.model as model
+
+    db_file = tmp_path / "app.db"
+    sql_file = tmp_path / "schema.sql"
+
+    sql_file.write_text(
+        "CREATE TABLE test (id INTEGER);",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(
+        model,
+        "SKIP_INIT_IF_DB_EXISTS",
+        True,
+    )
+
+    model.init_database(
+        db_path=str(db_file),
+        sql_path=str(sql_file),
+        data_dir=str(tmp_path),
+    )
+
+    assert db_file.exists()
