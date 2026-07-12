@@ -15,6 +15,7 @@ class Toolbar(QWidget):
     # === VARIABLES ===
     # =================
 
+    execute_text_requested = Signal()
     execute_query_requested = Signal()
     execute_script_requested = Signal()
     undo_requested = Signal()
@@ -46,14 +47,20 @@ class Toolbar(QWidget):
         Construye la interfaz principal del widget.
         """
 
-        self.execute_button = ToolbarButton(
+        self.execute_text_button = ToolbarButton(
             "fa5s.play",
+            "execute_text",
+            "Execute text",
+        )
+
+        self.execute_query_button = ToolbarButton(
+            "fa5s.play-circle",
             "execute_query",
             "Execute query",
         )
 
         self.execute_script_button = ToolbarButton(
-            "fa5s.play-circle",
+            "mdi.script-text-play",
             "execute_script",
             "Execute script",
         )
@@ -82,7 +89,8 @@ class Toolbar(QWidget):
         layout.addWidget(self.undo_button)
         layout.addWidget(self.redo_button)
         layout.addWidget(ToolbarSeparator())
-        layout.addWidget(self.execute_button)
+        layout.addWidget(self.execute_text_button)
+        layout.addWidget(self.execute_query_button)
         layout.addWidget(self.execute_script_button)
         layout.addStretch()
 
@@ -103,7 +111,11 @@ class Toolbar(QWidget):
         con sus handlers correspondientes.
         """
 
-        self.execute_button.clicked.connect(
+        self.execute_text_button.clicked.connect(
+            self.execute_text_requested,
+        )
+
+        self.execute_query_button.clicked.connect(
             self.execute_query_requested,
         )
 

@@ -152,7 +152,10 @@ class Workspace(QWidget):
         # síncrona que bloqueará temporalmente el hilo principal.
         AppContext.get_app().processEvents()
 
-        if scope == SqlScope.SELECTED_TEXT:
+        if scope in (
+            SqlScope.SELECTED_TEXT,
+            SqlScope.ACTUAL_QUERY,
+        ):
             self._execute_query(sql)
 
         elif scope == SqlScope.FULL_SCRIPT:
