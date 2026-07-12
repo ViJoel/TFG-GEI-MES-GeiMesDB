@@ -1,4 +1,7 @@
-from sqlite3 import IntegrityError, OperationalError
+from sqlite3 import (
+    IntegrityError,
+    OperationalError,
+)
 from unittest.mock import patch
 
 import pytest

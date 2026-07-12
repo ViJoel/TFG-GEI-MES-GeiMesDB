@@ -5,6 +5,8 @@ import pytest
 import ui.widgets.forms.connection_form as connection_form
 from entities.connection import Connection
 from entities.driver import Driver
+from entities.message_type import MessageType
+from ui.app.worker_error import WorkerError
 from ui.widgets.forms.connection_form import ConnectionForm
 
 # =============================================================================
@@ -393,27 +395,114 @@ def test_save_button_emits_connection_saved_signal(
         form.save_button.click()
 
 
+def test_save_button_handles_create_exception(
+    form,
+    connection,
+    monkeypatch,
+):
+    """
+    Verifica que un error al crear la conexión
+    muestra la notificación correspondiente.
+    """
+
+    create_connection = MagicMock(side_effect=RuntimeError("boom"))
+    notify = MagicMock()
+    saved = MagicMock()
+
+    monkeypatch.setattr(
+        connection_form,
+        "create_connection",
+        create_connection,
+    )
+
+    monkeypatch.setattr(
+        connection_form,
+        "notify",
+        notify,
+    )
+
+    form.connection_saved.connect(saved)
+
+    form.name_input.setText(connection.name)
+    form.driver_input.setCurrentText(connection.driver.value)
+    form.host_input.setText(connection.host)
+    form.port_input.setText(str(connection.port))
+    form.database_input.setText(connection.database)
+    form.username_input.setText(connection.username)
+    form.password_input.setText(connection.password)
+
+    form.save_button.click()
+
+    create_connection.assert_called_once()
+
+    notify.assert_called_once_with(
+        MessageType.ERROR,
+        "Error saving",
+    )
+
+    saved.assert_not_called()
+
+
+def test_save_button_handles_update_exception(
+    form,
+    connection,
+    monkeypatch,
+):
+    """
+    Verifica que un error al actualizar la conexión
+    muestra la notificación correspondiente.
+    """
+
+    update_connection = MagicMock(side_effect=RuntimeError("boom"))
+    notify = MagicMock()
+    saved = MagicMock()
+
+    monkeypatch.setattr(
+        connection_form,
+        "update_connection",
+        update_connection,
+    )
+
+    monkeypatch.setattr(
+        connection_form,
+        "notify",
+        notify,
+    )
+
+    form.connection_saved.connect(saved)
+
+    form.load_connection(connection)
+
+    form.save_button.click()
+
+    update_connection.assert_called_once()
+
+    notify.assert_called_once_with(
+        MessageType.ERROR,
+        "Error saving",
+    )
+
+    saved.assert_not_called()
+
+
 # =============================================================================
 # TEST CONNECTION
 # =============================================================================
 
 
-def test_test_connection_succeeds(form, connection, monkeypatch):
+def test_test_connection_starts_background_task(
+    form,
+    connection,
+    monkeypatch,
+):
     """
-    Verifica que el formulario prueba correctamente una conexión válida.
+    Verifica que el formulario lanza la prueba de
+    conexión mediante el TaskManager.
     """
 
-    test_connection = MagicMock(return_value=True)
     notify = MagicMock()
 
-    process_events = MagicMock()
-    app = MagicMock(processEvents=process_events)
-
-    monkeypatch.setattr(
-        connection_form,
-        "test_connection",
-        test_connection,
-    )
+    task_manager = MagicMock()
 
     monkeypatch.setattr(
         connection_form,
@@ -423,8 +512,8 @@ def test_test_connection_succeeds(form, connection, monkeypatch):
 
     monkeypatch.setattr(
         connection_form.AppContext,
-        "get_app",
-        MagicMock(return_value=app),
+        "get_task_manager",
+        MagicMock(return_value=task_manager),
     )
 
     form.name_input.setText(connection.name)
@@ -437,26 +526,26 @@ def test_test_connection_succeeds(form, connection, monkeypatch):
 
     form.test_connection_button.click()
 
-    process_events.assert_called_once()
-    test_connection.assert_called_once()
+    notify.assert_called_once()
+
+    task_manager.run.assert_called_once()
+
+    args = task_manager.run.call_args.args
+    kwargs = task_manager.run.call_args.kwargs
+
+    assert args[0] is connection_form.test_connection
+    assert isinstance(args[1], Connection)
+
+    assert callable(kwargs["on_success"])
+    assert kwargs["on_error"] == form._on_test_connection_error
 
 
-def test_test_connection_fails(form, connection, monkeypatch):
+def test_on_test_connection_success(form, monkeypatch):
     """
-    Verifica que el formulario maneja una conexión inválida.
+    Debe mostrar una notificación de éxito.
     """
 
-    test_connection = MagicMock(return_value=False)
     notify = MagicMock()
-
-    process_events = MagicMock()
-    app = MagicMock(processEvents=process_events)
-
-    monkeypatch.setattr(
-        connection_form,
-        "test_connection",
-        test_connection,
-    )
 
     monkeypatch.setattr(
         connection_form,
@@ -464,43 +553,20 @@ def test_test_connection_fails(form, connection, monkeypatch):
         notify,
     )
 
-    monkeypatch.setattr(
-        connection_form.AppContext,
-        "get_app",
-        MagicMock(return_value=app),
+    form._on_test_connection_success(True)
+
+    notify.assert_called_once_with(
+        MessageType.SUCCESS,
+        "Connection successful.",
     )
 
-    form.name_input.setText(connection.name)
-    form.driver_input.setCurrentText(connection.driver.value)
-    form.host_input.setText(connection.host)
-    form.port_input.setText(str(connection.port))
-    form.database_input.setText(connection.database)
-    form.username_input.setText(connection.username)
-    form.password_input.setText(connection.password)
 
-    form.test_connection_button.click()
-
-    process_events.assert_called_once()
-    test_connection.assert_called_once()
-
-
-def test_test_connection_handles_exception(form, connection, monkeypatch):
+def test_on_test_connection_failure(form, monkeypatch):
     """
-    Verifica que el formulario maneja errores durante la prueba de conexión.
+    Debe mostrar una notificación de error.
     """
-
-    test_connection = MagicMock(side_effect=RuntimeError())
 
     notify = MagicMock()
-
-    process_events = MagicMock()
-    app = MagicMock(processEvents=process_events)
-
-    monkeypatch.setattr(
-        connection_form,
-        "test_connection",
-        test_connection,
-    )
 
     monkeypatch.setattr(
         connection_form,
@@ -508,24 +574,38 @@ def test_test_connection_handles_exception(form, connection, monkeypatch):
         notify,
     )
 
-    monkeypatch.setattr(
-        connection_form.AppContext,
-        "get_app",
-        MagicMock(return_value=app),
+    form._on_test_connection_success(False)
+
+    notify.assert_called_once_with(
+        MessageType.ERROR,
+        "Connection failed.",
     )
 
-    form.name_input.setText(connection.name)
-    form.driver_input.setCurrentText(connection.driver.value)
-    form.host_input.setText(connection.host)
-    form.port_input.setText(str(connection.port))
-    form.database_input.setText(connection.database)
-    form.username_input.setText(connection.username)
-    form.password_input.setText(connection.password)
 
-    form.test_connection_button.click()
+def test_on_test_connection_error(form, monkeypatch):
+    """
+    Debe notificar un error cuando el Worker falla.
+    """
 
-    process_events.assert_called_once()
-    test_connection.assert_called_once()
+    notify = MagicMock()
+
+    monkeypatch.setattr(
+        connection_form,
+        "notify",
+        notify,
+    )
+
+    error = WorkerError(
+        exception=RuntimeError("boom"),
+        traceback="traceback",
+    )
+
+    form._on_test_connection_error(error)
+
+    notify.assert_called_once_with(
+        MessageType.ERROR,
+        "Invalid connection data.",
+    )
 
 
 # =============================================================================

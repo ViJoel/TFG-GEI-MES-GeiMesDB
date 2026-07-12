@@ -1,10 +1,17 @@
 from collections import defaultdict
 from copy import deepcopy
-from datetime import date, datetime
+from datetime import (
+    date,
+    datetime,
+)
 from decimal import Decimal
 from typing import Any
 
-from PySide6.QtCore import QAbstractTableModel, Qt, Signal
+from PySide6.QtCore import (
+    QAbstractTableModel,
+    Qt,
+    Signal,
+)
 from PySide6.QtGui import QColor
 
 from entities.query_result import ResultSet

@@ -1,0 +1,36 @@
+QListWidget#session_queries_history {
+    background-color: $session_queries_history_background_color;
+    border: 2px solid $session_queries_history_border_color;
+    border-radius: 4px;
+}
+
+QWidget#session_queries_history_item {
+    background-color: $session_queries_history_item_background_color;
+    border: none;
+    border-radius: 4px;
+}
+
+QWidget#session_queries_history_item:hover {
+    background-color: $session_queries_history_item_background_hover_color;
+}
+
+QListWidget#session_queries_history::item:selected {
+    background-color: $session_queries_history_item_background_selected_color;
+    border: none;
+    border-radius: 4px;
+}
+
+QWidget#session_queries_history_item QLabel {
+    background-color: transparent;
+}
+
+QWidget#session_queries_history_item QLabel#session_queries_history_item_date {
+    color: $session_queries_history_item_date_color;
+    font-size: 12px;
+}
+
+QWidget#session_queries_history_item QLabel#session_queries_history_item_query {
+    color: $session_queries_history_item_query_color;
+    font-size: 14px;
+    font-weight: 500;
+}

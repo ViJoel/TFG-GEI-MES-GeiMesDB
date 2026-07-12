@@ -1,4 +1,8 @@
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import (
+    MagicMock,
+    mock_open,
+    patch,
+)
 
 import pytest
 
@@ -130,6 +134,29 @@ def test_build_stylesheet_missing_variable(mock_file):
     ThemeManager._themes["dark"] = {}
 
     with pytest.raises(KeyError):
+        ThemeManager._build_stylesheet()
+
+
+@patch(
+    "builtins.open",
+    new_callable=mock_open,
+    read_data="QWidget { color: @primary; }",
+)
+@patch("ui.themes.theme_manager.STYLE_FILES", ["style.qss"])
+def test_build_stylesheet_invalid_at_variable(mock_file):
+    """
+    Debe lanzar ValueError si un QSS utiliza
+    variables con '@' en lugar de '$'.
+    """
+
+    ThemeManager._themes["dark"] = {
+        "primary": "#ffffff",
+    }
+
+    with pytest.raises(
+        ValueError,
+        match=r"Theme variables must use '\$', not '@'\.",
+    ):
         ThemeManager._build_stylesheet()
 
 

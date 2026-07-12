@@ -1,5 +1,9 @@
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import (
+    Qt,
+    Signal,
+)
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QListWidget,
     QListWidgetItem,
     QSizePolicy,
@@ -9,11 +13,17 @@ from PySide6.QtWidgets import (
 from entities.connection import Connection
 from entities.message_type import MessageType
 from log.app_logger import get_logger
-from modules.connections.service import delete_connection, get_connections
+from modules.connections.service import (
+    delete_connection,
+    get_connections,
+)
 from modules.sessions.service import has_session
 from ui.app.app_actions import notify
 from ui.app.app_state import set_selected_connection
-from ui.utils.layouts import hbox, vbox
+from ui.utils.layouts import (
+    hbox,
+    vbox,
+)
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
 from ui.widgets.sidebar.connection_item import ConnectionItem
 from ui.widgets.sidebar.icon_button import IconButton
@@ -156,6 +166,16 @@ class ConnectionsList(QWidget):
 
         self.list_widget.setObjectName("connections_list")
         self.list_widget.setSpacing(2)
+
+        self.list_widget.setVerticalScrollMode(
+            QAbstractItemView.ScrollMode.ScrollPerPixel,
+        )
+        self.list_widget.verticalScrollBar().setSingleStep(10)
+
+        self.list_widget.setHorizontalScrollMode(
+            QAbstractItemView.ScrollMode.ScrollPerPixel,
+        )
+        self.list_widget.horizontalScrollBar().setSingleStep(10)
 
         # Elimina el foco de teclado
         # Usado para eliminar el rectángulo

@@ -1,3 +1,4 @@
+import re
 from string import Template
 
 from log.app_logger import get_logger
@@ -188,6 +189,18 @@ class ThemeManager:
                 stylesheet += f.read()
 
         try:
+
+            if match := re.search(r"@\w+", stylesheet):
+
+                logger.error(
+                    "Invalid theme variable '%s'. Use '$' instead of '@'.",
+                    match.group(),
+                )
+
+                raise ValueError(
+                    f"Invalid theme variable '{match.group()}'. "
+                    "Theme variables must use '$', not '@'."
+                )
 
             stylesheet = Template(stylesheet).substitute(
                 cls._themes[cls._current_theme]

@@ -1,13 +1,25 @@
 from typing import Any
 
-from sqlalchemy import inspect, text
-from sqlalchemy.engine import CursorResult, Engine
+from sqlalchemy import (
+    inspect,
+    text,
+)
+from sqlalchemy.engine import (
+    CursorResult,
+    Engine,
+)
 from sqlalchemy.exc import SQLAlchemyError
 
 from entities.connection import Connection
 from entities.driver import Driver
-from entities.query_result import QueryResult, ResultSet
-from entities.script_result import ScriptResult, ScriptResultItem
+from entities.query_result import (
+    QueryResult,
+    ResultSet,
+)
+from entities.script_result import (
+    ScriptResult,
+    ScriptResultItem,
+)
 from entities.session import Session
 from log.app_logger import get_logger
 
@@ -122,22 +134,38 @@ def close_session(
 
     # No existe sesión activa.
     if session is None:
+
         logger.warning(
             f"There is no active session for the connection {connection_id}."
         )
+
         return
 
-    logger.info(f"Closing session for '{session.connection.name}'...")
+    try:
 
-    session.close()
+        logger.info(f"Closing session for '{session.connection.name}'...")
 
-    logger.info(f"Removing active session registry for '{session.connection.name}'...")
+        session.close()
 
-    del _active_sessions[connection_id]
+        logger.info(
+            f"Removing active session registry for '{session.connection.name}'..."
+        )
 
-    logger.success(f"Active session registry removed for '{session.connection.name}'.")
+        del _active_sessions[connection_id]
 
-    logger.success(f"Session closed correctly for '{session.connection.name}'.")
+        logger.success(
+            f"Active session registry removed for '{session.connection.name}'."
+        )
+
+        logger.success(f"Session closed for '{session.connection.name}'.")
+
+    except Exception as e:
+
+        logger.error(
+            f"Failed to close session for '{session.connection.name}'.\nException: {e}"
+        )
+
+        raise
 
 
 def get_session(

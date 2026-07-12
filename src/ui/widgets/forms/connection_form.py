@@ -1,4 +1,8 @@
-from PySide6.QtCore import QRegularExpression, Qt, Signal
+from PySide6.QtCore import (
+    QRegularExpression,
+    Qt,
+    Signal,
+)
 from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import (
     QComboBox,
@@ -14,11 +18,18 @@ from entities.connection import Connection
 from entities.driver import Driver
 from entities.message_type import MessageType
 from log.app_logger import get_logger
-from modules.connections.service import create_connection, update_connection
+from modules.connections.service import (
+    create_connection,
+    update_connection,
+)
 from modules.sessions.service import test_connection
 from ui.app.app_actions import notify
 from ui.app.app_context import AppContext
-from ui.utils.layouts import hbox, vbox
+from ui.app.worker_error import WorkerError
+from ui.utils.layouts import (
+    hbox,
+    vbox,
+)
 
 logger = get_logger(__name__)
 
@@ -748,45 +759,19 @@ class ConnectionForm(QWidget):
         del formulario.
         """
 
-        try:
+        connection = self._build_connection_from_form()
 
-            notify(
-                MessageType.WARNING,
-                "Testing connection...",
-            )
+        notify(
+            MessageType.WARNING,
+            "Testing connection...",
+        )
 
-            # Forzar el repintado de la UI antes de iniciar una operación
-            # síncrona que bloqueará temporalmente el hilo principal.
-            AppContext.get_app().processEvents()
-
-            connection = self._build_connection_from_form()
-
-            logger.info(f"Testing connection '{connection.name}'...")
-
-            success = test_connection(connection)
-
-            if success:
-
-                notify(
-                    MessageType.SUCCESS,
-                    "Connection successful",
-                )
-
-            else:
-
-                notify(
-                    MessageType.ERROR,
-                    "Connection failed",
-                )
-
-        except Exception as e:
-
-            logger.error(f"Error testing connection: {e}.")
-
-            notify(
-                MessageType.ERROR,
-                "Invalid connection data",
-            )
+        AppContext.get_task_manager().run(
+            test_connection,
+            connection,
+            on_success=lambda _: self._on_test_connection_success,
+            on_error=self._on_test_connection_error,
+        )
 
     def _build_connection_from_form(
         self,
@@ -845,3 +830,38 @@ class ConnectionForm(QWidget):
 
         self.clear_form()
         self.cancel_requested.emit()
+
+    # =====================
+    # === EVENT HELPERS ===
+    # =====================
+
+    def _on_test_connection_success(
+        self,
+        success: bool,
+    ) -> None:
+
+        if success:
+
+            notify(
+                MessageType.SUCCESS,
+                "Connection successful.",
+            )
+
+        else:
+
+            notify(
+                MessageType.ERROR,
+                "Connection failed.",
+            )
+
+    def _on_test_connection_error(
+        self,
+        error: WorkerError,
+    ) -> None:
+
+        logger.error(error.traceback)
+
+        notify(
+            MessageType.ERROR,
+            "Invalid connection data.",
+        )

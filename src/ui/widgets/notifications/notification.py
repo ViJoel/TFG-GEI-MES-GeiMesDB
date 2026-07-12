@@ -1,5 +1,9 @@
 import qtawesome as qta
-from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtCore import (
+    Qt,
+    QTimer,
+    Signal,
+)
 from PySide6.QtWidgets import (
     QLabel,
     QPushButton,

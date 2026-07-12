@@ -1,6 +1,9 @@
 import pytest
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QSizePolicy, QWidget
+from PySide6.QtWidgets import (
+    QSizePolicy,
+    QWidget,
+)
 
 from ui.widgets.sidebar.sidebar import Sidebar
 

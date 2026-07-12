@@ -5,7 +5,7 @@
 QTextEdit#console {
     background-color: $console_background_color;
     border: 2px solid $console_border_color;
-    border-radius: 8px;
+    border-radius: 4px;
 }
 
 /* ============= */
@@ -51,76 +51,4 @@ QHeaderView::section {
     border: none;
     color: $table_header_cell_color;
     padding: 4px 8px 4px 8px;
-}
-
-/* ================= */
-/* === SCROLLBAR === */
-/* ================= */
-
-/* Scrollbar vertical */
-
-QScrollBar:vertical {
-    background: $table_scrollbar_background_color;
-    width: 10px;
-    margin: 2px;
-}
-
-QScrollBar::handle:vertical {
-    background: $table_scrollbar_handle_color;
-    border-radius: 8px;
-    min-height: 30px;
-}
-
-QScrollBar::handle:vertical:hover {
-    background: $table_scrollbar_handle_color_hover;
-}
-
-QScrollBar::handle:vertical:pressed {
-    background: $table_scrollbar_handle_color_pressed;
-}
-
-QScrollBar::add-line:vertical,
-QScrollBar::sub-line:vertical {
-    height: 0px;
-    border: none;
-    background: transparent;
-}
-
-QScrollBar::add-page:vertical,
-QScrollBar::sub-page:vertical {
-    background: transparent;
-}
-
-/* Scrollbar horizontal */
-
-QScrollBar:horizontal {
-    background: $table_scrollbar_background_color;
-    height: 10px;
-    margin: 2px;
-}
-
-QScrollBar::handle:horizontal {
-    background: $table_scrollbar_handle_color;
-    border-radius: 8px;
-    min-width: 30px;
-}
-
-QScrollBar::handle:horizontal:hover {
-    background: $table_scrollbar_handle_color_hover;
-}
-
-QScrollBar::handle:horizontal:pressed {
-    background: $table_scrollbar_handle_color_pressed;
-}
-
-QScrollBar::add-line:horizontal,
-QScrollBar::sub-line:horizontal {
-    width: 0px;
-    border: none;
-    background: transparent;
-}
-
-QScrollBar::add-page:horizontal,
-QScrollBar::sub-page:horizontal {
-    background: transparent;
 }

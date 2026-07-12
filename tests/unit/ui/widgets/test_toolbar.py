@@ -45,12 +45,20 @@ def test_toolbar_object_name(toolbar):
     assert toolbar.objectName() == "toolbar"
 
 
-def test_toolbar_has_execute_button(toolbar):
+def test_toolbar_has_execute_selection_button(toolbar):
+    """
+    Verifica que el botón de ejecutar selección se crea correctamente.
+    """
+
+    assert isinstance(toolbar.execute_selection_button, ToolbarButton)
+
+
+def test_toolbar_has_execute_query_button(toolbar):
     """
     Verifica que el botón de ejecutar consulta se crea correctamente.
     """
 
-    assert isinstance(toolbar.execute_button, ToolbarButton)
+    assert isinstance(toolbar.execute_query_button, ToolbarButton)
 
 
 def test_toolbar_has_execute_script_button(toolbar):
@@ -90,14 +98,26 @@ def test_toolbar_has_layout(toolbar):
 # =============================================================================
 
 
+def test_execute_selection_requested_signal(toolbar, qtbot):
+    """
+    Verifica que pulsar Execute selection emite la señal correspondiente.
+    """
+
+    with qtbot.waitSignal(toolbar.execute_selection_requested):
+        QTest.mouseClick(
+            toolbar.execute_selection_button,
+            Qt.MouseButton.LeftButton,
+        )
+
+
 def test_execute_query_requested_signal(toolbar, qtbot):
     """
-    Verifica que pulsar Execute emite la señal correspondiente.
+    Verifica que pulsar Execute query emite la señal correspondiente.
     """
 
     with qtbot.waitSignal(toolbar.execute_query_requested):
         QTest.mouseClick(
-            toolbar.execute_button,
+            toolbar.execute_query_button,
             Qt.MouseButton.LeftButton,
         )
 

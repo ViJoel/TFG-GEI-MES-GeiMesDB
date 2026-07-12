@@ -1,5 +1,7 @@
-from entities.script_result import ScriptResult, ScriptResultItem
-
+from entities.script_result import (
+    ScriptResult,
+    ScriptResultItem,
+)
 
 # =============================================================================
 # ScriptResultItem

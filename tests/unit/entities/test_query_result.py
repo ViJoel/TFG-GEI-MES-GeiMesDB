@@ -1,4 +1,7 @@
-from entities.query_result import QueryResult, ResultSet
+from entities.query_result import (
+    QueryResult,
+    ResultSet,
+)
 
 # =============================================================================
 # ResultSet

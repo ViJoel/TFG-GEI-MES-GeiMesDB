@@ -44,7 +44,7 @@ class SqlEditorArea(QWidget):
         Construye la interfaz principal del widget.
         """
 
-        layout = vbox(sp=4)
+        layout = vbox(sp=8)
 
         self.setLayout(layout)
 
@@ -74,8 +74,12 @@ class SqlEditorArea(QWidget):
         con sus handlers correspondientes.
         """
 
-        self.toolbar.execute_query_requested.connect(
+        self.toolbar.execute_selection_requested.connect(
             lambda: self.editor.execute(SqlScope.SELECTED_TEXT)
+        )
+
+        self.toolbar.execute_query_requested.connect(
+            lambda: self.editor.execute(SqlScope.ACTUAL_QUERY)
         )
 
         self.toolbar.execute_script_requested.connect(
@@ -108,3 +112,18 @@ class SqlEditorArea(QWidget):
     # ==================
     # === PUBLIC API ===
     # ==================
+
+    def set_query_text(
+        self,
+        text: str,
+    ) -> None:
+        """
+        Inserta el texto SQL proporcionado dentro del editor
+        en la posición actual del cursor.
+
+        Args:
+            text (str):
+                Texto a insertar.
+        """
+
+        self.editor.insert_query_at_cursor(text)

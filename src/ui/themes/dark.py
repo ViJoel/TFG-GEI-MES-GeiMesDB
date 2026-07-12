@@ -1,4 +1,8 @@
-from ui.common.paths import ARROW_DOWN_ICON
+from ui.common.paths import (
+    ARROW_DOWN_ICON,
+    ARROW_LINE_DOWN,
+    ARROW_LINE_UP,
+)
 
 # ====================
 # === TRANSPARENCY ===
@@ -37,6 +41,9 @@ GREEN = "#8BC34A"
 GREEN_HOVER = "#9CCC65"
 GREEN_PRESSED = "#7CB342"
 GREEN_DISABLED = "#5E7F39"
+
+GREEN_RGBA_50 = "rgba(139, 195, 74, 128)"
+GREEN_DISABLED_RGBA_50 = "rgba(94, 127, 57, 128)"
 
 # ===================
 # === LIGHT GREEN ===
@@ -411,6 +418,72 @@ THEME.update(
     }
 )
 
+# ==================================
+# === CONNECTION QUERIES HISTORY ===
+# ==================================
+THEME.update(
+    {
+        # Contenedor de los inputs
+        "connection_queries_history_inputs_background_color": GRAY_950,
+        "connection_queries_history_inputs_border_color": THEME["primary"],
+        # Inputs
+        "connection_queries_history_date_input_background_color": GRAY_900,
+        "connection_queries_history_date_input_background_color_hover": GRAY_800,
+        "connection_queries_history_date_input_background_color_focus": GRAY_900,
+        "connection_queries_history_date_input_border_color": GRAY_800,
+        "connection_queries_history_date_input_border_color_hover": GRAY_700,
+        "connection_queries_history_date_input_border_color_focus": THEME["primary"],
+        "connection_queries_history_date_input_color": THEME["text"],
+        "connection_queries_history_date_input_color_hover": THEME["text_hover"],
+        "connection_queries_history_date_input_color_focus": THEME["primary"],
+        # Tipografía de los inputs
+        "connection_queries_history_date_input_font_family": "'Consolas'",
+        "connection_queries_history_date_input_font_size": "12px",
+        # Icono dropdown
+        "connection_queries_history_date_input_arrow_icon": ARROW_DOWN_ICON.replace(
+            "\\", "/"
+        ),
+        # Calendario desplegable
+        "connection_queries_history_date_input_calendar_background_color": GRAY_950,
+        "connection_queries_history_date_input_calendar_border_color": THEME["primary"],
+        # Calendario desplegable: Inputs de año y mes
+        "connection_queries_history_date_input_calendar_year_and_month_inputs_color": THEME[
+            "text"
+        ],
+        "connection_queries_history_date_input_calendar_year_and_month_inputs_color_hover": THEME[
+            "primary"
+        ],
+        "connection_queries_history_date_input_calendar_year_and_month_inputs_color_pressed": THEME[
+            "primary"
+        ],
+        "connection_queries_history_date_input_calendar_year_input_arrow_up": ARROW_LINE_UP,
+        "connection_queries_history_date_input_calendar_year_input_arrow_down": ARROW_LINE_DOWN,
+        # Calendario desplegable: Menu del input de los meses
+        "connection_queries_history_date_input_calendar_year_input_menu_background_color": GRAY_950,
+        "connection_queries_history_date_input_calendar_year_input_menu_border_color": THEME[
+            "primary"
+        ],
+        "connection_queries_history_date_input_calendar_year_input_menu_item_color": THEME[
+            "text"
+        ],
+        "connection_queries_history_date_input_calendar_year_input_menu_item_background_color_hover": GREEN_DISABLED_RGBA_50,
+        "connection_queries_history_date_input_calendar_year_input_menu_item_color_hover": THEME[
+            "primary"
+        ],
+        "connection_queries_history_date_input_calendar_year_input_menu_separator_color": THEME[
+            "primary"
+        ],
+        # Calendario desplegable: Botones de las flechas
+        "connection_queries_history_date_input_calendar_arrow_button_background_color_hover": GREEN_DISABLED_RGBA_50,
+        "connection_queries_history_date_input_calendar_arrow_button_background_color_pressed": GREEN_RGBA_50,
+        # Calendario desplegable: Celdas de los días
+        "connection_queries_history_date_input_calendar_cell_background_color_hover": GREEN_DISABLED_RGBA_50,
+        "connection_queries_history_date_input_calendar_cell_background_color_selected": GREEN_RGBA_50,
+        # Calendario desplegable: Tipografía
+        "connection_queries_history_date_input_calendar_font_size": "14px",
+    }
+)
+
 # ===============
 # === CONSOLE ===
 # ===============
@@ -418,11 +491,12 @@ THEME.update(
     {
         "console_background_color": GRAY_950,
         "console_border_color": THEME["primary"],
-        "console_color": THEME["text"],
+        "console_default_color": THEME["text"],
         "console_info_color": THEME["info"],
         "console_success_color": THEME["success"],
         "console_error_color": THEME["danger"],
         "console_warning_color": THEME["warning"],
+        "console_disabled_color": THEME["text_disabled"],
         # Tipografía
         "console_font_family": "'Consolas'",
         "console_font_size": "14px",
@@ -477,6 +551,41 @@ THEME.update(
         "notification_warning_background_color": LIGHT_YELLOW,
         "notification_warning_border_color": DARK_YELLOW,
         "notification_warning_color": DARK_YELLOW,
+    }
+)
+
+# ==================
+# === SCROLLBARS ===
+# ==================
+THEME.update(
+    {
+        "scrollbar_background_color": GRAY_950,
+        "scrollbar_handle_color": THEME["primary"],
+        "scrollbar_handle_color_hover": THEME["primary_hover"],
+        "scrollbar_handle_color_pressed": THEME["primary_pressed"],
+    }
+)
+
+# ===============================
+# === SESSION QUERIES HISTORY ===
+# ===============================
+THEME.update(
+    {
+        "session_queries_history_background_color": GRAY_950,
+        "session_queries_history_border_color": GREEN,
+    }
+)
+
+# ====================================
+# === SESSION QUERIES HISTORY ITEM ===
+# ====================================
+THEME.update(
+    {
+        "session_queries_history_item_background_color": TRANSPARENT,
+        "session_queries_history_item_background_hover_color": GRAY_900,
+        "session_queries_history_item_background_selected_color": GRAY_800,
+        "session_queries_history_item_date_color": THEME["text_disabled"],
+        "session_queries_history_item_query_color": THEME["text"],
     }
 )
 
@@ -547,11 +656,6 @@ THEME.update(
         # Alternancia de filas
         "table_row_alternate_background_color": GRAY_900,
         "table_grid_color": TRANSPARENT,
-        # Scrollbar
-        "table_scrollbar_background_color": TRANSPARENT,
-        "table_scrollbar_handle_color": THEME["primary"],
-        "table_scrollbar_handle_color_hover": THEME["primary_hover"],
-        "table_scrollbar_handle_color_pressed": THEME["primary_pressed"],
     }
 )
 
@@ -583,6 +687,7 @@ THEME.update(
         "toolbar_button_color_hover": WHITE,
         "toolbar_button_color_pressed": WHITE,
         # Iconos
+        "toolbar_button_execute_selection_icon_color": THEME["primary"],
         "toolbar_button_execute_query_icon_color": THEME["primary"],
         "toolbar_button_execute_script_icon_color": THEME["primary"],
         "toolbar_button_undo_icon_color": THEME["secondary"],

@@ -1,4 +1,7 @@
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import (
+    Qt,
+    Signal,
+)
 from PySide6.QtWidgets import (
     QDialog,
     QLabel,
@@ -6,7 +9,10 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ui.utils.layouts import hbox, vbox
+from ui.utils.layouts import (
+    hbox,
+    vbox,
+)
 
 
 class ConfirmationDialog(QDialog):

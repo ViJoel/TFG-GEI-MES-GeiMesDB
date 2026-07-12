@@ -6,7 +6,10 @@ from sqlalchemy.exc import SQLAlchemyError
 import modules.sessions.manager as manager
 from entities.connection import Connection
 from entities.driver import Driver
-from entities.query_result import QueryResult, ResultSet
+from entities.query_result import (
+    QueryResult,
+    ResultSet,
+)
 from entities.session import Session
 
 # =============================================================================

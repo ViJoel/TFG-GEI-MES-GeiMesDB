@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING
 
 from PySide6.QtWidgets import QApplication
 
+from ui.app.task_manager import TaskManager
+
 if TYPE_CHECKING:
     from ui.widgets.notifications.notification_manager import NotificationManager
 
@@ -19,6 +21,7 @@ class AppContext:
 
     app: QApplication | None = None
     notification_manager: NotificationManager | None = None
+    task_manager: TaskManager | None = None
 
     @classmethod
     def initialize(cls, app: QApplication):
@@ -90,3 +93,19 @@ class AppContext:
             raise RuntimeError("NotificationManager has not been initialized.")
 
         return cls.notification_manager
+
+    @classmethod
+    def set_task_manager(
+        cls,
+        task_manager: TaskManager,
+    ):
+
+        cls.task_manager = task_manager
+
+    @classmethod
+    def get_task_manager(cls) -> TaskManager:
+
+        if cls.task_manager is None:
+            raise RuntimeError("TaskManager has not been initialized.")
+
+        return cls.task_manager

@@ -1,4 +1,7 @@
-from PySide6.QtGui import QColor, QTextCursor
+from PySide6.QtGui import (
+    QColor,
+    QTextCursor,
+)
 from PySide6.QtWidgets import QTextEdit
 
 from entities.message_type import MessageType
@@ -41,6 +44,9 @@ class Console(QTextEdit):
         """
 
         self.setReadOnly(True)
+
+        self.verticalScrollBar().setSingleStep(20)
+        self.horizontalScrollBar().setSingleStep(20)
 
     # ===================
     # === PRIVATE API ===
@@ -102,22 +108,31 @@ class Console(QTextEdit):
                 Tipo de mensaje.
         """
 
+        string_1 = "console_"
+
         match message_type:
 
             case MessageType.DEFAULT:
-                color_name = "console_color"
+                string_2 = "default"
+
+            case MessageType.DISABLED:
+                string_2 = "disabled"
 
             case MessageType.INFO:
-                color_name = "console_info_color"
+                string_2 = "info"
 
             case MessageType.SUCCESS:
-                color_name = "console_success_color"
+                string_2 = "success"
 
             case MessageType.WARNING:
-                color_name = "console_warning_color"
+                string_2 = "warning"
 
             case MessageType.ERROR:
-                color_name = "console_error_color"
+                string_2 = "error"
+
+        string_3 = "_color"
+
+        color_name = string_1 + string_2 + string_3
 
         self._append_colored_text(
             text=text,

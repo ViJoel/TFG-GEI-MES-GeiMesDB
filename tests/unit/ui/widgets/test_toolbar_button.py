@@ -1,5 +1,8 @@
 import pytest
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import (
+    QSize,
+    Qt,
+)
 from PySide6.QtWidgets import QToolButton
 
 from ui.widgets.workspace.sql_editor.toolbar_button import ToolbarButton

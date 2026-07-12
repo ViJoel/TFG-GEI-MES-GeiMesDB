@@ -7,7 +7,7 @@
 QWidget#connection_form {
     background: $connection_form_background_color;
     border: 2px solid $connection_form_border_color;
-    border-radius: 8px;
+    border-radius: 4px;
 }
 
 /* Título */
@@ -16,7 +16,7 @@ QLabel#connection_form_title {
     background-color: $connection_form_title_background_color;
     border-bottom: 2px solid $connection_form_border_color;
     border-top: 2px solid $connection_form_border_color;
-    border-radius: 8px;
+    border-radius: 4px;
     font-size: 20px;
     padding: 4px 8px 4px 8px;
 }

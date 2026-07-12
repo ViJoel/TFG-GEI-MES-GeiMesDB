@@ -1,5 +1,9 @@
 import sqlparse
-from PySide6.QtCore import QRectF, Qt, Signal
+from PySide6.QtCore import (
+    QRectF,
+    Qt,
+    Signal,
+)
 from PySide6.QtGui import (
     QColor,
     QKeyEvent,
@@ -9,7 +13,10 @@ from PySide6.QtGui import (
     QResizeEvent,
     QTextFormat,
 )
-from PySide6.QtWidgets import QPlainTextEdit, QTextEdit
+from PySide6.QtWidgets import (
+    QPlainTextEdit,
+    QTextEdit,
+)
 
 from entities.sql_scope import SqlScope
 from ui.themes.theme_manager import ThemeManager
@@ -68,6 +75,9 @@ class SqlEditor(QPlainTextEdit):
         """
 
         self.setPlaceholderText("Write SQL query...")
+
+        self.verticalScrollBar().setSingleStep(1)
+        self.horizontalScrollBar().setSingleStep(1)
 
         self.line_number_area = LineNumberArea(self)
         self.line_number_area.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
@@ -268,12 +278,21 @@ class SqlEditor(QPlainTextEdit):
             self.execute(SqlScope.FULL_SCRIPT)
             return
 
-        # Ctrl + Enter -> Ejecutar texto seleccionado
+        # Ctrl + Alt + Enter -> Ejecutar texto seleccionado
+        elif (
+            event.key() == Qt.Key.Key_Return
+            and modifiers & Qt.KeyboardModifier.ControlModifier
+            and modifiers & Qt.KeyboardModifier.AltModifier
+        ):
+            self.execute(SqlScope.SELECTED_TEXT)
+            return
+
+        # Ctrl + Enter -> Ejecutar consulta actual
         elif (
             event.key() == Qt.Key.Key_Return
             and modifiers & Qt.KeyboardModifier.ControlModifier
         ):
-            self.execute(SqlScope.SELECTED_TEXT)
+            self.execute(SqlScope.ACTUAL_QUERY)
             return
 
         super().keyPressEvent(event)
@@ -349,6 +368,9 @@ class SqlEditor(QPlainTextEdit):
         if scope == SqlScope.SELECTED_TEXT:
             text = self.textCursor().selectedText()
 
+        elif scope == SqlScope.ACTUAL_QUERY:
+            text = self._get_current_query()
+
         elif scope == SqlScope.FULL_SCRIPT:
             text = self.toPlainText()
 
@@ -356,6 +378,60 @@ class SqlEditor(QPlainTextEdit):
             return None
 
         return self._normalize_sql(text) if self._has_content(text) else None
+
+    def _get_current_query(
+        self,
+    ) -> str | None:
+        """
+        Obtiene la sentencia SQL sobre la que se encuentra
+        actualmente el cursor.
+
+        Returns:
+            str | None:
+                Sentencia SQL normalizada o ``None`` si no se
+                encuentra ninguna consulta válida.
+        """
+
+        text = self.toPlainText()
+
+        if not self._has_content(text):
+            return None
+
+        cursor_position = self.textCursor().position()
+
+        offset = 0
+
+        for statement in sqlparse.parse(text):
+
+            statement_text = str(statement)
+
+            start = text.find(
+                statement_text,
+                offset,
+            )
+
+            if start == -1:
+                continue
+
+            end = start + len(statement_text)
+
+            # Ignorar espacios y saltos de línea
+            # exteriores a la sentencia.
+            leading = len(statement_text) - len(statement_text.lstrip())
+            trailing = len(statement_text) - len(statement_text.rstrip())
+
+            statement_start = start + leading
+            statement_end = end - trailing
+
+            if statement_start <= cursor_position <= statement_end:
+
+                statement_text = statement_text.strip()
+
+                return self._normalize_sql(statement_text)
+
+            offset = end
+
+        return None
 
     @staticmethod
     def _normalize_sql(
@@ -455,7 +531,7 @@ class SqlEditor(QPlainTextEdit):
 
         # Radio de las esquinas
         # redondeadas del panel.
-        radius = 8
+        radius = 4
 
         # Área completa del panel lateral.
         rect = QRectF(self.line_number_area.rect())
@@ -619,3 +695,24 @@ class SqlEditor(QPlainTextEdit):
             bottom = top + round(self.blockBoundingRect(block).height())
 
             block_number += 1
+
+    def insert_query_at_cursor(
+        self,
+        text: str,
+    ) -> None:
+        """
+        Inserta un fragmento de texto SQL en la posición
+        actual del cursor, reemplazando la selección si existe.
+
+        Args:
+            text (str): Texto SQL a insertar.
+        """
+
+        if not text:
+            return
+
+        # Insertar el texto en la posición del cursor actual
+        self.insertPlainText(text)
+
+        # Asegurar que el editor recupere el foco visual
+        self.setFocus()
