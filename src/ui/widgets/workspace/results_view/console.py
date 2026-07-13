@@ -171,3 +171,14 @@ class Console(QTextEdit):
                     f"{item.query}\nError: {item.error}\n\n",
                     MessageType.ERROR,
                 )
+
+        if script_result.rolled_back:
+
+            self.write(
+                "=" * 80
+                + "\n"
+                + "One or more UPDATE operations failed.\n"
+                + "The transaction was rolled back.\n"
+                + "No changes were saved.",
+                MessageType.INFO,
+            )

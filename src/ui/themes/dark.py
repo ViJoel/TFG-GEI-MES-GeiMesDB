@@ -656,6 +656,14 @@ THEME.update(
         # Alternancia de filas
         "table_row_alternate_background_color": GRAY_900,
         "table_grid_color": TRANSPARENT,
+        # Texto de las celdas en función del tipo de dato
+        "table_null_color": "#808080",
+        "table_default_color": "#D4D4D4",
+        "table_boolean_color": "#569CD6",
+        "table_datetime_color": "#DCDCAA",
+        "table_json_color": "#C586C0",
+        "table_number_color": "#B5CEA8",
+        "table_string_color": "#CE9178",
     }
 )
 

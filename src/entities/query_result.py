@@ -14,6 +14,8 @@ Clases:
 from dataclasses import dataclass
 from typing import Any
 
+from entities.table_metadata import TableMetadata
+
 
 @dataclass(
     slots=True,
@@ -31,24 +33,15 @@ class ResultSet:
         columns (list[str]):
             Nombres de las columnas del resultado.
 
-        columns_types (list[type]):
-            Tipos asociados a cada columna.
-
-        table_name (str | None):
-            Nombre de la tabla asociada al
-            resultado, si existe.
-
-        primary_key_columns (list[str]):
-            Columnas que forman la clave primaria
-            de la tabla asociada.
+        table_metadata (TableMetadata | None):
+            Metadatos de la tabla asociada al
+            resultado. Será `None` cuando la
+            consulta no sea editable.
     """
 
     rows: list[list[Any]]
     columns: list[str]
-    columns_types: list[type]
-
-    table_name: str | None
-    primary_key_columns: list[str]
+    table_metadata: TableMetadata | None
 
     @property
     def is_editable(self) -> bool:
@@ -58,13 +51,12 @@ class ResultSet:
 
         Returns:
             bool:
-                - `True` si existe una tabla asociada y
-                se dispone de al menos una columna
-                de clave primaria.
-                - `False` en caso contrario.
+                True si existe información de la
+                tabla asociada; False en caso
+                contrario.
         """
 
-        return self.table_name is not None and len(self.primary_key_columns) > 0
+        return self.table_metadata is not None
 
 
 @dataclass(

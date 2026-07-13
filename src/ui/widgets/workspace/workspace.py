@@ -13,6 +13,7 @@ from modules.queries_history.service import save_queries_history_batch
 from modules.sessions.service import (
     execute_query,
     execute_script,
+    execute_updates,
     is_editable_query,
 )
 from ui.app.app_actions import notify
@@ -183,37 +184,50 @@ class Workspace(QWidget):
 
         logger.info(f"Save requested for '{connection.name}' (ID: {connection.id}).")
 
-        logger.debug("Generating UPDATE queries...")
+        logger.debug("Generating UPDATE operations...")
 
-        queries = self.results_view.table.model.generate_update_queries()
+        operations = self.results_view.table.model.generate_update_operations()
 
-        logger.debug(f"{len(queries)} UPDATE queries generated.")
+        logger.debug(f"{len(operations)} UPDATE operations generated.")
 
-        logger.debug(f"Executing {len(queries)} UPDATE queries...")
+        logger.debug(f"Executing {len(operations)} UPDATE operations...")
 
-        script_result = execute_script(
+        script_result = execute_updates(
             connection_id=connection.id,
-            queries=queries,
+            operations=operations,
         )
 
-        logger.debug("UPDATE queries execution completed.")
+        logger.debug("UPDATE operations execution completed.")
 
-        logger.debug("Executing original query...")
+        if not script_result.rolled_back:
 
-        result = execute_query(
-            connection_id=connection.id,
-            query=self.current_query,
-        )
+            logger.debug("Executing original query...")
 
-        logger.debug("Original query execution completed.")
+            result = execute_query(
+                connection_id=connection.id,
+                query=self.current_query,
+            )
 
-        logger.debug("Refreshing results view...")
+            logger.debug("Original query execution completed.")
 
-        self.results_view.show_result(
-            result=result,
-            script_result=None,
-            is_script=False,
-        )
+            logger.debug("Refreshing results view...")
+
+            self.results_view.show_result(
+                result=result,
+                script_result=None,
+                is_script=False,
+            )
+
+            self.results_view.set_action_buttons_state(False)
+
+            logger.debug("Results view refreshed.")
+
+        else:
+
+            logger.debug(
+                "Transaction rolled back. Keeping current table "
+                "state so the user can correct the errors."
+            )
 
         self.results_view.show_result(
             result=None,
@@ -222,11 +236,11 @@ class Workspace(QWidget):
         )
 
         self.results_view.set_tab_buttons_state(True)
-        self.results_view.set_action_buttons_state(False)
 
-        logger.debug("Results view refreshed.")
-
-        logger.success(f"Changes saved for '{connection.name}' (ID: {connection.id}).")
+        logger.success(
+            f"Save operation finished for "
+            f"'{connection.name}' (ID: {connection.id})."
+        )
 
     def _on_query_selected_from_session_queries_history(
         self,
