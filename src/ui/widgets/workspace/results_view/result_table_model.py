@@ -103,17 +103,10 @@ class ResultTableModel(QAbstractTableModel):
         if (row, column) in self.modified_cells:
 
             if role == Qt.BackgroundRole:
-                return QColor(
-                    ThemeManager.get_color(
-                        "table_cell_modified_background_color",
-                    )
+                return ThemeManager.get_qcolor(
+                    key="table_cell_modified_background_color",
+                    alpha=64,
                 )
-
-            return QColor(
-                ThemeManager.get_color(
-                    "table_cell_modified_color",
-                )
-            )
 
         if role == Qt.BackgroundRole:
             return None

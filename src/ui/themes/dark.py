@@ -3,164 +3,7 @@ from ui.common.paths import (
     ARROW_LINE_DOWN,
     ARROW_LINE_UP,
 )
-
-# ====================
-# === TRANSPARENCY ===
-# ====================
-TRANSPARENT = "transparent"
-
-# =================
-# === GRAYSCALE ===
-# =================
-BLACK = "#000000"
-GRAY_950 = "#121314"
-GRAY_900 = "#1B1D1E"
-GRAY_850 = "#1F2123"
-GRAY_800 = "#242628"
-GRAY_750 = "#282B2D"
-GRAY_700 = "#2D3033"
-GRAY_650 = "#313437"
-GRAY_600 = "#35383C"
-GRAY_550 = "#404348"
-GRAY_500 = "#4A4D52"
-GRAY_450 = "#5A5D62"
-GRAY_400 = "#6B6E73"
-GRAY_350 = "#7A7D81"
-GRAY_300 = "#8A8D91"
-GRAY_250 = "#A1A3A6"
-GRAY_200 = "#B8B8B8"
-GRAY_150 = "#D5D5D5"
-GRAY_100 = "#F2F2F2"
-GRAY_50 = "#F8F8F8"
-WHITE = "#FFFFFF"
-
-# =============
-# === GREEN ===
-# =============
-GREEN = "#8BC34A"
-GREEN_HOVER = "#9CCC65"
-GREEN_PRESSED = "#7CB342"
-GREEN_DISABLED = "#5E7F39"
-
-GREEN_RGBA_50 = "rgba(139, 195, 74, 128)"
-GREEN_DISABLED_RGBA_50 = "rgba(94, 127, 57, 128)"
-
-# ===================
-# === LIGHT GREEN ===
-# ===================
-LIGHT_GREEN = "#A5D66A"
-LIGHT_GREEN_HOVER = "#B5DE84"
-LIGHT_GREEN_PRESSED = "#95C85A"
-LIGHT_GREEN_DISABLED = "#6F8F4D"
-
-# ==================
-# === DARK GREEN ===
-# ==================
-DARK_GREEN = "#1F5F2C"
-DARK_GREEN_HOVER = "#29783A"
-DARK_GREEN_PRESSED = "#34984A"
-
-# ==============
-# === ORANGE ===
-# ==============
-ORANGE = "#F28C38"
-ORANGE_HOVER = "#F59E50"
-ORANGE_PRESSED = "#E67E22"
-ORANGE_DISABLED = "#9A6738"
-ORANGE_SOFT = "#F4AE63"
-
-# ===========
-# === RED ===
-# ===========
-RED = "#D64545"
-RED_HOVER = "#E05353"
-RED_PRESSED = "#C03A3A"
-RED_DISABLED = "#7D4141"
-
-# =================
-# === LIGHT RED ===
-# =================
-LIGHT_RED = "#E57373"
-LIGHT_RED_HOVER = "#EF9A9A"
-LIGHT_RED_PRESSED = "#D96464"
-LIGHT_RED_DISABLED = "#9A6A6A"
-
-# ================
-# === DARK RED ===
-# ================
-DARK_RED = "#7A2F2F"
-DARK_RED_HOVER = "#914040"
-DARK_RED_PRESSED = "#632424"
-
-# ============
-# === BLUE ===
-# ============
-BLUE = "#4C8DDA"
-BLUE_HOVER = "#5B9BE7"
-BLUE_PRESSED = "#3D7BC5"
-BLUE_DISABLED = "#4C678A"
-
-# ============
-# === CYAN ===
-# ============
-CYAN = "#26C6DA"
-CYAN_HOVER = "#4DD0E1"
-CYAN_PRESSED = "#00ACC1"
-CYAN_DISABLED = "#2A7D88"
-
-# ==================
-# === LIGHT CYAN ===
-# ==================
-LIGHT_CYAN = "#6EDAE7"
-LIGHT_CYAN_HOVER = "#8BE3EC"
-LIGHT_CYAN_PRESSED = "#57CFDF"
-LIGHT_CYAN_DISABLED = "#5E9097"
-
-# =================
-# === DARK CYAN ===
-# =================
-DARK_CYAN = "#176C78"
-DARK_CYAN_HOVER = "#1E8593"
-DARK_CYAN_PRESSED = "#125964"
-
-# ==============
-# === PURPLE ===
-# ==============
-PURPLE = "#AB47BC"
-PURPLE_HOVER = "#BA68C8"
-PURPLE_PRESSED = "#8E24AA"
-PURPLE_DISABLED = "#73407D"
-
-# ==============
-# === YELLOW ===
-# ==============
-YELLOW = "#FDD835"
-YELLOW_HOVER = "#FFEE58"
-YELLOW_PRESSED = "#FBC02D"
-YELLOW_DISABLED = "#A3913A"
-
-# ====================
-# === LIGHT YELLOW ===
-# ====================
-LIGHT_YELLOW = "#FFE082"
-LIGHT_YELLOW_HOVER = "#FFECB3"
-LIGHT_YELLOW_PRESSED = "#FFD54F"
-LIGHT_YELLOW_DISABLED = "#B8A66A"
-
-# ===================
-# === DARK YELLOW ===
-# ===================
-DARK_YELLOW = "#8A6D00"
-DARK_YELLOW_HOVER = "#A37F00"
-DARK_YELLOW_PRESSED = "#705900"
-
-# ============
-# === PINK ===
-# ============
-PINK = "#EC407A"
-PINK_HOVER = "#F06292"
-PINK_PRESSED = "#D81B60"
-PINK_DISABLED = "#8E4560"
+from ui.themes.color_pallete import *
 
 # ===============
 # === GENERAL ===
@@ -647,10 +490,9 @@ THEME.update(
         "table_header_cell_background_color": THEME["primary"],
         "table_header_cell_color": GRAY_800,
         # Celdas de la tabla
-        "table_cell_background_color_hover": THEME["secondary"],
-        "table_cell_color_hover": GRAY_800,
-        "table_cell_selected_background_color": ORANGE,
-        "table_cell_selected_color": GRAY_800,
+        "table_cell_background_color_hover": ORANGE_DISABLED_RGBA_25,
+        "table_cell_selected_background_color": ORANGE_RGBA_25,
+        "table_cell_selected_color": THEME["text"],
         "table_cell_modified_background_color": THEME["accent"],
         "table_cell_modified_color": GRAY_800,
         # Alternancia de filas
@@ -673,7 +515,7 @@ THEME.update(
 THEME.update(
     {
         # Default
-        "toolbar_background_color": "rgba(139, 195, 74, 0.3)",
+        "toolbar_background_color": GREEN_RGBA_25,
         "toolbar_border_color": THEME["primary"],
         "toolbar_color": THEME["text"],
         # Separador
@@ -684,7 +526,6 @@ THEME.update(
 # ======================
 # === TOOLBAR BUTTON ===
 # ======================
-
 THEME.update(
     {
         # Botones
