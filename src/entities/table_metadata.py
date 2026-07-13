@@ -8,7 +8,10 @@ from datetime import (
     datetime,
     time,
 )
-from decimal import Decimal
+from decimal import (
+    Decimal,
+    InvalidOperation,
+)
 from typing import Any
 
 from sqlalchemy import Table
@@ -159,6 +162,7 @@ class TableMetadata:
         except (
             ValueError,
             TypeError,
+            InvalidOperation,
             json.JSONDecodeError,
         ):
 

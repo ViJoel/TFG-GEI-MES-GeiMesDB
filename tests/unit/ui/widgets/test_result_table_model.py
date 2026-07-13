@@ -1,6 +1,7 @@
 from datetime import (
     date,
     datetime,
+    time,
 )
 from decimal import Decimal
 from unittest.mock import (
@@ -10,6 +11,7 @@ from unittest.mock import (
 
 import pytest
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor
 
 from entities.query_result import ResultSet
 from ui.widgets.workspace.results_view.result_table_model import ResultTableModel
@@ -26,15 +28,14 @@ def result_set():
     """
 
     rs = MagicMock(spec=ResultSet)
-
     rs.columns = ["id", "name", "active"]
-    rs.columns_types = [int, str, bool]
     rs.rows = [
         [1, "Alice", True],
         [2, "Bob", False],
     ]
-    rs.primary_key_columns = ["id"]
-    rs.table_name = "users"
+    rs.table_metadata = MagicMock()
+    rs.table_metadata.primary_key_columns = ["id"]
+    rs.table_metadata.convert_value = MagicMock()
 
     return rs
 
@@ -50,13 +51,15 @@ def model(result_set):
 
 @pytest.fixture(autouse=True)
 def patch_theme_manager():
-    """
-    Evita dependencia del ThemeManager real.
-    """
-
-    with patch(
-        "ui.widgets.workspace.results_view.result_table_model.ThemeManager.get_color",
-        return_value="#FFFFFF",
+    with (
+        patch(
+            "ui.widgets.workspace.results_view.result_table_model.ThemeManager.get_color",
+            return_value="#FFFFFF",
+        ),
+        patch(
+            "ui.widgets.workspace.results_view.result_table_model.ThemeManager.get_qcolor",
+            return_value=QColor("#FFFFFF"),
+        ),
     ):
         yield
 
@@ -104,7 +107,7 @@ def test_data_edit_role(model):
 
     index = model.index(1, 0)
 
-    assert model.data(index, Qt.EditRole) == 2
+    assert model.data(index, Qt.EditRole) == "2"
 
 
 def test_data_modified_cell_background_role(model):
@@ -201,114 +204,6 @@ def test_set_data_wrong_role_returns_false(model):
 
 
 # =============================================================================
-# CONVERT VALUE
-# =============================================================================
-
-
-def test_convert_value_int(model):
-    """
-    Verifica conversión de string a entero.
-    """
-
-    assert model._convert_value(0, "123") == 123
-
-
-def test_convert_value_float(model):
-    """
-    Verifica conversión de string a float según tipo de columna.
-    """
-
-    model.result_set.columns_types[0] = float
-    assert model._convert_value(0, "1.5") == 1.5
-
-
-def test_convert_value_bool(model):
-    """
-    Verifica conversión de string a booleano.
-    """
-
-    model.result_set.columns_types[0] = bool
-    assert model._convert_value(0, "true") is True
-
-
-def test_convert_value_decimal(model):
-    """
-    Verifica conversión de string a Decimal.
-    """
-
-    model.result_set.columns_types[0] = Decimal
-    assert model._convert_value(0, "10.5") == Decimal("10.5")
-
-
-def test_convert_value_date(model):
-    """
-    Verifica conversión de string a date en formato ISO.
-    """
-
-    model.result_set.columns_types[0] = date
-    assert model._convert_value(0, "2024-01-01") == date(2024, 1, 1)
-
-
-def test_convert_value_datetime(model):
-    """
-    Verifica conversión de string a datetime desde ISO format.
-    """
-
-    model.result_set.columns_types[0] = datetime
-    assert model._convert_value(0, "2024-01-01T10:00:00") == datetime.fromisoformat(
-        "2024-01-01T10:00:00"
-    )
-
-
-def test_convert_value_str_column_type_returns_value(model):
-    """
-    Verifica que columnas tipo str devuelven el valor sin transformación.
-    """
-
-    model.result_set.columns_types[0] = str
-
-    result = model._convert_value(0, "hello world")
-
-    assert result == "hello world"
-
-
-# =============================================================================
-# CONVERT VALUE (EDGE CASES)
-# =============================================================================
-
-
-def test_convert_value_empty_string_returns_none(model):
-    """
-    Verifica que string vacío devuelve None.
-    """
-
-    assert model._convert_value(0, "") is None
-
-
-def test_convert_value_unknown_type_returns_value(model):
-    """
-    Verifica que tipos desconocidos devuelven el valor original.
-    """
-
-    class CustomType:
-        pass
-
-    model.result_set.columns_types[0] = CustomType
-
-    assert model._convert_value(0, "abc") == "abc"
-
-
-def test_convert_value_invalid_int_fallback(model):
-    """
-    Verifica fallback en caso de error de conversión.
-    """
-
-    model.result_set.columns_types[0] = int
-
-    assert model._convert_value(0, "not_a_number") == "not_a_number"
-
-
-# =============================================================================
 # HAS CHANGES
 # =============================================================================
 
@@ -354,58 +249,6 @@ def test_discard_changes(model):
 
     model.layoutChanged.emit.assert_called_once()
     model.state_changed.emit.assert_called_once_with(False)
-
-
-# =============================================================================
-# GENERATE UPDATE QUERIES
-# =============================================================================
-
-
-def test_generate_update_queries(model):
-    """
-    Verifica que se generan queries UPDATE correctamente.
-    """
-
-    model.modified_cells.add((0, 1))  # fila 0 columna name
-
-    queries = model.generate_update_queries()
-
-    assert len(queries) == 1
-    assert "UPDATE users" in queries[0]
-    assert "name" in queries[0]
-    assert "Alice" in queries[0]
-
-
-# =============================================================================
-# GENERATE UPDATE QUERIES (EDGE CASES)
-# =============================================================================
-
-
-def test_generate_update_queries_multiple_rows(model):
-    """
-    Verifica generación de múltiples queries.
-    """
-
-    # fila 0 y 1 modificadas
-    model.modified_cells = {(0, 1), (1, 1)}
-
-    queries = model.generate_update_queries()
-
-    assert len(queries) == 2
-
-
-def test_generate_update_queries_multiple_columns_same_row(model):
-    """
-    Verifica múltiples columnas en la misma fila.
-    """
-
-    model.modified_cells = {(0, 0), (0, 1)}
-
-    queries = model.generate_update_queries()
-
-    assert len(queries) == 1
-    assert "SET" in queries[0]
-    assert "WHERE" in queries[0]
 
 
 # =============================================================================
@@ -457,61 +300,230 @@ def test_modify_cell_value_removes_modified_cell_when_equal(model):
 
 
 # =============================================================================
-# FORMAT SQL VALUE
+# CONVERT VALUE
 # =============================================================================
 
 
-def test_format_sql_value_string_escape(model):
+def test_convert_value_delegates_to_table_metadata(model):
     """
-    Verifica escape de comillas en strings.
-    """
-
-    assert model._format_sql_value("O'Reilly") == "'O''Reilly'"
-
-
-def test_format_sql_value_none(model):
-    """
-    Verifica que None se convierte en NULL.
+    Verifica que la conversión se delega al TableMetadata.
     """
 
-    assert model._format_sql_value(None) == "NULL"
+    model.result_set.table_metadata.convert_value.return_value = 123
 
-
-def test_format_sql_value_bool(model):
-    """
-    Verifica conversión de booleanos a SQL.
-    """
-
-    assert model._format_sql_value(True) == "TRUE"
-    assert model._format_sql_value(False) == "FALSE"
-
-
-def test_format_sql_value_decimal_and_number(model):
-    """
-    Verifica Decimal y números.
-    """
-
-    assert model._format_sql_value(Decimal("10.5")) == "10.5"
-    assert model._format_sql_value(123) == "123"
-
-
-def test_format_sql_value_date_and_datetime():
-    """
-    Verifica que date y datetime se formatean correctamente a SQL.
-    """
-
-    from datetime import (
-        date,
-        datetime,
+    result = model._convert_value(
+        column=0,
+        value="123",
     )
 
-    from ui.widgets.workspace.results_view.result_table_model import ResultTableModel
+    assert result == 123
 
-    model = ResultTableModel.__new__(ResultTableModel)
+    model.result_set.table_metadata.convert_value.assert_called_once_with(
+        column_name="id",
+        value="123",
+    )
 
-    result_date = model._format_sql_value(date(2024, 1, 1))
-    assert result_date == "'2024-01-01'"
 
-    result_datetime = model._format_sql_value(datetime(2024, 1, 1, 10, 30, 0))
+def test_value_to_str_none(model):
+    assert model._value_to_str(None) == "[NULL]"
 
-    assert result_datetime == "'2024-01-01T10:30:00'"
+
+def test_value_to_str_decimal(model):
+    assert model._value_to_str(Decimal("10.5")) == "10.5"
+
+
+def test_value_to_str_date(model):
+    assert model._value_to_str(date(2024, 1, 1)) == "2024-01-01"
+
+
+def test_value_to_str_datetime(model):
+    value = datetime(2024, 1, 1, 12, 0)
+
+    assert model._value_to_str(value) == value.isoformat()
+
+
+def test_value_to_str_time(model):
+    value = time(12, 30)
+
+    assert model._value_to_str(value) == value.isoformat()
+
+
+def test_value_to_str_dict(model):
+    assert model._value_to_str({"a": 1}) == '{"a": 1}'
+
+
+# =============================================================================
+# GENERATE UPDATE OPERATIONS
+# =============================================================================
+
+
+def test_generate_update_operations(model):
+    """
+    Verifica que se genera una operación UPDATE.
+    """
+
+    model.modified_cells = {(0, 1)}
+
+    operations = model.generate_update_operations()
+
+    assert len(operations) == 1
+
+    operation = operations[0]
+
+    assert operation.primary_key == {"id": 1}
+    assert operation.values == {"name": "Alice"}
+    assert operation.table_metadata is model.result_set.table_metadata
+
+
+def test_generate_update_operations_multiple_rows(model):
+    model.modified_cells = {
+        (0, 1),
+        (1, 1),
+    }
+
+    operations = model.generate_update_operations()
+
+    assert len(operations) == 2
+
+
+def test_generate_update_operations_multiple_columns(model):
+    model.modified_cells = {
+        (0, 1),
+        (0, 2),
+    }
+
+    operations = model.generate_update_operations()
+
+    assert len(operations) == 1
+
+    assert operations[0].values == {
+        "name": "Alice",
+        "active": True,
+    }
+
+
+# =============================================================================
+# GET TABLE CELL COLOR
+# =============================================================================
+
+
+def test_get_table_cell_color_invalid_role_returns_none(model):
+    """
+    Verifica que los roles no soportados devuelven None.
+    """
+
+    assert (
+        model._get_table_cell_color(
+            row=0,
+            column=0,
+            role=Qt.DisplayRole,
+        )
+        is None
+    )
+
+
+def test_get_table_cell_color_modified_background(model):
+    """
+    Verifica que una celda modificada devuelve el color
+    de fondo configurado por el tema.
+    """
+
+    model.modified_cells.add((0, 0))
+
+    with patch(
+        "ui.widgets.workspace.results_view.result_table_model.ThemeManager.get_qcolor"
+    ) as get_qcolor:
+
+        color = QColor("#FFFFFF")
+        get_qcolor.return_value = color
+
+        result = model._get_table_cell_color(
+            row=0,
+            column=0,
+            role=Qt.BackgroundRole,
+        )
+
+        assert result is color
+
+        get_qcolor.assert_called_once_with(
+            key="table_cell_modified_background_color",
+            alpha=64,
+        )
+
+
+def test_get_table_cell_color_modified_foreground(model):
+    """
+    Verifica que el color de texto de una celda modificada
+    sigue resolviéndose según el tipo de dato.
+    """
+
+    model.modified_cells.add((0, 1))
+
+    result = model._get_table_cell_color(
+        row=0,
+        column=1,
+        role=Qt.ForegroundRole,
+    )
+
+    assert isinstance(result, QColor)
+
+
+def test_get_table_cell_color_background_returns_none(model):
+    """
+    Verifica que una celda no modificada no define
+    color de fondo.
+    """
+
+    assert (
+        model._get_table_cell_color(
+            row=0,
+            column=0,
+            role=Qt.BackgroundRole,
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    ("value", "theme_key"),
+    [
+        (None, "table_null_color"),
+        (True, "table_boolean_color"),
+        (123, "table_number_color"),
+        (1.5, "table_number_color"),
+        (Decimal("10.5"), "table_number_color"),
+        ("hello", "table_string_color"),
+        (date(2024, 1, 1), "table_datetime_color"),
+        (datetime(2024, 1, 1, 10, 0), "table_datetime_color"),
+        (time(10, 30), "table_datetime_color"),
+        ({"a": 1}, "table_json_color"),
+        (object(), "table_default_color"),
+    ],
+)
+def test_get_table_cell_color_foreground_by_value_type(
+    model,
+    value,
+    theme_key,
+):
+    """
+    Verifica que el color de primer plano se obtiene
+    utilizando la clave del tema correspondiente al
+    tipo de dato de la celda.
+    """
+
+    model.result_set.rows[0][0] = value
+
+    with patch(
+        "ui.widgets.workspace.results_view.result_table_model.ThemeManager.get_color",
+        return_value="#FFFFFF",
+    ) as get_color:
+
+        result = model._get_table_cell_color(
+            row=0,
+            column=0,
+            role=Qt.ForegroundRole,
+        )
+
+        assert isinstance(result, QColor)
+
+        get_color.assert_called_once_with(theme_key)

@@ -64,6 +64,12 @@ def mock_execute_script():
 
 
 @pytest.fixture
+def mock_execute_updates():
+    with patch("ui.widgets.workspace.workspace.execute_updates") as mock:
+        yield mock
+
+
+@pytest.fixture
 def mock_is_editable_query():
     with patch("ui.widgets.workspace.workspace.is_editable_query") as mock:
         yield mock
@@ -367,34 +373,32 @@ def test_execute_script(
 # =============================================================================
 
 
-def test_save_requested_refreshes_results(
-    mock_execute_script,
+def test_save_requested_refreshes_results_when_updates_succeed(
+    mock_execute_updates,
     mock_execute_query,
     workspace,
 ):
     """
-    Verifica que al guardar los cambios se
-    ejecutan las sentencias UPDATE, se vuelve
-    a ejecutar la consulta original y se
-    actualiza la vista de resultados.
+    Verifica que, si las operaciones UPDATE se
+    ejecutan correctamente, se vuelve a ejecutar
+    la consulta original y se actualiza la vista.
     """
 
-    update_queries = [
-        "UPDATE users SET name='John' WHERE id=1;",
-    ]
+    operations = [MagicMock()]
 
     workspace.current_query = "SELECT * FROM users"
 
     workspace.results_view.table.model = MagicMock()
-
-    workspace.results_view.table.model.generate_update_queries.return_value = (
-        update_queries
+    workspace.results_view.table.model.generate_update_operations.return_value = (
+        operations
     )
 
     script_result = MagicMock()
+    script_result.rolled_back = False
+
     query_result = MagicMock()
 
-    mock_execute_script.return_value = script_result
+    mock_execute_updates.return_value = script_result
     mock_execute_query.return_value = query_result
 
     workspace.results_view.show_result = MagicMock()
@@ -403,11 +407,11 @@ def test_save_requested_refreshes_results(
 
     workspace._on_save_requested()
 
-    workspace.results_view.table.model.generate_update_queries.assert_called_once()
+    workspace.results_view.table.model.generate_update_operations.assert_called_once()
 
-    mock_execute_script.assert_called_once_with(
+    mock_execute_updates.assert_called_once_with(
         connection_id=1,
-        queries=update_queries,
+        operations=operations,
     )
 
     mock_execute_query.assert_called_once_with(
@@ -429,11 +433,61 @@ def test_save_requested_refreshes_results(
         is_script=True,
     )
 
+    workspace.results_view.set_action_buttons_state.assert_called_once_with(False)
+
     workspace.results_view.set_tab_buttons_state.assert_called_once_with(True)
 
-    workspace.results_view.set_action_buttons_state.assert_called_once_with(
-        False,
+
+def test_save_requested_does_not_refresh_results_when_updates_are_rolled_back(
+    mock_execute_updates,
+    mock_execute_query,
+    workspace,
+):
+    """
+    Verifica que, si las operaciones UPDATE
+    provocan un rollback, no se vuelve a ejecutar
+    la consulta original y se conserva el estado
+    actual de la tabla.
+    """
+
+    operations = [MagicMock()]
+
+    workspace.current_query = "SELECT * FROM users"
+
+    workspace.results_view.table.model = MagicMock()
+    workspace.results_view.table.model.generate_update_operations.return_value = (
+        operations
     )
+
+    script_result = MagicMock()
+    script_result.rolled_back = True
+
+    mock_execute_updates.return_value = script_result
+
+    workspace.results_view.show_result = MagicMock()
+    workspace.results_view.set_tab_buttons_state = MagicMock()
+    workspace.results_view.set_action_buttons_state = MagicMock()
+
+    workspace._on_save_requested()
+
+    workspace.results_view.table.model.generate_update_operations.assert_called_once()
+
+    mock_execute_updates.assert_called_once_with(
+        connection_id=1,
+        operations=operations,
+    )
+
+    mock_execute_query.assert_not_called()
+
+    workspace.results_view.show_result.assert_called_once_with(
+        result=None,
+        script_result=script_result,
+        is_script=True,
+    )
+
+    workspace.results_view.set_action_buttons_state.assert_not_called()
+
+    workspace.results_view.set_tab_buttons_state.assert_called_once_with(True)
 
 
 # =============================================================================
