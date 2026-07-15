@@ -324,34 +324,6 @@ def test_convert_value_delegates_to_table_metadata(model):
     )
 
 
-def test_value_to_str_none(model):
-    assert model._value_to_str(None) == "[NULL]"
-
-
-def test_value_to_str_decimal(model):
-    assert model._value_to_str(Decimal("10.5")) == "10.5"
-
-
-def test_value_to_str_date(model):
-    assert model._value_to_str(date(2024, 1, 1)) == "2024-01-01"
-
-
-def test_value_to_str_datetime(model):
-    value = datetime(2024, 1, 1, 12, 0)
-
-    assert model._value_to_str(value) == value.isoformat()
-
-
-def test_value_to_str_time(model):
-    value = time(12, 30)
-
-    assert model._value_to_str(value) == value.isoformat()
-
-
-def test_value_to_str_dict(model):
-    assert model._value_to_str({"a": 1}) == '{"a": 1}'
-
-
 # =============================================================================
 # GENERATE UPDATE OPERATIONS
 # =============================================================================
@@ -496,7 +468,7 @@ def test_get_table_cell_color_background_returns_none(model):
         (date(2024, 1, 1), "table_datetime_color"),
         (datetime(2024, 1, 1, 10, 0), "table_datetime_color"),
         (time(10, 30), "table_datetime_color"),
-        ({"a": 1}, "table_json_color"),
+        ({"a": 1}, "table_dict_color"),
         (object(), "table_default_color"),
     ],
 )

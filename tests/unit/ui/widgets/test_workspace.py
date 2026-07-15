@@ -6,6 +6,7 @@ from unittest.mock import (
 import pytest
 
 from entities.connection import Connection
+from entities.message_type import MessageType
 from entities.sql_scope import SqlScope
 from ui.widgets.workspace.workspace import Workspace
 
@@ -376,6 +377,7 @@ def test_execute_script(
 def test_save_requested_refreshes_results_when_updates_succeed(
     mock_execute_updates,
     mock_execute_query,
+    mock_notify,
     workspace,
 ):
     """
@@ -437,10 +439,16 @@ def test_save_requested_refreshes_results_when_updates_succeed(
 
     workspace.results_view.set_tab_buttons_state.assert_called_once_with(True)
 
+    mock_notify.assert_called_once_with(
+        MessageType.SUCCESS,
+        "Changes saved",
+    )
+
 
 def test_save_requested_does_not_refresh_results_when_updates_are_rolled_back(
     mock_execute_updates,
     mock_execute_query,
+    mock_notify,
     workspace,
 ):
     """
@@ -488,6 +496,11 @@ def test_save_requested_does_not_refresh_results_when_updates_are_rolled_back(
     workspace.results_view.set_action_buttons_state.assert_not_called()
 
     workspace.results_view.set_tab_buttons_state.assert_called_once_with(True)
+
+    mock_notify.assert_called_once_with(
+        MessageType.ERROR,
+        "Saving changes failed.",
+    )
 
 
 # =============================================================================

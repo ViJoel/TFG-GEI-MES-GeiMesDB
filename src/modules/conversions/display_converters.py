@@ -26,7 +26,7 @@ def convert_boolean(
             Representación textual del valor.
     """
 
-    return str(value)
+    return "TRUE" if value else "FALSE"
 
 
 def convert_date(

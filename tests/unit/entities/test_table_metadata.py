@@ -1,23 +1,13 @@
-from datetime import (
-    date,
-    datetime,
-    time,
+from unittest.mock import (
+    MagicMock,
+    patch,
 )
-from decimal import Decimal
-from unittest.mock import MagicMock
 
 import pytest
 from sqlalchemy.sql.sqltypes import (
-    JSON,
     Boolean,
-    Date,
-    DateTime,
-    Float,
     Integer,
-    Numeric,
     String,
-    Time,
-    Uuid,
 )
 
 from entities.table_metadata import TableMetadata
@@ -85,112 +75,67 @@ def test_post_init_extracts_table_information(metadata):
 # =============================================================================
 
 
-@pytest.mark.parametrize(
-    ("column_type", "value", "expected"),
-    [
-        (Integer(), "12", 12),
-        (Float(), "1.5", 1.5),
-        (Numeric(), "10.25", Decimal("10.25")),
-        (String(), "hello", "hello"),
-        (Boolean(), "true", True),
-        (Boolean(), "false", False),
-        (Date(), "2024-01-01", date(2024, 1, 1)),
-        (
-            DateTime(),
-            "2024-01-01T10:30:00",
-            datetime(2024, 1, 1, 10, 30, 0),
-        ),
-        (Time(), "12:30:45", time(12, 30, 45)),
-        (JSON(), '{"a":1}', {"a": 1}),
-        (
-            Uuid(),
-            "550e8400-e29b-41d4-a716-446655440000",
-            "550e8400-e29b-41d4-a716-446655440000",
-        ),
-    ],
-)
-def test_convert_value(metadata, column_type, value, expected):
+def test_convert_value_delegates_to_input_converter(metadata):
     """
-    Debe convertir correctamente cada tipo
-    soportado.
+    Debe delegar la conversión en input_converter.
     """
 
-    metadata.column_types = {"col": column_type}
+    metadata.column_types = {"col": Integer()}
 
-    assert metadata.convert_value("col", value) == expected
+    with patch(
+        "entities.table_metadata.input_converter",
+        return_value=123,
+    ) as mock_converter:
+
+        result = metadata.convert_value(
+            "col",
+            "12",
+        )
+
+    mock_converter.assert_called_once_with(
+        column_type=metadata.column_types["col"],
+        value="12",
+    )
+
+    assert result == 123
 
 
 # =============================================================================
-# NULL VALUES
+# SUPPORTS EDITTING
 # =============================================================================
 
 
-@pytest.mark.parametrize(
-    "value",
-    [
-        "",
-        "NULL",
-        "[NULL]",
-        " null ",
-    ],
-)
-def test_convert_value_returns_none_for_null_values(metadata, value):
+def test_supports_editing_delegates_to_supports_input_conversion(metadata):
     """
-    Debe interpretar las distintas
-    representaciones de NULL.
+    Debe consultar si el tipo admite edición.
     """
 
-    metadata.column_types = {"col": String()}
+    metadata.column_types = {"col": Integer()}
 
-    assert metadata.convert_value("col", value) is None
+    with patch(
+        "entities.table_metadata.supports_input_conversion",
+        return_value=True,
+    ) as mock_supports:
+
+        result = metadata.supports_editing("col")
+
+    mock_supports.assert_called_once_with(
+        metadata.column_types["col"],
+    )
+
+    assert result is True
 
 
-# =============================================================================
-# INVALID CONVERSIONS
-# =============================================================================
-
-
-@pytest.mark.parametrize(
-    ("column_type", "value"),
-    [
-        (Integer(), "abc"),
-        (Float(), "abc"),
-        (Numeric(), "abc"),
-        (Date(), "abc"),
-        (DateTime(), "abc"),
-        (Time(), "abc"),
-        (JSON(), "{invalid"),
-    ],
-)
-def test_convert_value_returns_original_value_when_conversion_fails(
-    metadata,
-    column_type,
-    value,
-):
+def test_supports_editing_returns_false(metadata):
     """
-    Si la conversión falla debe devolverse el
-    valor original.
+    Debe devolver False cuando el tipo no admite edición.
     """
 
-    metadata.column_types = {"col": column_type}
+    metadata.column_types = {"col": Integer()}
 
-    assert metadata.convert_value("col", value) == value
+    with patch(
+        "entities.table_metadata.supports_input_conversion",
+        return_value=False,
+    ):
 
-
-# =============================================================================
-# UNKNOWN TYPE
-# =============================================================================
-
-
-def test_convert_value_unknown_type_returns_original_value(metadata):
-    """
-    Tipos no soportados deben devolver el valor
-    original.
-    """
-
-    class CustomType:
-        pass
-
-    metadata.column_types = {"col": CustomType()}
-
-    assert metadata.convert_value("col", "hello") == "hello"
+        assert metadata.supports_editing("col") is False

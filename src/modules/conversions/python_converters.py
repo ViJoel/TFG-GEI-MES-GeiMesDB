@@ -13,9 +13,28 @@ def convert_boolean(
     """
     Convierte un valor textual a un booleano.
 
-    Se consideran verdaderos los valores
-    'true', '1' y 'yes', ignorando mayúsculas
-    y minúsculas.
+    Valores aceptados:
+
+    - Verdadero:
+        - `true`
+        - `t`
+        - `1`
+        - `yes`
+        - `y`
+        - `si`
+        - `s`
+        - `on`
+
+    - Falso:
+        - `false`
+        - `f`
+        - `0`
+        - `no`
+        - `n`
+        - `off`
+
+    La comparación ignora mayúsculas,
+    minúsculas y espacios.
 
     Args:
         value (str):
@@ -24,13 +43,38 @@ def convert_boolean(
     Returns:
         bool:
             Valor convertido a booleano.
+
+    Raises:
+        ValueError:
+            Si el valor recibido no corresponde
+            a una representación booleana válida.
     """
 
-    return value.lower() in (
+    normalized = "".join(value.split()).lower()
+
+    if normalized in (
         "true",
+        "t",
         "1",
         "yes",
-    )
+        "y",
+        "si",
+        "s",
+        "on",
+    ):
+        return True
+
+    if normalized in (
+        "false",
+        "f",
+        "0",
+        "no",
+        "n",
+        "off",
+    ):
+        return False
+
+    raise ValueError(f"Invalid boolean value: {value}")
 
 
 def convert_date(

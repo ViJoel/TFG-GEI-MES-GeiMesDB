@@ -41,6 +41,66 @@ def test_result_set_is_not_editable_when_table_metadata_is_none():
     assert result_set.is_editable is False
 
 
+def test_result_set_supports_editing_returns_false_without_metadata():
+    """
+    Un ResultSet sin metadata nunca debe permitir
+    edición de columnas.
+    """
+
+    result_set = ResultSet(
+        rows=[],
+        columns=[],
+        table_metadata=None,
+    )
+
+    assert result_set.supports_editing("id") is False
+
+
+def test_result_set_supports_editing_delegates_to_metadata():
+    """
+    ResultSet debe delegar la comprobación de
+    edición en TableMetadata.
+    """
+
+    metadata = MagicMock(
+        spec=TableMetadata,
+    )
+
+    metadata.supports_editing.return_value = True
+
+    result_set = ResultSet(
+        rows=[],
+        columns=[],
+        table_metadata=metadata,
+    )
+
+    assert result_set.supports_editing("id") is True
+
+    metadata.supports_editing.assert_called_once_with(
+        column_name="id",
+    )
+
+
+def test_result_set_supports_editing_returns_false_for_non_editable_column():
+    """
+    Una columna no editable debe devolver False.
+    """
+
+    metadata = MagicMock(
+        spec=TableMetadata,
+    )
+
+    metadata.supports_editing.return_value = False
+
+    result_set = ResultSet(
+        rows=[],
+        columns=[],
+        table_metadata=metadata,
+    )
+
+    assert result_set.supports_editing("id") is False
+
+
 # =============================================================================
 # QueryResult
 # =============================================================================

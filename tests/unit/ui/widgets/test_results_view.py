@@ -209,19 +209,16 @@ def test_write_message_clears_and_writes(results_view):
 # =============================================================================
 
 
-def test_save_changes_emits_signal_and_notify(results_view):
+def test_save_changes_emits_signal(results_view):
     """
     Verifica emisión de save_requested.
     """
 
-    with patch("ui.widgets.workspace.results_view.results_view.notify") as mock_notify:
-        results_view.save_requested = MagicMock()
+    results_view.save_requested = MagicMock()
 
-        results_view._save_changes()
+    results_view._save_changes()
 
-        results_view.save_requested.emit.assert_called_once()
-
-        mock_notify.assert_called_once()
+    results_view.save_requested.emit.assert_called_once()
 
 
 def test_discard_changes_calls_table_and_notify(results_view):

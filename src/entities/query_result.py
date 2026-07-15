@@ -48,8 +48,8 @@ class ResultSet:
         self,
     ) -> bool:
         """
-        Indica si el conjunto de resultados puede
-        modificarse.
+        Indica si el resultado dispone de metadata
+        asociada para permitir operaciones de edición.
 
         Returns:
             bool:
