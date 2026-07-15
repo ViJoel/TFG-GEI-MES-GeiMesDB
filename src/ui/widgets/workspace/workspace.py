@@ -180,6 +180,8 @@ class Workspace(QWidget):
         actualiza los resultados.
         """
 
+        saving_operation_success: bool = False
+
         connection = self.connection
 
         logger.info(f"Save requested for '{connection.name}' (ID: {connection.id}).")
@@ -222,12 +224,16 @@ class Workspace(QWidget):
 
             logger.debug("Results view refreshed.")
 
+            saving_operation_success = True
+
         else:
 
             logger.debug(
                 "Transaction rolled back. Keeping current table "
                 "state so the user can correct the errors."
             )
+
+            saving_operation_success = False
 
         self.results_view.show_result(
             result=None,
@@ -241,6 +247,18 @@ class Workspace(QWidget):
             f"Save operation finished for "
             f"'{connection.name}' (ID: {connection.id})."
         )
+
+        if saving_operation_success:
+            notify(
+                MessageType.SUCCESS,
+                "Changes saved",
+            )
+
+        else:
+            notify(
+                MessageType.ERROR,
+                "Saving changes failed.",
+            )
 
     def _on_query_selected_from_session_queries_history(
         self,
