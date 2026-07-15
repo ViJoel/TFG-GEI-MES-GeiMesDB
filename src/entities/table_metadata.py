@@ -1,33 +1,13 @@
-import json
 from dataclasses import (
     dataclass,
     field,
 )
-from datetime import (
-    date,
-    datetime,
-    time,
-)
-from decimal import (
-    Decimal,
-    InvalidOperation,
-)
 from typing import Any
 
 from sqlalchemy import Table
-from sqlalchemy.sql.sqltypes import (
-    JSON,
-    Boolean,
-    Date,
-    DateTime,
-    Float,
-    Integer,
-    Numeric,
-    String,
-    Time,
-    Uuid,
-)
 from sqlalchemy.types import TypeEngine
+
+from modules.conversions.inputs_conversion import convert
 
 
 @dataclass(
@@ -92,10 +72,6 @@ class TableMetadata:
         correspondiente según el tipo SQLAlchemy de
         la columna indicada.
 
-        También interpreta distintas representaciones
-        de valores nulos (`NULL`, `[NULL]` o cadena
-        vacía) como `None`.
-
         Args:
             column_name (str):
                 Nombre de la columna.
@@ -106,64 +82,10 @@ class TableMetadata:
         Returns:
             Any:
                 Valor convertido al tipo Python
-                correspondiente. Si la conversión no
-                puede realizarse, se devuelve el
-                valor original.
+                correspondiente.
         """
 
-        normalized = value.strip().upper().strip("[]")
-
-        if normalized in (
-            "",
-            "NULL",
-        ):
-            return None
-
-        column_type = self.column_types[column_name]
-
-        try:
-
-            if isinstance(column_type, Integer):
-                return int(value)
-
-            if isinstance(column_type, Float):
-                return float(value)
-
-            if isinstance(column_type, Numeric):
-                return Decimal(value)
-
-            if isinstance(column_type, String):
-                return value
-
-            if isinstance(column_type, Boolean):
-                return value.lower() in (
-                    "true",
-                    "1",
-                    "yes",
-                )
-
-            if isinstance(column_type, Date):
-                return date.fromisoformat(value)
-
-            if isinstance(column_type, DateTime):
-                return datetime.fromisoformat(value)
-
-            if isinstance(column_type, Time):
-                return time.fromisoformat(value)
-
-            if isinstance(column_type, JSON):
-                return json.loads(value)
-
-            if isinstance(column_type, Uuid):
-                return value
-
-            return value
-
-        except (
-            ValueError,
-            TypeError,
-            InvalidOperation,
-            json.JSONDecodeError,
-        ):
-
-            return value
+        return convert(
+            column_type=self.column_types[column_name],
+            value=value,
+        )
