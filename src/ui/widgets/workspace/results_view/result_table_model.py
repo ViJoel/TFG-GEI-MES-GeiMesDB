@@ -1,4 +1,3 @@
-import json
 from collections import defaultdict
 from copy import deepcopy
 from datetime import (
@@ -18,6 +17,7 @@ from PySide6.QtGui import QColor
 
 from entities.query_result import ResultSet
 from entities.update_operation import UpdateOperation
+from modules.conversions.converters import display_converter
 from ui.themes.theme_manager import ThemeManager
 
 
@@ -129,7 +129,7 @@ class ResultTableModel(QAbstractTableModel):
             color = "datetime"
 
         elif isinstance(value, dict):
-            color = "json"
+            color = "dict"
 
         else:
             color = "default"
@@ -198,7 +198,7 @@ class ResultTableModel(QAbstractTableModel):
         # Reutilizamos la función centralizada para la vista y la edición
         if role in (Qt.DisplayRole, Qt.EditRole):
             value = self.result_set.rows[row][column]
-            return self._value_to_str(value)
+            return display_converter(value)
 
         if role in (
             Qt.ForegroundRole,
@@ -255,7 +255,16 @@ class ResultTableModel(QAbstractTableModel):
                 Banderas asociadas a la celda.
         """
 
-        return Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable
+        flags = Qt.ItemIsSelectable | Qt.ItemIsEnabled
+
+        column_name = self.result_set.columns[index.column()]
+
+        if self.result_set.supports_editing(
+            column_name=column_name,
+        ):
+            flags |= Qt.ItemIsEditable
+
+        return flags
 
     def setData(
         self,
@@ -376,45 +385,6 @@ class ResultTableModel(QAbstractTableModel):
             column_name=column_name,
             value=value,
         )
-
-    def _value_to_str(self, value: Any) -> str:
-        """
-        Convierte cualquier tipo de objeto devuelto
-        por SQLAlchemy a su representación textual
-        idónea para la interfaz gráfica.
-
-        Args:
-            value (Any):
-                Valor a convertir.
-
-        Returns:
-            str:
-                Valor convertida a string.
-        """
-
-        if value is None:
-            return "[NULL]"
-
-        if isinstance(
-            value,
-            (
-                date,
-                datetime,
-                time,
-            ),
-        ):
-            return value.isoformat()
-
-        if isinstance(value, Decimal):
-            return str(value)
-
-        if isinstance(value, dict):
-            return json.dumps(
-                value,
-                ensure_ascii=False,
-            )
-
-        return str(value)
 
     def _has_changes(
         self,

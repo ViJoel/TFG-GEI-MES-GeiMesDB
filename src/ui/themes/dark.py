@@ -503,7 +503,7 @@ THEME.update(
         "table_default_color": "#D4D4D4",
         "table_boolean_color": "#569CD6",
         "table_datetime_color": "#DCDCAA",
-        "table_json_color": "#C586C0",
+        "table_dict_color": "#C586C0",
         "table_number_color": "#B5CEA8",
         "table_string_color": "#CE9178",
     }

@@ -44,7 +44,9 @@ class ResultSet:
     table_metadata: TableMetadata | None
 
     @property
-    def is_editable(self) -> bool:
+    def is_editable(
+        self,
+    ) -> bool:
         """
         Indica si el conjunto de resultados puede
         modificarse.
@@ -57,6 +59,30 @@ class ResultSet:
         """
 
         return self.table_metadata is not None
+
+    def supports_editing(
+        self,
+        column_name: str,
+    ) -> bool:
+        """
+        Indica si una columna puede editarse.
+
+        Args:
+            column_name (str):
+                Nombre de la columna.
+
+        Returns:
+            bool:
+                True si la columna admite edición;
+                False en caso contrario.
+        """
+
+        if self.table_metadata is None:
+            return False
+
+        return self.table_metadata.supports_editing(
+            column_name=column_name,
+        )
 
 
 @dataclass(

@@ -7,7 +7,10 @@ from typing import Any
 from sqlalchemy import Table
 from sqlalchemy.types import TypeEngine
 
-from modules.conversions.inputs_conversion import convert
+from modules.conversions.converters import (
+    input_converter,
+    supports_input_conversion,
+)
 
 
 @dataclass(
@@ -85,7 +88,29 @@ class TableMetadata:
                 correspondiente.
         """
 
-        return convert(
+        return input_converter(
             column_type=self.column_types[column_name],
             value=value,
+        )
+
+    def supports_editing(
+        self,
+        column_name: str,
+    ) -> bool:
+        """
+        Indica si una columna admite edición desde la
+        interfaz.
+
+        Args:
+            column_name (str):
+                Nombre de la columna.
+
+        Returns:
+            bool:
+                True si existe un conversor registrado
+                para su tipo SQLAlchemy.
+        """
+
+        return supports_input_conversion(
+            self.column_types[column_name],
         )

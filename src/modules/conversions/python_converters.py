@@ -1,91 +1,10 @@
-import json
 from datetime import (
     date,
     datetime,
     time,
 )
 from decimal import Decimal
-from typing import Any
-
-
-def convert_integer(
-    value: str,
-) -> int:
-    """
-    Convierte un valor textual a un entero.
-
-    Args:
-        value (str):
-            Valor introducido por el usuario.
-
-    Returns:
-        int:
-            Valor convertido a entero.
-    """
-
-    return int(value)
-
-
-def convert_float(
-    value: str,
-) -> float:
-    """
-    Convierte un valor textual a un número de
-    punto flotante.
-
-    Args:
-        value (str):
-            Valor introducido por el usuario.
-
-    Returns:
-        float:
-            Valor convertido a punto flotante.
-    """
-
-    value = "".join(value.split())
-    value = value.replace(",", ".")
-
-    return float(value)
-
-
-def convert_numeric(
-    value: str,
-) -> Decimal:
-    """
-    Convierte un valor textual a un número
-    decimal.
-
-    Args:
-        value (str):
-            Valor introducido por el usuario.
-
-    Returns:
-        Decimal:
-            Valor convertido a decimal.
-    """
-
-    value = "".join(value.split())
-    value = value.replace(",", ".")
-
-    return Decimal(value)
-
-
-def convert_string(
-    value: str,
-) -> str:
-    """
-    Devuelve el valor textual sin modificar.
-
-    Args:
-        value (str):
-            Valor introducido por el usuario.
-
-    Returns:
-        str:
-            Valor original.
-    """
-
-    return value
+from uuid import UUID
 
 
 def convert_boolean(
@@ -151,6 +70,86 @@ def convert_datetime(
     return datetime.fromisoformat(value)
 
 
+def convert_float(
+    value: str,
+) -> float:
+    """
+    Convierte un valor textual a un número de
+    punto flotante.
+
+    Args:
+        value (str):
+            Valor introducido por el usuario.
+
+    Returns:
+        float:
+            Valor convertido a punto flotante.
+    """
+
+    value = "".join(value.split())
+    value = value.replace(",", ".")
+
+    return float(value)
+
+
+def convert_integer(
+    value: str,
+) -> int:
+    """
+    Convierte un valor textual a un entero.
+
+    Args:
+        value (str):
+            Valor introducido por el usuario.
+
+    Returns:
+        int:
+            Valor convertido a entero.
+    """
+
+    return int(value)
+
+
+def convert_numeric(
+    value: str,
+) -> Decimal:
+    """
+    Convierte un valor textual a un número
+    decimal.
+
+    Args:
+        value (str):
+            Valor introducido por el usuario.
+
+    Returns:
+        Decimal:
+            Valor convertido a decimal.
+    """
+
+    value = "".join(value.split())
+    value = value.replace(",", ".")
+
+    return Decimal(value)
+
+
+def convert_string(
+    value: str,
+) -> str:
+    """
+    Devuelve el valor textual sin modificar.
+
+    Args:
+        value (str):
+            Valor introducido por el usuario.
+
+    Returns:
+        str:
+            Valor original.
+    """
+
+    return value
+
+
 def convert_time(
     value: str,
 ) -> time:
@@ -171,17 +170,18 @@ def convert_time(
 
 def convert_uuid(
     value: str,
-) -> str:
+) -> UUID:
     """
-    Devuelve el UUID textual sin modificar.
+    Convierte un valor textual a un objeto UUID.
 
     Args:
         value (str):
             UUID introducido por el usuario.
 
     Returns:
-        str:
-            UUID como cadena.
+        UUID:
+            Objeto UUID correspondiente al valor
+            introducido.
     """
 
-    return value
+    return UUID(value)
