@@ -3,6 +3,7 @@ from copy import deepcopy
 from datetime import (
     date,
     datetime,
+    time,
 )
 from decimal import Decimal
 from typing import Any
@@ -15,6 +16,8 @@ from PySide6.QtCore import (
 from PySide6.QtGui import QColor
 
 from entities.query_result import ResultSet
+from entities.update_operation import UpdateOperation
+from modules.conversions.converters import display_converter
 from ui.themes.theme_manager import ThemeManager
 
 
@@ -59,6 +62,81 @@ class ResultTableModel(QAbstractTableModel):
         self.result_set = result_set
         self.original_result_set = deepcopy(result_set)
         self.modified_cells: set[tuple[int, int]] = set()
+
+    # ==================
+    # === UI HELPERS ===
+    # ==================
+
+    def _get_table_cell_color(
+        self,
+        row: int,
+        column: int,
+        role: Qt.ItemDataRole,
+    ) -> QColor | None:
+        """
+        Devuelve el color asociado a una celda en
+        función de su estado y del tipo de dato que
+        contiene.
+
+        Args:
+            row (int):
+                Índice de la fila.
+
+            column (int):
+                Índice de la columna.
+
+            role (Qt.ItemDataRole):
+                Rol solicitado por Qt.
+
+        Returns:
+            QColor | None:
+                Color correspondiente al rol
+                solicitado, o `None` si no aplica.
+        """
+
+        if role not in (
+            Qt.ForegroundRole,
+            Qt.BackgroundRole,
+        ):
+            return None
+
+        if (row, column) in self.modified_cells:
+
+            if role == Qt.BackgroundRole:
+                return ThemeManager.get_qcolor(
+                    key="table_cell_modified_background_color",
+                    alpha=64,
+                )
+
+        if role == Qt.BackgroundRole:
+            return None
+
+        value = self.result_set.rows[row][column]
+
+        if value is None:
+            color = "null"
+
+        elif isinstance(value, bool):
+            color = "boolean"
+
+        elif isinstance(value, (int, float, Decimal)):
+            color = "number"
+
+        elif isinstance(value, str):
+            color = "string"
+
+        elif isinstance(value, (date, datetime, time)):
+            color = "datetime"
+
+        elif isinstance(value, dict):
+            color = "dict"
+
+        else:
+            color = "default"
+
+        theme_key = f"table_{color}_color"
+
+        return QColor(ThemeManager.get_color(theme_key))
 
     # ====================
     # === QT OVERRIDES ===
@@ -116,28 +194,21 @@ class ResultTableModel(QAbstractTableModel):
         row = index.row()
         column = index.column()
 
+        # Separamos los roles para formatear la visualización
+        # Reutilizamos la función centralizada para la vista y la edición
+        if role in (Qt.DisplayRole, Qt.EditRole):
+            value = self.result_set.rows[row][column]
+            return display_converter(value)
+
         if role in (
-            Qt.DisplayRole,
-            Qt.EditRole,
+            Qt.ForegroundRole,
+            Qt.BackgroundRole,
         ):
-
-            return self.result_set.rows[row][column]
-
-        if (row, column) in self.modified_cells:
-
-            if role == Qt.BackgroundRole:
-                return QColor(
-                    ThemeManager.get_color(
-                        "table_cell_modified_background_color",
-                    )
-                )
-
-            if role == Qt.ForegroundRole:
-                return QColor(
-                    ThemeManager.get_color(
-                        "table_cell_modified_color",
-                    )
-                )
+            return self._get_table_cell_color(
+                row=row,
+                column=column,
+                role=role,
+            )
 
     def headerData(
         self,
@@ -184,7 +255,16 @@ class ResultTableModel(QAbstractTableModel):
                 Banderas asociadas a la celda.
         """
 
-        return Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable
+        flags = Qt.ItemIsSelectable | Qt.ItemIsEnabled
+
+        column_name = self.result_set.columns[index.column()]
+
+        if self.result_set.supports_editing(
+            column_name=column_name,
+        ):
+            flags |= Qt.ItemIsEditable
+
+        return flags
 
     def setData(
         self,
@@ -299,46 +379,12 @@ class ResultTableModel(QAbstractTableModel):
                 correspondiente.
         """
 
-        try:
+        column_name = self.result_set.columns[column]
 
-            column_type = self.result_set.columns_types[column]
-
-            if value == "":
-                return None
-
-            if column_type is int:
-                return int(value)
-
-            if column_type is float:
-                return float(value)
-
-            if column_type is str:
-                return value
-
-            if column_type is bool:
-                return value.lower() in (
-                    "true",
-                    "1",
-                    "yes",
-                )
-
-            if column_type is Decimal:
-                return Decimal(value)
-
-            if column_type is date:
-                return date.fromisoformat(value)
-
-            if column_type is datetime:
-                return datetime.fromisoformat(value)
-
-            return value
-
-        except (
-            ValueError,
-            TypeError,
-        ):
-
-            return value
+        return self.result_set.table_metadata.convert_value(
+            column_name=column_name,
+            value=value,
+        )
 
     def _has_changes(
         self,
@@ -381,88 +427,55 @@ class ResultTableModel(QAbstractTableModel):
 
         self.state_changed.emit(False)
 
-    def generate_update_queries(
+    def generate_update_operations(
         self,
-    ) -> list[str]:
+    ) -> list[UpdateOperation]:
         """
-        Genera las sentencias SQL necesarias para
+        Genera las operaciones necesarias para
         persistir las modificaciones realizadas.
 
         Returns:
-            list[str]:
-                Lista de sentencias UPDATE generadas.
+            list[UpdateOperation]:
+                Operaciones de actualización
+                correspondientes a las filas
+                modificadas.
         """
 
-        queries = []
+        operations: list[UpdateOperation] = []
 
         modified_columns_by_row = defaultdict(set)
 
         for row, column in self.modified_cells:
             modified_columns_by_row[row].add(column)
 
+        column_indexes = {
+            column: index for index, column in enumerate(self.result_set.columns)
+        }
+
         for row, modified_columns in modified_columns_by_row.items():
 
-            set_parts = []
+            values: dict[str, Any] = {}
+
+            primary_key: dict[str, Any] = {}
 
             for column in modified_columns:
 
                 column_name = self.result_set.columns[column]
 
-                value = self.result_set.rows[row][column]
+                values[column_name] = self.result_set.rows[row][column]
 
-                set_parts.append(f"{column_name} = {self._format_sql_value(value)}")
+            for pk_column in self.result_set.table_metadata.primary_key_columns:
 
-            where_parts = []
+                pk_index = column_indexes[pk_column]
 
-            for pk_column in self.result_set.primary_key_columns:
+                primary_key[pk_column] = self.original_result_set.rows[row][pk_index]
 
-                pk_index = self.result_set.columns.index(pk_column)
-
-                value = self.original_result_set.rows[row][pk_index]
-
-                where_parts.append(f"{pk_column} = {self._format_sql_value(value)}")
-
-            query = (
-                f"UPDATE {self.result_set.table_name} "
-                f"SET {', '.join(set_parts)} "
-                f"WHERE {' AND '.join(where_parts)};"
+            operations.append(
+                UpdateOperation(
+                    table_metadata=self.result_set.table_metadata,
+                    primary_key=primary_key,
+                    values=values,
+                )
             )
 
-            queries.append(query)
-
-        return queries
-
-    def _format_sql_value(
-        self,
-        value: Any,
-    ) -> str:
-        """
-        Convierte un valor Python a su representación
-        equivalente en SQL.
-
-        Args:
-            value (Any):
-                Valor que se desea formatear.
-
-        Returns:
-            str:
-                Representación del valor en formato
-                SQL.
-        """
-
-        if value is None:
-            return "NULL"
-
-        if isinstance(value, str):
-            return "'" + value.replace("'", "''") + "'"
-
-        if isinstance(value, bool):
-            return "TRUE" if value else "FALSE"
-
-        if isinstance(value, (date, datetime)):
-            return f"'{value.isoformat()}'"
-
-        if isinstance(value, Decimal):
-            return str(value)
-
-        return str(value)
+        return operations

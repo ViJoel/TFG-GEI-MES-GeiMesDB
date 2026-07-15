@@ -19,6 +19,7 @@ QTableView#table {
     border-radius: 4px;
     color: $table_color;
     gridline-color: $table_grid_color;
+    selection-background-color: transparent;
 }
 
 /* Celdas */
@@ -30,7 +31,6 @@ QTableView#table::item {
 QTableView#table::item:hover {
     background-color: $table_cell_background_color_hover;
     border-radius: 4px;
-    color: $table_cell_color_hover;
 }
 
 QTableView#table::item:selected {

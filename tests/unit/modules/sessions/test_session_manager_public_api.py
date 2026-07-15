@@ -6,11 +6,9 @@ from sqlalchemy.exc import SQLAlchemyError
 import modules.sessions.manager as manager
 from entities.connection import Connection
 from entities.driver import Driver
-from entities.query_result import (
-    QueryResult,
-    ResultSet,
-)
+from entities.query_result import QueryResult
 from entities.session import Session
+from entities.update_operation import UpdateOperation
 
 # =============================================================================
 # FIXTURES
@@ -872,320 +870,165 @@ def test_is_editable_query_invalid(query):
 
 
 # =============================================================================
-# _infer_column_types
+# execute_updates
 # =============================================================================
 
 
-def test_infer_column_types():
+def test_execute_updates_without_session():
+    """
+    Debe devolver un ScriptResult con error cuando
+    no existe una sesión activa.
+    """
 
-    result = manager._infer_column_types(
-        columns=["id", "name", "active"],
-        rows=[
-            [1, "Ana", True],
-            [2, "Luis", False],
-        ],
+    result = manager.execute_updates(
+        connection_id="missing",
+        operations=[],
     )
 
-    assert result == [int, str, bool]
+    assert result.rolled_back is False
+    assert len(result.items) == 1
+    assert result.items[0].error is not None
+    assert "There is no active session" in result.items[0].error
 
 
-def test_infer_column_types_first_row_none():
+def test_execute_updates_all_success():
+    """
+    Debe ejecutar todas las operaciones y hacer
+    commit de la transacción.
+    """
 
-    result = manager._infer_column_types(
-        columns=["id"],
-        rows=[
-            [None],
-            [5],
-        ],
+    connection = create_connection()
+    session = create_session(connection)
+
+    manager._active_sessions[connection.id] = session
+
+    conn = MagicMock()
+
+    transaction = MagicMock()
+    savepoint = MagicMock()
+
+    conn.begin.return_value = transaction
+    conn.begin_nested.return_value = savepoint
+
+    session.engine.connect.return_value.__enter__.return_value = conn
+    session.engine.dialect = MagicMock()
+
+    op1 = MagicMock(spec=UpdateOperation)
+    op1.to_statement.return_value = "stmt1"
+    op1.to_sql.return_value = "sql1"
+
+    op2 = MagicMock(spec=UpdateOperation)
+    op2.to_statement.return_value = "stmt2"
+    op2.to_sql.return_value = "sql2"
+
+    result = manager.execute_updates(
+        connection.id,
+        [op1, op2],
     )
 
-    assert result == [int]
+    assert result.rolled_back is False
+    assert len(result.items) == 2
 
+    transaction.commit.assert_called_once()
+    transaction.rollback.assert_not_called()
 
-def test_infer_column_types_all_none():
+    assert savepoint.commit.call_count == 2
+    savepoint.rollback.assert_not_called()
 
-    result = manager._infer_column_types(
-        columns=["id"],
-        rows=[
-            [None],
-            [None],
-        ],
-    )
+    assert result.items[0].query == "sql1"
+    assert result.items[0].error is None
 
-    assert result == [str]
+    assert result.items[1].query == "sql2"
+    assert result.items[1].error is None
 
 
-# =============================================================================
-# _extract_table_name
-# =============================================================================
+def test_execute_updates_with_sqlalchemy_error():
+    """
+    Si una operación falla debe hacerse rollback
+    completo al finalizar.
+    """
 
+    connection = create_connection()
+    session = create_session(connection)
 
-def test_extract_table_name():
+    manager._active_sessions[connection.id] = session
 
-    assert manager._extract_table_name("SELECT * FROM users") == "users"
+    conn = MagicMock()
 
+    transaction = MagicMock()
 
-def test_extract_table_name_semicolon():
+    savepoint_ok = MagicMock()
+    savepoint_fail = MagicMock()
 
-    assert manager._extract_table_name("SELECT * FROM users;") == "users"
-
-
-def test_extract_table_name_invalid():
-
-    assert manager._extract_table_name("SELECT") is None
-
-
-# =============================================================================
-# _create_console_output
-# =============================================================================
-
-
-@pytest.mark.parametrize(
-    ("query", "rowcount", "expected"),
-    [
-        ("INSERT INTO users VALUES(1)", 1, "1 row(s) inserted."),
-        ("UPDATE users SET name='A'", 2, "2 row(s) updated."),
-        ("DELETE FROM users", 3, "3 row(s) deleted."),
-        ("CREATE TABLE users(id)", 0, "Query executed successfully."),
-    ],
-)
-def test_create_console_output(query, rowcount, expected):
-
-    result = MagicMock()
-    result.rowcount = rowcount
-
-    assert (
-        manager._create_console_output(
-            query=query,
-            result=result,
-        )
-        == expected
-    )
-
-
-# =============================================================================
-# _format_result_set
-# =============================================================================
-
-
-def test_format_result_set():
-
-    result_set = ResultSet(
-        rows=[
-            [1, "Ana"],
-            [20, "Luis"],
-        ],
-        columns=["id", "name"],
-        columns_types=[int, str],
-        table_name=None,
-        primary_key_columns=[],
-    )
-
-    text = manager._format_result_set(result_set)
-
-    assert "id" in text
-    assert "name" in text
-    assert "Ana" in text
-    assert "Luis" in text
-    assert "|" in text
-    assert "-+-" in text
-
-
-# =============================================================================
-# _get_primary_key_columns
-# =============================================================================
-
-
-def test_get_primary_key_columns(monkeypatch):
-
-    inspector = MagicMock()
-    inspector.get_pk_constraint.return_value = {
-        "constrained_columns": ["id"],
-    }
-
-    monkeypatch.setattr(
-        manager,
-        "inspect",
-        MagicMock(return_value=inspector),
-    )
-
-    assert manager._get_primary_key_columns(
-        engine=MagicMock(),
-        table_name="users",
-    ) == ["id"]
-
-    inspector.get_pk_constraint.assert_called_once_with("users")
-
-
-def test_get_primary_key_columns_without_pk(monkeypatch):
-
-    inspector = MagicMock()
-    inspector.get_pk_constraint.return_value = {}
-
-    monkeypatch.setattr(
-        manager,
-        "inspect",
-        MagicMock(return_value=inspector),
-    )
-
-    assert (
-        manager._get_primary_key_columns(
-            engine=MagicMock(),
-            table_name="users",
-        )
-        == []
-    )
-
-
-# =============================================================================
-# _get_editable_metadata
-# =============================================================================
-
-
-def test_get_editable_metadata_not_editable(monkeypatch):
-
-    monkeypatch.setattr(
-        manager,
-        "is_editable_query",
-        MagicMock(return_value=False),
-    )
-
-    table, pk = manager._get_editable_metadata(
-        query="SELECT id FROM users",
-        engine=MagicMock(),
-    )
-
-    assert table is None
-    assert pk == []
-
-
-def test_get_editable_metadata_without_table(monkeypatch):
-
-    monkeypatch.setattr(
-        manager,
-        "is_editable_query",
-        MagicMock(return_value=True),
-    )
-
-    monkeypatch.setattr(
-        manager,
-        "_extract_table_name",
-        MagicMock(return_value=None),
-    )
-
-    table, pk = manager._get_editable_metadata(
-        query="SELECT * FROM users",
-        engine=MagicMock(),
-    )
-
-    assert table is None
-    assert pk == []
-
-
-def test_get_editable_metadata(monkeypatch):
-
-    monkeypatch.setattr(
-        manager,
-        "is_editable_query",
-        MagicMock(return_value=True),
-    )
-
-    monkeypatch.setattr(
-        manager,
-        "_extract_table_name",
-        MagicMock(return_value="users"),
-    )
-
-    monkeypatch.setattr(
-        manager,
-        "_get_primary_key_columns",
-        MagicMock(return_value=["id"]),
-    )
-
-    table, pk = manager._get_editable_metadata(
-        query="SELECT * FROM users",
-        engine=MagicMock(),
-    )
-
-    assert table == "users"
-    assert pk == ["id"]
-
-
-# =============================================================================
-# _create_result_set
-# =============================================================================
-
-
-def test_create_result_set(monkeypatch):
-
-    result = MagicMock()
-
-    result.keys.return_value = ["id", "name"]
-
-    result.fetchall.return_value = [
-        (1, "Ana"),
-        (2, "Luis"),
+    conn.begin.return_value = transaction
+    conn.begin_nested.side_effect = [
+        savepoint_ok,
+        savepoint_fail,
     ]
 
-    monkeypatch.setattr(
-        manager,
-        "_get_editable_metadata",
-        MagicMock(
-            return_value=(
-                "users",
-                ["id"],
-            )
-        ),
-    )
-
-    result_set = manager._create_result_set(
-        engine=MagicMock(),
-        query="SELECT * FROM users",
-        result=result,
-    )
-
-    assert result_set.columns == ["id", "name"]
-    assert result_set.rows == [
-        [1, "Ana"],
-        [2, "Luis"],
+    conn.execute.side_effect = [
+        None,
+        SQLAlchemyError("boom"),
     ]
-    assert result_set.columns_types == [int, str]
-    assert result_set.table_name == "users"
-    assert result_set.primary_key_columns == ["id"]
 
+    session.engine.connect.return_value.__enter__.return_value = conn
+    session.engine.dialect = MagicMock()
 
-# =============================================================================
-# _create_query_result
-# =============================================================================
+    op1 = MagicMock(spec=UpdateOperation)
+    op1.to_statement.return_value = "stmt1"
+    op1.to_sql.return_value = "sql1"
 
+    op2 = MagicMock(spec=UpdateOperation)
+    op2.to_statement.return_value = "stmt2"
+    op2.to_sql.return_value = "sql2"
 
-def test_create_query_result(monkeypatch):
-
-    result_set = ResultSet(
-        rows=[
-            [1, "Ana"],
-            [2, "Luis"],
-        ],
-        columns=["id", "name"],
-        columns_types=[int, str],
-        table_name="users",
-        primary_key_columns=["id"],
+    result = manager.execute_updates(
+        connection.id,
+        [op1, op2],
     )
 
-    monkeypatch.setattr(
-        manager,
-        "_create_result_set",
-        MagicMock(return_value=result_set),
-    )
+    assert result.rolled_back is True
 
-    result = manager._create_query_result(
-        engine=MagicMock(),
-        query="SELECT * FROM users",
-        result=MagicMock(),
-    )
+    transaction.rollback.assert_called_once()
+    transaction.commit.assert_not_called()
 
-    assert result.success
-    assert result.result_set is result_set
-    assert "2 row(s) returned." in result.console_output
-    assert "Ana" in result.console_output
-    assert "Luis" in result.console_output
+    savepoint_ok.commit.assert_called_once()
+    savepoint_fail.rollback.assert_called_once()
+
+    assert result.items[0].error is None
+    assert result.items[1].error == "boom"
+
+
+def test_execute_updates_unexpected_exception():
+    """
+    Una excepción inesperada debe hacer rollback y
+    propagarse.
+    """
+
+    connection = create_connection()
+    session = create_session(connection)
+
+    manager._active_sessions[connection.id] = session
+
+    conn = MagicMock()
+
+    transaction = MagicMock()
+
+    conn.begin.return_value = transaction
+    conn.begin_nested.side_effect = RuntimeError("boom")
+
+    session.engine.connect.return_value.__enter__.return_value = conn
+    session.engine.dialect = MagicMock()
+
+    operation = MagicMock(spec=UpdateOperation)
+    operation.to_statement.return_value = "stmt"
+    operation.to_sql.return_value = "sql"
+
+    with pytest.raises(RuntimeError, match="boom"):
+        manager.execute_updates(
+            connection.id,
+            [operation],
+        )
+
+    transaction.rollback.assert_called_once()
+    transaction.commit.assert_not_called()

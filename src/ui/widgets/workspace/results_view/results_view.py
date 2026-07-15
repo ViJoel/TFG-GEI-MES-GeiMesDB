@@ -351,11 +351,6 @@ class ResultsView(QWidget):
 
         self.save_requested.emit()
 
-        notify(
-            MessageType.SUCCESS,
-            "Changes saved",
-        )
-
     def _discard_changes(
         self,
     ) -> None:

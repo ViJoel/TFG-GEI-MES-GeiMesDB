@@ -63,6 +63,12 @@ class ScriptResult:
         items (list[ScriptResultItem]):
             Resultados individuales de las
             consultas ejecutadas.
+
+    rolled_back (bool):
+            Indica si la transacción completa fue
+            revertida tras producirse uno o más
+            errores.
     """
 
     items: list[ScriptResultItem]
+    rolled_back: bool = False

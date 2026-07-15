@@ -1,7 +1,6 @@
-from typing import Any
-
 from sqlalchemy import (
-    inspect,
+    MetaData,
+    Table,
     text,
 )
 from sqlalchemy.engine import (
@@ -21,6 +20,8 @@ from entities.script_result import (
     ScriptResultItem,
 )
 from entities.session import Session
+from entities.table_metadata import TableMetadata
+from entities.update_operation import UpdateOperation
 from log.app_logger import get_logger
 
 logger = get_logger(__name__)
@@ -476,6 +477,149 @@ def execute_script(
     )
 
 
+def execute_updates(
+    connection_id: str,
+    operations: list[UpdateOperation],
+) -> ScriptResult:
+    """
+    Ejecuta una serie de operaciones UPDATE dentro
+    de una única transacción.
+
+    Cada operación se ejecuta utilizando un
+    SAVEPOINT para permitir que el resto continúe
+    aunque alguna falle. Si al menos una operación
+    produce un error, la transacción completa se
+    revierte al finalizar.
+
+    Args:
+        connection_id (str):
+            Identificador de la conexión sobre la
+            que se ejecutarán las operaciones.
+
+        operations (list[UpdateOperation]):
+            Operaciones de actualización que se
+            desean persistir.
+
+    Returns:
+        ScriptResult:
+            Resultado de la ejecución.
+    """
+
+    session = get_session(connection_id)
+
+    if session is None:
+
+        message = f"There is no active session for connection " f"'{connection_id}'."
+
+        logger.warning(message)
+
+        return ScriptResult(
+            items=[
+                ScriptResultItem(
+                    query="",
+                    error=message,
+                ),
+            ],
+        )
+
+    logger.info(
+        f"Executing {len(operations)} update operation(s) "
+        f"on '{session.connection.name}'."
+    )
+
+    items: list[ScriptResultItem] = []
+    has_errors = False
+
+    with session.engine.connect() as connection:
+
+        transaction = connection.begin()
+
+        try:
+
+            for operation in operations:
+
+                stmt = operation.to_statement()
+
+                sql = operation.to_sql(
+                    session.engine.dialect,
+                )
+
+                savepoint = connection.begin_nested()
+
+                try:
+
+                    connection.execute(stmt)
+
+                    savepoint.commit()
+
+                    items.append(
+                        ScriptResultItem(
+                            query=sql,
+                        )
+                    )
+
+                    logger.success(
+                        f"Update executed successfully.\n"
+                        f"Connection: '{session.connection.name}'.\n"
+                        f"Query: {sql}"
+                    )
+
+                except SQLAlchemyError as e:
+
+                    has_errors = True
+
+                    savepoint.rollback()
+
+                    logger.error(
+                        f"Failed to execute update.\n"
+                        f"Connection: '{session.connection.name}'.\n"
+                        f"Query: {sql}\n"
+                        f"Exception: {e}"
+                    )
+
+                    items.append(
+                        ScriptResultItem(
+                            query=sql,
+                            error=str(e),
+                        )
+                    )
+
+            if has_errors:
+
+                transaction.rollback()
+
+                logger.warning(
+                    f"Transaction rolled back for "
+                    f"'{session.connection.name}' because one or more "
+                    f"UPDATE operations failed."
+                )
+
+            else:
+
+                transaction.commit()
+
+                logger.success(
+                    f"Transaction committed successfully for "
+                    f"'{session.connection.name}'."
+                )
+
+        except Exception:
+
+            transaction.rollback()
+
+            logger.exception(
+                f"Unexpected error executing update transaction.\n"
+                f"Connection: '{session.connection.name}'."
+            )
+
+            raise
+
+    return ScriptResult(
+        items=items,
+        rolled_back=has_errors,
+    )
+
+
 # ===================
 # === PRIVATE API ===
 # ===================
@@ -533,81 +677,62 @@ def _create_result_set(
     """
     Construye un conjunto de resultados a partir
     del resultado devuelto por SQLAlchemy.
-
-    Args:
-        engine (Engine):
-            Motor asociado a la sesión activa.
-
-        query (str):
-            Consulta SQL ejecutada.
-
-        result (CursorResult):
-            Resultado obtenido tras la ejecución.
-
-    Returns:
-        ResultSet:
-            Estructura tabular con los datos
-            recuperados.
     """
 
     columns = list(result.keys())
     rows = [list(row) for row in result.fetchall()]
 
-    table_name, primary_key_columns = _get_editable_metadata(
-        query=query,
-        engine=engine,
-    )
+    table_metadata = None
+
+    if is_editable_query(query):
+
+        table_name = _extract_table_name(query)
+
+        if table_name is not None:
+
+            table_metadata = _reflect_table_metadata(
+                engine=engine,
+                table_name=table_name,
+            )
 
     return ResultSet(
         rows=rows,
         columns=columns,
-        columns_types=_infer_column_types(
-            columns=columns,
-            rows=rows,
-        ),
-        table_name=table_name,
-        primary_key_columns=primary_key_columns,
+        table_metadata=table_metadata,
     )
 
 
-def _infer_column_types(
-    columns: list[str],
-    rows: list[list[Any]],
-) -> list[type]:
+def _reflect_table_metadata(
+    engine: Engine,
+    table_name: str,
+) -> TableMetadata:
     """
-    Infiere el tipo de cada columna a partir
-    de los valores recuperados.
+    Refleja una tabla existente mediante
+    SQLAlchemy.
 
     Args:
-        columns (list[str]):
-            Nombres de las columnas.
+        engine (Engine):
+            Motor asociado a la sesión.
 
-        rows (list[list[Any]]):
-            Filas obtenidas de la consulta.
+        table_name (str):
+            Nombre de la tabla.
 
     Returns:
-        list[type]:
-            Tipos inferidos para cada columna.
+        TableMetadata:
+            Metadatos completos de la tabla.
     """
 
-    columns_types = []
+    metadata = MetaData()
 
-    for i in range(len(columns)):
+    table = Table(
+        table_name,
+        metadata,
+        autoload_with=engine,
+    )
 
-        column_type = str
-
-        for row in rows:
-
-            value = row[i]
-
-            if value is not None:
-
-                column_type = type(value)
-                break
-
-        columns_types.append(column_type)
-
-    return columns_types
+    return TableMetadata(
+        table=table,
+    )
 
 
 def _format_result_set(
@@ -725,73 +850,3 @@ def _extract_table_name(
         return None
 
     return words[3].rstrip(";")
-
-
-def _get_primary_key_columns(
-    engine: Engine,
-    table_name: str,
-) -> list[str]:
-    """
-    Recupera las columnas que forman la clave
-    primaria de una tabla.
-
-    Args:
-        engine (Engine):
-            Motor utilizado para acceder al
-            esquema de la base de datos.
-
-        table_name (str):
-            Nombre de la tabla.
-
-    Returns:
-        list[str]:
-            Columnas que componen la clave
-            primaria.
-    """
-
-    inspector = inspect(engine)
-
-    pk = inspector.get_pk_constraint(table_name)
-
-    return pk.get(
-        "constrained_columns",
-        [],
-    )
-
-
-def _get_editable_metadata(
-    query: str,
-    engine: Engine,
-) -> tuple[str | None, list[str]]:
-    """
-    Obtiene la información necesaria para
-    permitir la edición gráfica de una consulta.
-
-    Args:
-        query (str):
-            Consulta SQL ejecutada.
-
-        engine (Engine):
-            Motor asociado a la sesión activa.
-
-    Returns:
-        tuple[str | None, list[str]]:
-            Nombre de la tabla y columnas de la
-            clave primaria. Si la consulta no es
-            editable, se devuelve `(None, [])`.
-    """
-
-    if not is_editable_query(query):
-        return None, []
-
-    table_name = _extract_table_name(query)
-
-    if table_name is None:
-        return None, []
-
-    primary_key_columns = _get_primary_key_columns(
-        engine,
-        table_name,
-    )
-
-    return table_name, primary_key_columns

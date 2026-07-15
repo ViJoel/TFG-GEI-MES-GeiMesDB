@@ -65,3 +65,33 @@ def test_script_result_can_store_empty_items_list():
     result = ScriptResult(items=[])
 
     assert result.items == []
+
+
+# =============================================================================
+# ROLLED BACK
+# =============================================================================
+
+
+def test_script_result_rolled_back_defaults_to_false():
+    """
+    ScriptResult debe marcar por defecto que la
+    transacción no fue revertida.
+    """
+
+    result = ScriptResult(items=[])
+
+    assert result.rolled_back is False
+
+
+def test_script_result_stores_rolled_back_value():
+    """
+    ScriptResult debe conservar el valor de
+    rolled_back proporcionado.
+    """
+
+    result = ScriptResult(
+        items=[],
+        rolled_back=True,
+    )
+
+    assert result.rolled_back is True

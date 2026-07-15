@@ -4,6 +4,7 @@ from unittest.mock import (
 )
 
 import pytest
+from PySide6.QtGui import QColor
 
 from entities.message_type import MessageType
 from entities.script_result import ScriptResult
@@ -161,6 +162,24 @@ def test_write_error_message(console):
     assert args["color"] is not None
 
 
+def test_write_disabled_message(console):
+    """
+    Verifica que write usa el color DISABLED.
+    """
+
+    console._append_colored_text = MagicMock()
+
+    console.write(
+        "Disabled",
+        MessageType.DISABLED,
+    )
+
+    args = console._append_colored_text.call_args.kwargs
+
+    assert args["text"] == "Disabled"
+    assert args["color"] is not None
+
+
 # =============================================================================
 # SHOW SCRIPT RESULT
 # =============================================================================
@@ -179,7 +198,7 @@ def test_show_script_result_success_and_error(console, script_result):
 
     console.clear.assert_called_once()
 
-    assert console.write.call_count == 2
+    assert console.write.call_count == 3
 
     console.write.assert_any_call(
         "SELECT 1;\n\n",
@@ -205,3 +224,21 @@ def test_show_script_result_none(console):
 
     console.clear.assert_called_once()
     console.write.assert_not_called()
+
+
+# =============================================================================
+# APPEND COLORED TEXT
+# =============================================================================
+
+
+def test_append_colored_text_writes_text(console):
+    """
+    _append_colored_text debe insertar el texto en la consola.
+    """
+
+    console._append_colored_text(
+        "Hello world",
+        QColor("#FF0000"),
+    )
+
+    assert console.toPlainText() == "Hello world"
