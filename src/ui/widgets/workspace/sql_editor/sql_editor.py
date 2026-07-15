@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 from entities.sql_scope import SqlScope
 from ui.themes.theme_manager import ThemeManager
 from ui.widgets.workspace.sql_editor.line_number_area import LineNumberArea
+from ui.widgets.workspace.sql_editor.sql_highlighter import SqlHighlighter
 
 
 class SqlEditor(QPlainTextEdit):
@@ -87,6 +88,8 @@ class SqlEditor(QPlainTextEdit):
 
         # Inicializar el resaltado de la línea actual.
         self._highlight_current_line()
+
+        self.syntax_highlighter = SqlHighlighter(self.document())
 
     # ==================
     # === UI HELPERS ===
