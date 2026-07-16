@@ -2,6 +2,7 @@ import re
 from unittest.mock import MagicMock
 
 import pytest
+from PySide6.QtCore import QRegularExpression
 from PySide6.QtGui import (
     QFont,
     QSyntaxHighlighter,
@@ -29,156 +30,129 @@ def highlighter():
 
 
 # =============================================================================
-# RULES SETUP
+# FORMAT CREATION
 # =============================================================================
 
 
-@pytest.mark.parametrize(
-    ("color_key", "bold"),
-    [
-        ("sql_keyword_color", False),
-        ("sql_keyword_color", True),
-    ],
-)
-def test_create_format_returns_expected_format(
+def test_create_format_returns_qtextcharformat(
     highlighter,
-    color_key,
-    bold,
+    monkeypatch,
 ):
     """
-    Verifica que _create_format devuelve un QTextCharFormat
-    correctamente configurado.
+    Verifica que _create_format genera un QTextCharFormat.
     """
+
+    monkeypatch.setattr(
+        "ui.themes.theme_manager.ThemeManager.get_color",
+        lambda _: "#ffffff",
+    )
 
     fmt = highlighter._create_format(
-        color_key,
-        bold,
+        {
+            "color": "sql_keyword_color",
+        }
     )
 
-    assert isinstance(fmt, QTextCharFormat)
+    assert isinstance(
+        fmt,
+        QTextCharFormat,
+    )
 
-    expected = QFont.Weight.Bold if bold else QFont.Weight.Normal
 
-    assert fmt.fontWeight() == expected
-
-
-@pytest.mark.parametrize(
-    "protected",
-    [
-        False,
-        True,
-    ],
-)
-def test_add_rule_adds_rule_to_expected_collection(
+def test_create_format_applies_bold(
     highlighter,
-    protected,
+    monkeypatch,
 ):
     """
-    Verifica que _add_rule añade la regla a la colección
-    correspondiente.
+    Verifica que las reglas con bold generan fuente negrita.
     """
 
-    rule = r"\bTEST\b"
-    fmt = QTextCharFormat()
+    monkeypatch.setattr(
+        "ui.themes.theme_manager.ThemeManager.get_color",
+        lambda _: "#ffffff",
+    )
 
-    protected_before = len(highlighter.protected_rules)
+    fmt = highlighter._create_format(
+        {
+            "color": "sql_keyword_color",
+            "bold": True,
+        }
+    )
+
+    assert fmt.fontWeight() == QFont.Weight.Bold
+
+
+def test_create_format_default_not_bold(
+    highlighter,
+    monkeypatch,
+):
+    monkeypatch.setattr(
+        "ui.themes.theme_manager.ThemeManager.get_color",
+        lambda _: "#ffffff",
+    )
+
+    fmt = highlighter._create_format(
+        {
+            "color": "sql_keyword_color",
+        }
+    )
+
+    assert fmt.fontWeight() != QFont.Weight.Bold
+
+
+# =============================================================================
+# RULE REGISTRATION
+# =============================================================================
+
+
+def test_add_rule_registers_normal_rule(
+    highlighter,
+):
+    """
+    Comprueba que una regla normal entra en rules.
+    """
+
+    rule = {
+        "color": "sql_keyword_color",
+        "patterns": [
+            r"\bTEST\b",
+        ],
+    }
+
     rules_before = len(highlighter.rules)
 
-    highlighter._add_rule(
-        rule,
-        fmt,
-        protected=protected,
-    )
+    highlighter._add_rule(rule)
 
-    if protected:
-        assert len(highlighter.protected_rules) == protected_before + 1
-        assert len(highlighter.rules) == rules_before
-    else:
-        assert len(highlighter.rules) == rules_before + 1
-        assert len(highlighter.protected_rules) == protected_before
+    assert len(highlighter.rules) == rules_before + 1
 
 
-def test_build_word_pattern():
-    """
-    Verifica que _build_word_pattern genera una expresión
-    regular para palabras completas.
-    """
-
-    pattern = SqlHighlighter._build_word_pattern(
-        {
-            "SELECT",
-            "FROM",
-        }
-    )
-
-    regex = re.compile(pattern)
-
-    assert regex.search("SELECT")
-    assert regex.search("FROM")
-    assert not regex.search("SELECTED")
-
-
-def test_build_symbol_pattern():
-    """
-    Verifica que _build_symbol_pattern construye
-    correctamente el patrón de símbolos y prioriza
-    los operadores más largos.
-    """
-
-    pattern = SqlHighlighter._build_symbol_pattern(
-        {
-            ">",
-            ">=",
-            "=",
-            "+",
-        }
-    )
-
-    tokens = pattern.removeprefix("(").removesuffix(")").split("|")
-
-    assert tokens.index(">=") < tokens.index(">")
-    assert "=" in tokens
-    assert r"\+" in tokens
-
-
-# =============================================================================
-# RULE CREATION
-# =============================================================================
-
-
-@pytest.mark.parametrize(
-    (
-        "method_name",
-        "protected_count",
-        "rules_count",
-    ),
-    [
-        ("_create_string_rules", 1, 0),
-        ("_create_comment_rules", 1, 0),
-        ("_create_keyword_rules", 0, 1),
-        ("_create_type_rules", 0, 1),
-        ("_create_function_rules", 0, 1),
-        ("_create_literal_rules", 0, 3),
-        ("_create_symbol_rules", 0, 1),
-        ("_create_parameter_rules", 0, 3),
-        ("_create_variable_rules", 0, 2),
-        ("_create_identifier_rules", 3, 0),
-    ],
-)
-def test_create_rules_add_expected_number_of_rules(
-    method_name,
-    protected_count,
-    rules_count,
+def test_add_rule_registers_protected_rule(
+    highlighter,
 ):
-    highlighter = SqlHighlighter(QTextDocument())
+    rule = {
+        "color": "sql_string_color",
+        "patterns": [
+            r"'[^']*'",
+        ],
+        "protected": True,
+    }
 
-    highlighter.protected_rules.clear()
-    highlighter.rules.clear()
+    before = len(highlighter.protected_rules)
 
-    getattr(highlighter, method_name)()
+    highlighter._add_rule(rule)
 
-    assert len(highlighter.protected_rules) == protected_count
-    assert len(highlighter.rules) == rules_count
+    assert len(highlighter.protected_rules) == before + 1
+
+
+def test_register_rules_loads_all_rules(
+    highlighter,
+):
+    """
+    Verifica que el constructor registra reglas.
+    """
+
+    assert highlighter.rules
+    assert highlighter.protected_rules
 
 
 # =============================================================================
@@ -285,6 +259,96 @@ def test_highlight_standard_rules_skips_protected_ranges(
     )
 
     highlighter.setFormat.assert_not_called()
+
+
+def test_highlight_protected_rules_continues_when_range_is_already_protected(
+    highlighter,
+):
+    """
+    Verifica que una coincidencia dentro de un rango ya protegido
+    se ignora y no aplica formato.
+    """
+
+    pattern = QRegularExpression(
+        r"'[^']*'",
+    )
+
+    fmt = QTextCharFormat()
+
+    highlighter.protected_rules = [
+        (
+            pattern,
+            fmt,
+        )
+    ]
+
+    highlighter.setFormat = MagicMock()
+
+    protected_ranges = [
+        (
+            0,
+            7,
+        )
+    ]
+
+    highlighter._highlight_protected_rules(
+        "'hello'",
+        protected_ranges,
+    )
+
+    highlighter.setFormat.assert_not_called()
+
+    # El rango existente no debe duplicarse
+    assert protected_ranges == [
+        (
+            0,
+            7,
+        )
+    ]
+
+
+def test_highlight_protected_rules_adds_new_range(
+    highlighter,
+):
+    """
+    Verifica que una coincidencia nueva se añade
+    y se formatea.
+    """
+
+    pattern = QRegularExpression(
+        r"'[^']*'",
+    )
+
+    fmt = QTextCharFormat()
+
+    highlighter.protected_rules = [
+        (
+            pattern,
+            fmt,
+        )
+    ]
+
+    highlighter.setFormat = MagicMock()
+
+    protected_ranges = []
+
+    highlighter._highlight_protected_rules(
+        "'hello'",
+        protected_ranges,
+    )
+
+    assert protected_ranges == [
+        (
+            0,
+            7,
+        )
+    ]
+
+    highlighter.setFormat.assert_called_once_with(
+        0,
+        7,
+        fmt,
+    )
 
 
 @pytest.mark.parametrize(

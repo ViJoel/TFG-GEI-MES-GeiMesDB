@@ -8,7 +8,7 @@ from PySide6.QtGui import (
     QTextCharFormat,
 )
 
-from modules.sql.highlighting.rules import SQL_RULES
+from modules.sql.highlighting.rules import SQL_HIGHLIGHT_RULES
 from ui.themes.theme_manager import ThemeManager
 
 
@@ -47,19 +47,7 @@ class SqlHighlighter(QSyntaxHighlighter):
         self.protected_rules = []
         self.rules = []
 
-        # Reglas protegidas
-        self._create_string_rules()
-        self._create_comment_rules()
-
-        # Resto de reglas
-        self._create_keyword_rules()
-        self._create_type_rules()
-        self._create_function_rules()
-        self._create_literal_rules()
-        self._create_symbol_rules()
-        self._create_parameter_rules()
-        self._create_variable_rules()
-        self._create_identifier_rules()
+        self._register_rules()
 
     # ===================
     # === RULES SETUP ===
@@ -67,20 +55,15 @@ class SqlHighlighter(QSyntaxHighlighter):
 
     def _create_format(
         self,
-        color_key: str,
-        bold: bool = False,
+        rule: dict,
     ) -> QTextCharFormat:
         """
-        Crea un formato de texto a partir de un color
-        definido en el tema.
+        Crea un formato de texto a partir de la
+        configuración de una regla de resaltado.
 
         Args:
-            color_key (str):
-                Clave del color en el tema.
-
-            bold (bool, optional):
-                Indica si el texto debe mostrarse en
-                negrita.
+            rule (dict):
+                Configuración de la regla.
 
         Returns:
             QTextCharFormat:
@@ -89,15 +72,17 @@ class SqlHighlighter(QSyntaxHighlighter):
 
         fmt = QTextCharFormat()
 
+        # Obtener color
         fmt.setForeground(
             QColor(
                 ThemeManager.get_color(
-                    color_key,
+                    rule.get("color", "text"),
                 ),
             )
         )
 
-        if bold:
+        # Obtener negrita
+        if rule.get("bold", False):
             fmt.setFontWeight(
                 QFont.Weight.Bold,
             )
@@ -106,285 +91,43 @@ class SqlHighlighter(QSyntaxHighlighter):
 
     def _add_rule(
         self,
-        pattern: str,
-        fmt: QTextCharFormat,
-        *,
-        protected: bool = False,
+        rule: dict,
     ) -> None:
         """
         Registra una regla de resaltado.
 
         Args:
-            pattern (str):
-                Expresión regular de la regla.
-
-            fmt (QTextCharFormat):
-                Formato asociado.
-
-            protected (bool, optional):
-                Indica si la regla pertenece al grupo
-                protegido.
+            rule (dict):
+                Datos de la regla a aplicar.
         """
 
-        rule = (
-            QRegularExpression(
-                pattern,
-                QRegularExpression.PatternOption.CaseInsensitiveOption,
-            ),
-            fmt,
-        )
+        fmt = self._create_format(rule)
+        protected = rule.get("protected", False)
 
-        if protected:
-            self.protected_rules.append(rule)
-        else:
-            self.rules.append(rule)
+        for pattern in rule.get("patterns", []):
 
-    @staticmethod
-    def _build_word_pattern(
-        words: set[str],
-    ) -> str:
-        """
-        Construye una expresión regular para
-        palabras completas.
+            regex_rule = (
+                QRegularExpression(
+                    pattern,
+                    QRegularExpression.PatternOption.CaseInsensitiveOption,
+                ),
+                fmt,
+            )
 
-        Args:
-            words (set[str]):
-                Palabras que forman parte de la regla.
+            if protected:
+                self.protected_rules.append(regex_rule)
+            else:
+                self.rules.append(regex_rule)
 
-        Returns:
-            str:
-                Patrón regex generado.
-        """
-
-        return rf"\b({'|'.join(words)})\b"
-
-    @staticmethod
-    def _build_symbol_pattern(
-        symbols: set[str],
-    ) -> str:
-        """
-        Construye una expresión regular para
-        operadores y símbolos SQL.
-
-        Args:
-            symbols (set[str]):
-                Símbolos que forman parte de la regla.
-
-        Returns:
-            str:
-                Patrón regex generado.
-        """
-
-        escaped = sorted(
-            (re.escape(symbol) for symbol in symbols),
-            key=len,
-            reverse=True,
-        )
-
-        return f"({'|'.join(escaped)})"
-
-    def _create_string_rules(
+    def _register_rules(
         self,
     ) -> None:
         """
-        Registra las reglas de resaltado para cadenas.
+        Registra todas las reglas de resaltado.
         """
 
-        self._add_rule(
-            r"'[^']*'",
-            self._create_format(
-                "sql_string_simple_quoted_color",
-            ),
-            protected=True,
-        )
-
-    def _create_comment_rules(
-        self,
-    ) -> None:
-        """
-        Registra las reglas de resaltado para comentarios.
-        """
-
-        fmt = self._create_format(
-            "sql_comment_color",
-        )
-
-        self._add_rule(
-            r"--[^\n]*",
-            fmt,
-            protected=True,
-        )
-
-    def _create_keyword_rules(
-        self,
-    ) -> None:
-        """
-        Registra las reglas de resaltado para palabras reservadas.
-        """
-
-        self._add_rule(
-            self._build_word_pattern(
-                SQL_RULES["keywords"],
-            ),
-            self._create_format(
-                "sql_keyword_color",
-                True,
-            ),
-        )
-
-    def _create_type_rules(
-        self,
-    ) -> None:
-        """
-        Registra las reglas de resaltado para tipos de datos.
-        """
-
-        self._add_rule(
-            self._build_word_pattern(
-                SQL_RULES["types"],
-            ),
-            self._create_format(
-                "sql_type_color",
-            ),
-        )
-
-    def _create_function_rules(
-        self,
-    ) -> None:
-        """
-        Registra las reglas de resaltado para funciones SQL.
-        """
-
-        self._add_rule(
-            rf"\b({'|'.join(SQL_RULES['functions'])})\b(?=\s*\()",
-            self._create_format(
-                "sql_function_color",
-            ),
-        )
-
-    def _create_literal_rules(
-        self,
-    ) -> None:
-        """
-        Registra las reglas de resaltado para literales.
-        """
-
-        self._add_rule(
-            r"\b\d+(\.\d+)?\b",
-            self._create_format(
-                "sql_number_color",
-            ),
-        )
-
-        self._add_rule(
-            self._build_word_pattern(
-                SQL_RULES["boolean"],
-            ),
-            self._create_format(
-                "sql_boolean_color",
-            ),
-        )
-
-        self._add_rule(
-            self._build_word_pattern(
-                SQL_RULES["null"],
-            ),
-            self._create_format(
-                "sql_null_color",
-            ),
-        )
-
-    def _create_symbol_rules(
-        self,
-    ) -> None:
-        """
-        Registra las reglas de resaltado para símbolos SQL.
-        """
-
-        self._add_rule(
-            self._build_symbol_pattern(
-                SQL_RULES["symbols"],
-            ),
-            self._create_format(
-                "sql_symbol_color",
-            ),
-        )
-
-    def _create_parameter_rules(
-        self,
-    ) -> None:
-        """
-        Registra las reglas de resaltado para parámetros.
-        """
-
-        fmt = self._create_format(
-            "sql_parameter_color",
-        )
-
-        self._add_rule(
-            r":[A-Za-z_]\w*",
-            fmt,
-        )
-
-        self._add_rule(
-            r"\$\d+",
-            fmt,
-        )
-
-        self._add_rule(
-            r"\?",
-            fmt,
-        )
-
-    def _create_variable_rules(
-        self,
-    ) -> None:
-        """
-        Registra las reglas de resaltado para variables.
-        """
-
-        fmt = self._create_format(
-            "sql_variable_color",
-        )
-
-        self._add_rule(
-            r"@@[A-Za-z_]\w*",
-            fmt,
-        )
-
-        self._add_rule(
-            r"@[A-Za-z_]\w*",
-            fmt,
-        )
-
-    def _create_identifier_rules(
-        self,
-    ) -> None:
-        """
-        Registra las reglas de resaltado para identificadores delimitados.
-        """
-
-        fmt = self._create_format(
-            "sql_identifier_color",
-        )
-
-        self._add_rule(
-            r'"[^"]*"',
-            fmt,
-            protected=True,
-        )
-
-        self._add_rule(
-            r"`[^`]*`",
-            fmt,
-            protected=True,
-        )
-
-        self._add_rule(
-            r"\[[^\]]+\]",
-            fmt,
-            protected=True,
-        )
+        for rule in SQL_HIGHLIGHT_RULES.values():
+            self._add_rule(rule)
 
     # ====================
     # === QT OVERRIDES ===
@@ -480,7 +223,7 @@ class SqlHighlighter(QSyntaxHighlighter):
         """
 
         fmt = self._create_format(
-            "sql_comment_color",
+            SQL_HIGHLIGHT_RULES["comments"],
         )
 
         # Por defecto, este bloque no continúa un comentario.
