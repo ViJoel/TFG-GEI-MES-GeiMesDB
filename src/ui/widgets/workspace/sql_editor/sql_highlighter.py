@@ -8,7 +8,7 @@ from PySide6.QtGui import (
     QTextCharFormat,
 )
 
-from modules.sql_highlighting.rules import SQL_RULES
+from modules.sql.highlighting.rules import SQL_RULES
 from ui.themes.theme_manager import ThemeManager
 
 
