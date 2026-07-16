@@ -3,10 +3,14 @@ black==26.3.1
 cffi==2.0.0
 click==8.3.1
 colorlog==6.10.1
+coverage==7.14.3
 cryptography==46.0.6
+cssbeautifier==2.0.1
+EditorConfig==0.17.1
 greenlet==3.3.2
 iniconfig==2.3.0
 isort==8.0.1
+jsbeautifier==2.0.1
 mypy_extensions==1.1.0
 oracledb==3.4.2
 packaging==26.0
@@ -25,6 +29,7 @@ PySide6_Addons==6.11.0
 PySide6_Essentials==6.11.0
 PySide6_Examples==6.11.0
 pytest==9.0.3
+pytest-cov==7.1.0
 pytest-qt==4.5.0
 pytokens==0.4.1
 QtAwesome==1.4.2
