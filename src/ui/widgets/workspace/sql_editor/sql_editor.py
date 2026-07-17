@@ -11,6 +11,7 @@ from PySide6.QtGui import (
     QPainterPath,
     QPaintEvent,
     QResizeEvent,
+    QTextCursor,
     QTextFormat,
 )
 from PySide6.QtWidgets import (
@@ -21,6 +22,7 @@ from PySide6.QtWidgets import (
 from entities.sql_scope import SqlScope
 from ui.themes.theme_manager import ThemeManager
 from ui.widgets.workspace.sql_editor.line_number_area import LineNumberArea
+from ui.widgets.workspace.sql_editor.sql_completer import SqlCompleter
 from ui.widgets.workspace.sql_editor.sql_highlighter import SqlHighlighter
 
 
@@ -89,7 +91,11 @@ class SqlEditor(QPlainTextEdit):
         # Inicializar el resaltado de la línea actual.
         self._highlight_current_line()
 
+        # Resaltado de sintaxis
         self.syntax_highlighter = SqlHighlighter(self.document())
+
+        # Autocompleción de sql
+        self.completer = SqlCompleter(parent_widget=self)
 
     # ==================
     # === UI HELPERS ===
@@ -220,6 +226,32 @@ class SqlEditor(QPlainTextEdit):
             self._highlight_current_line,
         )
 
+        # Señal de inserción
+        self.completer.activated[str].connect(self.insert_completion)
+
+    # ======================
+    # === EVENT HANDLERS ===
+    # ======================
+
+    def insert_completion(
+        self,
+        completion,
+    ):
+
+        if self.completer.widget() != self:
+            return
+
+        tc = self.textCursor()
+
+        # 1. Seleccionar la palabra que se está escribiendo actualmente bajo el cursor
+        tc.select(QTextCursor.SelectionType.WordUnderCursor)
+
+        # 2. Reemplazar la selección completa por la palabra sugerida (con su formato original de la lista)
+        tc.insertText(completion)
+
+        # 3. Actualizar el cursor activo del editor
+        self.setTextCursor(tc)
+
     # =====================
     # === EVENT HELPERS ===
     # =====================
@@ -248,6 +280,98 @@ class SqlEditor(QPlainTextEdit):
             scope,
         )
 
+    def text_under_cursor(
+        self,
+    ) -> str:
+        """
+        Obtiene la palabra situada bajo el cursor.
+
+        Returns:
+            str:
+                Texto de la palabra sobre la que se
+                encuentra el cursor. Si no existe,
+                devuelve una cadena vacía.
+        """
+
+        tc = self.textCursor()
+        tc.select(QTextCursor.SelectionType.WordUnderCursor)
+        return tc.selectedText()
+
+    def _handle_completer_popup_key_event(
+        self,
+        event: QKeyEvent,
+    ) -> bool:
+        """
+        Permite que el popup del autocompletador
+        gestione determinadas teclas cuando está visible.
+
+        Args:
+            event (QKeyEvent):
+                Evento de teclado recibido.
+
+        Returns:
+            bool:
+                ``True`` si el evento ha sido gestionado
+                por el popup y no debe seguir procesándose.
+        """
+
+        if not self.completer.popup().isVisible():
+            return False
+
+        if event.key() in (
+            Qt.Key.Key_Enter,
+            Qt.Key.Key_Return,
+            Qt.Key.Key_Escape,
+            Qt.Key.Key_Tab,
+            Qt.Key.Key_Backtab,
+        ):
+            event.ignore()
+            return True
+
+        return False
+
+    def _update_completer(
+        self,
+        event: QKeyEvent,
+    ) -> None:
+        """
+        Actualiza el estado del autocompletador tras
+        una pulsación de teclado.
+
+        Obtiene el prefijo situado bajo el cursor,
+        actualiza las sugerencias disponibles y
+        muestra u oculta el popup según corresponda.
+
+        Args:
+            event (QKeyEvent):
+                Evento de teclado recibido.
+        """
+
+        is_shortcut = (
+            event.modifiers() & Qt.KeyboardModifier.ControlModifier
+            and event.key() == Qt.Key.Key_Space
+        )
+
+        completion_prefix = self.text_under_cursor()
+
+        if not is_shortcut and (len(completion_prefix) < 1 or not event.text()):
+            self.completer.popup().hide()
+            return
+
+        if completion_prefix != self.completer.completionPrefix():
+
+            self.completer.setCompletionPrefix(completion_prefix)
+
+            self.completer.popup().setCurrentIndex(
+                self.completer.completionModel().index(0, 0)
+            )
+
+        rect = self.cursorRect()
+
+        rect.setWidth(self.completer.popup_width())
+
+        self.completer.complete(rect)
+
     # ====================
     # === QT OVERRIDES ===
     # ====================
@@ -264,6 +388,9 @@ class SqlEditor(QPlainTextEdit):
             event (QKeyEvent):
                 Evento de teclado recibido.
         """
+
+        if self._handle_completer_popup_key_event(event):
+            return
 
         modifiers = event.modifiers()
 
@@ -299,6 +426,8 @@ class SqlEditor(QPlainTextEdit):
             return
 
         super().keyPressEvent(event)
+
+        self._update_completer(event)
 
     def resizeEvent(
         self,

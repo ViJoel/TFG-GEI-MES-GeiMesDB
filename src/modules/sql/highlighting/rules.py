@@ -8,6 +8,10 @@ from modules.sql.syntax.ansi.literals import (
 )
 from modules.sql.syntax.ansi.symbols import SQL_SYMBOLS
 from modules.sql.syntax.ansi.types import SQL_TYPES
+from modules.sql.theme.colors import (
+    DEFAULT_COLOR,
+    SQL_THEME_COLORS,
+)
 
 
 def build_word_pattern(
@@ -78,30 +82,23 @@ def build_function_pattern(
 
 
 SQL_HIGHLIGHT_RULES = {
-    # =================
-    # === Estáticos ===
-    # =================
-    "boolean": {
-        "color": "sql_boolean_color",
+    "booleans": {
         "patterns": [],
         "patterns_builder": build_word_pattern,
         "values": SQL_BOOLEAN_VALUES,
     },
     "comments": {
-        "color": "sql_comment_color",
         "patterns": [
             r"--[^\n]*",
         ],
         "protected": True,
     },
     "functions": {
-        "color": "sql_function_color",
         "patterns": [],
         "patterns_builder": build_function_pattern,
         "values": SQL_FUNCTIONS,
     },
     "identifiers": {
-        "color": "sql_identifier_color",
         "patterns": [
             r'"[^"]*"',
             r"`[^`]*`",
@@ -111,57 +108,48 @@ SQL_HIGHLIGHT_RULES = {
     },
     "keywords": {
         "bold": True,
-        "color": "sql_keyword_color",
         "patterns": [],
         "patterns_builder": build_word_pattern,
         "protected": False,
         "values": SQL_KEYWORDS,
     },
-    "null": {
-        "color": "sql_null_color",
+    "nulls": {
         "patterns": [],
         "patterns_builder": build_word_pattern,
         "values": SQL_NULL_VALUES,
     },
     "numbers": {
-        "color": "sql_number_color",
         "patterns": [
             r"\b\d+(\.\d+)?\b",
         ],
     },
     "parameters": {
-        "color": "sql_parameter_color",
         "patterns": [
-            r":[A-Za-z_]\w*",
+            r":\w*",
             r"\$\d+",
             r"\?",
         ],
     },
     "strings": {
-        "color": "sql_string_color",
         "patterns": [
             r"'[^']*'",
         ],
         "protected": True,
     },
     "symbols": {
-        "color": "sql_symbol_color",
         "patterns": [],
         "patterns_builder": build_symbol_pattern,
         "values": SQL_SYMBOLS,
     },
     "types": {
-        "color": "sql_type_color",
         "patterns": [],
         "patterns_builder": build_word_pattern,
         "protected": False,
         "values": SQL_TYPES,
     },
     "variables": {
-        "color": "sql_variable_color",
         "patterns": [
-            r"@[A-Za-z_]\w*",
-            r"@@[A-Za-z_]\w*",
+            r"@@?\w*",
         ],
     },
 }
@@ -173,16 +161,23 @@ def _compile_rules() -> None:
     generados a partir de los valores.
     """
 
-    for rule in SQL_HIGHLIGHT_RULES.values():
+    for category, rule in SQL_HIGHLIGHT_RULES.items():
 
+        # 1. Extrae el color usando el nombre de la clave.
+        #    Si no existe, usa DEFAULT_COLOR
+        rule["color"] = SQL_THEME_COLORS.get(
+            category,
+            DEFAULT_COLOR,
+        )
+
+        # 2. Lógica de compilación
         builder = rule.get("patterns_builder")
 
-        if builder is None:
-            continue
-
-        rule["patterns"] = [
-            builder(rule["values"]),
-        ]
+        if builder is not None:
+            rule["patterns"] = [
+                builder(rule["values"]),
+            ]
 
 
+# Ejecutamos la configuración e inyección al cargar el módulo
 _compile_rules()

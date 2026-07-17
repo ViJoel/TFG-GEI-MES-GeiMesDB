@@ -9,6 +9,10 @@ from modules.sql.highlighting.rules import (
     build_symbol_pattern,
     build_word_pattern,
 )
+from modules.sql.theme.colors import (
+    DEFAULT_COLOR,
+    SQL_THEME_COLORS,
+)
 
 # ============================================================
 # build_word_pattern
@@ -157,24 +161,33 @@ def test_build_function_pattern_allows_spaces_before_parenthesis():
 # ============================================================
 
 
-def test_compile_rules_builds_patterns():
-    rules_before = {
-        key: value["patterns"].copy() for key, value in SQL_HIGHLIGHT_RULES.items()
-    }
+def test_compile_rules_assigns_colors():
+    """Assigns the expected color to every highlight rule."""
+    _compile_rules()
 
+    for category, rule in SQL_HIGHLIGHT_RULES.items():
+        expected_color = SQL_THEME_COLORS.get(category, DEFAULT_COLOR)
+        assert rule["color"] == expected_color
+
+
+def test_compile_rules_builds_patterns():
+    """Builds the expected regex patterns for dynamic rules."""
     _compile_rules()
 
     for rule in SQL_HIGHLIGHT_RULES.values():
+        builder = rule.get("patterns_builder")
 
-        if "patterns_builder" in rule:
-            assert rule["patterns"]
+        if builder is not None:
+            assert rule["patterns"] == [
+                builder(rule["values"]),
+            ]
 
 
-def test_compile_rules_does_not_modify_static_patterns():
+def test_compile_rules_keeps_static_patterns():
+    """Preserves the predefined patterns for static rules."""
     _compile_rules()
 
     assert r"--[^\n]*" in SQL_HIGHLIGHT_RULES["comments"]["patterns"]
-
     assert r"'[^']*'" in SQL_HIGHLIGHT_RULES["strings"]["patterns"]
 
 
@@ -186,12 +199,12 @@ def test_compile_rules_does_not_modify_static_patterns():
 @pytest.mark.parametrize(
     "rule_name",
     [
-        "boolean",
+        "booleans",
         "comments",
         "functions",
         "identifiers",
         "keywords",
-        "null",
+        "nulls",
         "numbers",
         "parameters",
         "strings",

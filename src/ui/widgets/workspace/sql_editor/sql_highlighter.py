@@ -76,7 +76,10 @@ class SqlHighlighter(QSyntaxHighlighter):
         fmt.setForeground(
             QColor(
                 ThemeManager.get_color(
-                    rule.get("color", "text"),
+                    rule.get(
+                        "color",
+                        "text",
+                    ),
                 ),
             )
         )
