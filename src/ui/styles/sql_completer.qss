@@ -1,0 +1,20 @@
+QAbstractItemView#sql_completer_popup {
+    background-color: $sql_completer_background_color;
+    border: 1px solid $sql_completer_border_color;
+    outline: none;
+}
+
+QAbstractItemView#sql_completer_popup::item {
+    background-color: transparent;
+    padding: 2px 8px;
+}
+
+QAbstractItemView#sql_completer_popup::item:hover {
+    background-color: $sql_completer_selection_background_color;
+    color: $sql_completer_selection_color;
+}
+
+QAbstractItemView#sql_completer_popup::item:selected {
+    background-color: $sql_completer_selection_background_color;
+    color: $sql_completer_selection_color;
+}

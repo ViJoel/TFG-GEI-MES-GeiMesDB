@@ -453,6 +453,19 @@ THEME.update(
     }
 )
 
+# =====================
+# === SQL COMPLETER ===
+# =====================
+THEME.update(
+    {
+        "sql_completer_background_color": GRAY_950,
+        "sql_completer_border_color": THEME["primary"],
+        "sql_completer_selection_background_color": GREEN_RGBA_75,
+        "sql_completer_selection_color": GRAY_950,
+    }
+)
+
+
 # ==================
 # === SQL EDITOR ===
 # ==================

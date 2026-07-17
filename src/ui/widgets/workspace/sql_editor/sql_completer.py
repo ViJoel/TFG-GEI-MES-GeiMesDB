@@ -53,6 +53,8 @@ class SqlCompleter(QCompleter):
 
         super().__init__()
 
+        self.popup().setObjectName("sql_completer_popup")
+
         self._model = SqlCompleterModel()
 
         self.setModel(self._model)

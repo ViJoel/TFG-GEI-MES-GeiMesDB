@@ -142,6 +142,11 @@ SIDEBAR_QSS = os.path.join(
     "sidebar.qss",
 )
 
+SQL_COMPLETER_QSS = os.path.join(
+    STYLES_DIR,
+    "sql_completer.qss",
+)
+
 SQL_EDITOR_QSS = os.path.join(
     STYLES_DIR,
     "sql_editor.qss",
@@ -183,6 +188,7 @@ STYLE_FILES = [
     SCROLLBAR_QSS,
     SESSION_QUERIES_HISTORY_QSS,
     SIDEBAR_QSS,
+    SQL_COMPLETER_QSS,
     SQL_EDITOR_QSS,
     TOOLBAR_QSS,
     TOOLBAR_BUTTON_QSS,
