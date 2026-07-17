@@ -13,7 +13,7 @@ from PySide6.QtGui import (
 from ui.widgets.workspace.sql_editor.sql_highlighter import SqlHighlighter
 
 # =============================================================================
-# FIXTURE
+# FIXTURES
 # =============================================================================
 
 
@@ -29,17 +29,51 @@ def highlighter():
     return SqlHighlighter(document)
 
 
+@pytest.fixture
+def mocked_highlighter(highlighter):
+    """
+    Devuelve un resaltador SQL con los métodos de Qt
+    utilizados durante el resaltado reemplazados por
+    objetos MagicMock para facilitar su verificación.
+    """
+
+    highlighter.setFormat = MagicMock()
+    highlighter.previousBlockState = MagicMock(return_value=0)
+    highlighter.setCurrentBlockState = MagicMock()
+    return highlighter
+
+
 # =============================================================================
 # FORMAT CREATION
 # =============================================================================
 
 
-def test_create_format_returns_qtextcharformat(
+@pytest.mark.parametrize(
+    "rule, is_bold",
+    [
+        (
+            {"color": "sql_keyword_color"},
+            False,
+        ),
+        (
+            {
+                "color": "sql_keyword_color",
+                "bold": True,
+            },
+            True,
+        ),
+    ],
+)
+def test_create_format(
     highlighter,
     monkeypatch,
+    rule,
+    is_bold,
 ):
     """
-    Verifica que _create_format genera un QTextCharFormat.
+    Verifica que _create_format crea un QTextCharFormat
+    y aplica correctamente el peso de la fuente según
+    la configuración de la regla.
     """
 
     monkeypatch.setattr(
@@ -47,57 +81,13 @@ def test_create_format_returns_qtextcharformat(
         lambda _: "#ffffff",
     )
 
-    fmt = highlighter._create_format(
-        {
-            "color": "sql_keyword_color",
-        }
-    )
+    fmt = highlighter._create_format(rule)
 
-    assert isinstance(
-        fmt,
-        QTextCharFormat,
-    )
+    assert isinstance(fmt, QTextCharFormat)
 
+    expected = QFont.Weight.Bold if is_bold else QFont.Weight.Normal
 
-def test_create_format_applies_bold(
-    highlighter,
-    monkeypatch,
-):
-    """
-    Verifica que las reglas con bold generan fuente negrita.
-    """
-
-    monkeypatch.setattr(
-        "ui.themes.theme_manager.ThemeManager.get_color",
-        lambda _: "#ffffff",
-    )
-
-    fmt = highlighter._create_format(
-        {
-            "color": "sql_keyword_color",
-            "bold": True,
-        }
-    )
-
-    assert fmt.fontWeight() == QFont.Weight.Bold
-
-
-def test_create_format_default_not_bold(
-    highlighter,
-    monkeypatch,
-):
-    monkeypatch.setattr(
-        "ui.themes.theme_manager.ThemeManager.get_color",
-        lambda _: "#ffffff",
-    )
-
-    fmt = highlighter._create_format(
-        {
-            "color": "sql_keyword_color",
-        }
-    )
-
-    assert fmt.fontWeight() != QFont.Weight.Bold
+    assert fmt.fontWeight() == expected
 
 
 # =============================================================================
@@ -105,43 +95,40 @@ def test_create_format_default_not_bold(
 # =============================================================================
 
 
-def test_add_rule_registers_normal_rule(
+@pytest.mark.parametrize(
+    "protected, attr",
+    [
+        (
+            False,
+            "rules",
+        ),
+        (
+            True,
+            "protected_rules",
+        ),
+    ],
+)
+def test_add_rule(
     highlighter,
+    protected,
+    attr,
 ):
     """
-    Comprueba que una regla normal entra en rules.
+    Verifica que _add_rule registra la regla en la
+    colección correspondiente según su tipo.
     """
 
-    rule = {
-        "color": "sql_keyword_color",
-        "patterns": [
-            r"\bTEST\b",
-        ],
-    }
+    before = len(getattr(highlighter, attr))
 
-    rules_before = len(highlighter.rules)
+    highlighter._add_rule(
+        {
+            "color": "sql_keyword_color",
+            "patterns": [r"\bTEST\b"],
+            "protected": protected,
+        }
+    )
 
-    highlighter._add_rule(rule)
-
-    assert len(highlighter.rules) == rules_before + 1
-
-
-def test_add_rule_registers_protected_rule(
-    highlighter,
-):
-    rule = {
-        "color": "sql_string_color",
-        "patterns": [
-            r"'[^']*'",
-        ],
-        "protected": True,
-    }
-
-    before = len(highlighter.protected_rules)
-
-    highlighter._add_rule(rule)
-
-    assert len(highlighter.protected_rules) == before + 1
+    assert len(getattr(highlighter, attr)) == before + 1
 
 
 def test_register_rules_loads_all_rules(
@@ -158,6 +145,10 @@ def test_register_rules_loads_all_rules(
 # =============================================================================
 # HIGHLIGHT HELPERS
 # =============================================================================
+
+# =====================================
+# IS PROTECTED
+# =====================================
 
 
 @pytest.mark.parametrize(
@@ -197,158 +188,88 @@ def test_is_protected(
     )
 
 
-def test_highlight_protected_rules_calls_set_format(
+# =====================================
+# PROTECTED RULES
+# =====================================
+
+
+@pytest.mark.parametrize(
+    "protected, expected_calls, expected_ranges",
+    [
+        (
+            [],
+            1,
+            [(0, 7)],
+        ),
+        (
+            [(0, 7)],
+            0,
+            [(0, 7)],
+        ),
+    ],
+)
+def test_highlight_protected_rules(
     highlighter,
+    protected,
+    expected_calls,
+    expected_ranges,
 ):
     """
     Verifica que las reglas protegidas aplican formato
-    y registran los rangos protegidos.
+    únicamente cuando la coincidencia no pertenece a un
+    rango protegido existente.
     """
 
-    protected_ranges = []
+    pattern = QRegularExpression(r"'[^']*'")
+    fmt = QTextCharFormat()
 
+    highlighter.protected_rules = [(pattern, fmt)]
     highlighter.setFormat = MagicMock()
 
     highlighter._highlight_protected_rules(
-        "'hola'",
-        protected_ranges,
+        "'hello'",
+        protected,
     )
 
-    assert protected_ranges
-    highlighter.setFormat.assert_called()
+    assert protected == expected_ranges
+    assert highlighter.setFormat.call_count == expected_calls
 
 
-def test_highlight_standard_rules_calls_set_format(
+# =====================================
+# STANDARD RULES
+# =====================================
+
+
+@pytest.mark.parametrize(
+    "protected, called",
+    [
+        ([], True),
+        ([(0, 6)], False),
+    ],
+)
+def test_highlight_standard_rules(
     highlighter,
+    protected,
+    called,
 ):
     """
-    Verifica que las reglas normales aplican formato
-    cuando el texto no pertenece a un rango protegido.
+    Verifica que las reglas estándar sólo aplican
+    formato sobre regiones que no están protegidas.
     """
 
     highlighter.setFormat = MagicMock()
-
-    highlighter._highlight_standard_rules(
-        "SELECT 1",
-        [],
-    )
-
-    highlighter.setFormat.assert_called()
-
-
-def test_highlight_standard_rules_skips_protected_ranges(
-    highlighter,
-):
-    """
-    Verifica que las reglas normales no sobrescriben
-    texto perteneciente a un rango protegido.
-    """
-
-    highlighter.setFormat = MagicMock()
-
-    protected = [
-        (
-            0,
-            len("SELECT"),
-        )
-    ]
 
     highlighter._highlight_standard_rules(
         "SELECT",
         protected,
     )
 
-    highlighter.setFormat.assert_not_called()
+    assert highlighter.setFormat.called is called
 
 
-def test_highlight_protected_rules_continues_when_range_is_already_protected(
-    highlighter,
-):
-    """
-    Verifica que una coincidencia dentro de un rango ya protegido
-    se ignora y no aplica formato.
-    """
-
-    pattern = QRegularExpression(
-        r"'[^']*'",
-    )
-
-    fmt = QTextCharFormat()
-
-    highlighter.protected_rules = [
-        (
-            pattern,
-            fmt,
-        )
-    ]
-
-    highlighter.setFormat = MagicMock()
-
-    protected_ranges = [
-        (
-            0,
-            7,
-        )
-    ]
-
-    highlighter._highlight_protected_rules(
-        "'hello'",
-        protected_ranges,
-    )
-
-    highlighter.setFormat.assert_not_called()
-
-    # El rango existente no debe duplicarse
-    assert protected_ranges == [
-        (
-            0,
-            7,
-        )
-    ]
-
-
-def test_highlight_protected_rules_adds_new_range(
-    highlighter,
-):
-    """
-    Verifica que una coincidencia nueva se añade
-    y se formatea.
-    """
-
-    pattern = QRegularExpression(
-        r"'[^']*'",
-    )
-
-    fmt = QTextCharFormat()
-
-    highlighter.protected_rules = [
-        (
-            pattern,
-            fmt,
-        )
-    ]
-
-    highlighter.setFormat = MagicMock()
-
-    protected_ranges = []
-
-    highlighter._highlight_protected_rules(
-        "'hello'",
-        protected_ranges,
-    )
-
-    assert protected_ranges == [
-        (
-            0,
-            7,
-        )
-    ]
-
-    highlighter.setFormat.assert_called_once_with(
-        0,
-        7,
-        fmt,
-    )
+# =====================================
+# MULTILINE COMMENTS
+# =====================================
 
 
 @pytest.mark.parametrize(
@@ -365,7 +286,7 @@ def test_highlight_protected_rules_adds_new_range(
     ],
 )
 def test_highlight_multiline_comments_sets_block_state(
-    highlighter,
+    mocked_highlighter,
     text,
     previous_state,
     expected_state,
@@ -377,24 +298,20 @@ def test_highlight_multiline_comments_sets_block_state(
 
     protected = []
 
-    highlighter.previousBlockState = MagicMock(
-        return_value=previous_state,
-    )
-    highlighter.setCurrentBlockState = MagicMock()
-    highlighter.setFormat = MagicMock()
+    mocked_highlighter.previousBlockState.return_value = previous_state
 
-    highlighter._highlight_multiline_comments(
+    mocked_highlighter._highlight_multiline_comments(
         text,
         protected,
     )
 
-    highlighter.setCurrentBlockState.assert_called_with(
+    mocked_highlighter.setCurrentBlockState.assert_called_with(
         expected_state,
     )
 
 
 def test_highlight_multiline_comments_adds_protected_range(
-    highlighter,
+    mocked_highlighter,
 ):
     """
     Verifica que un comentario multilínea añade un
@@ -403,23 +320,18 @@ def test_highlight_multiline_comments_adds_protected_range(
 
     protected = []
 
-    highlighter.previousBlockState = MagicMock(
-        return_value=0,
-    )
-    highlighter.setCurrentBlockState = MagicMock()
-    highlighter.setFormat = MagicMock()
-
-    highlighter._highlight_multiline_comments(
+    mocked_highlighter._highlight_multiline_comments(
         "/* hola */",
         protected,
     )
 
     assert len(protected) == 1
-    highlighter.setFormat.assert_called_once()
+
+    mocked_highlighter.setFormat.assert_called_once()
 
 
 def test_highlight_multiline_comments_without_comment(
-    highlighter,
+    mocked_highlighter,
 ):
     """
     Verifica que no se aplica formato cuando el bloque
@@ -428,19 +340,14 @@ def test_highlight_multiline_comments_without_comment(
 
     protected = []
 
-    highlighter.previousBlockState = MagicMock(
-        return_value=0,
-    )
-    highlighter.setCurrentBlockState = MagicMock()
-    highlighter.setFormat = MagicMock()
-
-    highlighter._highlight_multiline_comments(
+    mocked_highlighter._highlight_multiline_comments(
         "SELECT 1;",
         protected,
     )
 
     assert protected == []
-    highlighter.setFormat.assert_not_called()
+
+    mocked_highlighter.setFormat.assert_not_called()
 
 
 # =============================================================================
