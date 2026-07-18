@@ -22,9 +22,6 @@ from entities.sql_scope import SqlScope
 from ui.themes.theme_manager import ThemeManager
 from ui.widgets.workspace.sql_editor.line_number_area import LineNumberArea
 from ui.widgets.workspace.sql_editor.sql_completer import SqlCompleter
-from ui.widgets.workspace.sql_editor.sql_document_completion_provider import (
-    SqlDocumentCompletionProvider,
-)
 from ui.widgets.workspace.sql_editor.sql_highlighter import SqlHighlighter
 
 
@@ -98,9 +95,6 @@ class SqlEditor(QPlainTextEdit):
 
         # Autocompleción de sql
         self.completer = SqlCompleter(parent_widget=self)
-
-        # Autocompletado dinámico del documento
-        self.document_completion_provider = SqlDocumentCompletionProvider()
 
     # ==================
     # === UI HELPERS ===
@@ -243,19 +237,16 @@ class SqlEditor(QPlainTextEdit):
         self,
     ) -> None:
         """
-        Actualiza los datos dinámicos del autocompletador
-        cuando cambia el contenido del documento.
+        Notifica al autocompletador que el contenido
+        del documento ha cambiado.
 
-        Si se detectan cambios, recarga el modelo de
-        autocompletado.
+        Permite actualizar las sugerencias dinámicas
+        cuando sea necesario.
         """
 
-        changed = self.document_completion_provider.update(
+        self.completer.update_document_completion(
             self.toPlainText(),
         )
-
-        if changed:
-            self.completer.refresh()
 
     # =====================
     # === EVENT HELPERS ===

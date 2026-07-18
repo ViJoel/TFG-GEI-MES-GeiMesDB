@@ -1,94 +1,120 @@
+from typing import TypedDict
+
 from modules.sql.theme.colors import (
     DEFAULT_COLOR,
     SQL_THEME_COLORS,
 )
 
-SQL_DYNAMIC_COMPLETION_DATA = {
-    "identifiers": {
-        "values": set(),
-    },
-    "parameters": {
-        "values": set(),
-    },
-    "variables": {
-        "values": set(),
-    },
-}
+
+class DynamicCategory(TypedDict):
+    values: set[str]
+    color: str
 
 
-def clear_dynamic_completion_data() -> None:
-    """
-    Elimina todos los valores almacenados
-    en las categorías dinámicas del
-    autocompletador.
-    """
+class SqlDynamicCompletionData:
 
-    for data in SQL_DYNAMIC_COMPLETION_DATA.values():
-        data["values"].clear()
+    def __init__(
+        self,
+    ) -> None:
 
+        self.data = {
+            "parameters": {
+                "values": set(),
+            },
+            "variables": {
+                "values": set(),
+            },
+        }
 
-def update_dynamic_completion_data(
-    key: str,
-    values: set[str],
-) -> None:
-    """
-    Añade un conjunto de valores a una
-    categoría dinámica del autocompletador.
+    def get_data(
+        self,
+    ) -> dict[str, DynamicCategory]:
+        """
+        Devuelve una referencia al diccionario
+        interno con los datos dinámicos del
+        autocompletador.
 
-    Args:
-        key (str):
-            Categoría que se desea actualizar.
+        Returns:
+            dict[str, DynamicCategory]:
+                Diccionario con las categorías,
+                sus valores y metadatos.
+        """
 
-        values (set[str]):
-            Valores que se añadirán a la
-            categoría indicada.
-    """
+        return self.data
 
-    SQL_DYNAMIC_COMPLETION_DATA[key]["values"].update(values)
+    def clear_dynamic_completion_data(
+        self,
+    ) -> None:
+        """
+        Elimina todos los valores almacenados
+        en las categorías dinámicas del
+        autocompletador.
+        """
 
+        for data in self.data.values():
+            data["values"].clear()
 
-def has_changes(
-    key: str,
-    values: set[str],
-):
-    """
-    Comprueba si los valores de una categoría
-    difieren de los almacenados actualmente.
+    def update_dynamic_completion_data(
+        self,
+        key: str,
+        values: set[str],
+    ) -> None:
+        """
+        Añade un conjunto de valores a una
+        categoría dinámica del autocompletador.
 
-    Args:
-        key (str):
-            Categoría que se desea comprobar.
+        Args:
+            key (str):
+                Categoría que se desea actualizar.
 
-        values (set[str]):
-            Valores que se desean comparar.
+            values (set[str]):
+                Valores que se añadirán a la
+                categoría indicada.
+        """
 
-    Returns:
-        bool:
-            - `True` si existen diferencias.
-            - `False` en caso contrario.
-    """
+        self.data[key]["values"].update(values)
 
-    return values != SQL_DYNAMIC_COMPLETION_DATA[key]["values"]
+    def has_changes(
+        self,
+        key: str,
+        values: set[str],
+    ):
+        """
+        Comprueba si los valores de una categoría
+        difieren de los almacenados actualmente.
 
+        Args:
+            key (str):
+                Categoría que se desea comprobar.
 
-def _initialize_dynamic_data() -> None:
-    """
-    Inicializa los metadatos asociados a
-    cada categoría dinámica.
+            values (set[str]):
+                Valores que se desean comparar.
 
-    Asigna automáticamente el color de
-    representación definido para cada
-    categoría.
-    """
+        Returns:
+            bool:
+                - `True` si existen diferencias.
+                - `False` en caso contrario.
+        """
 
-    for category, data in SQL_DYNAMIC_COMPLETION_DATA.items():
+        return values != self.data[key]["values"]
 
-        # Extrae el color usando el nombre de la clave.
-        # Si no existe, usa DEFAULT_COLOR
-        data["color"] = SQL_THEME_COLORS.get(
-            category,
-            DEFAULT_COLOR,
-        )
+    def _initialize_dynamic_data(
+        self,
+    ) -> None:
+        """
+        Inicializa los metadatos asociados a
+        cada categoría dinámica.
 
-# Ejecutamos la configuración e inyección al cargar el módulo
-_initialize_dynamic_data()
+        Asigna automáticamente el color de
+        representación definido para cada
+        categoría.
+        """
+
+        for category, data in self.data.items():
+
+            # Extrae el color usando el nombre de la clave.
+            # Si no existe, usa DEFAULT_COLOR
+            data["color"] = SQL_THEME_COLORS.get(
+                category,
+                DEFAULT_COLOR,
+            )

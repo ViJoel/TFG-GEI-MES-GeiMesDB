@@ -206,3 +206,23 @@ class SqlCompleter(QCompleter):
         rect.setWidth(self.popup_width())
 
         self.complete(rect)
+
+    def update_document_completion(
+        self,
+        sql: str,
+    ) -> None:
+        """
+        Actualiza los datos dinámicos del
+        autocompletador a partir del contenido
+        del documento.
+
+        Si se detectan cambios, el modelo se
+        recarga automáticamente para reflejar
+        las nuevas sugerencias.
+
+        Args:
+            sql (str):
+                Contenido completo del documento.
+        """
+
+        self._model.update(sql)

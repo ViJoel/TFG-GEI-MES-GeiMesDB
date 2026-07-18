@@ -1,10 +1,6 @@
 import re
 
-from modules.sql.autocompletion.dynamic_data import (
-    clear_dynamic_completion_data,
-    has_changes,
-    update_dynamic_completion_data,
-)
+from modules.sql.autocompletion.dynamic_data import SqlDynamicCompletionData
 
 _PARAMETER_PATTERN = re.compile(r"(?<!\w)([:$]\w+)")
 
@@ -35,6 +31,7 @@ class SqlDocumentCompletionProvider:
     def update(
         self,
         sql: str,
+        dynamic_data: SqlDynamicCompletionData,
     ) -> bool:
         """
         Analiza el contenido del documento SQL y actualiza
@@ -45,22 +42,25 @@ class SqlDocumentCompletionProvider:
             sql (str):
                 Contenido completo del documento.
 
+            dynamic_data (SqlDynamicCompletionData):
+                Datos que pueden estar o no actualizados.
+
         Returns:
             bool:
-                ``True`` si los datos dinámicos han cambiado
-                y se han actualizado. ``False`` si no se ha
-                detectado ningún cambio.
+                - `True` si los datos dinámicos han cambiado
+                y se han actualizado.
+                - `False` si no se ha detectado ningún cambio.
         """
 
         parameters = set(_PARAMETER_PATTERN.findall(sql))
         variables = set(_VARIABLE_PATTERN.findall(sql))
 
-        parameters_changed = has_changes(
+        parameters_changed = dynamic_data.has_changes(
             key="parameters",
             values=parameters,
         )
 
-        variables_changed = has_changes(
+        variables_changed = dynamic_data.has_changes(
             key="variables",
             values=variables,
         )
@@ -68,14 +68,14 @@ class SqlDocumentCompletionProvider:
         if not parameters_changed and not variables_changed:
             return False
 
-        clear_dynamic_completion_data()
+        dynamic_data.clear_dynamic_completion_data()
 
-        update_dynamic_completion_data(
+        dynamic_data.update_dynamic_completion_data(
             key="parameters",
             values=parameters,
         )
 
-        update_dynamic_completion_data(
+        dynamic_data.update_dynamic_completion_data(
             key="variables",
             values=variables,
         )

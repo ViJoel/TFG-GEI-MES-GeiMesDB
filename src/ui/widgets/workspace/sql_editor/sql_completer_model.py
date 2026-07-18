@@ -5,9 +5,12 @@ from PySide6.QtGui import (
     QStandardItemModel,
 )
 
-from modules.sql.autocompletion.dynamic_data import SQL_DYNAMIC_COMPLETION_DATA
+from modules.sql.autocompletion.dynamic_data import SqlDynamicCompletionData
 from modules.sql.autocompletion.static_data import SQL_STATIC_COMPLETION_DATA
 from ui.themes.theme_manager import ThemeManager
+from ui.widgets.workspace.sql_editor.sql_document_completion_provider import (
+    SqlDocumentCompletionProvider,
+)
 
 
 class SqlCompleterModel(QStandardItemModel):
@@ -33,6 +36,10 @@ class SqlCompleterModel(QStandardItemModel):
 
         super().__init__()
 
+        self._dynamic_data = SqlDynamicCompletionData()
+
+        self._document_completion_provider = SqlDocumentCompletionProvider()
+
         self.refresh()
 
     # ==================
@@ -52,7 +59,7 @@ class SqlCompleterModel(QStandardItemModel):
 
         for completion_data in (
             SQL_STATIC_COMPLETION_DATA,
-            SQL_DYNAMIC_COMPLETION_DATA,
+            self._dynamic_data.get_data(),
         ):
 
             for value in completion_data.values():
@@ -78,3 +85,37 @@ class SqlCompleterModel(QStandardItemModel):
                     )
 
                     self.appendRow(item)
+
+    def update(
+        self,
+        sql: str,
+    ) -> bool:
+        """
+        Actualiza los datos dinámicos del
+        autocompletador a partir del contenido
+        del documento.
+
+        Si se detectan cambios, el modelo se
+        reconstruye automáticamente.
+
+        Args:
+            sql (str):
+                Contenido completo del documento.
+
+        Returns:
+            bool:
+                - `True` si los datos dinámicos
+                han cambiado.
+                - `False` si no se ha detectado
+                ningún cambio.
+        """
+
+        changed = self._document_completion_provider.update(
+            sql=sql,
+            dynamic_data=self._dynamic_data,
+        )
+
+        if changed:
+            self.refresh()
+
+        return changed
