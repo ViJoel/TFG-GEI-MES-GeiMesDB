@@ -359,6 +359,18 @@ class SqlEditor(QPlainTextEdit):
                 Evento de teclado recibido.
         """
 
+        popup_visible = self.completer.popup().isVisible()
+
+        # Evitar que el popup aparezca al borrar texto
+        # si todavía no estaba visible.
+        if not popup_visible and event.key() in (
+            Qt.Key.Key_Backspace,
+            Qt.Key.Key_Delete,
+        ):
+            return
+
+        # Ctrl + Space: Fuerza la aparicion del popup
+        # de autocompletado.
         is_shortcut = (
             event.modifiers() & Qt.KeyboardModifier.ControlModifier
             and event.key() == Qt.Key.Key_Space

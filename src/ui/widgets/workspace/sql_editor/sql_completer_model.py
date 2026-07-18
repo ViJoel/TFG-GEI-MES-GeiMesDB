@@ -57,34 +57,32 @@ class SqlCompleterModel(QStandardItemModel):
 
         self.clear()
 
+        items = []
+
         for completion_data in (
             SQL_STATIC_COMPLETION_DATA,
             self._dynamic_data.get_data(),
         ):
-
             for value in completion_data.values():
 
                 color = QColor(
                     ThemeManager.get_color(
-                        value.get(
-                            "color",
-                            "text",
-                        )
+                        value.get("color", "text"),
                     )
                 )
 
-                for word in value.get(
-                    "values",
-                    [],
-                ):
-                    item = QStandardItem(word)
+                for word in value.get("values", []):
+                    items.append((word, color))
 
-                    item.setData(
-                        color,
-                        Qt.ItemDataRole.ForegroundRole,
-                    )
+        items.sort(key=lambda item: item[0].casefold())
 
-                    self.appendRow(item)
+        for word, color in items:
+            item = QStandardItem(word)
+            item.setData(
+                color,
+                Qt.ItemDataRole.ForegroundRole,
+            )
+            self.appendRow(item)
 
     def update(
         self,
