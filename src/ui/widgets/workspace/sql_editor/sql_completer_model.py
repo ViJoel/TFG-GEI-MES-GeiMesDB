@@ -6,11 +6,11 @@ from PySide6.QtGui import (
 )
 
 from modules.sql.autocompletion.dynamic_data import SqlDynamicCompletionData
-from modules.sql.autocompletion.static_data import SQL_STATIC_COMPLETION_DATA
-from ui.themes.theme_manager import ThemeManager
-from ui.widgets.workspace.sql_editor.sql_document_completion_provider import (
+from modules.sql.autocompletion.sql_document_completion_provider import (
     SqlDocumentCompletionProvider,
 )
+from modules.sql.autocompletion.static_data import SQL_STATIC_COMPLETION_DATA
+from ui.themes.theme_manager import ThemeManager
 
 
 class SqlCompleterModel(QStandardItemModel):

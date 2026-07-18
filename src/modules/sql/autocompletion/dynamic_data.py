@@ -26,6 +26,8 @@ class SqlDynamicCompletionData:
             },
         }
 
+        self._initialize_dynamic_data()
+
     def get_data(
         self,
     ) -> dict[str, DynamicCategory]:

@@ -331,11 +331,8 @@ class SqlEditor(QPlainTextEdit):
             return False
 
         if event.key() in (
-            Qt.Key.Key_Enter,
-            Qt.Key.Key_Return,
             Qt.Key.Key_Escape,
             Qt.Key.Key_Tab,
-            Qt.Key.Key_Backtab,
         ):
             event.ignore()
             return True
@@ -438,6 +435,11 @@ class SqlEditor(QPlainTextEdit):
             and modifiers & Qt.KeyboardModifier.ControlModifier
         ):
             self.execute(SqlScope.ACTUAL_QUERY)
+            return
+
+        # Shift + Tab -> No hacer nada
+        if event.key() == Qt.Key.Key_Backtab:
+            event.accept()
             return
 
         super().keyPressEvent(event)
