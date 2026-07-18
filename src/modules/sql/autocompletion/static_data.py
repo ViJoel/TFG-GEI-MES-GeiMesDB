@@ -24,9 +24,6 @@ SQL_STATIC_COMPLETION_DATA = {
     "nulls": {
         "values": SQL_NULL_VALUES,
     },
-    "symbols": {
-        "values": SQL_SYMBOLS,
-    },
     "types": {
         "values": SQL_TYPES,
     },
