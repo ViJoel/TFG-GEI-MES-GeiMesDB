@@ -453,6 +453,19 @@ THEME.update(
     }
 )
 
+# =====================
+# === SQL COMPLETER ===
+# =====================
+THEME.update(
+    {
+        "sql_completer_background_color": GRAY_950,
+        "sql_completer_border_color": THEME["primary"],
+        "sql_completer_selection_background_color": GREEN_RGBA_75,
+        "sql_completer_selection_color": GRAY_950,
+    }
+)
+
+
 # ==================
 # === SQL EDITOR ===
 # ==================
@@ -488,14 +501,13 @@ THEME.update(
         "sql_null_color": LIGHT_CYAN,
         "sql_number_color": LIGHT_GREEN,
         "sql_parameter_color": YELLOW,
-        "sql_string_simple_quoted_color": RED_HOVER,
+        "sql_string_color": RED_HOVER,
         "sql_symbol_color": PURPLE,
         "sql_table_color": WHITE,
         "sql_type_color": ORANGE,
         "sql_variable_color": LIGHT_BLUE,
     }
 )
-
 
 # =============
 # === TABLE ===

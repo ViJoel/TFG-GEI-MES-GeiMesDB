@@ -1,8 +1,8 @@
-# Bug conocido: warnings espurios de `QTextCursor::setPosition()` en `QPlainTextEdit`
+# Warning conocido: warnings de `QTextCursor::setPosition()` en `QPlainTextEdit`
 
 ## Índice
 
-- [Bug conocido: warnings espurios de `QTextCursor::setPosition()` en `QPlainTextEdit`](#bug-conocido-warnings-espurios-de-qtextcursorsetposition-en-qplaintextedit)
+- [Warning conocido: warnings de `QTextCursor::setPosition()` en `QPlainTextEdit`](#warning-conocido-warnings-de-qtextcursorsetposition-en-qplaintextedit)
   - [Índice](#índice)
   - [Descripción](#descripción)
   - [Entorno afectado](#entorno-afectado)

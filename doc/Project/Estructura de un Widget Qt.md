@@ -1,3 +1,6 @@
+# Estructura definida para los widgets de Qt
+
+```python
 # =================
 # === VARIABLES ===
 # =================
@@ -64,3 +67,4 @@
 # ==================
 # Métodos públicos destinados a ser invocados
 # desde otros componentes de la aplicación.
+```
