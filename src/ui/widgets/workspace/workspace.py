@@ -91,7 +91,7 @@ class Workspace(QWidget):
         self.splitter.setSizes([1, 3])
 
         # Evita que alguno de los paneles desaparezca.
-        self.splitter.setChildrenCollapsible(False)
+        self.splitter.setChildrenCollapsible(True)
 
         self.splitter.addWidget(self.sql_editor)
         self.splitter.addWidget(self.results_view)

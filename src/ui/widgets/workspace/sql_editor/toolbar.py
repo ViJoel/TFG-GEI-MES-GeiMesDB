@@ -10,6 +10,12 @@ from ui.widgets.workspace.sql_editor.toolbar_separator import ToolbarSeparator
 
 
 class Toolbar(QWidget):
+    """
+    Barra de herramientas del editor SQL.
+
+    Proporciona accesos a las operaciones más habituales y
+    expone señales para que el contenedor gestione su lógica.
+    """
 
     # =================
     # === VARIABLES ===
@@ -20,6 +26,10 @@ class Toolbar(QWidget):
     execute_script_requested = Signal()
     undo_requested = Signal()
     redo_requested = Signal()
+    new_file_requested = Signal()
+    open_file_requested = Signal()
+    save_file_requested = Signal()
+    rename_file_requested = Signal()
 
     # ============
     # === INIT ===
@@ -28,6 +38,9 @@ class Toolbar(QWidget):
     def __init__(
         self,
     ) -> None:
+        """
+        Inicializa la barra de herramientas.
+        """
 
         super().__init__()
 
@@ -45,6 +58,27 @@ class Toolbar(QWidget):
     ) -> None:
         """
         Construye la interfaz principal del widget.
+        """
+
+        self._create_buttons()
+        self._set_buttons_tooltips()
+        self._build_layout()
+
+        self.setAttribute(
+            Qt.WidgetAttribute.WA_StyledBackground,
+            True,
+        )
+
+    # ==================
+    # === UI HELPERS ===
+    # ==================
+
+    def _create_buttons(
+        self,
+    ) -> None:
+        """
+        Crea los botones que componen la barra
+        de herramientas.
         """
 
         self.execute_selection_button = ToolbarButton(
@@ -77,6 +111,82 @@ class Toolbar(QWidget):
             "Redo",
         )
 
+        self.new_button = ToolbarButton(
+            "ei.file-new",
+            "new_file",
+            "New file",
+        )
+
+        self.open_button = ToolbarButton(
+            "fa5s.folder-open",
+            "open_file",
+            "Open file",
+        )
+
+        self.save_button = ToolbarButton(
+            "fa5s.save",
+            "save_file",
+            "Save file",
+        )
+
+        self.rename_button = ToolbarButton(
+            "mdi6.rename-box",
+            "rename_file",
+            "Rename file",
+        )
+
+    def _set_buttons_tooltips(
+        self,
+    ) -> None:
+        """
+        Configura los textos de ayuda mostrados
+        al situar el cursor sobre cada botón.
+        """
+
+        self.execute_selection_button.setToolTip(
+            "Execute the text selected.<br><b>Shortcut:</b> <code>Ctrl + Enter</code>"
+        )
+
+        self.execute_query_button.setToolTip(
+            "Execute the query under the cursor.<br><b>Shortcut:</b> <code>Ctrl + Alt + Enter</code>"
+        )
+
+        self.execute_script_button.setToolTip(
+            "Execute the full script.<br><b>Shortcut:</b> <code>Ctrl + Shift + Enter</code>"
+        )
+
+        self.undo_button.setToolTip(
+            "Undo action on the text.<br><b>Shortcut:</b> <code>Ctrl + Z</code>"
+        )
+
+        self.redo_button.setToolTip(
+            "Redo action on the text.<br><b>Shortcut:</b> <code>Ctrl + Shift + Z</code>"
+        )
+
+        self.new_button.setToolTip(
+            "Create a new file.<br><b>Shortcut:</b> <code>Ctrl + N</code>"
+        )
+
+        self.open_button.setToolTip(
+            "Open a file from your computer.<br><b>Shortcut:</b> <code>Ctrl + O</code>"
+        )
+
+        self.save_button.setToolTip(
+            "Save the file changes.<br><b>Shortcut:</b> <code>Ctrl + S</code>"
+        )
+
+        self.rename_button.setToolTip(
+            "Rename the file.<br><b>Shortcut:</b> <code>Ctrl + R</code>"
+        )
+
+    def _build_layout(
+        self,
+    ) -> None:
+        """
+        Construye la disposición visual de los
+        controles de la barra de herramientas.
+        """
+
         layout = hbox(
             ml=4,
             mt=4,
@@ -88,16 +198,21 @@ class Toolbar(QWidget):
 
         layout.addWidget(self.undo_button)
         layout.addWidget(self.redo_button)
+
         layout.addWidget(ToolbarSeparator())
+
         layout.addWidget(self.execute_selection_button)
         layout.addWidget(self.execute_query_button)
         layout.addWidget(self.execute_script_button)
-        layout.addStretch()
 
-        self.setAttribute(
-            Qt.WidgetAttribute.WA_StyledBackground,
-            True,
-        )
+        layout.addWidget(ToolbarSeparator())
+
+        layout.addWidget(self.new_button)
+        layout.addWidget(self.open_button)
+        layout.addWidget(self.save_button)
+        layout.addWidget(self.rename_button)
+
+        layout.addStretch()
 
     # ===============
     # === SIGNALS ===
@@ -129,4 +244,20 @@ class Toolbar(QWidget):
 
         self.redo_button.clicked.connect(
             self.redo_requested,
+        )
+
+        self.new_button.clicked.connect(
+            self.new_file_requested,
+        )
+
+        self.open_button.clicked.connect(
+            self.open_file_requested,
+        )
+
+        self.save_button.clicked.connect(
+            self.save_file_requested,
+        )
+
+        self.rename_button.clicked.connect(
+            self.rename_file_requested,
         )

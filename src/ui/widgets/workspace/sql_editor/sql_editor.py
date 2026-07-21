@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QTextEdit,
 )
 
+from entities.file import File
 from entities.sql_scope import SqlScope
 from ui.themes.theme_manager import ThemeManager
 from ui.widgets.workspace.sql_editor.line_number_area import LineNumberArea
@@ -46,6 +47,7 @@ class SqlEditor(QPlainTextEdit):
         list,
         object,
     )
+    file_modified = Signal(File)
 
     # ============
     # === INIT ===
@@ -53,14 +55,21 @@ class SqlEditor(QPlainTextEdit):
 
     def __init__(
         self,
+        file: File,
     ) -> None:
         """
         Inicializa el editor sql.
+
+        Args:
+            file (File):
+                Archivo abierto asociado al editor.
         """
 
         super().__init__()
 
         self.setObjectName("sql_editor")
+
+        self.file = file
 
         self._setup_ui()
         self._connect_signals()
@@ -237,15 +246,21 @@ class SqlEditor(QPlainTextEdit):
         self,
     ) -> None:
         """
-        Notifica al autocompletador que el contenido
-        del documento ha cambiado.
+        Gestiona la modificación del contenido del editor.
 
-        Permite actualizar las sugerencias dinámicas
-        cuando sea necesario.
+        Actualiza el contenido del archivo asociado, notifica
+        que el archivo ha sido modificado y refresca las
+        sugerencias dinámicas del autocompletador.
         """
 
+        text = self.toPlainText()
+
+        self.file.content = text
+
+        self.file_modified.emit(self.file)
+
         self.completer.update_document_completion(
-            self.toPlainText(),
+            text,
         )
 
     # =====================

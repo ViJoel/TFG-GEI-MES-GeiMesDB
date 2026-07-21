@@ -107,6 +107,17 @@ CONNECTION_QUERIES_HISTORY_QSS = os.path.join(
     "connection_queries_history.qss",
 )
 
+FILES_LIST_QSS = os.path.join(
+    STYLES_DIR,
+    "files_list.qss",
+)
+
+
+FILES_LIST_ITEM_QSS = os.path.join(
+    STYLES_DIR,
+    "files_list_item.qss",
+)
+
 FONTS_QSS = os.path.join(
     STYLES_DIR,
     "fonts.qss",
@@ -181,6 +192,8 @@ STYLE_FILES = [
     CONNECTIONS_LIST_QSS,
     CONNECTIONS_LIST_BUTTONS_QSS,
     CONNECTION_QUERIES_HISTORY_QSS,
+    FILES_LIST_QSS,
+    FILES_LIST_ITEM_QSS,
     FONTS_QSS,
     HOME_QSS,
     NOTIFICATIONS_QSS,

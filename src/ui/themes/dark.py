@@ -357,6 +357,31 @@ THEME.update(
     }
 )
 
+# ==================
+# === FILES LIST ===
+# ==================
+THEME.update(
+    {
+        "files_list_background_color": GRAY_950,
+        "files_list_border_color": THEME["primary"],
+    }
+)
+
+# =======================
+# === FILES LIST ITEM ===
+# =======================
+THEME.update(
+    {
+        "files_list_item_background_color": "rgba(139, 195, 74, 0.10)",
+        "files_list_item_background_color_hover": "rgba(139, 195, 74, 0.20)",
+        "files_list_item_background_color_selected": "rgba(139, 195, 74, 0.30)",
+        "files_list_item_color": THEME["secondary"],
+        # Botón
+        "files_list_item_close_button_background_color_hover": "rgba(197, 225, 165, 0.25)",
+        "files_list_item_close_button_background_color_pressed": "rgba(197, 225, 165, 0.50)",
+    }
+)
+
 # =================
 # === HOME PAGE ===
 # =================
@@ -575,5 +600,19 @@ THEME.update(
         "toolbar_button_execute_script_icon_color": THEME["primary"],
         "toolbar_button_undo_icon_color": THEME["secondary"],
         "toolbar_button_redo_icon_color": THEME["secondary"],
+        "toolbar_button_new_file_icon_color": LIGHT_BLUE,
+        "toolbar_button_open_file_icon_color": YELLOW,
+        "toolbar_button_rename_file_icon_color": LIGHT_RED,
+        "toolbar_button_save_file_icon_color": GRAY_200,
+    }
+)
+
+# ===============
+# === TOOLTIP ===
+# ===============
+THEME.update(
+    {
+        "tooltip_input_font_family": "'Consolas'",
+        "tooltip_input_font_size": "12px",
     }
 )
