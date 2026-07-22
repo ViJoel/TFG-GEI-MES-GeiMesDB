@@ -178,6 +178,11 @@ TOOLBAR_SEPARATOR_QSS = os.path.join(
     "toolbar_separator.qss",
 )
 
+TOOLTIP_QSS = os.path.join(
+    STYLES_DIR,
+    "tooltip.qss",
+)
+
 WORKSPACE_QSS = os.path.join(
     STYLES_DIR,
     "workspace.qss",
@@ -206,5 +211,6 @@ STYLE_FILES = [
     TOOLBAR_QSS,
     TOOLBAR_BUTTON_QSS,
     TOOLBAR_SEPARATOR_QSS,
+    TOOLTIP_QSS,
     WORKSPACE_QSS,
 ]

@@ -612,7 +612,11 @@ THEME.update(
 # ===============
 THEME.update(
     {
-        "tooltip_input_font_family": "'Consolas'",
-        "tooltip_input_font_size": "12px",
+        "tooltip_background_color": GRAY_950,
+        "tooltip_border_color": THEME["primary"],
+        "tooltip_color": THEME["text"],
+        # Tipografía
+        "tooltip_font_family": "'Consolas'",
+        "tooltip_font_size": "12px",
     }
 )

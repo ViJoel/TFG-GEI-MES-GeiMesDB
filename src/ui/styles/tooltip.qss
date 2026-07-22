@@ -1,0 +1,8 @@
+QToolTip {
+        background-color: $tooltip_background_color;
+        border: 1px solid $tooltip_border_color;
+        color: $tooltip_color;
+        font-family: $tooltip_font_family;
+        font-size: $tooltip_font_size;
+        padding: 2px 6px;
+    }

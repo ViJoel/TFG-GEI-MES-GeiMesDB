@@ -353,7 +353,11 @@ class FilesListItem(QWidget):
             selected (bool): Estado de selección.
         """
 
-        self.setProperty("selected", "true" if selected else "false")
+        self.setProperty(
+            "selected",
+            "true" if selected else "false",
+        )
+
         self._refresh_style()
 
     def _refresh_style(

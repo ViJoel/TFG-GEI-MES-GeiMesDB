@@ -88,7 +88,9 @@ class FilesList(QListWidget):
     # === UI STATE ===
     # ================
 
-    def _update_items_selection_state(self):
+    def _update_items_selection_state(
+        self,
+    ):
         """
         Actualiza el estado de selección
         de los items de la lista.
