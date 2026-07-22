@@ -53,7 +53,8 @@ def main() -> int:
     # Inicializar base de datos interna.
     init_database()
 
-    # Configurar política de escalado High-DPI (debe ir ANTES de instanciar QApplication)
+    # Configurar política de escalado High-DPI
+    # (debe ir ANTES de instanciar QApplication).
     QApplication.setHighDpiScaleFactorRoundingPolicy(
         Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
     )
