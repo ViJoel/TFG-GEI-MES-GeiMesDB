@@ -10,9 +10,14 @@ Clases:
     - MainWindow
 """
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import (
+    QCoreApplication,
+    Qt,
+)
+from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
     QMainWindow,
+    QSizePolicy,
     QStackedWidget,
     QWidget,
 )
@@ -48,6 +53,11 @@ class MainWindow(QMainWindow):
     - Atender eventos globales de la interfaz.
     """
 
+    # =================
+    # === VARIABLES ===
+    # =================
+    _was_maximized: bool = False
+
     # ============
     # === INIT ===
     # ============
@@ -79,6 +89,10 @@ class MainWindow(QMainWindow):
         # Título de la ventana.
         self.setWindowTitle(APP_NAME)
 
+        # Definir un tamaño mínimo razonable para
+        # permitir acoples en mitades de pantalla.
+        self.setMinimumSize(600, 400)
+
         # Widget central obligatorio en QMainWindow.
         central = QWidget()
         self.setCentralWidget(central)
@@ -96,6 +110,11 @@ class MainWindow(QMainWindow):
 
         # Stack de navegación principal.
         self.stack = QStackedWidget()
+        # Permitir que el QStackedWidget se expanda
+        # libremente en ambas direcciones.
+        self.stack.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
+        )
 
         # Pantalla inicial.
         self.home_page = Home()
@@ -407,3 +426,41 @@ class MainWindow(QMainWindow):
         super().resizeEvent(event)
 
         AppContext.notification_manager.reposition()
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_F11:
+            if self.isFullScreen():
+                # Restauramos al estado previo.
+                if self._was_maximized:
+                    self.showMaximized()  # Modo ventana maximizado.
+                else:
+                    self.showNormal()  # Modo ventana sin maximizar.
+            else:
+                # 1. Guardamos el estado actual.
+                self._was_maximized = self.isMaximized()
+
+                # 2. Aseguramos la existencia del
+                # handle de la ventana nativa.
+                if not self.windowHandle():
+                    self.createWinId()
+
+                # 3. Detectamos la pantalla basándonos
+                # en el centro geométrico de la ventana.
+                window_center = self.frameGeometry().center()
+                target_screen = QGuiApplication.screenAt(window_center) or self.screen()
+
+                # 4. Asignamos la pantalla al handle nativo.
+                if target_screen and self.windowHandle():
+                    self.windowHandle().setScreen(target_screen)
+                    # Procesamos eventos pendientes para
+                    # que el Servidor X/Windows registre
+                    # la reubicación de pantalla antes
+                    # del resize.
+                    QCoreApplication.processEvents()
+
+                # 5. Activamos pantalla completa.
+                self.showFullScreen()
+        else:
+            # Importante: pasa otros eventos de
+            # teclado al comportamiento por defecto.
+            super().keyPressEvent(event)
