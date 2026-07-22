@@ -20,11 +20,14 @@ QWidget#dialog_container {
 /* ===== DIALOG ELEMENTS ======== */
 /* ============================== */
 
-QWidget#dialog_container QLabel,
+QWidget#dialog_container QTextEdit,
 QWidget#dialog_container QPushButton {
     font-size: 14px;
 }
 
-QWidget#dialog_container QLabel {
-    background-color: $dialog_label_background_color;
+QWidget#dialog_container QTextEdit {
+    background-color: $dialog_text_background_color;
+    border: none;
+    padding: 0px;
+    margin: 0px;
 }

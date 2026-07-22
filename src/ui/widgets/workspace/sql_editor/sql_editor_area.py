@@ -18,6 +18,7 @@ from entities.sql_scope import SqlScope
 from ui.utils.layouts import (
     vbox,
 )
+from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
 from ui.widgets.workspace.sql_editor.files_list import FilesList
 from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
 from ui.widgets.workspace.sql_editor.toolbar import Toolbar
@@ -269,6 +270,21 @@ class SqlEditorArea(QWidget):
             file (File):
                 Archivo que debe cerrarse.
         """
+
+        if file.has_changes:
+            dialog = ConfirmationDialog(
+                title="Close file",
+                message=(
+                    "⚠️ <b>Discard unsaved changes?</b> ⚠️<br><br>"
+                    f"The file <code>{file.name}</code> has unsaved changes.<br>"
+                    "If you continue, you will lose these changes and this action cannot be undone."
+                ),
+                parent=self,
+            )
+
+            # Si el usuario cancela o cierra el diálogo, se interrumpe el flujo
+            if not dialog.exec():
+                return
 
         editor = self._get_editor(file)
 

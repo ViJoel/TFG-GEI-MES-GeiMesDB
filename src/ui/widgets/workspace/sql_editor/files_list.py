@@ -104,15 +104,6 @@ class FilesList(QListWidget):
 
             widget.set_selected(item == self.currentItem())
 
-    def _sync_selection_state(
-        self,
-    ) -> None:
-        """
-        Sincroniza el estado visual de los elementos.
-        """
-
-        self._update_items_selection_state()
-
     # ===============
     # === SIGNALS ===
     # ===============
@@ -152,12 +143,15 @@ class FilesList(QListWidget):
             return
 
         current_widget: FilesListItem = self.itemWidget(current)
-        previous_widget: FilesListItem = self.itemWidget(previous)
+        if current_widget:
+            current_widget.set_selected(True)
 
-        current_widget.set_selected(True)
-        previous_widget.set_selected(False)
+        if previous is not None:
+            previous_widget: FilesListItem = self.itemWidget(previous)
+            if previous_widget:
+                previous_widget.set_selected(False)
 
-        self._sync_selection_state()
+        self._update_items_selection_state()
 
         self.file_selected.emit(current_widget.file)
 

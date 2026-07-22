@@ -315,7 +315,7 @@ class ResultsView(QWidget):
 
         dialog = ConfirmationDialog(
             title="Save changes",
-            message="Are you sure you want to save the changes?",
+            message="Are you sure you want to <code><b>save</b></code> the changes?",
             parent=self,
         )
 
@@ -331,7 +331,7 @@ class ResultsView(QWidget):
 
         dialog = ConfirmationDialog(
             title="Discard changes",
-            message="Are you sure you want to discard the changes?",
+            message="Are you sure you want to <code><b>discard</b></code> the changes?",
             parent=self,
         )
 

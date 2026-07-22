@@ -353,7 +353,7 @@ THEME.update(
     {
         "dialog_background_color": GRAY_800,
         "dialog_border_color": GRAY_700,
-        "dialog_label_background_color": TRANSPARENT,
+        "dialog_text_background_color": TRANSPARENT,
     }
 )
 
