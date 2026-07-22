@@ -407,7 +407,10 @@ class MainWindow(QMainWindow):
     # === QT OVERRIDES ===
     # ====================
 
-    def moveEvent(self, event):
+    def moveEvent(
+        self,
+        event,
+    ) -> None:
         """
         Reposiciona las notificaciones cuando
         la ventana principal cambia de posición.
@@ -417,7 +420,10 @@ class MainWindow(QMainWindow):
 
         AppContext.notification_manager.reposition()
 
-    def resizeEvent(self, event):
+    def resizeEvent(
+        self,
+        event,
+    ) -> None:
         """
         Reposiciona las notificaciones cuando
         la ventana principal cambia de tamaño.
@@ -427,7 +433,25 @@ class MainWindow(QMainWindow):
 
         AppContext.notification_manager.reposition()
 
-    def keyPressEvent(self, event):
+    def keyPressEvent(
+        self,
+        event,
+    ) -> None:
+        """
+        Maneja los eventos de teclado de la ventana.
+
+        Intercepta de manera específica la tecla F11 para
+        alternar el modo de pantalla completa. Asegura que la
+        transición respete el monitor activo actual basándose
+        en el centro geométrico de la ventana, y restaura
+        el estado previo (maximizado o normal) al salir.
+
+        Args:
+            event (QKeyEvent):
+                Evento de teclado enviado por el sistema
+                que contiene la tecla presionada.
+        """
+
         if event.key() == Qt.Key.Key_F11:
             if self.isFullScreen():
                 # Restauramos al estado previo.
