@@ -203,9 +203,9 @@ class ConfirmationDialog(QDialog):
 
         container_layout.addLayout(buttons_layout)
 
-    # ======================
-    # === PRIVATE UTILS ===
-    # ======================
+    # ==================
+    # === UI HELPERS ===
+    # ==================
 
     def _adjust_message_height(
         self,

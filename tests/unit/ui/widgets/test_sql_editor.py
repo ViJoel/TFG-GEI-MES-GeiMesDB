@@ -15,6 +15,7 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import QPlainTextEdit
 
+from entities.file import File
 from entities.sql_scope import SqlScope
 from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
 
@@ -29,10 +30,28 @@ def editor(qtbot):
     Crea una instancia del SqlEditor para tests UI.
     """
 
-    widget = SqlEditor()
+    file = File()
+
+    widget = SqlEditor(file)
+
     qtbot.addWidget(widget)
     widget.show()
+
     return widget
+
+
+# =============================================================================
+# INIT
+# =============================================================================
+
+
+def test_file_is_saved(editor):
+    assert editor.file is not None
+    assert editor.file.name == "test.sql"
+
+
+def test_file_is_saved(editor):
+    assert editor.toPlainText() == editor.file.content
 
 
 # =============================================================================
@@ -557,3 +576,61 @@ def test_text_under_cursor_returns_empty_when_cursor_after_separator(editor):
     editor.setTextCursor(cursor)
 
     assert editor.text_under_cursor() == ""
+
+
+# =============================================================================
+# FILES
+# =============================================================================
+
+
+def test_text_changed_updates_file_content(editor):
+    editor.setPlainText("SELECT * FROM users")
+
+    assert editor.file.content == "SELECT * FROM users"
+
+
+def test_text_changed_emits_file_modified(editor, qtbot):
+    with qtbot.waitSignal(editor.file_modified) as blocker:
+        editor.setPlainText("SELECT 1")
+
+    assert blocker.args == [editor.file]
+
+
+def test_ctrl_s_emits_save_changes(editor, qtbot):
+    with qtbot.waitSignal(editor.save_changes) as blocker:
+        qtbot.keyPress(
+            editor,
+            Qt.Key_S,
+            modifier=Qt.ControlModifier,
+        )
+
+    assert blocker.args == [editor.file]
+
+
+def test_ctrl_r_emits_rename_file(editor, qtbot):
+    with qtbot.waitSignal(editor.rename_file) as blocker:
+        qtbot.keyPress(
+            editor,
+            Qt.Key_R,
+            modifier=Qt.ControlModifier,
+        )
+
+    assert blocker.args == [editor.file]
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("SELECT customer_id", "customer_id"),
+        ("SELECT * FROM users WHERE id = :user_id", ":user_id"),
+        ("SELECT @my_var", "@my_var"),
+    ],
+)
+def test_text_under_cursor_returns_word(editor, text, expected):
+    editor.setPlainText(text)
+
+    cursor = editor.textCursor()
+    cursor.movePosition(QTextCursor.MoveOperation.End)
+    editor.setTextCursor(cursor)
+
+    assert editor.text_under_cursor() == expected

@@ -8,6 +8,7 @@ import pytest
 from entities.connection import Connection
 from entities.message_type import MessageType
 from entities.sql_scope import SqlScope
+from entities.unsaved_changes_count import UnsavedChangesCount
 from ui.widgets.workspace.workspace import Workspace
 
 # =============================================================================
@@ -516,13 +517,13 @@ def test_query_selected_from_session_history_updates_editor(
     historial la inserta en el editor SQL.
     """
 
-    workspace.sql_editor.set_query_text = MagicMock()
+    workspace.sql_editor_area.set_query_text = MagicMock()
 
     query = "SELECT * FROM users"
 
     workspace._on_query_selected_from_session_queries_history(query)
 
-    workspace.sql_editor.set_query_text.assert_called_once_with(
+    workspace.sql_editor_area.set_query_text.assert_called_once_with(
         query,
     )
 
@@ -564,3 +565,38 @@ def test_save_queries_history(
     assert len(entries) == 2
     assert entries[0].query == "SELECT 1"
     assert entries[1].query == "SELECT 2"
+
+
+# =============================================================================
+# PUBLIC API
+# =============================================================================
+
+
+def test_get_unsaved_changes_count_returns_none_when_there_are_no_changes(workspace):
+    workspace.sql_editor_area.get_unsaved_changes_count = MagicMock(return_value=0)
+
+    result = workspace.get_unsaved_changes_count()
+
+    assert result is None
+
+
+def test_get_unsaved_changes_count_returns_entity(workspace):
+    workspace.sql_editor_area.get_unsaved_changes_count = MagicMock(return_value=3)
+
+    result = workspace.get_unsaved_changes_count()
+
+    assert isinstance(result, UnsavedChangesCount)
+    assert result.connection_name == workspace.connection.name
+    assert result.unsaved_changes == 3
+
+
+@pytest.mark.parametrize("count", [0, -1])
+def test_get_unsaved_changes_count_returns_none_when_there_are_no_changes(
+    workspace,
+    count,
+):
+    workspace.sql_editor_area.get_unsaved_changes_count = MagicMock(
+        return_value=count,
+    )
+
+    assert workspace.get_unsaved_changes_count() is None
