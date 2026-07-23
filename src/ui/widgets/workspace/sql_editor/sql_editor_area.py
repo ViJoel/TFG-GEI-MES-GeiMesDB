@@ -25,9 +25,7 @@ from entities.message_type import MessageType
 from entities.sql_scope import SqlScope
 from modules.files import service as files_service
 from ui.app.app_actions import notify
-from ui.utils.layouts import (
-    vbox,
-)
+from ui.utils.layouts import vbox
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
 from ui.widgets.workspace.sql_editor.files_list import FilesList
 from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
@@ -650,3 +648,21 @@ class SqlEditorArea(QWidget):
         """
 
         self._get_current_editor().insert_query_at_cursor(text)
+
+    # ==================
+    # === PUBLIC API ===
+    # ==================
+
+    def get_unsaved_changes_count(
+        self,
+    ) -> int:
+        """
+        Devuelve el número de archivos abiertos que tienen
+        cambios sin guardar/procesar.
+
+        Returns:
+            int:
+                Cantidad de archivos con cambios pendientes.
+        """
+
+        return sum(1 for file in self.files if file.has_changes and file.existsOnDisk)

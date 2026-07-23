@@ -148,9 +148,6 @@ class ConfirmationDialog(QDialog):
         self.message_view.setAcceptRichText(False)
 
         # Ocultar las barras de desplazamiento.
-        self.message_view.setVerticalScrollBarPolicy(
-            Qt.ScrollBarAlwaysOff,
-        )
         self.message_view.setHorizontalScrollBarPolicy(
             Qt.ScrollBarAlwaysOff,
         )

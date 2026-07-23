@@ -8,6 +8,7 @@ from entities.connection import Connection
 from entities.message_type import MessageType
 from entities.queries_history_entry import QueriesHistoryEntry
 from entities.sql_scope import SqlScope
+from entities.unsaved_changes_count import UnsavedChangesCount
 from log.app_logger import get_logger
 from modules.queries_history.service import save_queries_history_batch
 from modules.sessions.service import (
@@ -79,7 +80,7 @@ class Workspace(QWidget):
         main_layout = hbox()
         self.setLayout(main_layout)
 
-        self.sql_editor = SqlEditorArea()
+        self.sql_editor_area = SqlEditorArea()
         self.results_view = ResultsView(connection=self.connection)
 
         self.splitter = QSplitter(Qt.Vertical)
@@ -93,7 +94,7 @@ class Workspace(QWidget):
         # Evita que alguno de los paneles desaparezca.
         self.splitter.setChildrenCollapsible(True)
 
-        self.splitter.addWidget(self.sql_editor)
+        self.splitter.addWidget(self.sql_editor_area)
         self.splitter.addWidget(self.results_view)
 
         main_layout.addWidget(self.splitter)
@@ -110,7 +111,7 @@ class Workspace(QWidget):
         con sus handlers correspondientes.
         """
 
-        self.sql_editor.execute_requested.connect(
+        self.sql_editor_area.execute_requested.connect(
             self._on_execute_requested,
         )
 
@@ -265,7 +266,7 @@ class Workspace(QWidget):
         query: str,
     ) -> None:
 
-        self.sql_editor.set_query_text(query)
+        self.sql_editor_area.set_query_text(query)
 
     # =====================
     # === EVENT HELPERS ===
@@ -432,3 +433,29 @@ class Workspace(QWidget):
                 MessageType.SUCCESS,
                 "Error updating queries history.\nSee logs for details.",
             )
+
+    # ==================
+    # === PUBLIC API ===
+    # ==================
+
+    def get_unsaved_changes_count(
+        self,
+    ) -> UnsavedChangesCount:
+        """
+        Devuelve el número de archivos abiertos que tienen
+        cambios sin guardar/procesar.
+
+        Returns:
+            UnsavedChangesCount:
+                Cambios sin guardar.
+        """
+
+        count = self.sql_editor_area.get_unsaved_changes_count()
+
+        if count <= 0:
+            return
+
+        return UnsavedChangesCount(
+            connection_name=self.connection.name,
+            unsaved_changes=count,
+        )

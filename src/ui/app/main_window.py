@@ -14,7 +14,10 @@ from PySide6.QtCore import (
     QCoreApplication,
     Qt,
 )
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtGui import (
+    QCloseEvent,
+    QGuiApplication,
+)
 from PySide6.QtWidgets import (
     QMainWindow,
     QSizePolicy,
@@ -25,6 +28,7 @@ from PySide6.QtWidgets import (
 from common.constants import APP_NAME
 from entities.connection import Connection
 from entities.message_type import MessageType
+from entities.unsaved_changes_count import UnsavedChangesCount
 from log.app_logger import get_logger
 from modules.sessions.service import (
     close_session,
@@ -34,6 +38,7 @@ from ui.app.app_actions import notify
 from ui.app.app_context import AppContext
 from ui.app.worker_error import WorkerError
 from ui.utils.layouts import hbox
+from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
 from ui.widgets.forms.connection_form import ConnectionForm
 from ui.widgets.home.home import Home
 from ui.widgets.sidebar.sidebar import Sidebar
@@ -488,3 +493,56 @@ class MainWindow(QMainWindow):
             # Importante: pasa otros eventos de
             # teclado al comportamiento por defecto.
             super().keyPressEvent(event)
+
+    def closeEvent(
+        self,
+        event: QCloseEvent,
+    ) -> None:
+        """
+        Maneja el intento de cierre de la ventana principal.
+
+        Comprueba si existen cambios sin guardar en los espacios
+        de trabajo activos y solicita confirmación al usuario
+        antes de cerrar la aplicación.
+
+        Args:
+            event (QCloseEvent):
+                Evento de cierre de Qt.
+        """
+
+        # 1. Recopilar cambios sin guardar en todos los workspaces activos.
+        unsaved_items: list[UnsavedChangesCount] = []
+        for workspace in self.workspaces.values():
+            changes = workspace.get_unsaved_changes_count()
+            if changes:
+                unsaved_items.append(changes)
+
+        # 2. Si hay cambios pendientes, mostrar el diálogo de confirmación.
+        if unsaved_items:
+            # Construir un resumen con los nombres de las conexiones y sus archivos.
+            details_html = "<br>".join(
+                [
+                    f"• <b>{item.connection_name}</b>: {item.unsaved_changes} file(s)"
+                    for item in unsaved_items
+                ]
+            )
+
+            dialog = ConfirmationDialog(
+                title="Exit application",
+                message=(
+                    "⚠️ <b>Discard unsaved changes?</b> ⚠️<br><br>"
+                    "You have unsaved changes in the following workspace(s):<br>"
+                    f"{details_html}<br><br>"
+                    "If you exit now, all unsaved changes will be lost.<br>"
+                    "This action can not be undone."
+                ),
+                parent=self,
+            )
+
+            # Si el usuario cancela o cierra el diálogo, abortar el cierre.
+            if not dialog.exec():
+                event.ignore()
+                return
+
+        # 3. Si no hay cambios o el usuario confirmó, permitir el cierre.
+        event.accept()
