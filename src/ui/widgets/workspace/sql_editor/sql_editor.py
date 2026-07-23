@@ -48,6 +48,8 @@ class SqlEditor(QPlainTextEdit):
         object,
     )
     file_modified = Signal(File)
+    save_changes = Signal(File)
+    rename_file = Signal(File)
 
     # ============
     # === INIT ===
@@ -86,6 +88,8 @@ class SqlEditor(QPlainTextEdit):
         """
 
         self.setPlaceholderText("Write SQL query...")
+
+        self.setPlainText(self.file.content)
 
         self.verticalScrollBar().setSingleStep(1)
         self.horizontalScrollBar().setSingleStep(1)
@@ -421,13 +425,13 @@ class SqlEditor(QPlainTextEdit):
 
         modifiers = event.modifiers()
 
-        # Tab -> 4 espacios
+        # Tab -> 4 espacios.
         if event.key() == Qt.Key.Key_Tab:
             self.insertPlainText("    ")
             return
 
-        # Ctrl + Shift + Enter -> Ejecutar script
-        elif (
+        # Ctrl + Shift + Enter -> Ejecutar script.
+        if (
             event.key() == Qt.Key.Key_Return
             and modifiers & Qt.KeyboardModifier.ControlModifier
             and modifiers & Qt.KeyboardModifier.ShiftModifier
@@ -435,8 +439,8 @@ class SqlEditor(QPlainTextEdit):
             self.execute(SqlScope.FULL_SCRIPT)
             return
 
-        # Ctrl + Alt + Enter -> Ejecutar texto seleccionado
-        elif (
+        # Ctrl + Alt + Enter -> Ejecutar texto seleccionado.
+        if (
             event.key() == Qt.Key.Key_Return
             and modifiers & Qt.KeyboardModifier.ControlModifier
             and modifiers & Qt.KeyboardModifier.AltModifier
@@ -444,15 +448,31 @@ class SqlEditor(QPlainTextEdit):
             self.execute(SqlScope.SELECTED_TEXT)
             return
 
-        # Ctrl + Enter -> Ejecutar consulta actual
-        elif (
+        # Ctrl + Enter -> Ejecutar consulta actual.
+        if (
             event.key() == Qt.Key.Key_Return
             and modifiers & Qt.KeyboardModifier.ControlModifier
         ):
             self.execute(SqlScope.ACTUAL_QUERY)
             return
 
-        # Shift + Tab -> No hacer nada
+        # Ctrl + S -> Guardar cambios.
+        if (
+            event.key() == Qt.Key.Key_S
+            and modifiers & Qt.KeyboardModifier.ControlModifier
+        ):
+            self.save_changes.emit(self.file)
+            return
+
+        # Ctrl + R -> Renombrar archivo.
+        if (
+            event.key() == Qt.Key.Key_R
+            and modifiers & Qt.KeyboardModifier.ControlModifier
+        ):
+            self.rename_file.emit(self.file)
+            return
+
+        # Shift + Tab -> No hacer nada.
         if event.key() == Qt.Key.Key_Backtab:
             event.accept()
             return

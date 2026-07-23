@@ -112,7 +112,6 @@ FILES_LIST_QSS = os.path.join(
     "files_list.qss",
 )
 
-
 FILES_LIST_ITEM_QSS = os.path.join(
     STYLES_DIR,
     "files_list_item.qss",
@@ -131,6 +130,11 @@ HOME_QSS = os.path.join(
 NOTIFICATIONS_QSS = os.path.join(
     STYLES_DIR,
     "notifications.qss",
+)
+
+RENAME_FILE_DIALOG_QSS = os.path.join(
+    STYLES_DIR,
+    "rename_file_dialog.qss",
 )
 
 RESULTS_VIEW_QSS = os.path.join(
@@ -188,7 +192,6 @@ WORKSPACE_QSS = os.path.join(
     "workspace.qss",
 )
 
-
 STYLE_FILES = [
     BASE_QSS,
     BUTTONS_QSS,
@@ -202,6 +205,7 @@ STYLE_FILES = [
     FONTS_QSS,
     HOME_QSS,
     NOTIFICATIONS_QSS,
+    RENAME_FILE_DIALOG_QSS,
     RESULTS_VIEW_QSS,
     SCROLLBAR_QSS,
     SESSION_QUERIES_HISTORY_QSS,

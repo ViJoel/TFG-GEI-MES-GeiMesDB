@@ -422,6 +422,26 @@ THEME.update(
     }
 )
 
+# ==========================
+# === RENAME FILE DIALOG ===
+# ==========================
+THEME.update(
+    {
+        # Dialog
+        "rename_file_dialog_background_color": GRAY_950,
+        "rename_file_dialog_border_color": GRAY_800,
+        "rename_file_dialog_color": THEME["text"],
+        # Input
+        "rename_file_dialog_input_background_color": GRAY_900,
+        "rename_file_dialog_input_background_color_hover": GRAY_800,
+        "rename_file_dialog_input_border_color": GRAY_800,
+        "rename_file_dialog_input_border_color_hover": GRAY_700,
+        "rename_file_dialog_input_color": THEME["text"],
+        "rename_file_dialog_input_color_hover": THEME["text_hover"],
+    }
+)
+
+
 # ==================
 # === SCROLLBARS ===
 # ==================
