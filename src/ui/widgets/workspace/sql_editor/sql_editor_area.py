@@ -326,7 +326,7 @@ class SqlEditorArea(QWidget):
             path, _ = QFileDialog.getSaveFileName(
                 self,
                 "Save file",
-                "",
+                file.name,
                 "SQL Files (*.sql);;Text Files (*.txt);;All Files (*)",
             )
 

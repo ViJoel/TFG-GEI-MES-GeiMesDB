@@ -55,8 +55,11 @@ def test_editor_saves_file_reference(
     al archivo asociado.
     """
 
-    assert editor.file is not None
-    assert editor.file.name == "test.sql"
+    file = File()
+
+    editor = SqlEditor(file=file)
+
+    assert editor.file is file
 
 
 def test_editor_content_at_start(
