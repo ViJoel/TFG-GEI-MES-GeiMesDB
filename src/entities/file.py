@@ -109,12 +109,24 @@ class File:
         """
         Cambia el nombre del archivo y
         actualiza el directorio si corresponde.
+        Si no termina en `.sql` o `.txt`, añade `.sql` por defecto.
 
         Args:
             new_name:
                 Nuevo nombre del archivo.
         """
 
+        new_name = new_name.strip()
+
+        # 1. Quitamos el punto final si existe (ej. "script." -> "script").
+        if new_name.endswith("."):
+            new_name = new_name[:-1]
+
+        # 2. Garantizamos la extensión .sql si no termina en .sql ni .txt.
+        if not new_name.lower().endswith((".sql", ".txt")):
+            new_name = f"{new_name}.sql"
+
+        # 3. Comprobamos si el nombre procesado sigue siendo el mismo.
         if new_name == self.name:
             return
 

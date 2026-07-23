@@ -28,6 +28,7 @@ from ui.app.app_actions import notify
 from ui.utils.layouts import vbox
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
 from ui.widgets.workspace.sql_editor.files_list import FilesList
+from ui.widgets.workspace.sql_editor.rename_file_dialog import RenameFileDialog
 from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
 from ui.widgets.workspace.sql_editor.toolbar import Toolbar
 
@@ -380,124 +381,15 @@ class SqlEditorArea(QWidget):
 
         file = editor.file
 
-        # Instanciamos el diálogo
-        dialog = QInputDialog(self)
-        dialog.setWindowTitle("Rename file")
-        dialog.setLabelText("New file name:")
-        dialog.setTextValue(file.name)
-
-        # Quitamos los bordes y la barra de título nativa del sistema operativo.
-        dialog.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Dialog)
-
-        # Márgenes internos y espaciado entre widgets.
-        if dialog.layout():
-            dialog.layout().setContentsMargins(
-                20, 20, 20, 20
-            )  # (izquierda, arriba, derecha, abajo)
-            dialog.layout().setSpacing(12)  # espacio vertical entre elementos.
-
-        # Aplicar estilos y centrar cuando ya
-        # se haya renderizado el tamaño final.
-        def _setup_dialog():
-            self._apply_rename_file_dialog_button_styles(dialog)
-            self._center_rename_file_dialog_on_parent(
-                dialog=dialog,
-                parent=self,
-            )
-
-        # QTimer.singleShot con 0ms ejecuta la función en el
-        # siguiente ciclo de eventos, justo cuando el diálogo
-        # ya terminó de construir sus widgets internos.
-        QTimer.singleShot(
-            0,
-            lambda: _setup_dialog,
+        # Lanzar el diálogo totalmente autocontenido
+        new_name = RenameFileDialog.get_new_name(
+            current_name=file.name,
+            parent=self,
         )
 
-        # Ejecutar el diálogo.
-        if not dialog.exec():
-            return
-
-        new_name = dialog.textValue().strip()
-
-        if not new_name:
-            return
-
-        file.rename(new_name)
-
-        self.files_list.refresh_file(file)
-
-    # =====================
-    # === EVENT HELPERS ===
-    # =====================
-
-    @staticmethod
-    def _apply_rename_file_dialog_button_styles(
-        dialog: QInputDialog,
-    ) -> None:
-        """
-        Aplica las propiedades QSS a los botones
-        una vez dibujado el diálogo.
-
-        Args:
-            dialog (QInputDialog):
-                Diálogo para renombrar el archivo.
-        """
-
-        for btn in dialog.findChildren(QPushButton):
-
-            parent = btn.parent()
-
-            if isinstance(parent, QDialogButtonBox):
-
-                # 1. Quitamos la letra subrayada/acelerador de teclado.
-                btn.setText(btn.text().replace("&", ""))
-
-                # 2. Asignamos la propiedad QSS según el rol
-                role = parent.buttonRole(btn)
-
-                if role == QDialogButtonBox.ButtonRole.AcceptRole:
-                    btn.setProperty(
-                        "type",
-                        "primary",
-                    )
-
-                elif role == QDialogButtonBox.ButtonRole.RejectRole:
-                    btn.setProperty(
-                        "type",
-                        "danger",
-                    )
-
-                # 3. Refrescamos el estilo
-                btn.style().unpolish(btn)
-                btn.style().polish(btn)
-
-    @staticmethod
-    def _center_rename_file_dialog_on_parent(
-        dialog: QInputDialog,
-        parent: QWidget,
-    ) -> None:
-        """
-        Calcula y aplica la posición centrada
-        del diálogo respecto a su padre.
-
-        Args:
-            dialog (QInputDialog):
-                Diálogo para renombrar el archivo.
-
-            parent (QWidget):
-                Widget padre del diálogo.
-        """
-
-        if parent and dialog.isVisible():
-
-            # Obtenemos la geometría de la ventana principal.
-            parent_geo = parent.geometry()
-
-            # Calculamos las coordenadas x, y centradas.
-            x = parent_geo.x() + (parent_geo.width() - dialog.width()) // 2
-            y = parent_geo.y() + (parent_geo.height() - dialog.height()) // 2
-
-            dialog.move(x, y)
+        if new_name:
+            file.rename(new_name)
+            self.files_list.refresh_file(file)
 
     # ===================
     # === PRIVATE API ===
