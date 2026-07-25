@@ -2,7 +2,6 @@ from pathlib import Path
 
 from PySide6.QtCore import (
     Qt,
-    QTimer,
     Signal,
 )
 from PySide6.QtGui import (
@@ -10,10 +9,7 @@ from PySide6.QtGui import (
     QShortcut,
 )
 from PySide6.QtWidgets import (
-    QDialogButtonBox,
     QFileDialog,
-    QInputDialog,
-    QPushButton,
     QSizePolicy,
     QSplitter,
     QStackedWidget,
@@ -23,6 +19,7 @@ from PySide6.QtWidgets import (
 from entities.file import File
 from entities.message_type import MessageType
 from entities.sql_scope import SqlScope
+from log.app_logger import get_logger
 from modules.files import service as files_service
 from ui.app.app_actions import notify
 from ui.utils.layouts import vbox
@@ -31,6 +28,8 @@ from ui.widgets.workspace.sql_editor.files_list import FilesList
 from ui.widgets.workspace.sql_editor.rename_file_dialog import RenameFileDialog
 from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
 from ui.widgets.workspace.sql_editor.toolbar import Toolbar
+
+logger = get_logger(__name__)
 
 
 class SqlEditorArea(QWidget):
@@ -539,7 +538,13 @@ class SqlEditorArea(QWidget):
                 Texto a insertar.
         """
 
-        self._get_current_editor().insert_query_at_cursor(text)
+        current_editor = self._get_current_editor()
+
+        if current_editor is None:
+            logger.warning("Query insertion aborted. No active editors.")
+            return
+
+        current_editor.insert_query_at_cursor(text)
 
     # ==================
     # === PUBLIC API ===
