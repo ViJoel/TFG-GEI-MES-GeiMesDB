@@ -528,44 +528,86 @@ class Workspace(QWidget):
         self,
         queries: list[str],
     ) -> None:
+        """
+        Guarda el historial de consultas ejecutadas.
+
+        Actualiza el historial de la sesión de forma
+        inmediata y persiste las consultas en segundo
+        plano para evitar bloquear la interfaz.
+
+        Args:
+            queries (list[str]):
+                Consultas SQL ejecutadas.
+        """
 
         notify(
             MessageType.WARNING,
             "Saving queries history...",
         )
 
-        # Forzar el repintado de la UI antes de iniciar una operación
-        # síncrona que bloqueará temporalmente el hilo principal.
-        AppContext.get_app().processEvents()
+        entries: list[QueriesHistoryEntry] = []
 
-        try:
+        for query in queries:
 
-            entries: list[QueriesHistoryEntry] = []
-
-            for q in queries:
-
-                entry = QueriesHistoryEntry(
-                    connection_id=self.connection.id,
-                    query=q,
-                )
-
-                entries.append(entry)
-
-                self.results_view.add_entry_to_session_queries_history(entry=entry)
-
-            save_queries_history_batch(
-                connection=self.connection,
-                entries=entries,
+            entry = QueriesHistoryEntry(
+                connection_id=self.connection.id,
+                query=query,
             )
 
-            notify(MessageType.SUCCESS, "Queries history updated.")
+            entries.append(entry)
 
-        except:
+            self.results_view.add_entry_to_session_queries_history(entry=entry)
 
-            notify(
-                MessageType.SUCCESS,
-                "Error updating queries history.\nSee logs for details.",
-            )
+        AppContext.get_task_manager().run(
+            self._save_queries_history_backend,
+            entries,
+            on_success=self._on_save_queries_history_success,
+            on_error=self._on_save_queries_history_error,
+        )
+
+    def _save_queries_history_backend(
+        self,
+        entries: list[QueriesHistoryEntry],
+    ) -> None:
+        """
+        Persiste el historial de consultas en
+        segundo plano.
+        """
+
+        save_queries_history_batch(
+            connection=self.connection,
+            entries=entries,
+        )
+
+    def _on_save_queries_history_success(
+        self,
+        _: None,
+    ) -> None:
+        """
+        Notifica que el historial se ha
+        almacenado correctamente.
+        """
+
+        notify(
+            MessageType.SUCCESS,
+            "Queries history updated.",
+        )
+
+    def _on_save_queries_history_error(
+        self,
+        error: WorkerError,
+    ) -> None:
+        """
+        Gestiona los errores producidos al
+        guardar el historial de consultas.
+        """
+
+        logger.error(f"Error updating queries history.\n{error.traceback}")
+
+        notify(
+            MessageType.ERROR,
+            "Error updating queries history.\nSee logs for details.",
+        )
 
     # ==================
     # === PUBLIC API ===
