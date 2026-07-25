@@ -178,6 +178,16 @@ class Workspace(QWidget):
         actualiza los resultados.
         """
 
+        notify(
+            MessageType.WARNING,
+            "Saving changes...",
+        )
+
+        # Fuerza el repintado de la interfaz para que la
+        # notificación sea visible antes de iniciar una
+        # operación síncrona potencialmente bloqueante.
+        AppContext.get_app().processEvents()
+
         saving_operation_success: bool = False
 
         connection = self.connection
