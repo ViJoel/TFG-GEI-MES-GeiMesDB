@@ -144,11 +144,11 @@ class Toolbar(QWidget):
         """
 
         self.execute_selection_button.setToolTip(
-            "Execute the text selected.<br><br><b>Shortcut:</b> <code>Ctrl + Enter</code>"
+            "Execute the text selected.<br><br><b>Shortcut:</b> <code>Ctrl + Alt + Enter</code>"
         )
 
         self.execute_query_button.setToolTip(
-            "Execute the query under the cursor.<br><br><b>Shortcut:</b> <code>Ctrl + Alt + Enter</code>"
+            "Execute the query under the cursor.<br><br><b>Shortcut:</b> <code>Ctrl + Enter</code>"
         )
 
         self.execute_script_button.setToolTip(
