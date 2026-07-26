@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QTextEdit,
 )
 
+from entities.file import File
 from entities.sql_scope import SqlScope
 from ui.themes.theme_manager import ThemeManager
 from ui.widgets.workspace.sql_editor.line_number_area import LineNumberArea
@@ -46,6 +47,9 @@ class SqlEditor(QPlainTextEdit):
         list,
         object,
     )
+    file_modified = Signal(File)
+    save_changes = Signal(File)
+    rename_file = Signal(File)
 
     # ============
     # === INIT ===
@@ -53,14 +57,21 @@ class SqlEditor(QPlainTextEdit):
 
     def __init__(
         self,
+        file: File,
     ) -> None:
         """
         Inicializa el editor sql.
+
+        Args:
+            file (File):
+                Archivo abierto asociado al editor.
         """
 
         super().__init__()
 
         self.setObjectName("sql_editor")
+
+        self.file = file
 
         self._setup_ui()
         self._connect_signals()
@@ -77,6 +88,8 @@ class SqlEditor(QPlainTextEdit):
         """
 
         self.setPlaceholderText("Write SQL query...")
+
+        self.setPlainText(self.file.content)
 
         self.verticalScrollBar().setSingleStep(1)
         self.horizontalScrollBar().setSingleStep(1)
@@ -237,15 +250,21 @@ class SqlEditor(QPlainTextEdit):
         self,
     ) -> None:
         """
-        Notifica al autocompletador que el contenido
-        del documento ha cambiado.
+        Gestiona la modificación del contenido del editor.
 
-        Permite actualizar las sugerencias dinámicas
-        cuando sea necesario.
+        Actualiza el contenido del archivo asociado, notifica
+        que el archivo ha sido modificado y refresca las
+        sugerencias dinámicas del autocompletador.
         """
 
+        text = self.toPlainText()
+
+        self.file.content = text
+
+        self.file_modified.emit(self.file)
+
         self.completer.update_document_completion(
-            self.toPlainText(),
+            text,
         )
 
     # =====================
@@ -406,13 +425,13 @@ class SqlEditor(QPlainTextEdit):
 
         modifiers = event.modifiers()
 
-        # Tab -> 4 espacios
+        # Tab -> 4 espacios.
         if event.key() == Qt.Key.Key_Tab:
             self.insertPlainText("    ")
             return
 
-        # Ctrl + Shift + Enter -> Ejecutar script
-        elif (
+        # Ctrl + Shift + Enter -> Ejecutar script.
+        if (
             event.key() == Qt.Key.Key_Return
             and modifiers & Qt.KeyboardModifier.ControlModifier
             and modifiers & Qt.KeyboardModifier.ShiftModifier
@@ -420,8 +439,8 @@ class SqlEditor(QPlainTextEdit):
             self.execute(SqlScope.FULL_SCRIPT)
             return
 
-        # Ctrl + Alt + Enter -> Ejecutar texto seleccionado
-        elif (
+        # Ctrl + Alt + Enter -> Ejecutar texto seleccionado.
+        if (
             event.key() == Qt.Key.Key_Return
             and modifiers & Qt.KeyboardModifier.ControlModifier
             and modifiers & Qt.KeyboardModifier.AltModifier
@@ -429,15 +448,31 @@ class SqlEditor(QPlainTextEdit):
             self.execute(SqlScope.SELECTED_TEXT)
             return
 
-        # Ctrl + Enter -> Ejecutar consulta actual
-        elif (
+        # Ctrl + Enter -> Ejecutar consulta actual.
+        if (
             event.key() == Qt.Key.Key_Return
             and modifiers & Qt.KeyboardModifier.ControlModifier
         ):
             self.execute(SqlScope.ACTUAL_QUERY)
             return
 
-        # Shift + Tab -> No hacer nada
+        # Ctrl + S -> Guardar cambios.
+        if (
+            event.key() == Qt.Key.Key_S
+            and modifiers & Qt.KeyboardModifier.ControlModifier
+        ):
+            self.save_changes.emit(self.file)
+            return
+
+        # Ctrl + R -> Renombrar archivo.
+        if (
+            event.key() == Qt.Key.Key_R
+            and modifiers & Qt.KeyboardModifier.ControlModifier
+        ):
+            self.rename_file.emit(self.file)
+            return
+
+        # Shift + Tab -> No hacer nada.
         if event.key() == Qt.Key.Key_Backtab:
             event.accept()
             return

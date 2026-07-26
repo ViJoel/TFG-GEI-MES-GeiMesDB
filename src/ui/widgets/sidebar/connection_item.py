@@ -25,7 +25,10 @@ class ConnectionItem(QWidget):
     # === INIT ===
     # ============
 
-    def __init__(self, connection: Connection) -> None:
+    def __init__(
+        self,
+        connection: Connection,
+    ) -> None:
         """
         Inicializa el item.
 
@@ -45,7 +48,9 @@ class ConnectionItem(QWidget):
     # === UI SETUP ===
     # ================
 
-    def _setup_ui(self) -> None:
+    def _setup_ui(
+        self,
+    ) -> None:
         """
         Construye la interfaz principal del widget.
         """
@@ -80,7 +85,10 @@ class ConnectionItem(QWidget):
     # === UI STATE ===
     # ================
 
-    def set_selected(self, selected: bool) -> None:
+    def set_selected(
+        self,
+        selected: bool,
+    ) -> None:
         """
         Actualiza el estado de selección del item.
 
@@ -91,7 +99,9 @@ class ConnectionItem(QWidget):
         self.setProperty("selected", "true" if selected else "false")
         self._refresh_style()
 
-    def _refresh_style(self) -> None:
+    def _refresh_style(
+        self,
+    ) -> None:
         """
         Reaplica el estilo del widget.
         """

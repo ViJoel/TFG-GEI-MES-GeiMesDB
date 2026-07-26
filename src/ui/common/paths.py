@@ -107,6 +107,16 @@ CONNECTION_QUERIES_HISTORY_QSS = os.path.join(
     "connection_queries_history.qss",
 )
 
+FILES_LIST_QSS = os.path.join(
+    STYLES_DIR,
+    "files_list.qss",
+)
+
+FILES_LIST_ITEM_QSS = os.path.join(
+    STYLES_DIR,
+    "files_list_item.qss",
+)
+
 FONTS_QSS = os.path.join(
     STYLES_DIR,
     "fonts.qss",
@@ -120,6 +130,11 @@ HOME_QSS = os.path.join(
 NOTIFICATIONS_QSS = os.path.join(
     STYLES_DIR,
     "notifications.qss",
+)
+
+RENAME_FILE_DIALOG_QSS = os.path.join(
+    STYLES_DIR,
+    "rename_file_dialog.qss",
 )
 
 RESULTS_VIEW_QSS = os.path.join(
@@ -167,11 +182,15 @@ TOOLBAR_SEPARATOR_QSS = os.path.join(
     "toolbar_separator.qss",
 )
 
+TOOLTIP_QSS = os.path.join(
+    STYLES_DIR,
+    "tooltip.qss",
+)
+
 WORKSPACE_QSS = os.path.join(
     STYLES_DIR,
     "workspace.qss",
 )
-
 
 STYLE_FILES = [
     BASE_QSS,
@@ -181,9 +200,12 @@ STYLE_FILES = [
     CONNECTIONS_LIST_QSS,
     CONNECTIONS_LIST_BUTTONS_QSS,
     CONNECTION_QUERIES_HISTORY_QSS,
+    FILES_LIST_QSS,
+    FILES_LIST_ITEM_QSS,
     FONTS_QSS,
     HOME_QSS,
     NOTIFICATIONS_QSS,
+    RENAME_FILE_DIALOG_QSS,
     RESULTS_VIEW_QSS,
     SCROLLBAR_QSS,
     SESSION_QUERIES_HISTORY_QSS,
@@ -193,5 +215,6 @@ STYLE_FILES = [
     TOOLBAR_QSS,
     TOOLBAR_BUTTON_QSS,
     TOOLBAR_SEPARATOR_QSS,
+    TOOLTIP_QSS,
     WORKSPACE_QSS,
 ]

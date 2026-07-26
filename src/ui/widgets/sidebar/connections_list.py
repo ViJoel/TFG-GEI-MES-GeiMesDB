@@ -434,7 +434,9 @@ class ConnectionsList(QWidget):
 
         dialog = ConfirmationDialog(
             title="Delete connection",
-            message=(f"Are you sure you want to delete '{connection.name}'?"),
+            message=(
+                f"Are you sure you want to delete <code><b>{connection.name}</b></code>?"
+            ),
             parent=self,
         )
 

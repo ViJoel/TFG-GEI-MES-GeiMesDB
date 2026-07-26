@@ -9,7 +9,7 @@ QSplitter::handle {
 
 QSplitter::handle:horizontal {
     background-color: $splitter_background_color;
-    margin: 12px 0px 12px 0px;
+    margin: 12px 10px 12px 10px;
 }
 
 QSplitter::handle:vertical {

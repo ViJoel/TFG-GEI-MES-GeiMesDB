@@ -353,7 +353,32 @@ THEME.update(
     {
         "dialog_background_color": GRAY_800,
         "dialog_border_color": GRAY_700,
-        "dialog_label_background_color": TRANSPARENT,
+        "dialog_text_background_color": TRANSPARENT,
+    }
+)
+
+# ==================
+# === FILES LIST ===
+# ==================
+THEME.update(
+    {
+        "files_list_background_color": GRAY_950,
+        "files_list_border_color": THEME["primary"],
+    }
+)
+
+# =======================
+# === FILES LIST ITEM ===
+# =======================
+THEME.update(
+    {
+        "files_list_item_background_color": "rgba(139, 195, 74, 0.10)",
+        "files_list_item_background_color_hover": "rgba(139, 195, 74, 0.20)",
+        "files_list_item_background_color_selected": "rgba(139, 195, 74, 0.30)",
+        "files_list_item_color": THEME["secondary"],
+        # Botón
+        "files_list_item_close_button_background_color_hover": "rgba(197, 225, 165, 0.25)",
+        "files_list_item_close_button_background_color_pressed": "rgba(197, 225, 165, 0.50)",
     }
 )
 
@@ -396,6 +421,26 @@ THEME.update(
         "notification_warning_color": DARK_YELLOW,
     }
 )
+
+# ==========================
+# === RENAME FILE DIALOG ===
+# ==========================
+THEME.update(
+    {
+        # Dialog
+        "rename_file_dialog_background_color": GRAY_950,
+        "rename_file_dialog_border_color": GRAY_800,
+        "rename_file_dialog_color": THEME["text"],
+        # Input
+        "rename_file_dialog_input_background_color": GRAY_900,
+        "rename_file_dialog_input_background_color_hover": GRAY_800,
+        "rename_file_dialog_input_border_color": GRAY_800,
+        "rename_file_dialog_input_border_color_hover": GRAY_700,
+        "rename_file_dialog_input_color": THEME["text"],
+        "rename_file_dialog_input_color_hover": THEME["text_hover"],
+    }
+)
+
 
 # ==================
 # === SCROLLBARS ===
@@ -575,5 +620,23 @@ THEME.update(
         "toolbar_button_execute_script_icon_color": THEME["primary"],
         "toolbar_button_undo_icon_color": THEME["secondary"],
         "toolbar_button_redo_icon_color": THEME["secondary"],
+        "toolbar_button_new_file_icon_color": LIGHT_BLUE,
+        "toolbar_button_open_file_icon_color": YELLOW,
+        "toolbar_button_rename_file_icon_color": LIGHT_RED,
+        "toolbar_button_save_file_icon_color": GRAY_200,
+    }
+)
+
+# ===============
+# === TOOLTIP ===
+# ===============
+THEME.update(
+    {
+        "tooltip_background_color": GRAY_950,
+        "tooltip_border_color": THEME["primary"],
+        "tooltip_color": THEME["text"],
+        # Tipografía
+        "tooltip_font_family": "'Consolas'",
+        "tooltip_font_size": "12px",
     }
 )
