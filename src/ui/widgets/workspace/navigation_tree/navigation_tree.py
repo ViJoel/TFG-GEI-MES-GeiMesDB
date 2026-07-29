@@ -561,15 +561,3 @@ class NavigationTree(QWidget):
         )
 
         self._load_data()
-
-
-"""
-📁
-👁️
-⚡
-🔗
-🛡️
-📄
-🔒
-🔑
-"""

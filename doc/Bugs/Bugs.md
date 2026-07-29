@@ -6,6 +6,8 @@
 
   - [qt.accessibility.atspi](qt-accessibility-atspi-warning.md)
 
+  - [SAWarning](sawarning.md)
+
 - Bugs:
 
   - [Múltiples intentos de conexión por pulsaciones repetidas del botón](connectionslist-multiple-connect-attempts.md)

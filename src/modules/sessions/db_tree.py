@@ -7,6 +7,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine.reflection import Inspector
+from sqlalchemy.sql.sqltypes import NullType
 
 from log.app_logger import get_logger
 from modules.sessions.manager import get_session
@@ -167,6 +168,85 @@ def _extract_table_metadata(
     }
 
 
+def _build_columns(
+    columns_data: list[dict[str, Any]],
+    pk_cols: set[str] | None = None,
+    fk_cols: set[str] | None = None,
+    unique_cols: set[str] | None = None,
+) -> list[
+    dict[
+        str,
+        Any,
+    ]
+]:
+    """
+    Construye la representación interna de un conjunto de columnas.
+
+    Normaliza la información devuelta por SQLAlchemy para que todas las
+    columnas (tanto de tablas como de vistas) compartan el mismo modelo de
+    datos dentro de la aplicación.
+
+    Los tipos de datos no reconocidos por SQLAlchemy (`NullType`) se
+    representan como `"UNKNOWN TYPE"`.
+
+    Args:
+        columns_data:
+            Lista de diccionarios de columnas devuelta por
+            `Inspector.get_columns()`.
+
+        pk_cols:
+            Conjunto de nombres de columnas pertenecientes a la clave
+            primaria.
+
+        fk_cols:
+            Conjunto de nombres de columnas que forman parte de una clave
+            foránea.
+
+        unique_cols:
+            Conjunto de nombres de columnas con una restricción UNIQUE.
+
+    Returns:
+        list[dict[str, Any]]:
+            Lista de diccionarios normalizados con los atributos:
+
+            - `name`
+            - `type`
+            - `pk`
+            - `fk`
+            - `unique`
+            - `nullable`
+            - `default`
+    """
+
+    pk_cols = pk_cols or set()
+    fk_cols = fk_cols or set()
+    unique_cols = unique_cols or set()
+
+    columns = []
+
+    for col in columns_data:
+
+        column_type = (
+            "UNKNOWN TYPE" if isinstance(col["type"], NullType) else str(col["type"])
+        )
+
+        columns.append(
+            {
+                "name": col["name"],
+                "type": column_type,
+                "pk": col["name"] in pk_cols,
+                "fk": col["name"] in fk_cols,
+                "unique": col["name"] in unique_cols,
+                "nullable": col.get("nullable", True),
+                "default": (
+                    str(col["default"]) if col.get("default") is not None else None
+                ),
+            }
+        )
+
+    return columns
+
+
 def _extract_columns(
     inspector: Inspector,
     table_name: str,
@@ -180,7 +260,11 @@ def _extract_columns(
     ]
 ]:
     """
-    Construye la lista de definición de columnas para una tabla.
+    Extrae y normaliza las columnas de una tabla.
+
+    Obtiene la definición de las columnas mediante el `Inspector` de
+    SQLAlchemy y delega la construcción del modelo interno en
+    `_build_columns()`.
 
     Args:
         inspector:
@@ -195,28 +279,21 @@ def _extract_columns(
         fk_cols:
             Conjunto de nombres de columnas que forman claves foráneas.
 
+        unique_cols:
+            Conjunto de nombres de columnas con una restricción UNIQUE.
+
     Returns:
         list[dict[str, Any]]:
-            Lista de diccionarios con atributos de cada columna
-            (name, type, pk, fk, nullable, default).
+            Lista de columnas normalizadas según el modelo interno de la
+            aplicación.
     """
 
-    columns = []
-    for col in inspector.get_columns(table_name):
-        columns.append(
-            {
-                "name": col["name"],
-                "type": str(col["type"]),
-                "pk": col["name"] in pk_cols,
-                "fk": col["name"] in fk_cols,
-                "unique": col["name"] in unique_cols,
-                "nullable": col.get("nullable", True),
-                "default": (
-                    str(col["default"]) if col.get("default") is not None else None
-                ),
-            }
-        )
-    return columns
+    return _build_columns(
+        inspector.get_columns(table_name),
+        pk_cols,
+        fk_cols,
+        unique_cols,
+    )
 
 
 def _extract_constraints(
@@ -405,7 +482,10 @@ def _extract_single_view_metadata(
     Any,
 ]:
     """
-    Extrae las columnas, código SQL de definición e índices de una vista específica.
+    Extrae los metadatos de una vista específica.
+
+    Obtiene la definición SQL, las columnas normalizadas y, en el caso de
+    vistas materializadas, los índices asociados.
 
     Args:
         inspector:
@@ -419,19 +499,18 @@ def _extract_single_view_metadata(
 
     Returns:
         dict[str, Any]:
-            Diccionario con atributos 'is_materialized', 'definition', 'columns' e 'indexes'.
+            Diccionario con los siguientes atributos:
+
+            - `is_materialized`
+            - `definition`
+            - `columns`
+            - `indexes`
     """
 
     try:
-        columns = [
-            {
-                "name": col["name"],
-                "type": str(
-                    col["type"],
-                ),
-            }
-            for col in inspector.get_columns(view_name)
-        ]
+        columns = _build_columns(
+            inspector.get_columns(view_name),
+        )
     except (
         AttributeError,
         NotImplementedError,
@@ -465,43 +544,3 @@ def _extract_single_view_metadata(
         "columns": columns,
         "indexes": indexes,
     }
-
-
-# --- Ejemplo de uso con SQLite ---
-if __name__ == "__main__":
-    import pprint
-
-    # Base de datos en memoria
-    engine = create_engine("sqlite:///:memory:")
-
-    # En SQLAlchemy 2.0+ las sentencias SQL se ejecutan usando un bloque de conexión y text()
-    with engine.connect() as conn:
-        conn.execute(text("""
-            CREATE TABLE usuarios (
-                id INTEGER PRIMARY KEY,
-                email VARCHAR(255) NOT NULL UNIQUE
-            );
-        """))
-
-        conn.execute(text("""
-            CREATE TABLE pedidos (
-                id INTEGER PRIMARY KEY,
-                usuario_id INTEGER,
-                total DECIMAL(10,2),
-                FOREIGN KEY(usuario_id) REFERENCES usuarios(id)
-            );
-        """))
-
-        conn.execute(text("""
-            CREATE VIEW vista_pedidos AS 
-            SELECT p.id, u.email, p.total 
-            FROM pedidos p 
-            JOIN usuarios u ON p.usuario_id = u.id;
-        """))
-
-        # Confirmamos los cambios en la base de datos en memoria
-        conn.commit()
-
-    # Ejecutamos la extracción pasando el engine
-    metadata_extraida = _extract_schema_metadata(engine)
-    pprint.pprint(metadata_extraida)
