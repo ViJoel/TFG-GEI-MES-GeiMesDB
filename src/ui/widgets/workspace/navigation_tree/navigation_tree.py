@@ -2,6 +2,7 @@ from typing import Any
 
 import qtawesome as qta
 from PySide6.QtCore import (
+    QModelIndex,
     QSortFilterProxyModel,
     Qt,
 )
@@ -430,6 +431,8 @@ class NavigationTree(QWidget):
             self._on_filter_changed,
         )
 
+        self.tree_view.collapsed.connect(self._on_item_collapsed)
+
         """
         self.tree_view.customContextMenuRequested.connect(
             self.show_context_menu,
@@ -450,9 +453,50 @@ class NavigationTree(QWidget):
         if text:
             self.tree_view.expandAll()
 
+    def _on_item_collapsed(
+        self,
+        index: QModelIndex,
+    ) -> None:
+
+        current = self.tree_view.currentIndex()
+
+        if current.isValid() and self._is_descendant(current, index):
+            self.tree_view.clearSelection()
+            self.tree_view.setCurrentIndex(QModelIndex())
+
+        self._collapse_children(index)
+
     # =====================
     # === EVENT HELPERS ===
     # =====================
+
+    def _is_descendant(
+        self,
+        child: QModelIndex,
+        parent: QModelIndex,
+    ) -> bool:
+
+        while child.isValid():
+
+            if child == parent:
+                return True
+
+            child = child.parent()
+
+        return False
+
+    def _collapse_children(
+        self,
+        parent: QModelIndex,
+    ) -> None:
+
+        model = self.tree_view.model()
+
+        for row in range(model.rowCount(parent)):
+            child = model.index(row, 0, parent)
+
+            self._collapse_children(child)
+            self.tree_view.collapse(child)
 
     # ====================
     # === QT OVERRIDES ===

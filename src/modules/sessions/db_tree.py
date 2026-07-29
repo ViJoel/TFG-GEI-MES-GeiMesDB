@@ -1,10 +1,6 @@
 from typing import Any
 
-from sqlalchemy import (
-    create_engine,
-    inspect,
-    text,
-)
+from sqlalchemy import inspect
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine.reflection import Inspector
 from sqlalchemy.sql.sqltypes import NullType
@@ -53,7 +49,30 @@ def get_db_tree(
         )
         return None
 
-    return _extract_schema_metadata(session.engine)
+    try:
+
+        logger.info(
+            "Loading database tree for connection '%s'.",
+            connection_id,
+        )
+
+        tree_data = _extract_schema_metadata(session.engine)
+
+        logger.success(
+            "Database tree loaded successfully for connection '%s'.",
+            connection_id,
+        )
+
+        return tree_data
+
+    except Exception:
+
+        logger.exception(
+            "Unable to load database tree for connection '%s'.",
+            connection_id,
+        )
+
+        return None
 
 
 # ==========================================
@@ -89,6 +108,12 @@ def _extract_schema_metadata(
 
     views_data = _extract_all_views_metadata(inspector)
 
+    logger.debug(
+        "Found %d tables and %d views.",
+        len(tables_data),
+        len(views_data),
+    )
+
     return {
         "tables": tables_data,
         "views": views_data,
@@ -121,6 +146,11 @@ def _extract_table_metadata(
         dict[str, Any]:
             Diccionario con las claves 'columns', 'constraints' e 'indexes'.
     """
+
+    logger.debug(
+        "Inspecting table '%s'.",
+        table_name,
+    )
 
     pk_constraint = inspector.get_pk_constraint(table_name)
     pk_cols = set(
@@ -170,6 +200,7 @@ def _extract_table_metadata(
 
 def _build_columns(
     columns_data: list[dict[str, Any]],
+    table_name: str,
     pk_cols: set[str] | None = None,
     fk_cols: set[str] | None = None,
     unique_cols: set[str] | None = None,
@@ -226,9 +257,18 @@ def _build_columns(
 
     for col in columns_data:
 
-        column_type = (
-            "UNKNOWN TYPE" if isinstance(col["type"], NullType) else str(col["type"])
-        )
+        if isinstance(col["type"], NullType):
+
+            column_type = "UNKNOWN TYPE"
+
+            logger.warning(
+                "Unknown SQL type detected in '%s.%s'. Using placeholder type.",
+                table_name,
+                col["name"],
+            )
+
+        else:
+            column_type = str(col["type"])
 
         columns.append(
             {
@@ -243,6 +283,12 @@ def _build_columns(
                 ),
             }
         )
+
+    logger.debug(
+        "Found %d columns in '%s'.",
+        len(columns),
+        table_name,
+    )
 
     return columns
 
@@ -290,6 +336,7 @@ def _extract_columns(
 
     return _build_columns(
         inspector.get_columns(table_name),
+        table_name,
         pk_cols,
         fk_cols,
         unique_cols,
@@ -372,6 +419,12 @@ def _extract_constraints(
             }
         )
 
+    logger.debug(
+        "Found %d constraints in '%s'.",
+        len(constraints),
+        table_name,
+    )
+
     return constraints
 
 
@@ -400,7 +453,7 @@ def _extract_indexes(
             cada índice.
     """
 
-    return [
+    indexes = [
         {
             "name": idx.get("name"),
             "columns": idx.get(
@@ -414,6 +467,14 @@ def _extract_indexes(
         }
         for idx in inspector.get_indexes(table_name)
     ]
+
+    logger.debug(
+        "Found %d indexes in '%s'.",
+        len(indexes),
+        table_name,
+    )
+
+    return indexes
 
 
 # ==========================================
@@ -450,6 +511,7 @@ def _extract_all_views_metadata(
         NotImplementedError,
     ):
         view_names = []
+        logger.debug("Current SQLAlchemy dialect does not support standard views.")
 
     try:
         materialized_view_names = inspector.get_materialized_view_names()
@@ -458,10 +520,18 @@ def _extract_all_views_metadata(
         NotImplementedError,
     ):
         materialized_view_names = []
+        logger.debug("Current SQLAlchemy dialect does not support materialized views.")
 
     all_views = [(v, False) for v in view_names] + [
         (mv, True) for mv in materialized_view_names
     ]
+
+    logger.debug(
+        "Found %d views (%d standard, %d materialized).",
+        len(all_views),
+        len(view_names),
+        len(materialized_view_names),
+    )
 
     return {
         view_name: _extract_single_view_metadata(
@@ -507,15 +577,25 @@ def _extract_single_view_metadata(
             - `indexes`
     """
 
+    logger.debug(
+        "Inspecting view '%s'.",
+        view_name,
+    )
+
     try:
         columns = _build_columns(
             inspector.get_columns(view_name),
+            view_name,
         )
     except (
         AttributeError,
         NotImplementedError,
     ):
         columns = []
+        logger.debug(
+            "Unable to retrieve columns for view '%s'.",
+            view_name,
+        )
 
     try:
         definition = inspector.get_view_definition(view_name)
@@ -524,6 +604,10 @@ def _extract_single_view_metadata(
         NotImplementedError,
     ):
         definition = None
+        logger.debug(
+            "View '%s' does not expose its SQL definition.",
+            view_name,
+        )
 
     indexes = []
     if is_materialized:
@@ -536,7 +620,10 @@ def _extract_single_view_metadata(
             AttributeError,
             NotImplementedError,
         ):
-            pass
+            logger.debug(
+                "Materialized view '%s' does not expose indexes.",
+                view_name,
+            )
 
     return {
         "is_materialized": is_materialized,
