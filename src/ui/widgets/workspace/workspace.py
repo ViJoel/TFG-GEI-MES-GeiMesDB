@@ -1,5 +1,6 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
+    QSizePolicy,
     QSplitter,
     QWidget,
 )
@@ -23,6 +24,7 @@ from ui.app.app_actions import notify
 from ui.app.app_context import AppContext
 from ui.app.worker_error import WorkerError
 from ui.utils.layouts import hbox
+from ui.widgets.workspace.navigation_tree.navigation_tree import NavigationTree
 from ui.widgets.workspace.results_view.results_view import ResultsView
 from ui.widgets.workspace.sql_editor.sql_editor_area import SqlEditorArea
 
@@ -85,22 +87,28 @@ class Workspace(QWidget):
 
         self.sql_editor_area = SqlEditorArea()
         self.results_view = ResultsView(connection=self.connection)
+        self.navigation_tree = NavigationTree(connection_id=self.connection.id)
 
-        self.splitter = QSplitter(Qt.Vertical)
+        splitter = QSplitter(Qt.Vertical)
+        splitter.setHandleWidth(4)
+        splitter.setSizes([1, 3])
+        splitter.setChildrenCollapsible(True)
+        splitter.addWidget(self.sql_editor_area)
+        splitter.addWidget(self.results_view)
 
-        # Grosor de la barra.
-        self.splitter.setHandleWidth(4)
+        splitter_2 = QSplitter(Qt.Horizontal)
+        splitter_2.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Expanding,
+        )
+        splitter_2.setHandleWidth(1)
+        splitter_2.setSizes([3, 1])
+        splitter_2.setChildrenCollapsible(True)
 
-        # Proporciones de tamaño iniciales de los widgets.
-        self.splitter.setSizes([1, 3])
+        splitter_2.addWidget(splitter)
+        splitter_2.addWidget(self.navigation_tree)
 
-        # Evita que alguno de los paneles desaparezca.
-        self.splitter.setChildrenCollapsible(True)
-
-        self.splitter.addWidget(self.sql_editor_area)
-        self.splitter.addWidget(self.results_view)
-
-        main_layout.addWidget(self.splitter)
+        main_layout.addWidget(splitter_2)
 
     # ===============
     # === SIGNALS ===

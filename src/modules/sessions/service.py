@@ -1,8 +1,11 @@
+from typing import Any
+
 from entities.connection import Connection
 from entities.query_result import QueryResult
 from entities.script_result import ScriptResult
 from entities.session import Session
 from entities.update_operation import UpdateOperation
+from modules.sessions.db_tree import get_db_tree as gdt
 from modules.sessions.manager import close_all_sessions as cas
 from modules.sessions.manager import close_session as cs
 from modules.sessions.manager import execute_query as eq
@@ -198,3 +201,31 @@ def execute_updates(
         connection_id=connection_id,
         operations=operations,
     )
+
+
+def get_db_tree(
+    connection_id: str,
+) -> (
+    dict[
+        str,
+        Any,
+    ]
+    | None
+):
+    """
+    Obtiene la estructura completa de metadatos (tablas y vistas)
+    de una base de datos activa.
+
+    Args:
+        connection_id:
+            Identificador único de la conexión/sesión activa.
+
+    Returns:
+        dict[str,Any]:
+            Un diccionario con la estructura de la base de datos ("tables" y "views").
+
+        None:
+            Si no existe una sesión activa para el identificador proporcionado.
+    """
+
+    return gdt(connection_id=connection_id)
