@@ -1,0 +1,67 @@
+/* ======================== */
+/* === WIDGET PRINCIPAL === */
+/* ======================== */
+
+QWidget#navigation_tree {
+    background-color: $navigation_tree_background_color;
+    border: 2px solid $navigation_tree_border_color;
+    border-radius: 4px;
+}
+
+QWidget#navigation_tree QTreeView {
+    background-color: $navigation_tree_background_color;
+    border: none;
+    font-size: 12px;
+}
+
+/* ========================= */
+/* === BARRA DE FILTRADO === */
+/* ========================= */
+
+QLineEdit#navigation_tree_search_bar {
+    background-color: $navigation_tree_search_bar_background_color;
+    border: 1px solid $navigation_tree_search_bar_border_color;
+    border-radius: 4px;
+    color: $navigation_tree_search_bar_color;
+    font-size: 12px;
+    padding: 8px 12px;
+}
+
+QLineEdit#navigation_tree_search_bar:hover {
+    background-color: $navigation_tree_search_bar_background_color_hover;
+    border-color: $navigation_tree_search_bar_border_color_hover;
+    color: $navigation_tree_search_bar_color_hover;
+}
+
+QLineEdit#navigation_tree_search_bar:focus {
+    background-color: $navigation_tree_search_bar_background_color_focus;
+    border-color: $navigation_tree_search_bar_border_color_focus;
+    color: $navigation_tree_search_bar_color_focus;
+}
+
+/* ===================== */
+/* === ÁRBOL E ITEMS === */
+/* ===================== */
+
+/* Aspecto normal */
+QTreeView::item {
+    background-color: transparent;
+    border: none;
+}
+
+/* Al pasar el ratón */
+QTreeView::item:hover {
+    background-color: $navigation_tree_item_background_color_hover;
+}
+
+/* Seleccionado */
+QTreeView::item:selected,
+/* Seleccionado con foco */
+QTreeView::item:selected:active {
+    background-color: $navigation_tree_item_background_color_selected;
+}
+
+/* Seleccionado sin foco */
+QTreeView::item:selected:!active {
+    background-color: $navigation_tree_item_background_color_selected_not_active;
+}

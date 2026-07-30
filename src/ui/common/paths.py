@@ -127,6 +127,11 @@ HOME_QSS = os.path.join(
     "home.qss",
 )
 
+NAVIGATION_TREE_QSS = os.path.join(
+    STYLES_DIR,
+    "navigation_tree.qss",
+)
+
 NOTIFICATIONS_QSS = os.path.join(
     STYLES_DIR,
     "notifications.qss",
@@ -204,6 +209,7 @@ STYLE_FILES = [
     FILES_LIST_ITEM_QSS,
     FONTS_QSS,
     HOME_QSS,
+    NAVIGATION_TREE_QSS,
     NOTIFICATIONS_QSS,
     RENAME_FILE_DIALOG_QSS,
     RESULTS_VIEW_QSS,

@@ -167,7 +167,6 @@ THEME.update(
         "connection_form_input_color": THEME["text"],
         "connection_form_input_color_hover": THEME["text_hover"],
         "connection_form_input_color_focus": THEME["primary"],
-        "connection_form_input_placeholder_color": GRAY_450,
         "connection_form_arrow_icon": ARROW_DOWN_ICON.replace("\\", "/"),
     }
 )
@@ -394,6 +393,45 @@ THEME.update(
     }
 )
 
+# =======================
+# === NAVIGATION TREE ===
+# =======================
+THEME.update(
+    {
+        # Panel
+        "navigation_tree_background_color": GRAY_950,
+        "navigation_tree_border_color": THEME["primary"],
+        # Barra de búsqueda
+        "navigation_tree_search_bar_background_color": GRAY_900,
+        "navigation_tree_search_bar_border_color": GRAY_800,
+        "navigation_tree_search_bar_color": THEME["text"],
+        "navigation_tree_search_bar_background_color_hover": GRAY_800,
+        "navigation_tree_search_bar_border_color_hover": GRAY_700,
+        "navigation_tree_search_bar_color_hover": THEME["text_hover"],
+        "navigation_tree_search_bar_background_color_focus": GRAY_900,
+        "navigation_tree_search_bar_border_color_focus": THEME["primary"],
+        "navigation_tree_search_bar_color_focus": THEME["primary"],
+        # Iconos
+        "navigation_tree_icon_color": "#9e9e9e",
+        "navigation_tree_column_icon_color": "#90a4ae",
+        "navigation_tree_constraint_icon_color": "#1355b2",
+        "navigation_tree_constraint_fk_icon_color": "#03a9f4",
+        "navigation_tree_constraint_nullable_icon_color": "#e0e0e0",
+        "navigation_tree_constraint_pk_icon_color": "#ffca28",
+        "navigation_tree_constraint_unique_icon_color": "#fe5d51",
+        "navigation_tree_folder_icon_color": "#f9a825",
+        "navigation_tree_index_icon_color": "#ab47bc",
+        "navigation_tree_materialized_view_icon_color": "#42a5f5",
+        "navigation_tree_table_icon_color": "#42a5f5",
+        "navigation_tree_view_icon_color": "#26a69a",
+        # Items
+        "navigation_tree_item_background_color_hover": GRAY_800,
+        "navigation_tree_item_background_color_selected": GRAY_600,
+        "navigation_tree_item_background_color_selected_active": GREEN_RGBA_25,
+        "navigation_tree_item_background_color_selected_not_active": GRAY_700,
+    }
+)
+
 # =====================
 # === NOTIFICATIONS ===
 # =====================
@@ -440,7 +478,6 @@ THEME.update(
         "rename_file_dialog_input_color_hover": THEME["text_hover"],
     }
 )
-
 
 # ==================
 # === SCROLLBARS ===
@@ -509,7 +546,6 @@ THEME.update(
         "sql_completer_selection_color": GRAY_950,
     }
 )
-
 
 # ==================
 # === SQL EDITOR ===

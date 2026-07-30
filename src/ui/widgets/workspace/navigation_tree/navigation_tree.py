@@ -24,7 +24,9 @@ from modules.sessions.service import get_db_tree
 from ui.app.app_actions import notify
 from ui.app.app_context import AppContext
 from ui.app.worker_error import WorkerError
+from ui.themes.theme_manager import ThemeManager
 from ui.utils.layouts import vbox
+from ui.widgets.workspace.navigation_tree.no_focus_style import NoFocusStyle
 from ui.widgets.workspace.navigation_tree.tree_node_type import TreeNodeType
 
 logger = get_logger(__name__)
@@ -68,6 +70,13 @@ class NavigationTree(QWidget):
         Construye la interfaz principal del widget.
         """
 
+        self.setObjectName("navigation_tree")
+
+        self.setAttribute(
+            Qt.WidgetAttribute.WA_StyledBackground,
+            True,
+        )
+
         layout = vbox(
             ml=4,
             mt=4,
@@ -108,6 +117,7 @@ class NavigationTree(QWidget):
     ) -> QLineEdit:
 
         search_bar = QLineEdit()
+        search_bar.setObjectName("navigation_tree_search_bar")
         search_bar.setPlaceholderText("🔍 Filter schema...")
         search_bar.setClearButtonEnabled(True)
 
@@ -123,6 +133,11 @@ class NavigationTree(QWidget):
         tree_view.setHeaderHidden(True)
         tree_view.setAnimated(True)
         tree_view.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        tree_view.setStyle(
+            NoFocusStyle(
+                tree_view.style(),
+            )
+        )
 
         # Menú Contextual
         tree_view.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -341,79 +356,101 @@ class NavigationTree(QWidget):
 
             case TreeNodeType.TABLES_FOLDER:
                 icon_name = "mdi.folder-table"
-                color = "#f9a825"
+                color = self._get_icon_color("folder")
 
             case TreeNodeType.TABLE:
                 icon_name = "mdi.table"
-                color = "#42a5f5"
+                color = self._get_icon_color("table")
 
             case TreeNodeType.COLUMNS_FOLDER:
                 icon_name = "mdi.folder-table-outline"
-                color = "#f9a825"
+                color = self._get_icon_color("folder")
 
             case TreeNodeType.COLUMN:
                 if data["pk"]:
                     icon_name = "mdi.key-variant"
-                    color = "#ffca28"
+                    color = self._get_icon_color("constraint_pk")
                 elif data["fk"]:
                     icon_name = "mdi.link-variant"
-                    color = "#03a9f4"
+                    color = self._get_icon_color("constraint_fk")
                 elif data.get("unique", False):
                     icon_name = "mdi.lock"
-                    color = "#fe5d51"
+                    color = self._get_icon_color("constraint_unique")
                 elif not data.get("nullable", True):
                     icon_name = "mdi.null"
-                    color = "#e0e0e0"
+                    color = self._get_icon_color("constraint_nullable")
                 else:
                     icon_name = "mdi6.view-column"
-                    color = "#90a4ae"
+                    color = self._get_icon_color("column")
 
             case TreeNodeType.CONSTRAINTS_FOLDER:
                 icon_name = "mdi.folder-lock"
-                color = "#f9a825"
+                color = self._get_icon_color("folder")
 
             case TreeNodeType.CONSTRAINT:
                 if data["type"] == "PRIMARY_KEY":
                     icon_name = "mdi.key-variant"
-                    color = "#ffca28"
+                    color = self._get_icon_color("constraint_pk")
                 elif data["type"] == "FOREIGN_KEY":
                     icon_name = "mdi.link-variant"
-                    color = "#03a9f4"
+                    color = self._get_icon_color("constraint_fk")
                 elif data["type"] == "UNIQUE":
                     icon_name = "mdi.lock"
-                    color = "#fe5d51"
+                    color = self._get_icon_color("constraint_unique")
                 else:
                     icon_name = "mdi.shield-half-full"
-                    color = "#000000"
+                    color = self._get_icon_color("constraint")
 
             case TreeNodeType.INDEXES_FOLDER:
                 icon_name = "mdi.folder-cog"
-                color = "#f9a825"
+                color = self._get_icon_color("folder")
 
             case TreeNodeType.INDEX:
                 icon_name = "mdi.lightning-bolt"
-                color = "#ab47bc"
+                color = self._get_icon_color("index")
 
             case TreeNodeType.VIEWS_FOLDER:
                 icon_name = "mdi6.folder-eye"
-                color = "#f9a825"
+                color = self._get_icon_color("folder")
 
             case TreeNodeType.VIEW:
                 if data["is_materialized"]:
                     icon_name = "mdi.table-headers-eye"
-                    color = "#42a5f5"
+                    color = self._get_icon_color("materialized_view")
                 else:
                     icon_name = "mdi6.table-eye"
-                    color = "#26a69a"
+                    color = self._get_icon_color("view")
 
             case _:
                 icon_name = "mdi.help-circle-outline"
-                color = "#9e9e9e"
+                color = self._get_icon_color()
 
         return qta.icon(
             icon_name,
             color=color,
         )
+
+    def _get_icon_color(
+        self,
+        color_id: str | None = None,
+    ) -> str:
+        """
+        Obtiene el color solicitado para el icono del árbol
+        del tema de color actualmente aplicado.
+
+        Args:
+            color_id (str):
+                Id del color en el tema.
+
+        Returns:
+            str:
+                Código del color.
+        """
+
+        if color_id is None:
+            return ThemeManager.get_color("navigation_tree_icon_color")
+        else:
+            return ThemeManager.get_color(f"navigation_tree_{color_id}_icon_color")
 
     # ===============
     # === SIGNALS ===
