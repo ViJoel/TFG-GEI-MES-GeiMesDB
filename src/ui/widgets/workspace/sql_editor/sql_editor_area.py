@@ -419,6 +419,7 @@ class SqlEditorArea(QWidget):
 
         self.editors.addWidget(editor)
         self.editors.setCurrentWidget(editor)
+        editor.setFocus()
 
     def _remove_file_and_editor(
         self,

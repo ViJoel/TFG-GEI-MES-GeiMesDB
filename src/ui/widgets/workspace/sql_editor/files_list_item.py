@@ -77,6 +77,10 @@ class CloseFileButton(QPushButton):
         self.previus_icon: QIcon = None
         self.setIcon(self.current_base_icon)
 
+        self.setToolTip(
+            "Close the editor tab.<br><br><b>Shortcut:</b> <code>Ctrl + W</code>"
+        )
+
     # ==================
     # === UI HELPERS ===
     # ==================
