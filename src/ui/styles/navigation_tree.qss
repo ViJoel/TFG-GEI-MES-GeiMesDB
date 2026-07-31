@@ -43,6 +43,10 @@ QLineEdit#navigation_tree_search_bar:focus {
 /* === ÁRBOL E ITEMS === */
 /* ===================== */
 
+QTreeView:focus {
+    outline: none;
+}
+
 /* Aspecto normal */
 QTreeView::item {
     background-color: transparent;

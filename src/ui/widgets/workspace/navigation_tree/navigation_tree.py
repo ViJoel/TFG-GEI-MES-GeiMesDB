@@ -3,8 +3,10 @@ from typing import Any
 import qtawesome as qta
 from PySide6.QtCore import (
     QModelIndex,
+    QPoint,
     QSortFilterProxyModel,
     Qt,
+    Signal,
 )
 from PySide6.QtGui import (
     QIcon,
@@ -19,6 +21,7 @@ from PySide6.QtWidgets import (
 )
 
 from entities.message_type import MessageType
+from entities.navigation_tree_action import NavigationTreeAction
 from log.app_logger import get_logger
 from modules.sessions.service import get_db_tree
 from ui.app.app_actions import notify
@@ -26,7 +29,9 @@ from ui.app.app_context import AppContext
 from ui.app.worker_error import WorkerError
 from ui.themes.theme_manager import ThemeManager
 from ui.utils.layouts import vbox
-from ui.widgets.workspace.navigation_tree.no_focus_style import NoFocusStyle
+from ui.widgets.workspace.navigation_tree.navigation_tree_context_menu import (
+    NavigationTreeContextMenu,
+)
 from ui.widgets.workspace.navigation_tree.tree_node_type import TreeNodeType
 
 logger = get_logger(__name__)
@@ -37,6 +42,11 @@ class NavigationTree(QWidget):
     # =================
     # === VARIABLES ===
     # =================
+
+    action_requested = Signal(
+        NavigationTreeAction,
+        str,
+    )
 
     # ============
     # === INIT ===
@@ -133,11 +143,6 @@ class NavigationTree(QWidget):
         tree_view.setHeaderHidden(True)
         tree_view.setAnimated(True)
         tree_view.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        tree_view.setStyle(
-            NoFocusStyle(
-                tree_view.style(),
-            )
-        )
 
         # Menú Contextual
         tree_view.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -470,11 +475,9 @@ class NavigationTree(QWidget):
 
         self.tree_view.collapsed.connect(self._on_item_collapsed)
 
-        """
         self.tree_view.customContextMenuRequested.connect(
-            self.show_context_menu,
+            self._show_context_menu,
         )
-        """
 
     # ======================
     # === EVENT HANDLERS ===
@@ -502,6 +505,30 @@ class NavigationTree(QWidget):
             self.tree_view.setCurrentIndex(QModelIndex())
 
         self._collapse_children(index)
+
+    def _show_context_menu(
+        self,
+        pos: QPoint,
+    ) -> None:
+
+        index = self.tree_view.indexAt(pos)
+
+        if not index.isValid():
+            return
+
+        source_index = self.proxy_model.mapToSource(index)
+
+        item = self.model.itemFromIndex(source_index)
+
+        menu = NavigationTreeContextMenu(
+            parent=self,
+            item=item,
+            connection_id=self.connection_id,
+        )
+
+        menu.action_requested.connect(self.action_requested.emit)
+
+        menu.exec(self.tree_view.viewport().mapToGlobal(pos))
 
     # =====================
     # === EVENT HELPERS ===

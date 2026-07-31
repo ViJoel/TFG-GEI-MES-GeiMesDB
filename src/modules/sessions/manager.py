@@ -187,6 +187,30 @@ def get_session(
     return _active_sessions.get(connection_id)
 
 
+def get_session_driver(
+    connection_id: str,
+) -> Driver | None:
+    """
+    Recupera una sesión activa registrada.
+
+    Args:
+        connection_id (str):
+            Identificador único de la conexión.
+
+    Returns:
+        Driver | None:
+            Driver de la conexión asociada a la sesión
+            activa encontrada o None si no existe la sesión.
+    """
+
+    session = get_session(connection_id)
+
+    if session is None:
+        return
+    else:
+        return session.connection.driver
+
+
 def has_session(
     connection_id: str,
 ) -> bool:

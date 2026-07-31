@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
 
 from entities.connection import Connection
 from entities.message_type import MessageType
+from entities.navigation_tree_action import NavigationTreeAction
 from entities.queries_history_entry import QueriesHistoryEntry
 from entities.query_execution import QueryExecution
 from entities.script_result import ScriptResult
@@ -132,6 +133,10 @@ class Workspace(QWidget):
 
         self.results_view.query_selected_from_session_queries_history.connect(
             self._on_query_selected_from_session_queries_history
+        )
+
+        self.navigation_tree.action_requested.connect(
+            self._on_navigation_tree_action,
         )
 
     # ======================
@@ -282,6 +287,34 @@ class Workspace(QWidget):
     ) -> None:
 
         self.sql_editor_area.set_query_text(query)
+
+    def _on_navigation_tree_action(
+        self,
+        action: NavigationTreeAction,
+        sql: str,
+    ) -> None:
+        """
+        Gestiona las acciones emitidas por el árbol de navegación.
+
+        Dependiendo del tipo de acción solicitada, inserta el SQL en el
+        editor o lo ejecuta directamente utilizando el mismo flujo de
+        ejecución que el resto de la aplicación.
+
+        Args:
+            action (NavigationTreeAction):
+                Acción solicitada por el menú contextual del árbol.
+
+            sql (str):
+                Sentencia SQL asociada a la acción.
+        """
+
+        match action:
+
+            case NavigationTreeAction.INSERT_SQL_IN_EDITOR:
+                self.sql_editor_area.set_query_text(sql)
+
+            case NavigationTreeAction.EXECUTE_SQL:
+                self._execute_query([sql])
 
     # =====================
     # === EVENT HELPERS ===
