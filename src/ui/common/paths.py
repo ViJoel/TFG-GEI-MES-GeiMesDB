@@ -132,6 +132,11 @@ NAVIGATION_TREE_QSS = os.path.join(
     "navigation_tree.qss",
 )
 
+NAVIGATION_TREE_CONTEXT_MENU_QSS = os.path.join(
+    STYLES_DIR,
+    "navigation_tree_context_menu.qss",
+)
+
 NOTIFICATIONS_QSS = os.path.join(
     STYLES_DIR,
     "notifications.qss",
@@ -210,6 +215,7 @@ STYLE_FILES = [
     FONTS_QSS,
     HOME_QSS,
     NAVIGATION_TREE_QSS,
+    NAVIGATION_TREE_CONTEXT_MENU_QSS,
     NOTIFICATIONS_QSS,
     RENAME_FILE_DIALOG_QSS,
     RESULTS_VIEW_QSS,

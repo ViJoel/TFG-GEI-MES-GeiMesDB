@@ -1,0 +1,25 @@
+QMenu#navigation_tree_context_menu {
+    background-color: $navigation_tree_context_menu_background_color;
+    border: 1px solid $navigation_tree_context_menu_border_color;
+    color: $navigation_tree_context_menu_color;
+    padding: 4px;
+}
+
+QMenu#navigation_tree_context_menu::item {
+    background-color: transparent;
+    border-radius: 4px;
+    font-size: 12px;
+    min-width: 140px;
+    padding: 6px 12px;
+}
+
+QMenu#navigation_tree_context_menu::item:selected {
+    background-color: $navigation_tree_context_menu_item_selected_background_color;
+    color: $navigation_tree_context_menu_item_selected_color;
+}
+
+QMenu#navigation_tree_context_menu::separator {
+    background-color: $navigation_tree_context_menu_separator_color;
+    height: 1px;
+    margin: 4px 8px;
+}

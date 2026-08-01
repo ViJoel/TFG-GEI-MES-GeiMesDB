@@ -80,6 +80,8 @@ class NavigationTreeContextMenu(QMenu):
         Construye el menú contextual según el tipo de nodo.
         """
 
+        self.setObjectName("navigation_tree_context_menu")
+
         match self.node_type:
 
             case TreeNodeType.TABLES_FOLDER:

@@ -433,6 +433,20 @@ THEME.update(
     }
 )
 
+# ====================================
+# === NAVIGATION TREE CONTEXT MENU ===
+# ====================================
+THEME.update(
+    {
+        "navigation_tree_context_menu_background_color": "#252526",
+        "navigation_tree_context_menu_border_color": THEME["primary"],
+        "navigation_tree_context_menu_color": "#d4d4d4",
+        "navigation_tree_context_menu_item_selected_background_color": "rgba(139, 195, 74, 0.10)",
+        "navigation_tree_context_menu_item_selected_color": THEME["secondary"],
+        "navigation_tree_context_menu_separator_color": "#3f3f46",
+    }
+)
+
 # =====================
 # === NOTIFICATIONS ===
 # =====================
