@@ -419,6 +419,7 @@ THEME.update(
         "navigation_tree_constraint_nullable_icon_color": "#e0e0e0",
         "navigation_tree_constraint_pk_icon_color": "#ffca28",
         "navigation_tree_constraint_unique_icon_color": "#fe5d51",
+        "navigation_tree_constraint_check_icon_color": "#338337",
         "navigation_tree_folder_icon_color": "#f9a825",
         "navigation_tree_index_icon_color": "#ab47bc",
         "navigation_tree_materialized_view_icon_color": "#42a5f5",

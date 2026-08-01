@@ -425,6 +425,15 @@ def _extract_constraints(
         table_name,
     )
 
+    for ck in inspector.get_check_constraints(table_name):
+        constraints.append(
+            {
+                "name": ck.get("name"),
+                "type": "CHECK",
+                "sqltext": ck.get("sqltext"),
+            }
+        )
+
     return constraints
 
 

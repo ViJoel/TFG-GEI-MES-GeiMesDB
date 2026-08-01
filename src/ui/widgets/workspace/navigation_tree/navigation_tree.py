@@ -265,7 +265,7 @@ class NavigationTree(QWidget):
         constraint: dict[str, Any],
     ) -> QStandardItem:
 
-        text = constraint["name"]
+        text = constraint["name"] or constraint["type"]
 
         if constraint["type"] == "PRIMARY_KEY":
             text += f" ({', '.join(constraint['columns'])})"
@@ -279,6 +279,9 @@ class NavigationTree(QWidget):
 
         elif constraint["type"] == "UNIQUE":
             text += f" ({', '.join(constraint['columns'])})"
+
+        elif constraint["type"] == "CHECK":
+            text += f" ({constraint['sqltext']})"
 
         return self._create_node(
             text=text,
@@ -402,6 +405,9 @@ class NavigationTree(QWidget):
                 elif data["type"] == "UNIQUE":
                     icon_name = "mdi.lock"
                     color = self._get_icon_color("constraint_unique")
+                elif data["type"] == "CHECK":
+                    icon_name = "mdi.check-bold"
+                    color = self._get_icon_color("constraint_check")
                 else:
                     icon_name = "mdi.shield-half-full"
                     color = self._get_icon_color("constraint")

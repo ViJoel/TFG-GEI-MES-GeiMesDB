@@ -32,6 +32,23 @@ class NavigationTreeContextMenu(QMenu):
         item: QStandardItem,
         connection_id: str,
     ) -> None:
+        """
+        Inicializa el menú contextual del árbol de navegación.
+
+        Obtiene la información del nodo seleccionado, carga el driver de la
+        conexión activa y configura las acciones disponibles según el tipo de nodo.
+
+        Args:
+            parent:
+                Widget padre del menú contextual.
+
+            item (QStandardItem):
+                Elemento del árbol sobre el que se ha solicitado
+                el menú contextual.
+
+            connection_id (str):
+                Identificador de la conexión activa.
+        """
 
         super().__init__(parent)
 
@@ -43,6 +60,12 @@ class NavigationTreeContextMenu(QMenu):
         self.data = node["data"]
 
         self.sgbd_driver = get_session_driver(connection_id)
+
+        # Extraer el nombre de la tabla del nodo padre en el árbol:
+        self.parent_item = item.parent()
+        self.parent_name = (
+            self.parent_item.text() if self.parent_item is not None else None
+        )
 
         self._setup_ui()
 
@@ -66,25 +89,25 @@ class NavigationTreeContextMenu(QMenu):
                 pass
 
             case TreeNodeType.COLUMNS_FOLDER:
-                pass
+                self._build_columns_folder_menu()
 
             case TreeNodeType.COLUMN:
                 pass
 
             case TreeNodeType.CONSTRAINTS_FOLDER:
-                pass
+                self._build_constraints_folder_menu()
 
             case TreeNodeType.CONSTRAINT:
                 pass
 
             case TreeNodeType.INDEXES_FOLDER:
-                pass
+                self._build_indexes_folder_menu()
 
             case TreeNodeType.INDEX:
                 pass
 
             case TreeNodeType.VIEWS_FOLDER:
-                pass
+                self._build_views_folder_menu()
 
             case TreeNodeType.VIEW:
                 pass
@@ -122,6 +145,106 @@ class NavigationTreeContextMenu(QMenu):
             self._on_show_tables_metadata,
         )
 
+    def _build_columns_folder_menu(
+        self,
+    ) -> None:
+        """
+        Construye el menú contextual del nodo raíz de columnas.
+        """
+
+        generate_select_action = self.addAction(
+            "Generate SELECT",
+        )
+
+        generate_select_action.triggered.connect(
+            self._on_generate_select_columns,
+        )
+
+        self.addSeparator()
+
+        show_metadata_action = self.addAction(
+            "Show metadata",
+        )
+
+        show_metadata_action.triggered.connect(
+            self._on_show_columns_metadata,
+        )
+
+    def _build_constraints_folder_menu(
+        self,
+    ) -> None:
+        """
+        Construye el menú contextual del nodo raíz de restricciones.
+        """
+
+        generate_select_action = self.addAction(
+            "Generate SELECT",
+        )
+
+        generate_select_action.triggered.connect(
+            self._on_generate_select_constraints,
+        )
+
+        self.addSeparator()
+
+        show_metadata_action = self.addAction(
+            "Show metadata",
+        )
+
+        show_metadata_action.triggered.connect(
+            self._on_show_constraints_metadata,
+        )
+
+    def _build_indexes_folder_menu(
+        self,
+    ) -> None:
+        """
+        Construye el menú contextual del nodo raíz de índices.
+        """
+
+        generate_select_action = self.addAction(
+            "Generate SELECT",
+        )
+
+        generate_select_action.triggered.connect(
+            self._on_generate_select_indexes,
+        )
+
+        self.addSeparator()
+
+        show_metadata_action = self.addAction(
+            "Show metadata",
+        )
+
+        show_metadata_action.triggered.connect(
+            self._on_show_indexes_metadata,
+        )
+
+    def _build_views_folder_menu(
+        self,
+    ) -> None:
+        """
+        Construye el menú contextual del nodo raíz de vistas.
+        """
+
+        generate_select_action = self.addAction(
+            "Generate SELECT",
+        )
+
+        generate_select_action.triggered.connect(
+            self._on_generate_select_views,
+        )
+
+        self.addSeparator()
+
+        show_metadata_action = self.addAction(
+            "Show metadata",
+        )
+
+        show_metadata_action.triggered.connect(
+            self._on_show_views_metadata,
+        )
+
     # ===============
     # === SIGNALS ===
     # ===============
@@ -129,6 +252,136 @@ class NavigationTreeContextMenu(QMenu):
     # ======================
     # === EVENT HANDLERS ===
     # ======================
+
+    def _on_generate_select_tables(
+        self,
+    ) -> None:
+        """
+        Genera la consulta SQL con la metadata de las tablas
+        y solicita su inserción en el editor SQL.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+            self._generate_tables_metadata(),
+        )
+
+    def _on_show_tables_metadata(
+        self,
+    ) -> None:
+        """
+        Genera la consulta SQL con la metadata de las tablas
+        y solicita su ejecución.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.EXECUTE_SQL,
+            self._generate_tables_metadata(),
+        )
+
+    def _on_generate_select_columns(
+        self,
+    ) -> None:
+        """
+        Genera la consulta SQL con la metadata de las columnas
+        y solicita su inserción en el editor SQL.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+            self._generate_columns_metadata(),
+        )
+
+    def _on_show_columns_metadata(
+        self,
+    ) -> None:
+        """
+        Genera la consulta SQL con la metadata de las columnas
+        y solicita su ejecución.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.EXECUTE_SQL,
+            self._generate_columns_metadata(),
+        )
+
+    def _on_generate_select_constraints(
+        self,
+    ) -> None:
+        """
+        Genera la consulta SQL con la metadata de las restricciones
+        y solicita su inserción en el editor SQL.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+            self._generate_constraints_metadata(),
+        )
+
+    def _on_show_constraints_metadata(
+        self,
+    ) -> None:
+        """
+        Genera la consulta SQL con la metadata de las restricciones
+        y solicita su ejecución.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.EXECUTE_SQL,
+            self._generate_constraints_metadata(),
+        )
+
+    def _on_generate_select_indexes(
+        self,
+    ) -> None:
+        """
+        Genera la consulta SQL con la metadata de los índices
+        y solicita su inserción en el editor SQL.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+            self._generate_indexes_metadata(),
+        )
+
+    def _on_show_indexes_metadata(
+        self,
+    ) -> None:
+        """
+        Genera la consulta SQL con la metadata de los índices
+        y solicita su ejecución.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.EXECUTE_SQL,
+            self._generate_indexes_metadata(),
+        )
+
+    def _on_generate_select_views(
+        self,
+    ) -> None:
+        """
+        Genera la consulta SQL con la metadata de las vistas
+        y solicita su inserción en el editor SQL.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+            self._generate_views_metadata(),
+        )
+
+    def _on_show_views_metadata(
+        self,
+    ) -> None:
+        """
+        Genera la consulta SQL con la metadata de las vistas
+        y solicita su ejecución.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.EXECUTE_SQL,
+            self._generate_views_metadata(),
+        )
 
     # =====================
     # === EVENT HELPERS ===
@@ -142,27 +395,17 @@ class NavigationTreeContextMenu(QMenu):
     # === PRIVATE API ===
     # ===================
 
-    def _on_generate_select_tables(
-        self,
-    ) -> None:
-
-        self.action_requested.emit(
-            NavigationTreeAction.INSERT_SQL_IN_EDITOR,
-            self._generate_tables_metadata(),
-        )
-
-    def _on_show_tables_metadata(
-        self,
-    ) -> None:
-
-        self.action_requested.emit(
-            NavigationTreeAction.EXECUTE_SQL,
-            self._generate_tables_metadata(),
-        )
-
     def _generate_tables_metadata(
         self,
     ) -> str:
+        """
+        Genera la consulta SQL para obtener la metadata de las tablas
+        según el sistema gestor de base de datos activo.
+
+        Returns:
+            str:
+                Consulta SQL compatible con el driver configurado.
+        """
 
         match self.sgbd_driver:
 
@@ -192,6 +435,189 @@ class NavigationTreeContextMenu(QMenu):
 
             case Driver.ORACLE:
                 return "SELECT *\n" "FROM user_tables\n" "ORDER BY table_name;"
+
+        return ""
+
+    def _generate_columns_metadata(
+        self,
+    ) -> str:
+        """
+        Genera la consulta SQL para obtener la metadata de las columnas
+        de la tabla seleccionada según el sistema gestor de base de datos activo.
+
+        Returns:
+            str:
+                Consulta SQL compatible con el driver configurado.
+        """
+
+        match self.sgbd_driver:
+
+            case Driver.POSTGRESQL:
+                return (
+                    "SELECT *\n"
+                    "FROM information_schema.columns\n"
+                    "WHERE table_schema = 'public'\n"
+                    f"AND table_name = '{self.parent_name}'\n"
+                    "ORDER BY ordinal_position;"
+                )
+
+            case Driver.MYSQL:
+                return (
+                    "SELECT *\n"
+                    "FROM information_schema.columns\n"
+                    "WHERE table_schema = DATABASE()\n"
+                    f"AND table_name = '{self.parent_name}'\n"
+                    "ORDER BY ordinal_position;"
+                )
+
+            case Driver.SQLITE:
+                return f"PRAGMA table_info('{self.parent_name}');"
+
+            case Driver.ORACLE:
+                return (
+                    "SELECT *\n"
+                    "FROM user_tab_columns\n"
+                    f"WHERE table_name = '{self.parent_name.upper()}'\n"
+                    "ORDER BY column_id;"
+                )
+
+        return ""
+
+    def _generate_constraints_metadata(
+        self,
+    ) -> str:
+        """
+        Genera la consulta SQL para obtener la metadata de las restricciones
+        de la tabla seleccionada según el sistema gestor de base de datos activo.
+
+        Returns:
+            str:
+                Consulta SQL compatible con el driver configurado.
+        """
+
+        match self.sgbd_driver:
+
+            case Driver.POSTGRESQL:
+                return (
+                    "SELECT *\n"
+                    "FROM information_schema.table_constraints\n"
+                    "WHERE constraint_schema = 'public'\n"
+                    f"AND table_name = '{self.parent_name}'\n"
+                    "ORDER BY constraint_name;"
+                )
+
+            case Driver.MYSQL:
+                return (
+                    "SELECT *\n"
+                    "FROM information_schema.table_constraints\n"
+                    "WHERE constraint_schema = DATABASE()\n"
+                    f"AND table_name = '{self.parent_name}'\n"
+                    "ORDER BY constraint_name;"
+                )
+
+            case Driver.SQLITE:
+                return (
+                    "SELECT *\n"
+                    "FROM sqlite_master\n"
+                    "WHERE type = 'table'\n"
+                    f"AND name = '{self.parent_name}';"
+                )
+
+            case Driver.ORACLE:
+                return (
+                    "SELECT *\n"
+                    "FROM user_constraints\n"
+                    f"WHERE table_name = '{self.parent_name.upper()}'\n"
+                    "ORDER BY constraint_name;"
+                )
+
+        return ""
+
+    def _generate_indexes_metadata(
+        self,
+    ) -> str:
+        """
+        Genera la consulta SQL para obtener la metadata de los índices
+        de la tabla seleccionada según el sistema gestor de base de datos activo.
+
+        Returns:
+            str:
+                Consulta SQL compatible con el driver configurado.
+        """
+
+        match self.sgbd_driver:
+
+            case Driver.POSTGRESQL:
+                return (
+                    "SELECT *\n"
+                    "FROM pg_indexes\n"
+                    "WHERE schemaname = 'public'\n"
+                    f"AND tablename = '{self.parent_name}'\n"
+                    "ORDER BY indexname;"
+                )
+
+            case Driver.MYSQL:
+                return (
+                    "SELECT *\n"
+                    "FROM information_schema.statistics\n"
+                    "WHERE table_schema = DATABASE()\n"
+                    f"AND table_name = '{self.parent_name}'\n"
+                    "ORDER BY index_name;"
+                )
+
+            case Driver.SQLITE:
+                return f"PRAGMA index_list('{self.parent_name}');"
+
+            case Driver.ORACLE:
+                return (
+                    "SELECT *\n"
+                    "FROM user_indexes\n"
+                    f"WHERE table_name = '{self.parent_name.upper()}'\n"
+                    "ORDER BY index_name;"
+                )
+
+        return ""
+
+    def _generate_views_metadata(
+        self,
+    ) -> str:
+        """
+        Genera la consulta SQL para obtener la metadata de las vistas
+        según el sistema gestor de base de datos activo.
+
+        Returns:
+            str:
+                Consulta SQL compatible con el driver configurado.
+        """
+
+        match self.sgbd_driver:
+
+            case Driver.POSTGRESQL:
+                return (
+                    "SELECT *\n"
+                    "FROM information_schema.views\n"
+                    "WHERE table_schema = 'public'\n"
+                    "ORDER BY table_name;"
+                )
+
+            case Driver.MYSQL:
+                return (
+                    "SELECT *\n"
+                    "FROM information_schema.views\n"
+                    "WHERE table_schema = DATABASE()\n"
+                    "ORDER BY table_name;"
+                )
+
+            case Driver.SQLITE:
+                return (
+                    "SELECT *\n"
+                    "FROM sqlite_master\n"
+                    "WHERE type = 'view'\n"
+                    "ORDER BY name;"
+                )
+
+            case Driver.ORACLE:
+                return "SELECT *\n" "FROM user_views\n" "ORDER BY view_name;"
 
         return ""
 
