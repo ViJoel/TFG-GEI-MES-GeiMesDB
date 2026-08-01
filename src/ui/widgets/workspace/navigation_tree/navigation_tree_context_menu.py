@@ -2,7 +2,10 @@ from PySide6.QtCore import (
     Qt,
     Signal,
 )
-from PySide6.QtGui import QStandardItem
+from PySide6.QtGui import (
+    QGuiApplication,
+    QStandardItem,
+)
 from PySide6.QtWidgets import QMenu
 
 from entities.driver import Driver
@@ -106,7 +109,7 @@ class NavigationTreeContextMenu(QMenu):
                 self._build_indexes_folder_menu()
 
             case TreeNodeType.INDEX:
-                pass
+                self._build_index_menu()
 
             case TreeNodeType.VIEWS_FOLDER:
                 self._build_views_folder_menu()
@@ -114,13 +117,11 @@ class NavigationTreeContextMenu(QMenu):
             case TreeNodeType.VIEW:
                 pass
 
-    # ================
-    # === UI STATE ===
-    # ================
-
     # ==================
     # === UI HELPERS ===
     # ==================
+
+    # Tablas
 
     def _build_tables_folder_menu(
         self,
@@ -147,6 +148,8 @@ class NavigationTreeContextMenu(QMenu):
             self._on_show_tables_metadata,
         )
 
+    # Columnas
+
     def _build_columns_folder_menu(
         self,
     ) -> None:
@@ -171,6 +174,8 @@ class NavigationTreeContextMenu(QMenu):
         show_metadata_action.triggered.connect(
             self._on_show_columns_metadata,
         )
+
+    # Restricciones
 
     def _build_constraints_folder_menu(
         self,
@@ -197,6 +202,8 @@ class NavigationTreeContextMenu(QMenu):
             self._on_show_constraints_metadata,
         )
 
+    # Índices
+
     def _build_indexes_folder_menu(
         self,
     ) -> None:
@@ -221,6 +228,45 @@ class NavigationTreeContextMenu(QMenu):
         show_metadata_action.triggered.connect(
             self._on_show_indexes_metadata,
         )
+
+    # Índice
+
+    def _build_index_menu(
+        self,
+    ) -> None:
+        """
+        Construye el menú contextual de un índice.
+        """
+
+        generate_select_action = self.addAction(
+            "Generate SELECT",
+        )
+
+        generate_select_action.triggered.connect(
+            self._on_generate_select_index,
+        )
+
+        self.addSeparator()
+
+        show_details_action = self.addAction(
+            "Show details",
+        )
+
+        show_details_action.triggered.connect(
+            self._on_show_index_details,
+        )
+
+        self.addSeparator()
+
+        copy_name_action = self.addAction(
+            "Copy name",
+        )
+
+        copy_name_action.triggered.connect(
+            self._on_copy_index_name,
+        )
+
+    # Vistas
 
     def _build_views_folder_menu(
         self,
@@ -247,13 +293,11 @@ class NavigationTreeContextMenu(QMenu):
             self._on_show_views_metadata,
         )
 
-    # ===============
-    # === SIGNALS ===
-    # ===============
-
     # ======================
     # === EVENT HANDLERS ===
     # ======================
+
+    # Tablas
 
     def _on_generate_select_tables(
         self,
@@ -281,6 +325,8 @@ class NavigationTreeContextMenu(QMenu):
             self._generate_tables_metadata(),
         )
 
+    # Columnas
+
     def _on_generate_select_columns(
         self,
     ) -> None:
@@ -306,6 +352,8 @@ class NavigationTreeContextMenu(QMenu):
             NavigationTreeAction.EXECUTE_SQL,
             self._generate_columns_metadata(),
         )
+
+    # Restricciones
 
     def _on_generate_select_constraints(
         self,
@@ -333,6 +381,8 @@ class NavigationTreeContextMenu(QMenu):
             self._generate_constraints_metadata(),
         )
 
+    # Índices
+
     def _on_generate_select_indexes(
         self,
     ) -> None:
@@ -358,6 +408,47 @@ class NavigationTreeContextMenu(QMenu):
             NavigationTreeAction.EXECUTE_SQL,
             self._generate_indexes_metadata(),
         )
+
+    # Índice
+
+    def _on_generate_select_index(
+        self,
+    ) -> None:
+        """
+        Genera la consulta SQL con el detalle del índice seleccionado
+        y solicita su inserción en el editor SQL.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+            self._generate_index_details(),
+        )
+
+    def _on_show_index_details(
+        self,
+    ) -> None:
+        """
+        Genera la consulta SQL con el detalle del índice seleccionado
+        y solicita su ejecución.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.EXECUTE_SQL,
+            self._generate_index_details(),
+        )
+
+    def _on_copy_index_name(
+        self,
+    ) -> None:
+        """
+        Copia al portapapeles el nombre del índice seleccionado.
+        """
+
+        QGuiApplication.clipboard().setText(
+            self.data["name"],
+        )
+
+    # Vistas
 
     def _on_generate_select_views(
         self,
@@ -385,17 +476,11 @@ class NavigationTreeContextMenu(QMenu):
             self._generate_views_metadata(),
         )
 
-    # =====================
-    # === EVENT HELPERS ===
-    # =====================
-
-    # ====================
-    # === QT OVERRIDES ===
-    # ====================
-
     # ===================
     # === PRIVATE API ===
     # ===================
+
+    # Tablas
 
     def _generate_tables_metadata(
         self,
@@ -439,6 +524,8 @@ class NavigationTreeContextMenu(QMenu):
                 return "SELECT *\n" "FROM user_tables\n" "ORDER BY table_name;"
 
         return ""
+
+    # Columnas
 
     def _generate_columns_metadata(
         self,
@@ -484,6 +571,8 @@ class NavigationTreeContextMenu(QMenu):
                 )
 
         return ""
+
+    # Restricciones
 
     def _generate_constraints_metadata(
         self,
@@ -535,6 +624,8 @@ class NavigationTreeContextMenu(QMenu):
 
         return ""
 
+    # Índices
+
     def _generate_indexes_metadata(
         self,
     ) -> str:
@@ -580,6 +671,57 @@ class NavigationTreeContextMenu(QMenu):
 
         return ""
 
+    # Índice
+
+    def _generate_index_details(
+        self,
+    ) -> str:
+        """
+        Genera la consulta SQL para obtener el detalle del índice
+        seleccionado según el sistema gestor de base de datos activo.
+
+        Returns:
+            str:
+                Consulta SQL compatible con el driver configurado.
+        """
+
+        match self.sgbd_driver:
+
+            case Driver.POSTGRESQL:
+                return (
+                    "SELECT *\n"
+                    "FROM pg_indexes\n"
+                    "WHERE schemaname = 'public'\n"
+                    f"AND indexname = '{self.data["name"]}';"
+                )
+
+            case Driver.MYSQL:
+                return (
+                    "SELECT *\n"
+                    "FROM information_schema.statistics\n"
+                    "WHERE table_schema = DATABASE()\n"
+                    f"AND index_name = '{self.data["name"]}';"
+                )
+
+            case Driver.SQLITE:
+                return (
+                    "SELECT *\n"
+                    "FROM sqlite_master\n"
+                    "WHERE type = 'index'\n"
+                    f"AND name = '{self.data["name"]}';"
+                )
+
+            case Driver.ORACLE:
+                return (
+                    "SELECT *\n"
+                    "FROM user_indexes\n"
+                    f"WHERE index_name = '{self.data['name'].upper()}';"
+                )
+
+        return ""
+
+    # Vistas
+
     def _generate_views_metadata(
         self,
     ) -> str:
@@ -622,7 +764,3 @@ class NavigationTreeContextMenu(QMenu):
                 return "SELECT *\n" "FROM user_views\n" "ORDER BY view_name;"
 
         return ""
-
-    # ==================
-    # === PUBLIC API ===
-    # ==================
