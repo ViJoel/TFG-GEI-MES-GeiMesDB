@@ -39,6 +39,24 @@ QLineEdit#navigation_tree_search_bar:focus {
     color: $navigation_tree_search_bar_color_focus;
 }
 
+/* ========================= */
+/* === BOTÓN DE REFRESCO === */
+/* ========================= */
+
+QPushButton#navigation_tree_refresh_button {
+    background-color: $navigation_tree_refresh_button_background_color;
+    border-color: $navigation_tree_refresh_button_border_color;
+    color: $navigation_tree_refresh_button_color;
+}
+
+QPushButton#navigation_tree_refresh_button:hover {
+    background-color: $navigation_tree_refresh_button_background_color_hover;
+}
+
+QPushButton#navigation_tree_refresh_button:pressed {
+    background-color: $navigation_tree_refresh_button_background_color_pressed;
+}
+
 /* ===================== */
 /* === ÁRBOL E ITEMS === */
 /* ===================== */

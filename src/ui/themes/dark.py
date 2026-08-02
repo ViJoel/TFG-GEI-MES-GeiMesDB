@@ -411,6 +411,12 @@ THEME.update(
         "navigation_tree_search_bar_background_color_focus": GRAY_900,
         "navigation_tree_search_bar_border_color_focus": THEME["primary"],
         "navigation_tree_search_bar_color_focus": THEME["primary"],
+        # Botón de refresco
+        "navigation_tree_refresh_button_background_color": GRAY_800,
+        "navigation_tree_refresh_button_border_color": THEME["accent"],
+        "navigation_tree_refresh_button_color": THEME["accent"],
+        "navigation_tree_refresh_button_background_color_hover": "rgba(76, 141, 218, 0.20)",
+        "navigation_tree_refresh_button_background_color_pressed": "rgba(76, 141, 218, 0.10)",
         # Iconos
         "navigation_tree_icon_color": "#9e9e9e",
         "navigation_tree_column_icon_color": "#90a4ae",

@@ -16,6 +16,7 @@ from PySide6.QtGui import (
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QLineEdit,
+    QPushButton,
     QTreeView,
     QWidget,
 )
@@ -28,7 +29,10 @@ from ui.app.app_actions import notify
 from ui.app.app_context import AppContext
 from ui.app.worker_error import WorkerError
 from ui.themes.theme_manager import ThemeManager
-from ui.utils.layouts import vbox
+from ui.utils.layouts import (
+    hbox,
+    vbox,
+)
 from ui.widgets.workspace.navigation_tree.navigation_tree_context_menu import (
     NavigationTreeContextMenu,
 )
@@ -96,10 +100,21 @@ class NavigationTree(QWidget):
         )
         self.setLayout(layout)
 
+        search_layout = hbox(
+            sp=4,
+        )
+
         # Buscador
         self.search_bar = self._create_search_bar()
-        layout.addWidget(self.search_bar)
+        search_layout.addWidget(self.search_bar)
 
+        # Botón de refresco
+        self.refresh_button = self._create_refresh_button()
+        search_layout.addWidget(self.refresh_button)
+
+        layout.addLayout(search_layout)
+
+        # Árbol
         self.tree_view = self._create_tree_view()
         layout.addWidget(self.tree_view)
 
@@ -113,10 +128,6 @@ class NavigationTree(QWidget):
         self.proxy_model.setSourceModel(self.model)
         self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
         self.proxy_model.setRecursiveFilteringEnabled(True)
-
-    # ================
-    # === UI STATE ===
-    # ================
 
     # ==================
     # === UI HELPERS ===
@@ -132,6 +143,27 @@ class NavigationTree(QWidget):
         search_bar.setClearButtonEnabled(True)
 
         return search_bar
+
+    def _create_refresh_button(
+        self,
+    ) -> QPushButton:
+
+        button = QPushButton()
+
+        button.setObjectName("navigation_tree_refresh_button")
+
+        button.setIcon(
+            qta.icon(
+                "mdi.refresh",
+                color=ThemeManager.get_color(
+                    "navigation_tree_refresh_button_color",
+                ),
+            )
+        )
+
+        button.setToolTip("Refresh tree")
+
+        return button
 
     def _create_tree_view(
         self,
@@ -500,7 +532,13 @@ class NavigationTree(QWidget):
             self._on_filter_changed,
         )
 
-        self.tree_view.collapsed.connect(self._on_item_collapsed)
+        self.refresh_button.clicked.connect(
+            self.refresh,
+        )
+
+        self.tree_view.collapsed.connect(
+            self._on_item_collapsed,
+        )
 
         self.tree_view.customContextMenuRequested.connect(
             self._show_context_menu,
@@ -588,10 +626,6 @@ class NavigationTree(QWidget):
 
             self._collapse_children(child)
             self.tree_view.collapse(child)
-
-    # ====================
-    # === QT OVERRIDES ===
-    # ====================
 
     # ===================
     # === PRIVATE API ===
