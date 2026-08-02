@@ -103,7 +103,7 @@ class NavigationTreeContextMenu(QMenu):
                 self._build_constraints_folder_menu()
 
             case TreeNodeType.CONSTRAINT:
-                pass
+                self._build_constraint_menu()
 
             case TreeNodeType.INDEXES_FOLDER:
                 self._build_indexes_folder_menu()
@@ -200,6 +200,43 @@ class NavigationTreeContextMenu(QMenu):
 
         show_metadata_action.triggered.connect(
             self._on_show_constraints_metadata,
+        )
+
+    # Restricción
+
+    def _build_constraint_menu(
+        self,
+    ) -> None:
+        """
+        Construye el menú contextual de una restricción.
+        """
+
+        generate_select_action = self.addAction(
+            "Generate SELECT",
+        )
+
+        generate_select_action.triggered.connect(
+            self._on_generate_select_constraint,
+        )
+
+        self.addSeparator()
+
+        show_details_action = self.addAction(
+            "Show details",
+        )
+
+        show_details_action.triggered.connect(
+            self._on_show_constraint_details,
+        )
+
+        self.addSeparator()
+
+        copy_name_action = self.addAction(
+            "Copy name",
+        )
+
+        copy_name_action.triggered.connect(
+            self._on_copy_constraint_name,
         )
 
     # Índices
@@ -379,6 +416,45 @@ class NavigationTreeContextMenu(QMenu):
         self.action_requested.emit(
             NavigationTreeAction.EXECUTE_SQL,
             self._generate_constraints_metadata(),
+        )
+
+    # Restricción
+
+    def _on_generate_select_constraint(
+        self,
+    ) -> None:
+        """
+        Genera la consulta SQL con el detalle de la restricción
+        seleccionada y solicita su inserción en el editor SQL.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+            self._generate_constraint_details(),
+        )
+
+    def _on_show_constraint_details(
+        self,
+    ) -> None:
+        """
+        Genera la consulta SQL con el detalle de la restricción
+        seleccionada y solicita su ejecución.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.EXECUTE_SQL,
+            self._generate_constraint_details(),
+        )
+
+    def _on_copy_constraint_name(
+        self,
+    ) -> None:
+        """
+        Copia al portapapeles el nombre de la restricción seleccionada.
+        """
+
+        QGuiApplication.clipboard().setText(
+            self.data["name"],
         )
 
     # Índices
@@ -620,6 +696,55 @@ class NavigationTreeContextMenu(QMenu):
                     "FROM user_constraints\n"
                     f"WHERE table_name = '{self.parent_name.upper()}'\n"
                     "ORDER BY constraint_name;"
+                )
+
+        return ""
+
+    # Restricción
+
+    def _generate_constraint_details(
+        self,
+    ) -> str:
+        """
+        Genera la consulta SQL para obtener el detalle de la restricción
+        seleccionada según el sistema gestor de base de datos activo.
+
+        Returns:
+            str:
+                Consulta SQL compatible con el driver configurado.
+        """
+
+        match self.sgbd_driver:
+
+            case Driver.POSTGRESQL:
+                return (
+                    "SELECT *\n"
+                    "FROM information_schema.table_constraints\n"
+                    "WHERE constraint_schema = 'public'\n"
+                    f"AND constraint_name = '{self.data['name']}';"
+                )
+
+            case Driver.MYSQL:
+                return (
+                    "SELECT *\n"
+                    "FROM information_schema.table_constraints\n"
+                    "WHERE constraint_schema = DATABASE()\n"
+                    f"AND constraint_name = '{self.data['name']}';"
+                )
+
+            case Driver.SQLITE:
+                return (
+                    "SELECT *\n"
+                    "FROM sqlite_master\n"
+                    "WHERE type = 'table'\n"
+                    f"AND name = '{self.data['table']}';"
+                )
+
+            case Driver.ORACLE:
+                return (
+                    "SELECT *\n"
+                    "FROM user_constraints\n"
+                    f"WHERE constraint_name = '{self.data['name'].upper()}';"
                 )
 
         return ""

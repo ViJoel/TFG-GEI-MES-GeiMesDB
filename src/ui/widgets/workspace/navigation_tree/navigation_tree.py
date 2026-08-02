@@ -206,7 +206,8 @@ class NavigationTree(QWidget):
         if table["constraints"]:
             item.appendRow(
                 self._create_constraints_folder(
-                    table["constraints"],
+                    constraints=table["constraints"],
+                    table_name=table_name,
                 )
             )
 
@@ -248,6 +249,7 @@ class NavigationTree(QWidget):
     def _create_constraints_folder(
         self,
         constraints: list[dict[str, Any]],
+        table_name: str,
     ) -> QStandardItem:
 
         item = self._create_node(
@@ -256,13 +258,19 @@ class NavigationTree(QWidget):
         )
 
         for constraint in constraints:
-            item.appendRow(self._create_constraint_node(constraint))
+            item.appendRow(
+                self._create_constraint_node(
+                    constraint=constraint,
+                    table_name=table_name,
+                )
+            )
 
         return item
 
     def _create_constraint_node(
         self,
         constraint: dict[str, Any],
+        table_name: str,
     ) -> QStandardItem:
 
         text = constraint["name"] or constraint["type"]
@@ -282,6 +290,8 @@ class NavigationTree(QWidget):
 
         elif constraint["type"] == "CHECK":
             text += f" ({constraint['sqltext']})"
+
+        constraint["table"] = table_name
 
         return self._create_node(
             text=text,
