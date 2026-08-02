@@ -115,7 +115,7 @@ class NavigationTreeContextMenu(QMenu):
                 self._build_views_folder_menu()
 
             case TreeNodeType.VIEW:
-                pass
+                self._build_view_menu()
 
     # ==================
     # === UI HELPERS ===
@@ -482,6 +482,67 @@ class NavigationTreeContextMenu(QMenu):
 
         show_metadata_action.triggered.connect(
             self._on_show_views_metadata,
+        )
+
+    # Vista
+
+    def _build_view_menu(
+        self,
+    ) -> None:
+        """
+        Construye el menú contextual de una vista.
+        """
+
+        generate_select_action = self.addAction(
+            "Generate SELECT",
+        )
+
+        generate_select_action.triggered.connect(
+            self._on_generate_select_view,
+        )
+
+        generate_drop_action = self.addAction(
+            "Generate DROP",
+        )
+
+        generate_drop_action.triggered.connect(
+            self._on_generate_drop_view,
+        )
+
+        self.addSeparator()
+
+        show_data_action = self.addAction(
+            "Show data",
+        )
+
+        show_data_action.triggered.connect(
+            self._on_show_view_data,
+        )
+
+        show_metadata_action = self.addAction(
+            "Show metadata",
+        )
+
+        show_metadata_action.triggered.connect(
+            self._on_show_view_metadata,
+        )
+
+        show_columns_action = self.addAction(
+            "Show columns",
+        )
+
+        show_columns_action.triggered.connect(
+            self._on_show_view_columns,
+        )
+
+        self.addSeparator()
+
+        copy_name_action = self.addAction(
+            "Copy name",
+        )
+
+        copy_name_action.triggered.connect(
+            self._on_copy_view_name,
         )
 
     # ======================
@@ -912,9 +973,87 @@ class NavigationTreeContextMenu(QMenu):
             self._generate_views_metadata(),
         )
 
-    # ===================
-    # === PRIVATE API ===
-    # ===================
+    # Vista
+
+    def _on_generate_select_view(
+        self,
+    ) -> None:
+        """
+        Genera una consulta SELECT para la vista seleccionada
+        y solicita su inserción en el editor SQL.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+            self._generate_view_select(),
+        )
+
+    def _on_generate_drop_view(
+        self,
+    ) -> None:
+        """
+        Genera una consulta DROP para la vista seleccionada
+        y solicita su inserción en el editor SQL.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+            self._generate_view_drop(),
+        )
+
+    def _on_show_view_data(
+        self,
+    ) -> None:
+        """
+        Genera una consulta SQL para mostrar los datos de la
+        vista seleccionada y solicita su ejecución.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.EXECUTE_SQL,
+            self._generate_view_data(),
+        )
+
+    def _on_show_view_metadata(
+        self,
+    ) -> None:
+        """
+        Genera una consulta SQL con la metadata de la vista
+        seleccionada y solicita su ejecución.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.EXECUTE_SQL,
+            self._generate_view_metadata(),
+        )
+
+    def _on_show_view_columns(
+        self,
+    ) -> None:
+        """
+        Genera una consulta SQL con la metadata de las columnas
+        de la vista seleccionada y solicita su ejecución.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.EXECUTE_SQL,
+            self._generate_view_columns(),
+        )
+
+    def _on_copy_view_name(
+        self,
+    ) -> None:
+        """
+        Copia al portapapeles el nombre de la vista seleccionada.
+        """
+
+        QGuiApplication.clipboard().setText(
+            self.item.text(),
+        )
+
+    # =====================
+    # === EVENT HELPERS ===
+    # =====================
 
     # Tablas
 
@@ -1538,3 +1677,106 @@ class NavigationTreeContextMenu(QMenu):
                 return "SELECT *\n" "FROM user_views\n" "ORDER BY view_name;"
 
         return ""
+
+    # Vista
+
+    def _generate_view_select(
+        self,
+    ) -> str:
+        """
+        Genera una consulta SELECT para la vista seleccionada.
+
+        Returns:
+            str:
+                Consulta SQL.
+        """
+
+        return self._generate_table_select()
+
+    def _generate_view_drop(
+        self,
+    ) -> str:
+        """
+        Genera una consulta DROP para la vista seleccionada.
+
+        Returns:
+            str:
+                Consulta SQL.
+        """
+
+        return f"DROP VIEW {self.item.text()};"
+
+    def _generate_view_data(
+        self,
+    ) -> str:
+        """
+        Genera una consulta para mostrar los datos de la vista
+        seleccionada.
+
+        Returns:
+            str:
+                Consulta SQL.
+        """
+
+        return self._generate_table_data()
+
+    def _generate_view_metadata(
+        self,
+    ) -> str:
+        """
+        Genera una consulta SQL para obtener la metadata de la
+        vista seleccionada.
+
+        Returns:
+            str:
+                Consulta SQL compatible con el driver configurado.
+        """
+
+        match self.sgbd_driver:
+
+            case Driver.POSTGRESQL:
+                return (
+                    "SELECT *\n"
+                    "FROM information_schema.views\n"
+                    "WHERE table_schema = 'public'\n"
+                    f"AND table_name = '{self.item.text()}';"
+                )
+
+            case Driver.MYSQL:
+                return (
+                    "SELECT *\n"
+                    "FROM information_schema.views\n"
+                    "WHERE table_schema = DATABASE()\n"
+                    f"AND table_name = '{self.item.text()}';"
+                )
+
+            case Driver.SQLITE:
+                return (
+                    "SELECT *\n"
+                    "FROM sqlite_master\n"
+                    "WHERE type = 'view'\n"
+                    f"AND name = '{self.item.text()}';"
+                )
+
+            case Driver.ORACLE:
+                return (
+                    "SELECT *\n"
+                    "FROM user_views\n"
+                    f"WHERE view_name = '{self.item.text().upper()}';"
+                )
+
+        return ""
+
+    def _generate_view_columns(
+        self,
+    ) -> str:
+        """
+        Genera una consulta SQL para obtener la metadata de las
+        columnas de la vista seleccionada.
+
+        Returns:
+            str:
+                Consulta SQL compatible con el driver configurado.
+        """
+
+        return self._generate_table_columns()

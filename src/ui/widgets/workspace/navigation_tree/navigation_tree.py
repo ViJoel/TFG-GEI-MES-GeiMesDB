@@ -361,7 +361,8 @@ class NavigationTree(QWidget):
         if view["columns"]:
             item.appendRow(
                 self._create_columns_folder(
-                    view["columns"],
+                    columns=view["columns"],
+                    table_name=view_name,
                 )
             )
 
