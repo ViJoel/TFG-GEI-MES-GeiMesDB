@@ -97,7 +97,7 @@ class NavigationTreeContextMenu(QMenu):
                 self._build_columns_folder_menu()
 
             case TreeNodeType.COLUMN:
-                pass
+                self._build_column_menu()
 
             case TreeNodeType.CONSTRAINTS_FOLDER:
                 self._build_constraints_folder_menu()
@@ -173,6 +173,67 @@ class NavigationTreeContextMenu(QMenu):
 
         show_metadata_action.triggered.connect(
             self._on_show_columns_metadata,
+        )
+
+    # Columna
+
+    def _build_column_menu(
+        self,
+    ) -> None:
+        """
+        Construye el menú contextual de una columna.
+        """
+
+        generate_select_action = self.addAction(
+            "Generate SELECT",
+        )
+
+        generate_select_action.triggered.connect(
+            self._on_generate_select_column,
+        )
+
+        generate_where_action = self.addAction(
+            "Generate WHERE",
+        )
+
+        generate_where_action.triggered.connect(
+            self._on_generate_where_column,
+        )
+
+        self.addSeparator()
+
+        show_data_action = self.addAction(
+            "Show data",
+        )
+
+        show_data_action.triggered.connect(
+            self._on_show_column_data,
+        )
+
+        show_metadata_action = self.addAction(
+            "Show metadata",
+        )
+
+        show_metadata_action.triggered.connect(
+            self._on_show_column_metadata,
+        )
+
+        self.addSeparator()
+
+        copy_name_action = self.addAction(
+            "Copy name",
+        )
+
+        copy_name_action.triggered.connect(
+            self._on_copy_column_name,
+        )
+
+        copy_type_action = self.addAction(
+            "Copy type",
+        )
+
+        copy_type_action.triggered.connect(
+            self._on_copy_column_type,
         )
 
     # Restricciones
@@ -388,6 +449,82 @@ class NavigationTreeContextMenu(QMenu):
         self.action_requested.emit(
             NavigationTreeAction.EXECUTE_SQL,
             self._generate_columns_metadata(),
+        )
+
+    # Columna
+
+    def _on_generate_select_column(
+        self,
+    ) -> None:
+        """
+        Genera una consulta SQL para seleccionar la columna
+        y solicita su inserción en el editor SQL.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+            self._generate_column_select(),
+        )
+
+    def _on_generate_where_column(
+        self,
+    ) -> None:
+        """
+        Genera una cláusula WHERE para la columna seleccionada
+        y solicita su inserción en el editor SQL.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+            self._generate_column_where(),
+        )
+
+    def _on_show_column_data(
+        self,
+    ) -> None:
+        """
+        Genera una consulta SQL para mostrar los datos de la
+        columna seleccionada y solicita su ejecución.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.EXECUTE_SQL,
+            self._generate_column_data(),
+        )
+
+    def _on_show_column_metadata(
+        self,
+    ) -> None:
+        """
+        Genera una consulta SQL con la metadata de la columna
+        seleccionada y solicita su ejecución.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.EXECUTE_SQL,
+            self._generate_column_metadata(),
+        )
+
+    def _on_copy_column_name(
+        self,
+    ) -> None:
+        """
+        Copia al portapapeles el nombre de la columna seleccionada.
+        """
+
+        QGuiApplication.clipboard().setText(
+            self.data["name"],
+        )
+
+    def _on_copy_column_type(
+        self,
+    ) -> None:
+        """
+        Copia al portapapeles el tipo de la columna seleccionada.
+        """
+
+        QGuiApplication.clipboard().setText(
+            self.data["type"],
         )
 
     # Restricciones
@@ -644,6 +781,94 @@ class NavigationTreeContextMenu(QMenu):
                     "FROM user_tab_columns\n"
                     f"WHERE table_name = '{self.parent_name.upper()}'\n"
                     "ORDER BY column_id;"
+                )
+
+        return ""
+
+    # Columna
+
+    def _generate_column_select(
+        self,
+    ) -> str:
+        """
+        Genera una consulta SQL para seleccionar la columna.
+
+        Returns:
+            str:
+                Consulta SQL compatible con el driver configurado.
+        """
+
+        return f"SELECT {self.data['name']}\n" f"FROM {self.data['table']};"
+
+    def _generate_column_where(
+        self,
+    ) -> str:
+        """
+        Genera una cláusula WHERE para la columna seleccionada.
+
+        Returns:
+            str:
+                Cláusula WHERE.
+        """
+
+        return f"WHERE {self.data['name']} = "
+
+    def _generate_column_data(
+        self,
+    ) -> str:
+        """
+        Genera una consulta SQL para mostrar los datos de la
+        columna seleccionada.
+
+        Returns:
+            str:
+                Consulta SQL.
+        """
+
+        return f"SELECT {self.data['name']}\n" f"FROM {self.data['table']};"
+
+    def _generate_column_metadata(
+        self,
+    ) -> str:
+        """
+        Genera la consulta SQL para obtener la metadata de la
+        columna seleccionada según el sistema gestor de base de
+        datos activo.
+
+        Returns:
+            str:
+                Consulta SQL compatible con el driver configurado.
+        """
+
+        match self.sgbd_driver:
+
+            case Driver.POSTGRESQL:
+                return (
+                    "SELECT *\n"
+                    "FROM information_schema.columns\n"
+                    "WHERE table_schema = 'public'\n"
+                    f"AND table_name = '{self.data['table']}'\n"
+                    f"AND column_name = '{self.data['name']}';"
+                )
+
+            case Driver.MYSQL:
+                return (
+                    "SELECT *\n"
+                    "FROM information_schema.columns\n"
+                    "WHERE table_schema = DATABASE()\n"
+                    f"AND table_name = '{self.data['table']}'\n"
+                    f"AND column_name = '{self.data['name']}';"
+                )
+
+            case Driver.SQLITE:
+                return f"PRAGMA table_info('{self.data['table']}');"
+
+            case Driver.ORACLE:
+                return (
+                    "SELECT *\n"
+                    "FROM user_tab_columns\n"
+                    f"WHERE table_name = '{self.data['table'].upper()}'\n"
+                    f"AND column_name = '{self.data['name'].upper()}';"
                 )
 
         return ""

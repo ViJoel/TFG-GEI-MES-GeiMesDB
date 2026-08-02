@@ -200,6 +200,7 @@ class NavigationTree(QWidget):
             item.appendRow(
                 self._create_columns_folder(
                     table["columns"],
+                    table_name=table_name,
                 )
             )
 
@@ -223,6 +224,7 @@ class NavigationTree(QWidget):
     def _create_columns_folder(
         self,
         columns: list[dict[str, Any]],
+        table_name: str,
     ) -> QStandardItem:
 
         item = self._create_node(
@@ -231,14 +233,22 @@ class NavigationTree(QWidget):
         )
 
         for column in columns:
-            item.appendRow(self._create_column_node(column))
+            item.appendRow(
+                self._create_column_node(
+                    column=column,
+                    table_name=table_name,
+                )
+            )
 
         return item
 
     def _create_column_node(
         self,
         column: dict[str, Any],
+        table_name: str,
     ) -> QStandardItem:
+
+        column["table"] = table_name
 
         return self._create_node(
             text=f"{column['name']} : {column['type']}",
