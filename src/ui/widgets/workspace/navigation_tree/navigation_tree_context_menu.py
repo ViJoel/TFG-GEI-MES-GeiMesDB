@@ -91,7 +91,7 @@ class NavigationTreeContextMenu(QMenu):
                 self._build_tables_folder_menu()
 
             case TreeNodeType.TABLE:
-                pass
+                self._build_table_menu()
 
             case TreeNodeType.COLUMNS_FOLDER:
                 self._build_columns_folder_menu()
@@ -146,6 +146,99 @@ class NavigationTreeContextMenu(QMenu):
 
         show_metadata_action.triggered.connect(
             self._on_show_tables_metadata,
+        )
+
+    # Tabla
+
+    def _build_table_menu(
+        self,
+    ) -> None:
+        """
+        Construye el menú contextual de una tabla.
+        """
+
+        generate_select_action = self.addAction(
+            "Generate SELECT",
+        )
+
+        generate_select_action.triggered.connect(
+            self._on_generate_select_table,
+        )
+
+        generate_insert_action = self.addAction(
+            "Generate INSERT",
+        )
+
+        generate_insert_action.triggered.connect(
+            self._on_generate_insert_table,
+        )
+
+        generate_update_action = self.addAction(
+            "Generate UPDATE",
+        )
+
+        generate_update_action.triggered.connect(
+            self._on_generate_update_table,
+        )
+
+        generate_delete_action = self.addAction(
+            "Generate DELETE",
+        )
+
+        generate_delete_action.triggered.connect(
+            self._on_generate_delete_table,
+        )
+
+        generate_alter_action = self.addAction(
+            "Generate ALTER",
+        )
+
+        generate_alter_action.triggered.connect(
+            self._on_generate_alter_table,
+        )
+
+        generate_drop_action = self.addAction(
+            "Generate DROP",
+        )
+
+        generate_drop_action.triggered.connect(
+            self._on_generate_drop_table,
+        )
+
+        self.addSeparator()
+
+        show_data_action = self.addAction(
+            "Show data",
+        )
+
+        show_data_action.triggered.connect(
+            self._on_show_table_data,
+        )
+
+        show_metadata_action = self.addAction(
+            "Show metadata",
+        )
+
+        show_metadata_action.triggered.connect(
+            self._on_show_table_metadata,
+        )
+
+        show_columns_action = self.addAction(
+            "Show columns",
+        )
+
+        show_columns_action.triggered.connect(
+            self._on_show_table_columns,
+        )
+
+        self.addSeparator()
+
+        copy_name_action = self.addAction(
+            "Copy name",
+        )
+
+        copy_name_action.triggered.connect(
+            self._on_copy_table_name,
         )
 
     # Columnas
@@ -421,6 +514,136 @@ class NavigationTreeContextMenu(QMenu):
         self.action_requested.emit(
             NavigationTreeAction.EXECUTE_SQL,
             self._generate_tables_metadata(),
+        )
+
+    # Tabla
+
+    def _on_generate_select_table(
+        self,
+    ) -> None:
+        """
+        Genera una consulta SELECT para la tabla seleccionada
+        y solicita su inserción en el editor SQL.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+            self._generate_table_select(),
+        )
+
+    def _on_generate_insert_table(
+        self,
+    ) -> None:
+        """
+        Genera una consulta INSERT para la tabla seleccionada
+        y solicita su inserción en el editor SQL.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+            self._generate_table_insert(),
+        )
+
+    def _on_generate_update_table(
+        self,
+    ) -> None:
+        """
+        Genera una consulta UPDATE para la tabla seleccionada
+        y solicita su inserción en el editor SQL.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+            self._generate_table_update(),
+        )
+
+    def _on_generate_delete_table(
+        self,
+    ) -> None:
+        """
+        Genera una consulta DELETE para la tabla seleccionada
+        y solicita su inserción en el editor SQL.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+            self._generate_table_delete(),
+        )
+
+    def _on_generate_alter_table(
+        self,
+    ) -> None:
+        """
+        Genera una consulta ALTER para la tabla seleccionada
+        y solicita su inserción en el editor SQL.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+            self._generate_table_alter(),
+        )
+
+    def _on_generate_drop_table(
+        self,
+    ) -> None:
+        """
+        Genera una consulta DROP para la tabla seleccionada
+        y solicita su inserción en el editor SQL.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+            self._generate_table_drop(),
+        )
+
+    def _on_show_table_data(
+        self,
+    ) -> None:
+        """
+        Genera una consulta SQL para mostrar los datos de la
+        tabla seleccionada y solicita su ejecución.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.EXECUTE_SQL,
+            self._generate_table_data(),
+        )
+
+    def _on_show_table_metadata(
+        self,
+    ) -> None:
+        """
+        Genera una consulta SQL con la metadata de la tabla
+        seleccionada y solicita su ejecución.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.EXECUTE_SQL,
+            self._generate_table_metadata(),
+        )
+
+    def _on_show_table_columns(
+        self,
+    ) -> None:
+        """
+        Genera una consulta SQL con la metadata de las columnas
+        de la tabla seleccionada y solicita su ejecución.
+        """
+
+        self.action_requested.emit(
+            NavigationTreeAction.EXECUTE_SQL,
+            self._generate_table_columns(),
+        )
+
+    def _on_copy_table_name(
+        self,
+    ) -> None:
+        """
+        Copia al portapapeles el nombre de la tabla seleccionada.
+        """
+
+        QGuiApplication.clipboard().setText(
+            self.item.text(),
         )
 
     # Columnas
@@ -735,6 +958,207 @@ class NavigationTreeContextMenu(QMenu):
 
             case Driver.ORACLE:
                 return "SELECT *\n" "FROM user_tables\n" "ORDER BY table_name;"
+
+        return ""
+
+    # Tabla
+
+    def _generate_table_select(
+        self,
+    ) -> str:
+        """
+        Genera una consulta SELECT para la tabla seleccionada.
+
+        Returns:
+            str:
+                Consulta SQL.
+        """
+
+        return "SELECT *\n" f"FROM {self.item.text()};"
+
+    def _generate_table_insert(
+        self,
+    ) -> str:
+        """
+        Genera una consulta INSERT para la tabla seleccionada.
+
+        Returns:
+            str:
+                Consulta SQL.
+        """
+
+        columns = ",\n    ".join(column["name"] for column in self.data["columns"])
+
+        values = ",\n    ".join("?" for _ in self.data["columns"])
+
+        return (
+            f"INSERT INTO {self.item.text()} (\n"
+            f"    {columns}\n"
+            ")\n"
+            "VALUES (\n"
+            f"    {values}\n"
+            ");"
+        )
+
+    def _generate_table_update(
+        self,
+    ) -> str:
+        """
+        Genera una consulta UPDATE para la tabla seleccionada.
+
+        Returns:
+            str:
+                Consulta SQL.
+        """
+
+        assignments = ",\n    ".join(
+            f"{column['name']} = ?" for column in self.data["columns"]
+        )
+
+        return f"UPDATE {self.item.text()}\n" "SET\n" f"    {assignments}\n" "WHERE ;"
+
+    def _generate_table_delete(
+        self,
+    ) -> str:
+        """
+        Genera una consulta DELETE para la tabla seleccionada.
+
+        Returns:
+            str:
+                Consulta SQL.
+        """
+
+        return f"DELETE FROM {self.item.text()}\n" "WHERE ;"
+
+    def _generate_table_alter(
+        self,
+    ) -> str:
+        """
+        Genera una plantilla ALTER para la tabla seleccionada.
+
+        Returns:
+            str:
+                Consulta SQL.
+        """
+
+        return f"ALTER TABLE {self.item.text()}\n" "\n" ";"
+
+    def _generate_table_drop(
+        self,
+    ) -> str:
+        """
+        Genera una consulta DROP para la tabla seleccionada.
+
+        Returns:
+            str:
+                Consulta SQL.
+        """
+
+        return f"DROP TABLE {self.item.text()};"
+
+    def _generate_table_data(
+        self,
+    ) -> str:
+        """
+        Genera una consulta para mostrar los datos de la tabla
+        seleccionada.
+
+        Returns:
+            str:
+                Consulta SQL.
+        """
+
+        return self._generate_table_select()
+
+    def _generate_table_metadata(
+        self,
+    ) -> str:
+        """
+        Genera una consulta SQL para obtener la metadata de la
+        tabla seleccionada.
+
+        Returns:
+            str:
+                Consulta SQL compatible con el driver configurado.
+        """
+
+        match self.sgbd_driver:
+
+            case Driver.POSTGRESQL:
+                return (
+                    "SELECT *\n"
+                    "FROM information_schema.tables\n"
+                    "WHERE table_schema = 'public'\n"
+                    f"AND table_name = '{self.item.text()}';"
+                )
+
+            case Driver.MYSQL:
+                return (
+                    "SELECT *\n"
+                    "FROM information_schema.tables\n"
+                    "WHERE table_schema = DATABASE()\n"
+                    f"AND table_name = '{self.item.text()}';"
+                )
+
+            case Driver.SQLITE:
+                return (
+                    "SELECT *\n"
+                    "FROM sqlite_master\n"
+                    "WHERE type = 'table'\n"
+                    f"AND name = '{self.item.text()}';"
+                )
+
+            case Driver.ORACLE:
+                return (
+                    "SELECT *\n"
+                    "FROM user_tables\n"
+                    f"WHERE table_name = '{self.item.text().upper()}';"
+                )
+
+        return ""
+
+    def _generate_table_columns(
+        self,
+    ) -> str:
+        """
+        Genera una consulta SQL para obtener la metadata de las
+        columnas de la tabla seleccionada.
+
+        Returns:
+            str:
+                Consulta SQL compatible con el driver configurado.
+        """
+
+        match self.sgbd_driver:
+
+            case Driver.POSTGRESQL:
+                return (
+                    "SELECT *\n"
+                    "FROM information_schema.columns\n"
+                    "WHERE table_schema = 'public'\n"
+                    f"AND table_name = '{self.item.text()}'\n"
+                    "ORDER BY ordinal_position;"
+                )
+
+            case Driver.MYSQL:
+                return (
+                    "SELECT *\n"
+                    "FROM information_schema.columns\n"
+                    "WHERE table_schema = DATABASE()\n"
+                    f"AND table_name = '{self.item.text()}'\n"
+                    "ORDER BY ordinal_position;"
+                )
+
+            case Driver.SQLITE:
+                return f"PRAGMA table_info('{self.item.text()}');"
+
+            case Driver.ORACLE:
+                return (
+                    "SELECT *\n"
+                    "FROM user_tab_columns\n"
+                    f"WHERE table_name = '{self.item.text().upper()}'\n"
+                    "ORDER BY column_id;"
+                )
 
         return ""
 
