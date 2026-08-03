@@ -69,6 +69,7 @@ def patch_navigation_tree(mocker):
 
     tree.refresh = mocker.Mock()
     tree.action_requested = mocker.Mock()
+    tree.tree_reloaded = mocker.Mock()
 
     mocker.patch(
         "ui.widgets.workspace.workspace.NavigationTree",
@@ -954,6 +955,7 @@ def test_connect_signals(
     workspace.results_view.save_requested = mocker.Mock()
     workspace.results_view.query_selected_from_session_queries_history = mocker.Mock()
     workspace.navigation_tree.action_requested = mocker.Mock()
+    workspace.navigation_tree.tree_reloaded = mocker.Mock()
 
     workspace._connect_signals()
 
@@ -971,4 +973,8 @@ def test_connect_signals(
 
     workspace.navigation_tree.action_requested.connect.assert_called_once_with(
         workspace._on_navigation_tree_action,
+    )
+
+    workspace.navigation_tree.tree_reloaded.connect.assert_called_once_with(
+        workspace.sql_editor_area.force_update_editors_completers,
     )

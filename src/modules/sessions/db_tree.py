@@ -7,6 +7,7 @@ from sqlalchemy.sql.sqltypes import NullType
 
 from log.app_logger import get_logger
 from modules.sessions.manager import get_session
+from modules.sql.autocompletion.schema_data import SQL_SCHEMA_COMPLETION_DATA
 
 logger = get_logger(__name__)
 
@@ -62,6 +63,16 @@ def get_db_tree(
             "Database tree loaded successfully for connection '%s'.",
             connection_id,
         )
+
+        logger.info("Extrating data for editor autocompleter...")
+
+        SQL_SCHEMA_COMPLETION_DATA.update(
+            _build_completion_data(
+                tree_data,
+            )
+        )
+
+        logger.success("Data extracted.")
 
         return tree_data
 
@@ -639,4 +650,79 @@ def _extract_single_view_metadata(
         "definition": definition,
         "columns": columns,
         "indexes": indexes,
+    }
+
+
+# ==========================================
+# FUNCIÓN PARA EL AUTOCOMPLETADO DEL EDITOR
+# ==========================================
+
+
+def _build_completion_data(
+    tree_data: dict[str, Any],
+) -> dict[
+    str,
+    list[str],
+]:
+    """
+    Construye el modelo simplificado utilizado por el autocompletador
+    a partir del árbol de metadatos de la base de datos.
+
+    Extrae únicamente los nombres únicos de tablas, vistas, columnas,
+    restricciones e índices.
+
+    Args:
+        tree_data:
+            Modelo completo generado por `_extract_schema_metadata()`.
+
+    Returns:
+        dict[str, list[str]]:
+            Diccionario con las categorías utilizadas por el
+            autocompletador:
+
+            - `tables`
+            - `views`
+            - `columns`
+            - `constraints`
+            - `indexes`
+    """
+
+    tables: set[str] = set()
+    views: set[str] = set()
+    columns: set[str] = set()
+    constraints: set[str] = set()
+    indexes: set[str] = set()
+
+    for table_name, table_data in tree_data.get("tables", {}).items():
+
+        tables.add(table_name)
+
+        for column in table_data.get("columns", []):
+            columns.add(column["name"])
+
+        for constraint in table_data.get("constraints", []):
+            if constraint.get("name"):
+                constraints.add(constraint["name"])
+
+        for index in table_data.get("indexes", []):
+            if index.get("name"):
+                indexes.add(index["name"])
+
+    for view_name, view_data in tree_data.get("views", {}).items():
+
+        views.add(view_name)
+
+        for column in view_data.get("columns", []):
+            columns.add(column["name"])
+
+        for index in view_data.get("indexes", []):
+            if index.get("name"):
+                indexes.add(index["name"])
+
+    return {
+        "tables": sorted(tables),
+        "views": sorted(views),
+        "columns": sorted(columns),
+        "constraints": sorted(constraints),
+        "indexes": sorted(indexes),
     }

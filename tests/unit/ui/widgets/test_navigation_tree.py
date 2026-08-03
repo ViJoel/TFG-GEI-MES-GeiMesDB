@@ -13,6 +13,7 @@ from PySide6.QtGui import (
     QIcon,
     QStandardItem,
 )
+from PySide6.QtTest import QSignalSpy
 from PySide6.QtWidgets import QWidget
 
 from entities.message_type import MessageType
@@ -166,8 +167,6 @@ def test_initial_state(tree):
     assert tree.connection_id == "connection-id"
 
     assert tree.objectName() == "navigation_tree"
-
-    assert tree.data is None
 
     assert tree.model is not None
 
@@ -1026,8 +1025,6 @@ def test_load_data_success_with_tables_and_views(tree):
     ) as notify:
         tree._load_data_success(data)
 
-    assert tree.data == data
-
     assert tree.model.rowCount() == 2
 
     assert tree.tree_view.expand.call_count == 2
@@ -1052,8 +1049,6 @@ def test_load_data_success_without_tables_or_views(tree):
         tree._load_data_success(data)
 
     assert tree.model.rowCount() == 0
-
-    assert tree.data == data
 
     notify.assert_called_once()
 
@@ -1081,6 +1076,28 @@ def test_load_data_error(tree):
     logger.error.assert_called_once()
 
     notify.assert_called_once()
+
+
+def test_load_data_success_emits_tree_reloaded_signal(qtbot):
+    with (
+        patch("ui.widgets.workspace.navigation_tree.navigation_tree.notify"),
+        patch(
+            "ui.widgets.workspace.navigation_tree.navigation_tree.AppContext.get_task_manager"
+        ),
+    ):
+        tree = NavigationTree(connection_id="connection")
+        qtbot.addWidget(tree)
+
+        spy = QSignalSpy(tree.tree_reloaded)
+
+        tree._load_data_success(
+            {
+                "tables": {},
+                "views": {},
+            }
+        )
+
+    assert spy.count() == 1
 
 
 # =============================================================================

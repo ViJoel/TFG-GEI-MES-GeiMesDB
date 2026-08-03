@@ -564,3 +564,21 @@ class SqlEditorArea(QWidget):
         """
 
         return sum(1 for file in self.files if file.has_changes and file.existsOnDisk)
+
+    def force_update_editors_completers(
+        self,
+    ) -> None:
+        """
+        Fuerza la actualización del autocompletador de
+        todos los editores abiertos.
+
+        Se utiliza cuando cambia el esquema de la base
+        de datos para que las nuevas sugerencias estén
+        disponibles inmediatamente en todos los
+        editores.
+        """
+
+        for i in range(self.editors.count()):
+
+            editor = self.editors.widget(i)
+            editor.force_update_completer()

@@ -596,18 +596,22 @@ THEME.update(
 THEME.update(
     {
         "sql_boolean_color": CYAN,
+        "sql_column_color": LIGHT_RED,
         "sql_comment_color": GRAY_400,
+        "sql_constraint_color": LIGHT_RED,
         "sql_function_color": BLUE,
         "sql_identifier_color": LIGHT_ORANGE,
+        "sql_index_color": LIGHT_RED,
         "sql_keyword_color": GREEN,
         "sql_null_color": LIGHT_CYAN,
         "sql_number_color": LIGHT_GREEN,
         "sql_parameter_color": YELLOW,
         "sql_string_color": RED_HOVER,
         "sql_symbol_color": PURPLE,
-        "sql_table_color": WHITE,
+        "sql_table_color": LIGHT_RED,
         "sql_type_color": ORANGE,
         "sql_variable_color": LIGHT_BLUE,
+        "sql_view_color": LIGHT_RED,
     }
 )
 

@@ -42,6 +42,21 @@ logger = get_logger(__name__)
 
 
 class NavigationTree(QWidget):
+    """
+    Árbol de navegación de la base de datos.
+
+    Muestra la estructura del esquema de la conexión
+    activa (tablas, vistas y sus objetos asociados)
+    y proporciona acciones contextuales para generar
+    consultas SQL e interactuar con los distintos
+    elementos de la base de datos.
+
+    Además, coordina la recarga del modelo del árbol
+    cuando cambia el esquema de la base de datos y
+    notifica al resto de la aplicación para que
+    actualice los componentes que dependen de dicha
+    información, como el autocompletador SQL.
+    """
 
     # =================
     # === VARIABLES ===
@@ -52,6 +67,8 @@ class NavigationTree(QWidget):
         str,
     )
 
+    tree_reloaded = Signal()
+
     # ============
     # === INIT ===
     # ============
@@ -60,11 +77,17 @@ class NavigationTree(QWidget):
         self,
         connection_id: str,
     ) -> None:
+        """
+        Inicializa el árbol de navegación.
+
+        Args:
+            connection_id (str):
+                Id de la conexión.
+        """
 
         super().__init__()
 
         self.connection_id = connection_id
-        self.data: dict[str, Any] = None
 
         # Modelo y Proxy para filtrado.
         self._setup_models()
@@ -697,12 +720,12 @@ class NavigationTree(QWidget):
                 )
             )
 
-        self.data = data
-
         notify(
             message_type=MessageType.SUCCESS,
             message="Tree loaded.",
         )
+
+        self.tree_reloaded.emit()
 
     def _load_data_error(
         self,

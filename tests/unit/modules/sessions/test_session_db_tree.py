@@ -10,6 +10,7 @@ from sqlalchemy.sql.sqltypes import (
 
 from modules.sessions.db_tree import (
     _build_columns,
+    _build_completion_data,
     _extract_all_views_metadata,
     _extract_columns,
     _extract_constraints,
@@ -55,6 +56,51 @@ def test_get_db_tree_returns_metadata():
         assert get_db_tree("connection") == expected
 
 
+def test_get_db_tree_returns_metadata_and_updates_completion_data():
+    session = MagicMock()
+    session.engine = MagicMock()
+
+    tree_data = {
+        "tables": {},
+        "views": {},
+    }
+
+    completion_data = {
+        "tables": [],
+        "views": [],
+        "columns": [],
+        "constraints": [],
+        "indexes": [],
+    }
+
+    with (
+        patch(
+            "modules.sessions.db_tree.get_session",
+            return_value=session,
+        ),
+        patch(
+            "modules.sessions.db_tree._extract_schema_metadata",
+            return_value=tree_data,
+        ),
+        patch(
+            "modules.sessions.db_tree._build_completion_data",
+            return_value=completion_data,
+        ) as build_completion_data,
+        patch(
+            "modules.sessions.db_tree.SQL_SCHEMA_COMPLETION_DATA.update",
+        ) as update_completion_data,
+    ):
+        result = get_db_tree("connection")
+
+    assert result == tree_data
+
+    build_completion_data.assert_called_once_with(tree_data)
+
+    update_completion_data.assert_called_once_with(
+        completion_data,
+    )
+
+
 def test_get_db_tree_returns_none_when_exception():
     session = MagicMock()
     session.engine = MagicMock()
@@ -68,8 +114,13 @@ def test_get_db_tree_returns_none_when_exception():
             "modules.sessions.db_tree._extract_schema_metadata",
             side_effect=Exception,
         ),
+        patch(
+            "modules.sessions.db_tree.SQL_SCHEMA_COMPLETION_DATA.update",
+        ) as update_completion_data,
     ):
         assert get_db_tree("connection") is None
+
+    update_completion_data.assert_not_called()
 
 
 # =============================================================================
@@ -632,3 +683,133 @@ def test_extract_single_view_metadata_not_materialized_does_not_read_indexes():
         )
 
     indexes_mock.assert_not_called()
+
+
+# =============================================================================
+# _build_completion_data
+# =============================================================================
+
+
+def test_build_completion_data():
+    tree_data = {
+        "tables": {
+            "users": {
+                "columns": [
+                    {"name": "id"},
+                    {"name": "name"},
+                ],
+                "constraints": [
+                    {"name": "pk_users"},
+                    {"name": "uq_users_name"},
+                ],
+                "indexes": [
+                    {"name": "ix_users_name"},
+                ],
+            },
+        },
+        "views": {
+            "active_users": {
+                "columns": [
+                    {"name": "id"},
+                    {"name": "name"},
+                ],
+                "indexes": [
+                    {"name": "ix_active_users"},
+                ],
+            },
+        },
+    }
+
+    assert _build_completion_data(tree_data) == {
+        "tables": ["users"],
+        "views": ["active_users"],
+        "columns": ["id", "name"],
+        "constraints": [
+            "pk_users",
+            "uq_users_name",
+        ],
+        "indexes": [
+            "ix_active_users",
+            "ix_users_name",
+        ],
+    }
+
+
+def test_build_completion_data_removes_duplicates():
+    tree_data = {
+        "tables": {
+            "users": {
+                "columns": [
+                    {"name": "id"},
+                    {"name": "name"},
+                ],
+                "constraints": [
+                    {"name": "pk_users"},
+                    {"name": "pk_users"},
+                    {"name": None},
+                ],
+                "indexes": [
+                    {"name": "ix_users"},
+                    {"name": "ix_users"},
+                ],
+            },
+            "employees": {
+                "columns": [
+                    {"name": "id"},
+                    {"name": "name"},
+                ],
+                "constraints": [
+                    {"name": "pk_users"},
+                ],
+                "indexes": [
+                    {"name": "ix_users"},
+                ],
+            },
+        },
+        "views": {
+            "employees_view": {
+                "columns": [
+                    {"name": "id"},
+                    {"name": "name"},
+                ],
+                "indexes": [
+                    {"name": "ix_users"},
+                ],
+            },
+        },
+    }
+
+    assert _build_completion_data(tree_data) == {
+        "tables": [
+            "employees",
+            "users",
+        ],
+        "views": [
+            "employees_view",
+        ],
+        "columns": [
+            "id",
+            "name",
+        ],
+        "constraints": [
+            "pk_users",
+        ],
+        "indexes": [
+            "ix_users",
+        ],
+    }
+
+
+def test_build_completion_data_empty_tree():
+    assert _build_completion_data(
+        {
+            "tables": {},
+            "views": {},
+        }
+    ) == {
+        "tables": [],
+        "views": [],
+        "columns": [],
+        "constraints": [],
+        "indexes": [],
+    }

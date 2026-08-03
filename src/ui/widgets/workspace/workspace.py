@@ -139,6 +139,10 @@ class Workspace(QWidget):
             self._on_navigation_tree_action,
         )
 
+        self.navigation_tree.tree_reloaded.connect(
+            self.sql_editor_area.force_update_editors_completers
+        )
+
     # ======================
     # === EVENT HANDLERS ===
     # ======================

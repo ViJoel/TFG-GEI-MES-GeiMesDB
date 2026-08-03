@@ -7,6 +7,7 @@ from PySide6.QtGui import QShortcut
 from PySide6.QtWidgets import (
     QSplitter,
     QStackedWidget,
+    QWidget,
 )
 
 from entities.sql_scope import SqlScope
@@ -1444,3 +1445,44 @@ def test_get_unsaved_changes_count_empty(
     """
 
     assert sql_editor_area.get_unsaved_changes_count() == 0
+
+
+# =============================================================================
+# FORCE UPDATE EDITORS COMPLETERS
+# =============================================================================
+
+
+def test_force_update_editors_completers_updates_all_editors(
+    sql_editor_area,
+):
+    """
+    Verifica que se fuerza la actualización del
+    autocompletador de todos los editores abiertos.
+    """
+
+    editor_1 = QWidget()
+    editor_1.force_update_completer = MagicMock()
+
+    editor_2 = QWidget()
+    editor_2.force_update_completer = MagicMock()
+
+    sql_editor_area.editors.addWidget(editor_1)
+    sql_editor_area.editors.addWidget(editor_2)
+
+    sql_editor_area.force_update_editors_completers()
+
+    editor_1.force_update_completer.assert_called_once()
+    editor_2.force_update_completer.assert_called_once()
+
+
+def test_force_update_editors_completers_with_no_editors(
+    sql_editor_area,
+):
+    """
+    Verifica que no falla cuando no existen
+    editores abiertos.
+    """
+
+    assert sql_editor_area.editors.count() == 0
+
+    sql_editor_area.force_update_editors_completers()
