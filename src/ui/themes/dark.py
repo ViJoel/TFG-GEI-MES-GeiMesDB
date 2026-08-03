@@ -336,7 +336,7 @@ THEME.update(
         "console_default_color": THEME["text"],
         "console_info_color": THEME["info"],
         "console_success_color": THEME["success"],
-        "console_error_color": THEME["danger"],
+        "console_error_color": THEME["error"],
         "console_warning_color": THEME["warning"],
         "console_disabled_color": THEME["text_disabled"],
         # Tipografía
@@ -595,23 +595,24 @@ THEME.update(
 # ============================
 THEME.update(
     {
-        "sql_boolean_color": CYAN,
-        "sql_column_color": LIGHT_RED,
+        "sql_boolean_color": LIGHT_CYAN,
+        "sql_column_color": LIGHT_BLUE,
         "sql_comment_color": GRAY_400,
-        "sql_constraint_color": LIGHT_RED,
-        "sql_function_color": BLUE,
-        "sql_identifier_color": LIGHT_ORANGE,
-        "sql_index_color": LIGHT_RED,
-        "sql_keyword_color": GREEN,
+        "sql_constant_color": LIGHT_CYAN,
+        "sql_constraint_color": RED_SOFT,
+        "sql_function_color": LIGHT_BLUE,
+        "sql_identifier_color": GRAY_150,
+        "sql_index_color": LIGHT_PURPLE,
+        "sql_keyword_color": LIGHT_GREEN,
         "sql_null_color": LIGHT_CYAN,
-        "sql_number_color": LIGHT_GREEN,
-        "sql_parameter_color": YELLOW,
-        "sql_string_color": RED_HOVER,
-        "sql_symbol_color": PURPLE,
-        "sql_table_color": LIGHT_RED,
-        "sql_type_color": ORANGE,
-        "sql_variable_color": LIGHT_BLUE,
-        "sql_view_color": LIGHT_RED,
+        "sql_number_color": GRAY_100,
+        "sql_parameter_color": LIGHT_YELLOW,
+        "sql_string_color": LIGHT_RED,
+        "sql_symbol_color": "#DEC3E8",
+        "sql_table_color": LIGHT_ORANGE,
+        "sql_type_color": LIGHT_ORANGE,
+        "sql_variable_color": LIGHT_YELLOW,
+        "sql_view_color": ORANGE,
     }
 )
 

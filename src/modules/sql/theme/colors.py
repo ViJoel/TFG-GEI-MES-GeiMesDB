@@ -4,6 +4,7 @@ SQL_THEME_COLORS = {
     "booleans": "sql_boolean_color",
     "columns": "sql_column_color",
     "comments": "sql_comment_color",
+    "constants": "sql_constant_color",
     "constraints": "sql_constraint_color",
     "functions": "sql_function_color",
     "identifiers": "sql_identifier_color",
