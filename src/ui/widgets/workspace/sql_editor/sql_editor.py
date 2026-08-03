@@ -264,7 +264,7 @@ class SqlEditor(QPlainTextEdit):
         self.file_modified.emit(self.file)
 
         self.completer.update_document_completion(
-            text,
+            sql=text,
         )
 
     # =====================
@@ -900,3 +900,10 @@ class SqlEditor(QPlainTextEdit):
 
         # Asegurar que el editor recupere el foco visual
         self.setFocus()
+
+    def force_update_completer(
+        self,
+    ) -> None:
+        self.completer.update_document_completion(
+            force_update=True,
+        )

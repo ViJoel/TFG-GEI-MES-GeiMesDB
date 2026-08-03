@@ -167,7 +167,6 @@ THEME.update(
         "connection_form_input_color": THEME["text"],
         "connection_form_input_color_hover": THEME["text_hover"],
         "connection_form_input_color_focus": THEME["primary"],
-        "connection_form_input_placeholder_color": GRAY_450,
         "connection_form_arrow_icon": ARROW_DOWN_ICON.replace("\\", "/"),
     }
 )
@@ -337,7 +336,7 @@ THEME.update(
         "console_default_color": THEME["text"],
         "console_info_color": THEME["info"],
         "console_success_color": THEME["success"],
-        "console_error_color": THEME["danger"],
+        "console_error_color": THEME["error"],
         "console_warning_color": THEME["warning"],
         "console_disabled_color": THEME["text_disabled"],
         # Tipografía
@@ -394,6 +393,66 @@ THEME.update(
     }
 )
 
+# =======================
+# === NAVIGATION TREE ===
+# =======================
+THEME.update(
+    {
+        # Panel
+        "navigation_tree_background_color": GRAY_950,
+        "navigation_tree_border_color": THEME["primary"],
+        # Barra de búsqueda
+        "navigation_tree_search_bar_background_color": GRAY_900,
+        "navigation_tree_search_bar_border_color": GRAY_800,
+        "navigation_tree_search_bar_color": THEME["text"],
+        "navigation_tree_search_bar_background_color_hover": GRAY_800,
+        "navigation_tree_search_bar_border_color_hover": GRAY_700,
+        "navigation_tree_search_bar_color_hover": THEME["text_hover"],
+        "navigation_tree_search_bar_background_color_focus": GRAY_900,
+        "navigation_tree_search_bar_border_color_focus": THEME["primary"],
+        "navigation_tree_search_bar_color_focus": THEME["primary"],
+        # Botón de refresco
+        "navigation_tree_refresh_button_background_color": GRAY_800,
+        "navigation_tree_refresh_button_border_color": THEME["accent"],
+        "navigation_tree_refresh_button_color": THEME["accent"],
+        "navigation_tree_refresh_button_background_color_hover": "rgba(76, 141, 218, 0.20)",
+        "navigation_tree_refresh_button_background_color_pressed": "rgba(76, 141, 218, 0.10)",
+        # Iconos
+        "navigation_tree_icon_color": "#9e9e9e",
+        "navigation_tree_column_icon_color": "#90a4ae",
+        "navigation_tree_constraint_icon_color": "#1355b2",
+        "navigation_tree_constraint_fk_icon_color": "#03a9f4",
+        "navigation_tree_constraint_nullable_icon_color": "#e0e0e0",
+        "navigation_tree_constraint_pk_icon_color": "#ffca28",
+        "navigation_tree_constraint_unique_icon_color": "#fe5d51",
+        "navigation_tree_constraint_check_icon_color": "#338337",
+        "navigation_tree_folder_icon_color": "#f9a825",
+        "navigation_tree_index_icon_color": "#ab47bc",
+        "navigation_tree_materialized_view_icon_color": "#42a5f5",
+        "navigation_tree_table_icon_color": "#42a5f5",
+        "navigation_tree_view_icon_color": "#26a69a",
+        # Items
+        "navigation_tree_item_background_color_hover": GRAY_800,
+        "navigation_tree_item_background_color_selected": GRAY_600,
+        "navigation_tree_item_background_color_selected_active": GREEN_RGBA_25,
+        "navigation_tree_item_background_color_selected_not_active": GRAY_700,
+    }
+)
+
+# ====================================
+# === NAVIGATION TREE CONTEXT MENU ===
+# ====================================
+THEME.update(
+    {
+        "navigation_tree_context_menu_background_color": "#252526",
+        "navigation_tree_context_menu_border_color": THEME["primary"],
+        "navigation_tree_context_menu_color": "#d4d4d4",
+        "navigation_tree_context_menu_item_selected_background_color": "rgba(139, 195, 74, 0.10)",
+        "navigation_tree_context_menu_item_selected_color": THEME["secondary"],
+        "navigation_tree_context_menu_separator_color": "#3f3f46",
+    }
+)
+
 # =====================
 # === NOTIFICATIONS ===
 # =====================
@@ -440,7 +499,6 @@ THEME.update(
         "rename_file_dialog_input_color_hover": THEME["text_hover"],
     }
 )
-
 
 # ==================
 # === SCROLLBARS ===
@@ -510,7 +568,6 @@ THEME.update(
     }
 )
 
-
 # ==================
 # === SQL EDITOR ===
 # ==================
@@ -538,19 +595,24 @@ THEME.update(
 # ============================
 THEME.update(
     {
-        "sql_boolean_color": CYAN,
+        "sql_boolean_color": LIGHT_CYAN,
+        "sql_column_color": LIGHT_BLUE,
         "sql_comment_color": GRAY_400,
-        "sql_function_color": BLUE,
-        "sql_identifier_color": LIGHT_ORANGE,
-        "sql_keyword_color": GREEN,
+        "sql_constant_color": LIGHT_CYAN,
+        "sql_constraint_color": RED_SOFT,
+        "sql_function_color": LIGHT_BLUE,
+        "sql_identifier_color": GRAY_150,
+        "sql_index_color": LIGHT_PURPLE,
+        "sql_keyword_color": LIGHT_GREEN,
         "sql_null_color": LIGHT_CYAN,
-        "sql_number_color": LIGHT_GREEN,
-        "sql_parameter_color": YELLOW,
-        "sql_string_color": RED_HOVER,
-        "sql_symbol_color": PURPLE,
-        "sql_table_color": WHITE,
-        "sql_type_color": ORANGE,
-        "sql_variable_color": LIGHT_BLUE,
+        "sql_number_color": GRAY_100,
+        "sql_parameter_color": LIGHT_YELLOW,
+        "sql_string_color": LIGHT_RED,
+        "sql_symbol_color": "#DEC3E8",
+        "sql_table_color": LIGHT_ORANGE,
+        "sql_type_color": LIGHT_ORANGE,
+        "sql_variable_color": LIGHT_YELLOW,
+        "sql_view_color": ORANGE,
     }
 )
 

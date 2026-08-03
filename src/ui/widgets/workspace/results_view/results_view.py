@@ -76,7 +76,10 @@ class ResultsView(QWidget):
 
         pagelayout = vbox(mt=12)
 
-        toolbar_layout = hbox(mb=8)
+        toolbar_layout = hbox(
+            mb=8,
+            sp=4,
+        )
         self.left_toolbar_layout = hbox()
         self.right_toolbar_layout = hbox()
 

@@ -2,6 +2,7 @@ from modules.sql.syntax.ansi.functions import SQL_FUNCTIONS
 from modules.sql.syntax.ansi.keywords import SQL_KEYWORDS
 from modules.sql.syntax.ansi.literals import (
     SQL_BOOLEAN_VALUES,
+    SQL_CONSTANTS,
     SQL_NULL_VALUES,
 )
 from modules.sql.syntax.ansi.symbols import SQL_SYMBOLS
@@ -14,6 +15,9 @@ from modules.sql.theme.colors import (
 SQL_STATIC_COMPLETION_DATA = {
     "booleans": {
         "values": SQL_BOOLEAN_VALUES,
+    },
+    "constants": {
+        "values": SQL_CONSTANTS,
     },
     "functions": {
         "values": SQL_FUNCTIONS,

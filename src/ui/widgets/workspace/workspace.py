@@ -1,11 +1,13 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
+    QSizePolicy,
     QSplitter,
     QWidget,
 )
 
 from entities.connection import Connection
 from entities.message_type import MessageType
+from entities.navigation_tree_action import NavigationTreeAction
 from entities.queries_history_entry import QueriesHistoryEntry
 from entities.query_execution import QueryExecution
 from entities.script_result import ScriptResult
@@ -23,6 +25,7 @@ from ui.app.app_actions import notify
 from ui.app.app_context import AppContext
 from ui.app.worker_error import WorkerError
 from ui.utils.layouts import hbox
+from ui.widgets.workspace.navigation_tree.navigation_tree import NavigationTree
 from ui.widgets.workspace.results_view.results_view import ResultsView
 from ui.widgets.workspace.sql_editor.sql_editor_area import SqlEditorArea
 
@@ -85,22 +88,28 @@ class Workspace(QWidget):
 
         self.sql_editor_area = SqlEditorArea()
         self.results_view = ResultsView(connection=self.connection)
+        self.navigation_tree = NavigationTree(connection_id=self.connection.id)
 
-        self.splitter = QSplitter(Qt.Vertical)
+        splitter = QSplitter(Qt.Vertical)
+        splitter.setHandleWidth(4)
+        splitter.setSizes([1, 3])
+        splitter.setChildrenCollapsible(True)
+        splitter.addWidget(self.sql_editor_area)
+        splitter.addWidget(self.results_view)
 
-        # Grosor de la barra.
-        self.splitter.setHandleWidth(4)
+        splitter_2 = QSplitter(Qt.Horizontal)
+        splitter_2.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Expanding,
+        )
+        splitter_2.setHandleWidth(1)
+        splitter_2.setSizes([3, 1])
+        splitter_2.setChildrenCollapsible(True)
 
-        # Proporciones de tamaño iniciales de los widgets.
-        self.splitter.setSizes([1, 3])
+        splitter_2.addWidget(splitter)
+        splitter_2.addWidget(self.navigation_tree)
 
-        # Evita que alguno de los paneles desaparezca.
-        self.splitter.setChildrenCollapsible(True)
-
-        self.splitter.addWidget(self.sql_editor_area)
-        self.splitter.addWidget(self.results_view)
-
-        main_layout.addWidget(self.splitter)
+        main_layout.addWidget(splitter_2)
 
     # ===============
     # === SIGNALS ===
@@ -124,6 +133,14 @@ class Workspace(QWidget):
 
         self.results_view.query_selected_from_session_queries_history.connect(
             self._on_query_selected_from_session_queries_history
+        )
+
+        self.navigation_tree.action_requested.connect(
+            self._on_navigation_tree_action,
+        )
+
+        self.navigation_tree.tree_reloaded.connect(
+            self.sql_editor_area.force_update_editors_completers
         )
 
     # ======================
@@ -274,6 +291,34 @@ class Workspace(QWidget):
     ) -> None:
 
         self.sql_editor_area.set_query_text(query)
+
+    def _on_navigation_tree_action(
+        self,
+        action: NavigationTreeAction,
+        sql: str,
+    ) -> None:
+        """
+        Gestiona las acciones emitidas por el árbol de navegación.
+
+        Dependiendo del tipo de acción solicitada, inserta el SQL en el
+        editor o lo ejecuta directamente utilizando el mismo flujo de
+        ejecución que el resto de la aplicación.
+
+        Args:
+            action (NavigationTreeAction):
+                Acción solicitada por el menú contextual del árbol.
+
+            sql (str):
+                Sentencia SQL asociada a la acción.
+        """
+
+        match action:
+
+            case NavigationTreeAction.INSERT_SQL_IN_EDITOR:
+                self.sql_editor_area.set_query_text(sql)
+
+            case NavigationTreeAction.EXECUTE_SQL:
+                self._execute_query([sql])
 
     # =====================
     # === EVENT HELPERS ===

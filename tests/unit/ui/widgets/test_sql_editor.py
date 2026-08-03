@@ -544,10 +544,12 @@ def test_on_text_changed_updates_document_completion(
 
     editor.completer.update_document_completion = MagicMock()
 
-    editor.setPlainText("SELECT :id")
+    text = "SELECT :id"
+
+    editor.setPlainText(text)
 
     editor.completer.update_document_completion.assert_called_once_with(
-        "SELECT :id",
+        sql=text,
     )
 
 
@@ -561,11 +563,13 @@ def test_on_text_changed_passes_current_document_text(
 
     editor.completer.update_document_completion = MagicMock()
 
-    editor.setPlainText("SELECT @var FROM table")
+    text = "SELECT @var FROM table"
 
-    args = editor.completer.update_document_completion.call_args[0]
+    editor.setPlainText(text)
 
-    assert args == ("SELECT @var FROM table",)
+    editor.completer.update_document_completion.assert_called_once_with(
+        sql=text,
+    )
 
 
 def test_update_completer_does_not_show_popup_on_backspace_if_hidden(
@@ -759,3 +763,25 @@ def test_text_under_cursor_returns_word(
     editor.setTextCursor(cursor)
 
     assert editor.text_under_cursor() == expected
+
+
+# =============================================================================
+# FORCE UPDATE COMPLETER
+# =============================================================================
+
+
+def test_force_update_completer_forces_document_completion_refresh(
+    editor,
+):
+    """
+    Verifica que force_update_completer solicita una
+    actualización forzada del autocompletador.
+    """
+
+    editor.completer.update_document_completion = MagicMock()
+
+    editor.force_update_completer()
+
+    editor.completer.update_document_completion.assert_called_once_with(
+        force_update=True,
+    )

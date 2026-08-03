@@ -50,12 +50,8 @@ QLineEdit#connection_form_input:hover {
 
 QLineEdit#connection_form_input:focus {
     background-color: $connection_form_input_background_color_focus;
-    border: 1px solid $connection_form_input_border_color_focus;
+    border-color: $connection_form_input_border_color_focus;
     color: $connection_form_input_color_focus;
-}
-
-QLineEdit#connection_form_input::placeholder {
-    color: $connection_form_input_placeholder_color;
 }
 
 /* Desplegable del driver */
@@ -77,7 +73,7 @@ QComboBox#connection_form_input:hover {
 
 QComboBox#connection_form_input:focus {
     background-color: $connection_form_input_background_color_focus;
-    border: 1px solid $connection_form_input_border_color_focus;
+    border-color: $connection_form_input_border_color_focus;
     color: $connection_form_input_color_focus;
 }
 

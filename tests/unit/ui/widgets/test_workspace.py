@@ -1,9 +1,11 @@
 from unittest.mock import MagicMock
 
 import pytest
+from PySide6.QtWidgets import QWidget
 
 from entities.connection import Connection
 from entities.message_type import MessageType
+from entities.navigation_tree_action import NavigationTreeAction
 from entities.queries_history_entry import QueriesHistoryEntry
 from entities.sql_scope import SqlScope
 from entities.unsaved_changes_count import UnsavedChangesCount
@@ -49,6 +51,32 @@ def patch_global_dependencies(mocker):
     mocker.patch(
         "ui.widgets.workspace.results_view.connection_queries_history.AppContext.get_app",
     )
+
+    mocker.patch(
+        "ui.widgets.workspace.navigation_tree.navigation_tree.notify",
+    )
+
+    mocker.patch(
+        "ui.widgets.workspace.navigation_tree.navigation_tree.AppContext.get_task_manager",
+        return_value=mocker.Mock(),
+    )
+
+
+@pytest.fixture(autouse=True)
+def patch_navigation_tree(mocker):
+
+    tree = QWidget()
+
+    tree.refresh = mocker.Mock()
+    tree.action_requested = mocker.Mock()
+    tree.tree_reloaded = mocker.Mock()
+
+    mocker.patch(
+        "ui.widgets.workspace.workspace.NavigationTree",
+        return_value=tree,
+    )
+
+    return tree
 
 
 @pytest.fixture
@@ -824,3 +852,129 @@ def test_get_unsaved_changes_count(
         assert isinstance(result, UnsavedChangesCount)
         assert result.connection_name == workspace.connection.name
         assert result.unsaved_changes == count
+
+
+# =============================================================================
+# SESSION HISTORY
+# =============================================================================
+
+
+def test_query_selected_from_history_sets_editor_text(
+    workspace,
+    mocker,
+):
+    """
+    Verifica que seleccionar una consulta del historial
+    la copia al editor.
+    """
+
+    set_query_text = mocker.patch.object(
+        workspace.sql_editor_area,
+        "set_query_text",
+    )
+
+    query = "SELECT * FROM users"
+
+    workspace._on_query_selected_from_session_queries_history(
+        query,
+    )
+
+    set_query_text.assert_called_once_with(query)
+
+
+# =============================================================================
+# NAVIGATION TREE
+# =============================================================================
+
+
+def test_navigation_tree_insert_sql_sets_editor_text(
+    workspace,
+    mocker,
+):
+    """
+    Verifica que INSERT_SQL_IN_EDITOR copia el SQL
+    al editor.
+    """
+
+    set_query_text = mocker.patch.object(
+        workspace.sql_editor_area,
+        "set_query_text",
+    )
+
+    sql = "SELECT * FROM users"
+
+    workspace._on_navigation_tree_action(
+        NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+        sql,
+    )
+
+    set_query_text.assert_called_once_with(sql)
+
+
+def test_navigation_tree_execute_sql_executes_query(
+    workspace,
+    mocker,
+):
+    """
+    Verifica que EXECUTE_SQL delega la ejecución
+    al flujo habitual de consultas.
+    """
+
+    execute_query = mocker.patch.object(
+        workspace,
+        "_execute_query",
+    )
+
+    sql = "SELECT * FROM users"
+
+    workspace._on_navigation_tree_action(
+        NavigationTreeAction.EXECUTE_SQL,
+        sql,
+    )
+
+    execute_query.assert_called_once_with([sql])
+
+
+# =============================================================================
+# SIGNALS
+# =============================================================================
+
+
+def test_connect_signals(
+    workspace,
+    mocker,
+):
+    """
+    Verifica que todas las señales se conectan
+    a sus handlers.
+    """
+
+    workspace = Workspace(workspace.connection)
+
+    workspace.sql_editor_area.execute_requested = mocker.Mock()
+    workspace.results_view.save_requested = mocker.Mock()
+    workspace.results_view.query_selected_from_session_queries_history = mocker.Mock()
+    workspace.navigation_tree.action_requested = mocker.Mock()
+    workspace.navigation_tree.tree_reloaded = mocker.Mock()
+
+    workspace._connect_signals()
+
+    workspace.sql_editor_area.execute_requested.connect.assert_called_once_with(
+        workspace._on_execute_requested,
+    )
+
+    workspace.results_view.save_requested.connect.assert_called_once_with(
+        workspace._on_save_requested,
+    )
+
+    workspace.results_view.query_selected_from_session_queries_history.connect.assert_called_once_with(
+        workspace._on_query_selected_from_session_queries_history,
+    )
+
+    workspace.navigation_tree.action_requested.connect.assert_called_once_with(
+        workspace._on_navigation_tree_action,
+    )
+
+    workspace.navigation_tree.tree_reloaded.connect.assert_called_once_with(
+        workspace.sql_editor_area.force_update_editors_completers,
+    )

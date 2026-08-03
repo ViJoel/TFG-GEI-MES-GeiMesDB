@@ -2,8 +2,10 @@ from PySide6.QtCore import (
     Qt,
     Signal,
 )
+from PySide6.QtGui import QKeySequence
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QApplication,
     QTableView,
 )
 
@@ -75,8 +77,6 @@ class Table(QTableView):
 
         self.setShowGrid(True)
 
-        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-
         self.setVerticalScrollMode(
             QAbstractItemView.ScrollMode.ScrollPerPixel,
         )
@@ -86,6 +86,82 @@ class Table(QTableView):
             QAbstractItemView.ScrollMode.ScrollPerPixel,
         )
         self.horizontalScrollBar().setSingleStep(10)
+
+    # ====================
+    # === QT OVERRIDES ===
+    # ====================
+
+    def keyPressEvent(
+        self,
+        event,
+    ) -> None:
+        """
+        Establece los atajos de teclado personalizados.
+
+        Para cualquier otra combinación de teclas,
+        delega el procesamiento en la implementación
+        base de QTableView.
+
+        Args:
+            event:
+                Evento de teclado recibido por el
+                widget.
+        """
+
+        if event.matches(QKeySequence.StandardKey.Copy):
+
+            index = self.currentIndex()
+
+            if index.isValid():
+
+                QApplication.clipboard().setText(
+                    str(
+                        index.data(
+                            Qt.ItemDataRole.DisplayRole,
+                        )
+                    )
+                )
+
+                event.accept()
+
+                return
+
+        if event.key() in (
+            Qt.Key.Key_Return,
+            Qt.Key.Key_Enter,
+        ):
+
+            self.edit(self.currentIndex())
+
+            event.accept()
+
+            return
+
+        super().keyPressEvent(event)
+
+    # ===================
+    # === PRIVATE API ===
+    # ===================
+
+    def _set_initial_columns_size(
+        self,
+        result_set: ResultSet,
+    ) -> None:
+        """
+        Ajusta el ancho inicial de cada columna
+        en base al texto de su cabecera.
+
+        Args:
+            result_set (ResultSet):
+                Conjunto de resultados que se
+                mostrará en la tabla.
+        """
+
+        font_metrics = self.horizontalHeader().fontMetrics()
+
+        for column, name in enumerate(result_set.columns):
+            width = font_metrics.horizontalAdvance(name) + 24
+            self.setColumnWidth(column, width)
 
     # ==================
     # === PUBLIC API ===
@@ -110,6 +186,8 @@ class Table(QTableView):
         self.model.state_changed.connect(self.data_changed)
 
         self.setModel(self.model)
+
+        self._set_initial_columns_size(result_set)
 
     def discard_changes(
         self,

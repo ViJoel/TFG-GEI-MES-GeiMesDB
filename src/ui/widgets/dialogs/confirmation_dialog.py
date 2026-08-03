@@ -3,6 +3,7 @@ from PySide6.QtCore import (
     Signal,
 )
 from PySide6.QtWidgets import (
+    QApplication,
     QDialog,
     QFrame,
     QPushButton,
@@ -67,6 +68,7 @@ class ConfirmationDialog(QDialog):
         super().__init__(parent.window())
 
         self.origin_widget = parent
+        self._previous_focus_widget = QApplication.focusWidget()
 
         self.setObjectName("confirmation_dialog")
         self.setWindowTitle(title)
@@ -279,33 +281,86 @@ class ConfirmationDialog(QDialog):
         """
 
         self.accept_button.clicked.connect(
-            self._on_accept_clicked,
+            self.accept,
         )
 
         self.cancel_button.clicked.connect(
-            self._on_cancel_clicked,
+            self.reject,
         )
 
-    # ======================
-    # === EVENT HANDLERS ===
-    # ======================
+    # ====================
+    # === QT OVERRIDES ===
+    # ====================
 
-    def _on_accept_clicked(
+    def accept(
         self,
     ) -> None:
         """
-        Maneja la confirmación de la acción.
+        Confirma la acción y cierra el diálogo.
         """
 
         self.confirmed.emit()
-        self.accept()
 
-    def _on_cancel_clicked(
+        super().accept()
+
+        if self._previous_focus_widget is not None:
+            self._previous_focus_widget.setFocus()
+
+    def reject(
         self,
     ) -> None:
         """
-        Maneja la cancelación de la acción.
+        Cancela la acción y cierra el diálogo.
         """
 
         self.cancelled.emit()
-        self.reject()
+
+        super().reject()
+
+        if self._previous_focus_widget is not None:
+            self._previous_focus_widget.setFocus()
+
+    def showEvent(
+        self,
+        event,
+    ) -> None:
+        """
+        Asigna el foco inicial al botón de aceptación
+        cuando el diálogo se muestra.
+
+        Args:
+            event:
+                Evento de mostrado recibido desde Qt.
+        """
+
+        super().showEvent(event)
+        self.accept_button.setFocus()
+
+    def focusNextPrevChild(
+        self,
+        next: bool,
+    ) -> bool:
+        """
+        Mantiene el ciclo de foco dentro del diálogo.
+
+        Alterna el foco entre los botones de aceptar
+        y cancelar para impedir que la navegación con
+        `Tab` alcance widgets de la ventana principal.
+
+        Args:
+            next (bool):
+                Indica la dirección del cambio de foco
+                solicitado por Qt.
+
+        Returns:
+            bool:
+                `True` para indicar que el cambio de
+                foco ha sido gestionado por el diálogo.
+        """
+
+        if self.accept_button.hasFocus():
+            self.cancel_button.setFocus()
+        else:
+            self.accept_button.setFocus()
+
+        return True

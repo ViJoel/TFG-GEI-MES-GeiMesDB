@@ -4,7 +4,7 @@ from PySide6.QtCore import (
 )
 from PySide6.QtWidgets import QWidget
 
-from ui.utils.layouts import hbox
+from ui.utils.layouts import flow
 from ui.widgets.workspace.sql_editor.toolbar_button import ToolbarButton
 from ui.widgets.workspace.sql_editor.toolbar_separator import ToolbarSeparator
 
@@ -187,7 +187,7 @@ class Toolbar(QWidget):
         controles de la barra de herramientas.
         """
 
-        layout = hbox(
+        layout = flow(
             ml=4,
             mt=4,
             mr=4,
@@ -211,8 +211,6 @@ class Toolbar(QWidget):
         layout.addWidget(self.open_button)
         layout.addWidget(self.save_button)
         layout.addWidget(self.rename_button)
-
-        layout.addStretch()
 
     # ===============
     # === SIGNALS ===
