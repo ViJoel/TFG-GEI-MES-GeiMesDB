@@ -5,7 +5,7 @@
 QListWidget#connections_list {
     background-color: $connections_list_background_color;
     border: 2px solid $connections_list_border_color;
-    border-radius: 8px;
+    border-radius: 4px;
 }
 
 /* ========================= */

@@ -2,10 +2,12 @@ from entities.connection import Connection
 from entities.query_result import QueryResult
 from entities.script_result import ScriptResult
 from entities.session import Session
+from entities.update_operation import UpdateOperation
 from modules.sessions.manager import close_all_sessions as cas
 from modules.sessions.manager import close_session as cs
 from modules.sessions.manager import execute_query as eq
 from modules.sessions.manager import execute_script as es
+from modules.sessions.manager import execute_updates as eu
 from modules.sessions.manager import get_session as gs
 from modules.sessions.manager import has_session as hs
 from modules.sessions.manager import is_editable_query as ieq
@@ -169,3 +171,30 @@ def execute_script(
     """
 
     return es(connection_id, queries)
+
+
+def execute_updates(
+    connection_id: str,
+    operations: list[UpdateOperation],
+) -> ScriptResult:
+    """
+    Ejecuta una serie de operaciones UPDATE.
+
+    Args:
+        connection_id (str):
+            Identificador de la conexión sobre la
+            que se ejecutarán las operaciones.
+
+        operations (list[UpdateOperation]):
+            Operaciones de actualización que se
+            desean persistir.
+
+    Returns:
+        ScriptResult:
+            Resultado de la ejecución.
+    """
+
+    return eu(
+        connection_id=connection_id,
+        operations=operations,
+    )

@@ -1,11 +1,17 @@
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import (
+    dataclass,
+    field,
+)
 from typing import Optional
 
 from entities.driver import Driver
 
 
-@dataclass(kw_only=True)  # Obliga a usar nombres de campo
+@dataclass(
+    slots=True,
+    kw_only=True,
+)
 class Connection:
     """
     Configuración técnica para el acceso a diferentes motores de bases de datos.

@@ -1,0 +1,7 @@
+QWidget#toolbar_separator {
+    background-color: $toolbar_separator;
+    border: none;
+    border-radius: 8px;
+    min-width: 1px;
+    max-width: 1px;
+}

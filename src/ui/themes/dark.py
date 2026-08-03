@@ -1,159 +1,9 @@
-from ui.common.paths import ARROW_DOWN_ICON
-
-# ====================
-# === TRANSPARENCY ===
-# ====================
-TRANSPARENT = "transparent"
-
-# =================
-# === GRAYSCALE ===
-# =================
-BLACK = "#000000"
-GRAY_950 = "#121314"
-GRAY_900 = "#1B1D1E"
-GRAY_850 = "#1F2123"
-GRAY_800 = "#242628"
-GRAY_750 = "#282B2D"
-GRAY_700 = "#2D3033"
-GRAY_650 = "#313437"
-GRAY_600 = "#35383C"
-GRAY_550 = "#404348"
-GRAY_500 = "#4A4D52"
-GRAY_450 = "#5A5D62"
-GRAY_400 = "#6B6E73"
-GRAY_350 = "#7A7D81"
-GRAY_300 = "#8A8D91"
-GRAY_250 = "#A1A3A6"
-GRAY_200 = "#B8B8B8"
-GRAY_150 = "#D5D5D5"
-GRAY_100 = "#F2F2F2"
-GRAY_50 = "#F8F8F8"
-WHITE = "#FFFFFF"
-
-# =============
-# === GREEN ===
-# =============
-GREEN = "#8BC34A"
-GREEN_HOVER = "#9CCC65"
-GREEN_PRESSED = "#7CB342"
-GREEN_DISABLED = "#5E7F39"
-
-# ===================
-# === LIGHT GREEN ===
-# ===================
-LIGHT_GREEN = "#A5D66A"
-LIGHT_GREEN_HOVER = "#B5DE84"
-LIGHT_GREEN_PRESSED = "#95C85A"
-LIGHT_GREEN_DISABLED = "#6F8F4D"
-
-# ==================
-# === DARK GREEN ===
-# ==================
-DARK_GREEN = "#1F5F2C"
-DARK_GREEN_HOVER = "#29783A"
-DARK_GREEN_PRESSED = "#34984A"
-
-# ==============
-# === ORANGE ===
-# ==============
-ORANGE = "#F28C38"
-ORANGE_HOVER = "#F59E50"
-ORANGE_PRESSED = "#E67E22"
-ORANGE_DISABLED = "#9A6738"
-ORANGE_SOFT = "#F4AE63"
-
-# ===========
-# === RED ===
-# ===========
-RED = "#D64545"
-RED_HOVER = "#E05353"
-RED_PRESSED = "#C03A3A"
-RED_DISABLED = "#7D4141"
-
-# =================
-# === LIGHT RED ===
-# =================
-LIGHT_RED = "#E57373"
-LIGHT_RED_HOVER = "#EF9A9A"
-LIGHT_RED_PRESSED = "#D96464"
-LIGHT_RED_DISABLED = "#9A6A6A"
-
-# ================
-# === DARK RED ===
-# ================
-DARK_RED = "#7A2F2F"
-DARK_RED_HOVER = "#914040"
-DARK_RED_PRESSED = "#632424"
-
-# ============
-# === BLUE ===
-# ============
-BLUE = "#4C8DDA"
-BLUE_HOVER = "#5B9BE7"
-BLUE_PRESSED = "#3D7BC5"
-BLUE_DISABLED = "#4C678A"
-
-# ============
-# === CYAN ===
-# ============
-CYAN = "#26C6DA"
-CYAN_HOVER = "#4DD0E1"
-CYAN_PRESSED = "#00ACC1"
-CYAN_DISABLED = "#2A7D88"
-
-# ==================
-# === LIGHT CYAN ===
-# ==================
-LIGHT_CYAN = "#6EDAE7"
-LIGHT_CYAN_HOVER = "#8BE3EC"
-LIGHT_CYAN_PRESSED = "#57CFDF"
-LIGHT_CYAN_DISABLED = "#5E9097"
-
-# =================
-# === DARK CYAN ===
-# =================
-DARK_CYAN = "#176C78"
-DARK_CYAN_HOVER = "#1E8593"
-DARK_CYAN_PRESSED = "#125964"
-
-# ==============
-# === PURPLE ===
-# ==============
-PURPLE = "#AB47BC"
-PURPLE_HOVER = "#BA68C8"
-PURPLE_PRESSED = "#8E24AA"
-PURPLE_DISABLED = "#73407D"
-
-# ==============
-# === YELLOW ===
-# ==============
-YELLOW = "#FDD835"
-YELLOW_HOVER = "#FFEE58"
-YELLOW_PRESSED = "#FBC02D"
-YELLOW_DISABLED = "#A3913A"
-
-# ====================
-# === LIGHT YELLOW ===
-# ====================
-LIGHT_YELLOW = "#FFE082"
-LIGHT_YELLOW_HOVER = "#FFECB3"
-LIGHT_YELLOW_PRESSED = "#FFD54F"
-LIGHT_YELLOW_DISABLED = "#B8A66A"
-
-# ===================
-# === DARK YELLOW ===
-# ===================
-DARK_YELLOW = "#8A6D00"
-DARK_YELLOW_HOVER = "#A37F00"
-DARK_YELLOW_PRESSED = "#705900"
-
-# ============
-# === PINK ===
-# ============
-PINK = "#EC407A"
-PINK_HOVER = "#F06292"
-PINK_PRESSED = "#D81B60"
-PINK_DISABLED = "#8E4560"
+from ui.common.paths import (
+    ARROW_DOWN_ICON,
+    ARROW_LINE_DOWN,
+    ARROW_LINE_UP,
+)
+from ui.themes.color_pallete import *
 
 # ===============
 # === GENERAL ===
@@ -411,6 +261,72 @@ THEME.update(
     }
 )
 
+# ==================================
+# === CONNECTION QUERIES HISTORY ===
+# ==================================
+THEME.update(
+    {
+        # Contenedor de los inputs
+        "connection_queries_history_inputs_background_color": GRAY_950,
+        "connection_queries_history_inputs_border_color": THEME["primary"],
+        # Inputs
+        "connection_queries_history_date_input_background_color": GRAY_900,
+        "connection_queries_history_date_input_background_color_hover": GRAY_800,
+        "connection_queries_history_date_input_background_color_focus": GRAY_900,
+        "connection_queries_history_date_input_border_color": GRAY_800,
+        "connection_queries_history_date_input_border_color_hover": GRAY_700,
+        "connection_queries_history_date_input_border_color_focus": THEME["primary"],
+        "connection_queries_history_date_input_color": THEME["text"],
+        "connection_queries_history_date_input_color_hover": THEME["text_hover"],
+        "connection_queries_history_date_input_color_focus": THEME["primary"],
+        # Tipografía de los inputs
+        "connection_queries_history_date_input_font_family": "'Consolas'",
+        "connection_queries_history_date_input_font_size": "12px",
+        # Icono dropdown
+        "connection_queries_history_date_input_arrow_icon": ARROW_DOWN_ICON.replace(
+            "\\", "/"
+        ),
+        # Calendario desplegable
+        "connection_queries_history_date_input_calendar_background_color": GRAY_950,
+        "connection_queries_history_date_input_calendar_border_color": THEME["primary"],
+        # Calendario desplegable: Inputs de año y mes
+        "connection_queries_history_date_input_calendar_year_and_month_inputs_color": THEME[
+            "text"
+        ],
+        "connection_queries_history_date_input_calendar_year_and_month_inputs_color_hover": THEME[
+            "primary"
+        ],
+        "connection_queries_history_date_input_calendar_year_and_month_inputs_color_pressed": THEME[
+            "primary"
+        ],
+        "connection_queries_history_date_input_calendar_year_input_arrow_up": ARROW_LINE_UP,
+        "connection_queries_history_date_input_calendar_year_input_arrow_down": ARROW_LINE_DOWN,
+        # Calendario desplegable: Menu del input de los meses
+        "connection_queries_history_date_input_calendar_year_input_menu_background_color": GRAY_950,
+        "connection_queries_history_date_input_calendar_year_input_menu_border_color": THEME[
+            "primary"
+        ],
+        "connection_queries_history_date_input_calendar_year_input_menu_item_color": THEME[
+            "text"
+        ],
+        "connection_queries_history_date_input_calendar_year_input_menu_item_background_color_hover": GREEN_DISABLED_RGBA_50,
+        "connection_queries_history_date_input_calendar_year_input_menu_item_color_hover": THEME[
+            "primary"
+        ],
+        "connection_queries_history_date_input_calendar_year_input_menu_separator_color": THEME[
+            "primary"
+        ],
+        # Calendario desplegable: Botones de las flechas
+        "connection_queries_history_date_input_calendar_arrow_button_background_color_hover": GREEN_DISABLED_RGBA_50,
+        "connection_queries_history_date_input_calendar_arrow_button_background_color_pressed": GREEN_RGBA_50,
+        # Calendario desplegable: Celdas de los días
+        "connection_queries_history_date_input_calendar_cell_background_color_hover": GREEN_DISABLED_RGBA_50,
+        "connection_queries_history_date_input_calendar_cell_background_color_selected": GREEN_RGBA_50,
+        # Calendario desplegable: Tipografía
+        "connection_queries_history_date_input_calendar_font_size": "14px",
+    }
+)
+
 # ===============
 # === CONSOLE ===
 # ===============
@@ -418,11 +334,12 @@ THEME.update(
     {
         "console_background_color": GRAY_950,
         "console_border_color": THEME["primary"],
-        "console_color": THEME["text"],
+        "console_default_color": THEME["text"],
         "console_info_color": THEME["info"],
         "console_success_color": THEME["success"],
         "console_error_color": THEME["danger"],
         "console_warning_color": THEME["warning"],
+        "console_disabled_color": THEME["text_disabled"],
         # Tipografía
         "console_font_family": "'Consolas'",
         "console_font_size": "14px",
@@ -480,6 +397,41 @@ THEME.update(
     }
 )
 
+# ==================
+# === SCROLLBARS ===
+# ==================
+THEME.update(
+    {
+        "scrollbar_background_color": GRAY_950,
+        "scrollbar_handle_color": THEME["primary"],
+        "scrollbar_handle_color_hover": THEME["primary_hover"],
+        "scrollbar_handle_color_pressed": THEME["primary_pressed"],
+    }
+)
+
+# ===============================
+# === SESSION QUERIES HISTORY ===
+# ===============================
+THEME.update(
+    {
+        "session_queries_history_background_color": GRAY_950,
+        "session_queries_history_border_color": GREEN,
+    }
+)
+
+# ====================================
+# === SESSION QUERIES HISTORY ITEM ===
+# ====================================
+THEME.update(
+    {
+        "session_queries_history_item_background_color": TRANSPARENT,
+        "session_queries_history_item_background_hover_color": GRAY_900,
+        "session_queries_history_item_background_selected_color": GRAY_800,
+        "session_queries_history_item_date_color": THEME["text_disabled"],
+        "session_queries_history_item_query_color": THEME["text"],
+    }
+)
+
 # ===============
 # === SIDEBAR ===
 # ===============
@@ -500,6 +452,19 @@ THEME.update(
         "splitter_background_color_pressed": THEME["accent_hover"],
     }
 )
+
+# =====================
+# === SQL COMPLETER ===
+# =====================
+THEME.update(
+    {
+        "sql_completer_background_color": GRAY_950,
+        "sql_completer_border_color": THEME["primary"],
+        "sql_completer_selection_background_color": GREEN_RGBA_75,
+        "sql_completer_selection_color": GRAY_950,
+    }
+)
+
 
 # ==================
 # === SQL EDITOR ===
@@ -523,6 +488,27 @@ THEME.update(
     }
 )
 
+# ============================
+# === SQL SYNTAX HIGHLIGHT ===
+# ============================
+THEME.update(
+    {
+        "sql_boolean_color": CYAN,
+        "sql_comment_color": GRAY_400,
+        "sql_function_color": BLUE,
+        "sql_identifier_color": LIGHT_ORANGE,
+        "sql_keyword_color": GREEN,
+        "sql_null_color": LIGHT_CYAN,
+        "sql_number_color": LIGHT_GREEN,
+        "sql_parameter_color": YELLOW,
+        "sql_string_color": RED_HOVER,
+        "sql_symbol_color": PURPLE,
+        "sql_table_color": WHITE,
+        "sql_type_color": ORANGE,
+        "sql_variable_color": LIGHT_BLUE,
+    }
+)
+
 # =============
 # === TABLE ===
 # =============
@@ -538,19 +524,56 @@ THEME.update(
         "table_header_cell_background_color": THEME["primary"],
         "table_header_cell_color": GRAY_800,
         # Celdas de la tabla
-        "table_cell_background_color_hover": THEME["secondary"],
-        "table_cell_color_hover": GRAY_800,
-        "table_cell_selected_background_color": ORANGE,
-        "table_cell_selected_color": GRAY_800,
+        "table_cell_background_color_hover": ORANGE_DISABLED_RGBA_25,
+        "table_cell_selected_background_color": ORANGE_RGBA_25,
+        "table_cell_selected_color": THEME["text"],
         "table_cell_modified_background_color": THEME["accent"],
         "table_cell_modified_color": GRAY_800,
         # Alternancia de filas
         "table_row_alternate_background_color": GRAY_900,
         "table_grid_color": TRANSPARENT,
-        # Scrollbar
-        "table_scrollbar_background_color": TRANSPARENT,
-        "table_scrollbar_handle_color": THEME["primary"],
-        "table_scrollbar_handle_color_hover": THEME["primary_hover"],
-        "table_scrollbar_handle_color_pressed": THEME["primary_pressed"],
+        # Texto de las celdas en función del tipo de dato
+        "table_null_color": "#808080",
+        "table_default_color": "#D4D4D4",
+        "table_boolean_color": "#569CD6",
+        "table_datetime_color": "#DCDCAA",
+        "table_dict_color": "#C586C0",
+        "table_number_color": "#B5CEA8",
+        "table_string_color": "#CE9178",
+    }
+)
+
+# ===============
+# === TOOLBAR ===
+# ===============
+THEME.update(
+    {
+        # Default
+        "toolbar_background_color": GREEN_RGBA_25,
+        "toolbar_border_color": THEME["primary"],
+        "toolbar_color": THEME["text"],
+        # Separador
+        "toolbar_separator": GRAY_900,
+    }
+)
+
+# ======================
+# === TOOLBAR BUTTON ===
+# ======================
+THEME.update(
+    {
+        # Botones
+        "toolbar_button_background_color": "transparent",
+        "toolbar_button_background_color_hover": GRAY_950,
+        "toolbar_button_background_color_pressed": GRAY_800,
+        "toolbar_button_color": THEME["text"],
+        "toolbar_button_color_hover": WHITE,
+        "toolbar_button_color_pressed": WHITE,
+        # Iconos
+        "toolbar_button_execute_selection_icon_color": THEME["primary"],
+        "toolbar_button_execute_query_icon_color": THEME["primary"],
+        "toolbar_button_execute_script_icon_color": THEME["primary"],
+        "toolbar_button_undo_icon_color": THEME["secondary"],
+        "toolbar_button_redo_icon_color": THEME["secondary"],
     }
 )

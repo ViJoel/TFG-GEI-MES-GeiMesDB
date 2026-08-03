@@ -1,7 +1,10 @@
 import logging
 from unittest.mock import patch
 
-from log.logger_config import SUCCESS, setup_logging
+from log.logger_config import (
+    SUCCESS,
+    setup_logging,
+)
 
 # =============================================================================
 # Nivel SUCCESS

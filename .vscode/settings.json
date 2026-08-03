@@ -7,5 +7,22 @@
         "tests"
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "never"
+        }
+    },
+    "isort.args": [
+        "--profile",
+        "black",
+        "--force-grid-wrap",
+        "2",
+        "--multi-line",
+        "3",
+        "--trailing-comma",
+        "--indent",
+        "    "
+    ]
 }

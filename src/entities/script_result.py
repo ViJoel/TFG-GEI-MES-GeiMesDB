@@ -14,7 +14,10 @@ Clases:
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(
+    slots=True,
+    kw_only=True,
+)
 class ScriptResultItem:
     """
     Representa el resultado de la ejecución de una
@@ -47,7 +50,10 @@ class ScriptResultItem:
         return self.error is None
 
 
-@dataclass
+@dataclass(
+    slots=True,
+    kw_only=True,
+)
 class ScriptResult:
     """
     Contiene los resultados de la ejecución
@@ -57,6 +63,12 @@ class ScriptResult:
         items (list[ScriptResultItem]):
             Resultados individuales de las
             consultas ejecutadas.
+
+    rolled_back (bool):
+            Indica si la transacción completa fue
+            revertida tras producirse uno o más
+            errores.
     """
 
     items: list[ScriptResultItem]
+    rolled_back: bool = False

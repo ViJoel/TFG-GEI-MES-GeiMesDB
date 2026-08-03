@@ -1,7 +1,7 @@
 QWidget#sidebar {
     background-color: $sidebar_background_color;
     border: 2px solid $sidebar_border_color;
-    border-radius: 8px;
+    border-radius: 4px;
 }
 
 QPushButton#settings_button {

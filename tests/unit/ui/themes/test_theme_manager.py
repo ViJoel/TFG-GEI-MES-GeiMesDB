@@ -1,6 +1,11 @@
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import (
+    MagicMock,
+    mock_open,
+    patch,
+)
 
 import pytest
+from PySide6.QtGui import QColor
 
 from ui.themes.theme_manager import ThemeManager
 
@@ -133,6 +138,29 @@ def test_build_stylesheet_missing_variable(mock_file):
         ThemeManager._build_stylesheet()
 
 
+@patch(
+    "builtins.open",
+    new_callable=mock_open,
+    read_data="QWidget { color: @primary; }",
+)
+@patch("ui.themes.theme_manager.STYLE_FILES", ["style.qss"])
+def test_build_stylesheet_invalid_at_variable(mock_file):
+    """
+    Debe lanzar ValueError si un QSS utiliza
+    variables con '@' en lugar de '$'.
+    """
+
+    ThemeManager._themes["dark"] = {
+        "primary": "#ffffff",
+    }
+
+    with pytest.raises(
+        ValueError,
+        match=r"Theme variables must use '\$', not '@'\.",
+    ):
+        ThemeManager._build_stylesheet()
+
+
 # =============================================================================
 # GET COLOR
 # =============================================================================
@@ -171,3 +199,43 @@ def test_get_color_default_transparent():
     ThemeManager._themes["dark"] = {}
 
     assert ThemeManager.get_color("unknown") == "transparent"
+
+
+# =============================================================================
+# GET QCOLOR
+# =============================================================================
+
+
+@patch.object(ThemeManager, "get_color", return_value="#123456")
+def test_get_qcolor_without_alpha(mock_get_color):
+    """
+    Debe devolver un QColor conservando el alfa
+    original cuando no se especifica.
+    """
+
+    color = ThemeManager.get_qcolor("primary")
+
+    assert isinstance(color, QColor)
+    assert color.name() == "#123456"
+    assert color.alpha() == 255
+
+    mock_get_color.assert_called_once_with("primary")
+
+
+@patch.object(ThemeManager, "get_color", return_value="#123456")
+def test_get_qcolor_with_alpha(mock_get_color):
+    """
+    Debe devolver un QColor aplicando el canal
+    alfa indicado.
+    """
+
+    color = ThemeManager.get_qcolor(
+        "primary",
+        alpha=64,
+    )
+
+    assert isinstance(color, QColor)
+    assert color.name() == "#123456"
+    assert color.alpha() == 64
+
+    mock_get_color.assert_called_once_with("primary")

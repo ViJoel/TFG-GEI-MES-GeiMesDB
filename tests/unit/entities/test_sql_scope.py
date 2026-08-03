@@ -10,8 +10,9 @@ def test_sql_scope_members_exist():
     Verifica que los miembros del enum SqlScope existen correctamente.
     """
 
-    assert SqlScope.SELECTED_TEXT
+    assert SqlScope.ACTUAL_QUERY
     assert SqlScope.FULL_SCRIPT
+    assert SqlScope.SELECTED_TEXT
 
 
 # =============================================================================
@@ -24,8 +25,9 @@ def test_sql_scope_lookup_by_value():
     Verifica que el enum puede resolverse a partir de su valor interno.
     """
 
-    assert SqlScope(SqlScope.SELECTED_TEXT.value) is SqlScope.SELECTED_TEXT
+    assert SqlScope(SqlScope.ACTUAL_QUERY.value) is SqlScope.ACTUAL_QUERY
     assert SqlScope(SqlScope.FULL_SCRIPT.value) is SqlScope.FULL_SCRIPT
+    assert SqlScope(SqlScope.SELECTED_TEXT.value) is SqlScope.SELECTED_TEXT
 
 
 # =============================================================================
@@ -40,9 +42,10 @@ def test_sql_scope_iteration():
 
     values = list(SqlScope)
 
-    assert SqlScope.SELECTED_TEXT in values
+    assert SqlScope.ACTUAL_QUERY in values
     assert SqlScope.FULL_SCRIPT in values
-    assert len(values) == 2
+    assert SqlScope.SELECTED_TEXT in values
+    assert len(values) == 3
 
 
 # =============================================================================
@@ -55,5 +58,6 @@ def test_sql_scope_names():
     Verifica que los nombres de los miembros del enum SqlScope son correctos.
     """
 
-    assert SqlScope.SELECTED_TEXT.name == "SELECTED_TEXT"
+    assert SqlScope.ACTUAL_QUERY.name == "ACTUAL_QUERY"
     assert SqlScope.FULL_SCRIPT.name == "FULL_SCRIPT"
+    assert SqlScope.SELECTED_TEXT.name == "SELECTED_TEXT"

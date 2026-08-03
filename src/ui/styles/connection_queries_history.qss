@@ -1,0 +1,216 @@
+/* ======================= */
+/* === INPUTS WIDGET ===== */
+/* ======================= */
+
+QWidget#connection_queries_history_inputs {
+    background-color: $connection_queries_history_inputs_background_color;
+    border: 2px solid $connection_queries_history_inputs_border_color;
+    border-radius: 4px;
+}
+
+/* ====================== */
+/* === INPUT WIDGET ===== */
+/* ====================== */
+
+QWidget#connection_queries_history_date {
+    background-color: transparent;
+}
+
+/* ===================== */
+/* === INPUT LABEL ===== */
+/* ===================== */
+
+QLabel#connection_queries_history_date_input_label {
+    background-color: transparent;
+}
+
+/* ==================== */
+/* === DATE INPUT ===== */
+/* ==================== */
+
+QDateEdit#connection_queries_history_date_input {
+    background-color: $connection_queries_history_date_input_background_color;
+    border: 1px solid $connection_queries_history_date_input_border_color;
+    border-radius: 4px;
+    color: $connection_queries_history_date_input_color;
+    font-family: $connection_queries_history_date_input_font_family;
+    font-size: $connection_queries_history_date_input_font_size;
+    min-height: 20px;
+    min-width: 80px;
+    padding: 4px;
+}
+
+QDateEdit#connection_queries_history_date_input:hover {
+    background-color: $connection_queries_history_date_input_background_color_hover;
+    border-color: $connection_queries_history_date_input_border_color_hover;
+    color: $connection_queries_history_date_input_color_hover;
+}
+
+QDateEdit#connection_queries_history_date_input:focus {
+    background-color: $connection_queries_history_date_input_background_color_focus;
+    border-color: $connection_queries_history_date_input_border_color_focus;
+    color: $connection_queries_history_date_input_color_focus;
+}
+
+QDateEdit#connection_queries_history_date_input::drop-down {
+    background: transparent;
+    border: none;
+    width: 28px;
+}
+
+QDateEdit#connection_queries_history_date_input::down-arrow {
+    image: url($connection_queries_history_date_input_arrow_icon);
+    height: 14px;
+    width: 14px;
+}
+
+/* ============================= */
+/* === DATE INPUT CALENDAR ===== */
+/* ============================= */
+
+/* Widget principal */
+
+QCalendarWidget {
+    background-color: transparent;
+    border: none;
+    font-size: $connection_queries_history_date_input_calendar_font_size;
+}
+
+/* Barra superior */
+
+QCalendarWidget QWidget#qt_calendar_navigationbar {
+    background-color: $connection_queries_history_date_input_calendar_background_color;
+    border: 1px solid $connection_queries_history_date_input_calendar_border_color;
+    border-bottom: none;
+}
+
+/* Botones de navegación */
+
+QCalendarWidget QToolButton {
+    background-color: transparent;
+    border: none;
+    color: $connection_queries_history_date_input_calendar_year_and_month_inputs_color;
+    font-size: $connection_queries_history_date_input_calendar_font_size;
+    padding: 6px;
+}
+
+QCalendarWidget QToolButton:hover {
+    color: $connection_queries_history_date_input_calendar_year_and_month_inputs_color_hover;
+}
+
+QCalendarWidget QToolButton:pressed {
+    color: $connection_queries_history_date_input_calendar_year_and_month_inputs_color_pressed;
+}
+
+/* Botón mes anterior */
+/* Botón mes siguiente */
+
+QCalendarWidget QToolButton#qt_calendar_prevmonth,
+QCalendarWidget QToolButton#qt_calendar_nextmonth {
+    background-color: transparent;
+    height: 24px;
+    width: 24px;
+}
+
+QCalendarWidget QToolButton#qt_calendar_prevmonth:hover,
+QCalendarWidget QToolButton#qt_calendar_nextmonth:hover {
+    background-color: $connection_queries_history_date_input_calendar_arrow_button_background_color_hover;
+}
+
+QCalendarWidget QToolButton#qt_calendar_prevmonth:pressed,
+QCalendarWidget QToolButton#qt_calendar_nextmonth:pressed {
+    background-color: $connection_queries_history_date_input_calendar_arrow_button_background_color_pressed;
+}
+
+/* Selector de mes (menú desplegable) */
+
+QCalendarWidget QMenu {
+    background-color: $connection_queries_history_date_input_calendar_year_input_menu_background_color;
+    border: 1px solid $connection_queries_history_date_input_calendar_year_input_menu_border_color;
+    outline: none;
+}
+
+QCalendarWidget QMenu::item {
+    background-color: transparent;
+    color: $connection_queries_history_date_input_calendar_year_input_menu_item_color;
+    padding: 6px 16px;
+}
+
+QCalendarWidget QMenu::item:selected {
+    background-color: $connection_queries_history_date_input_calendar_year_input_menu_item_background_color_hover;
+    color: $connection_queries_history_date_input_calendar_year_input_menu_item_color_hover;
+}
+
+QCalendarWidget QMenu::separator {
+    height: 1px;
+    background: $connection_queries_history_date_input_calendar_year_input_menu_separator_color;
+    margin: 2px 8px;
+}
+
+/* Selector de año */
+
+QCalendarWidget QSpinBox {
+    background: transparent;
+    border: none;
+    font-size: $connection_queries_history_date_input_calendar_font_size;
+}
+
+QCalendarWidget QSpinBox::up-button,
+QCalendarWidget QSpinBox::down-button {
+    background-color: transparent;
+    border: none;
+    height: 10px;
+    width: 16px;
+}
+
+QCalendarWidget QSpinBox::up-button {
+    padding-top: 8px;
+    subcontrol-position: top right;
+}
+
+QCalendarWidget QSpinBox::down-button {
+    padding-bottom: 8px;
+    subcontrol-position: bottom right;
+}
+
+QCalendarWidget QSpinBox::up-arrow {
+    image: url($connection_queries_history_date_input_calendar_year_input_arrow_up);
+}
+
+QCalendarWidget QSpinBox::down-arrow {
+    image: url($connection_queries_history_date_input_calendar_year_input_arrow_down);
+}
+
+QCalendarWidget QSpinBox::up-arrow,
+QCalendarWidget QSpinBox::down-arrow {
+    width: 8px;
+    height: 8px;
+}
+
+/* Tabla de días */
+
+QCalendarWidget QAbstractItemView {
+    background-color: $connection_queries_history_date_input_calendar_background_color;
+    border: 1px solid $connection_queries_history_date_input_calendar_border_color;
+}
+
+/* Celda */
+
+QCalendarWidget QAbstractItemView::item {
+    border: none;
+    font-size: $connection_queries_history_date_input_calendar_font_size;
+}
+
+QCalendarWidget QAbstractItemView::item:hover {
+    background-color: $connection_queries_history_date_input_calendar_cell_background_color_hover;
+}
+
+QCalendarWidget QAbstractItemView::item:selected {
+    background-color: $connection_queries_history_date_input_calendar_cell_background_color_selected;
+}
+
+/* Cabeceras (Lu, Ma, Mi...) */
+
+QCalendarWidget QTableView {
+    font-size: $connection_queries_history_date_input_calendar_font_size;
+}

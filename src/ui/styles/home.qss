@@ -1,7 +1,7 @@
 QWidget#home_page {
     background-color: $home_page_background_color;
     border: 2px solid $home_page_border_color;
-    border-radius: 8px;
+    border-radius: 4px;
 }
 
 QLabel#home_page_title {

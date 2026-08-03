@@ -25,6 +25,7 @@ def mock_manager(monkeypatch):
     monkeypatch.setattr(service, "eq", MagicMock())
     monkeypatch.setattr(service, "ieq", MagicMock())
     monkeypatch.setattr(service, "es", MagicMock())
+    monkeypatch.setattr(service, "eu", MagicMock())
 
 
 def test_open_session():
@@ -146,4 +147,30 @@ def test_execute_script():
     result = service.execute_script("1", queries)
 
     service.es.assert_called_once_with("1", queries)
+    assert result == "result"
+
+
+def test_execute_updates():
+    """
+    Verifica que execute_updates delega correctamente
+    la ejecución de operaciones UPDATE al manager.
+    """
+
+    operations = [
+        MagicMock(),
+        MagicMock(),
+    ]
+
+    service.eu.return_value = "result"
+
+    result = service.execute_updates(
+        connection_id="1",
+        operations=operations,
+    )
+
+    service.eu.assert_called_once_with(
+        connection_id="1",
+        operations=operations,
+    )
+
     assert result == "result"

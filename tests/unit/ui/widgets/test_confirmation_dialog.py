@@ -1,6 +1,9 @@
 import pytest
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QDialog, QWidget
+from PySide6.QtWidgets import (
+    QDialog,
+    QWidget,
+)
 
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
 

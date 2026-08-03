@@ -1,4 +1,7 @@
+import re
 from string import Template
+
+from PySide6.QtGui import QColor
 
 from log.app_logger import get_logger
 from ui.app.app_context import AppContext
@@ -189,6 +192,18 @@ class ThemeManager:
 
         try:
 
+            if match := re.search(r"@\w+", stylesheet):
+
+                logger.error(
+                    "Invalid theme variable '%s'. Use '$' instead of '@'.",
+                    match.group(),
+                )
+
+                raise ValueError(
+                    f"Invalid theme variable '{match.group()}'. "
+                    "Theme variables must use '$', not '@'."
+                )
+
             stylesheet = Template(stylesheet).substitute(
                 cls._themes[cls._current_theme]
             )
@@ -245,3 +260,35 @@ class ThemeManager:
         )
 
         return fallback_color
+
+    @classmethod
+    def get_qcolor(
+        cls,
+        key: str,
+        alpha: int | None = None,
+    ) -> QColor:
+        """
+        Obtiene un QColor a partir de un color de la
+        paleta del tema activo.
+
+        Args:
+            key (str):
+                Clave del color en la paleta.
+
+            alpha (int | None):
+                Canal alfa del color (0-255). Si es
+                ``None``, se conserva la opacidad
+                original del color.
+
+        Returns:
+            QColor:
+                Color correspondiente a la clave
+                solicitada.
+        """
+
+        color = QColor(cls.get_color(key))
+
+        if alpha is not None:
+            color.setAlpha(alpha)
+
+        return color

@@ -14,8 +14,13 @@ Clases:
 from dataclasses import dataclass
 from typing import Any
 
+from entities.table_metadata import TableMetadata
 
-@dataclass
+
+@dataclass(
+    slots=True,
+    kw_only=True,
+)
 class ResultSet:
     """
     Contiene el conjunto de resultados devuelto
@@ -28,43 +33,62 @@ class ResultSet:
         columns (list[str]):
             Nombres de las columnas del resultado.
 
-        columns_types (list[type]):
-            Tipos asociados a cada columna.
-
-        table_name (str | None):
-            Nombre de la tabla asociada al
-            resultado, si existe.
-
-        primary_key_columns (list[str]):
-            Columnas que forman la clave primaria
-            de la tabla asociada.
+        table_metadata (TableMetadata | None):
+            Metadatos de la tabla asociada al
+            resultado. Será `None` cuando la
+            consulta no sea editable.
     """
 
     rows: list[list[Any]]
     columns: list[str]
-    columns_types: list[type]
-
-    table_name: str | None
-    primary_key_columns: list[str]
+    table_metadata: TableMetadata | None
 
     @property
-    def is_editable(self) -> bool:
+    def is_editable(
+        self,
+    ) -> bool:
         """
-        Indica si el conjunto de resultados puede
-        modificarse.
+        Indica si el resultado dispone de metadata
+        asociada para permitir operaciones de edición.
 
         Returns:
             bool:
-                - `True` si existe una tabla asociada y
-                se dispone de al menos una columna
-                de clave primaria.
-                - `False` en caso contrario.
+                True si existe información de la
+                tabla asociada; False en caso
+                contrario.
         """
 
-        return self.table_name is not None and len(self.primary_key_columns) > 0
+        return self.table_metadata is not None
+
+    def supports_editing(
+        self,
+        column_name: str,
+    ) -> bool:
+        """
+        Indica si una columna puede editarse.
+
+        Args:
+            column_name (str):
+                Nombre de la columna.
+
+        Returns:
+            bool:
+                True si la columna admite edición;
+                False en caso contrario.
+        """
+
+        if self.table_metadata is None:
+            return False
+
+        return self.table_metadata.supports_editing(
+            column_name=column_name,
+        )
 
 
-@dataclass
+@dataclass(
+    slots=True,
+    kw_only=True,
+)
 class QueryResult:
     """
     Representa el resultado de la ejecución de una

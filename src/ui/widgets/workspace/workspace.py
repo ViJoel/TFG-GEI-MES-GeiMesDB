@@ -1,15 +1,26 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QSplitter, QWidget
+from PySide6.QtWidgets import (
+    QSplitter,
+    QWidget,
+)
 
 from entities.connection import Connection
 from entities.message_type import MessageType
+from entities.queries_history_entry import QueriesHistoryEntry
 from entities.sql_scope import SqlScope
 from log.app_logger import get_logger
-from modules.sessions.service import execute_query, execute_script, is_editable_query
+from modules.queries_history.service import save_queries_history_batch
+from modules.sessions.service import (
+    execute_query,
+    execute_script,
+    execute_updates,
+    is_editable_query,
+)
 from ui.app.app_actions import notify
+from ui.app.app_context import AppContext
 from ui.utils.layouts import hbox
 from ui.widgets.workspace.results_view.results_view import ResultsView
-from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
+from ui.widgets.workspace.sql_editor.sql_editor_area import SqlEditorArea
 
 logger = get_logger(__name__)
 
@@ -68,8 +79,8 @@ class Workspace(QWidget):
         main_layout = hbox()
         self.setLayout(main_layout)
 
-        self.sql_editor = SqlEditor()
-        self.results_view = ResultsView()
+        self.sql_editor = SqlEditorArea()
+        self.results_view = ResultsView(connection=self.connection)
 
         self.splitter = QSplitter(Qt.Vertical)
 
@@ -107,6 +118,10 @@ class Workspace(QWidget):
             self._on_save_requested,
         )
 
+        self.results_view.query_selected_from_session_queries_history.connect(
+            self._on_query_selected_from_session_queries_history
+        )
+
     # ======================
     # === EVENT HANDLERS ===
     # ======================
@@ -129,13 +144,32 @@ class Workspace(QWidget):
                 Ámbito de ejecución solicitado.
         """
 
-        if scope == SqlScope.SELECTED_TEXT:
+        notify(
+            MessageType.WARNING,
+            "Executing sql...",
+        )
+
+        # Forzar el repintado de la UI antes de iniciar una operación
+        # síncrona que bloqueará temporalmente el hilo principal.
+        AppContext.get_app().processEvents()
+
+        if scope in (
+            SqlScope.SELECTED_TEXT,
+            SqlScope.ACTUAL_QUERY,
+        ):
             self._execute_query(sql)
 
         elif scope == SqlScope.FULL_SCRIPT:
             self._execute_script(sql)
 
+        self._save_queries_history(sql)
+
         self.results_view.set_action_buttons_state(False)
+
+        notify(
+            MessageType.SUCCESS,
+            "SQL executed.",
+        )
 
     def _on_save_requested(
         self,
@@ -146,41 +180,60 @@ class Workspace(QWidget):
         actualiza los resultados.
         """
 
+        saving_operation_success: bool = False
+
         connection = self.connection
 
         logger.info(f"Save requested for '{connection.name}' (ID: {connection.id}).")
 
-        logger.debug("Generating UPDATE queries...")
+        logger.debug("Generating UPDATE operations...")
 
-        queries = self.results_view.table.model.generate_update_queries()
+        operations = self.results_view.table.model.generate_update_operations()
 
-        logger.debug(f"{len(queries)} UPDATE queries generated.")
+        logger.debug(f"{len(operations)} UPDATE operations generated.")
 
-        logger.debug(f"Executing {len(queries)} UPDATE queries...")
+        logger.debug(f"Executing {len(operations)} UPDATE operations...")
 
-        script_result = execute_script(
+        script_result = execute_updates(
             connection_id=connection.id,
-            queries=queries,
+            operations=operations,
         )
 
-        logger.debug("UPDATE queries execution completed.")
+        logger.debug("UPDATE operations execution completed.")
 
-        logger.debug("Executing original query...")
+        if not script_result.rolled_back:
 
-        result = execute_query(
-            connection_id=connection.id,
-            query=self.current_query,
-        )
+            logger.debug("Executing original query...")
 
-        logger.debug("Original query execution completed.")
+            result = execute_query(
+                connection_id=connection.id,
+                query=self.current_query,
+            )
 
-        logger.debug("Refreshing results view...")
+            logger.debug("Original query execution completed.")
 
-        self.results_view.show_result(
-            result=result,
-            script_result=None,
-            is_script=False,
-        )
+            logger.debug("Refreshing results view...")
+
+            self.results_view.show_result(
+                result=result,
+                script_result=None,
+                is_script=False,
+            )
+
+            self.results_view.set_action_buttons_state(False)
+
+            logger.debug("Results view refreshed.")
+
+            saving_operation_success = True
+
+        else:
+
+            logger.debug(
+                "Transaction rolled back. Keeping current table "
+                "state so the user can correct the errors."
+            )
+
+            saving_operation_success = False
 
         self.results_view.show_result(
             result=None,
@@ -189,11 +242,30 @@ class Workspace(QWidget):
         )
 
         self.results_view.set_tab_buttons_state(True)
-        self.results_view.set_action_buttons_state(False)
 
-        logger.debug("Results view refreshed.")
+        logger.success(
+            f"Save operation finished for "
+            f"'{connection.name}' (ID: {connection.id})."
+        )
 
-        logger.success(f"Changes saved for '{connection.name}' (ID: {connection.id}).")
+        if saving_operation_success:
+            notify(
+                MessageType.SUCCESS,
+                "Changes saved",
+            )
+
+        else:
+            notify(
+                MessageType.ERROR,
+                "Saving changes failed.",
+            )
+
+    def _on_query_selected_from_session_queries_history(
+        self,
+        query: str,
+    ) -> None:
+
+        self.sql_editor.set_query_text(query)
 
     # =====================
     # === EVENT HELPERS ===
@@ -320,3 +392,43 @@ class Workspace(QWidget):
             f"Script executed successfully for "
             f"'{self.connection.name}' (ID: {self.connection.id})."
         )
+
+    def _save_queries_history(self, queries: list[str]) -> None:
+
+        notify(
+            MessageType.WARNING,
+            "Saving queries history...",
+        )
+
+        # Forzar el repintado de la UI antes de iniciar una operación
+        # síncrona que bloqueará temporalmente el hilo principal.
+        AppContext.get_app().processEvents()
+
+        try:
+
+            entries: list[QueriesHistoryEntry] = []
+
+            for q in queries:
+
+                entry = QueriesHistoryEntry(
+                    connection_id=self.connection.id,
+                    query=q,
+                )
+
+                entries.append(entry)
+
+                self.results_view.add_entry_to_session_queries_history(entry=entry)
+
+            save_queries_history_batch(
+                connection=self.connection,
+                entries=entries,
+            )
+
+            notify(MessageType.SUCCESS, "Queries history updated.")
+
+        except:
+
+            notify(
+                MessageType.SUCCESS,
+                "Error updating queries history.\nSee logs for details.",
+            )

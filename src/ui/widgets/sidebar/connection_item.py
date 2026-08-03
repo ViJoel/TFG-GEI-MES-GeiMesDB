@@ -1,5 +1,11 @@
-from PySide6.QtGui import QIcon, Qt
-from PySide6.QtWidgets import QLabel, QWidget
+from PySide6.QtGui import (
+    QIcon,
+    Qt,
+)
+from PySide6.QtWidgets import (
+    QLabel,
+    QWidget,
+)
 
 from entities.connection import Connection
 from entities.driver import Driver

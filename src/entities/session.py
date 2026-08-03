@@ -11,7 +11,10 @@ from log.app_logger import get_logger
 logger = get_logger(__name__)
 
 
-@dataclass(slots=True)
+@dataclass(
+    slots=True,
+    kw_only=True,
+)
 class Session:
     """
     Representa una sesión activa de base de datos

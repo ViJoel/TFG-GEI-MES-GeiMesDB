@@ -1,8 +1,14 @@
 from unittest.mock import MagicMock
 
 import pytest
-from PySide6.QtCore import QPointF, Qt
-from PySide6.QtGui import QIcon, QMouseEvent
+from PySide6.QtCore import (
+    QPointF,
+    Qt,
+)
+from PySide6.QtGui import (
+    QIcon,
+    QMouseEvent,
+)
 from PySide6.QtTest import QTest
 
 import ui.widgets.sidebar.icon_button as icon_button_module

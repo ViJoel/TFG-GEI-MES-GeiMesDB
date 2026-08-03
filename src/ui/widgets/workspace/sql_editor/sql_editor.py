@@ -1,5 +1,9 @@
 import sqlparse
-from PySide6.QtCore import QRectF, Qt, Signal
+from PySide6.QtCore import (
+    QRectF,
+    Qt,
+    Signal,
+)
 from PySide6.QtGui import (
     QColor,
     QKeyEvent,
@@ -9,11 +13,16 @@ from PySide6.QtGui import (
     QResizeEvent,
     QTextFormat,
 )
-from PySide6.QtWidgets import QPlainTextEdit, QTextEdit
+from PySide6.QtWidgets import (
+    QPlainTextEdit,
+    QTextEdit,
+)
 
 from entities.sql_scope import SqlScope
 from ui.themes.theme_manager import ThemeManager
 from ui.widgets.workspace.sql_editor.line_number_area import LineNumberArea
+from ui.widgets.workspace.sql_editor.sql_completer import SqlCompleter
+from ui.widgets.workspace.sql_editor.sql_highlighter import SqlHighlighter
 
 
 class SqlEditor(QPlainTextEdit):
@@ -69,6 +78,9 @@ class SqlEditor(QPlainTextEdit):
 
         self.setPlaceholderText("Write SQL query...")
 
+        self.verticalScrollBar().setSingleStep(1)
+        self.horizontalScrollBar().setSingleStep(1)
+
         self.line_number_area = LineNumberArea(self)
         self.line_number_area.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.line_number_area.setAutoFillBackground(False)
@@ -77,6 +89,12 @@ class SqlEditor(QPlainTextEdit):
 
         # Inicializar el resaltado de la línea actual.
         self._highlight_current_line()
+
+        # Resaltado de sintaxis
+        self.syntax_highlighter = SqlHighlighter(self.document())
+
+        # Autocompleción de sql
+        self.completer = SqlCompleter(parent_widget=self)
 
     # ==================
     # === UI HELPERS ===
@@ -207,11 +225,34 @@ class SqlEditor(QPlainTextEdit):
             self._highlight_current_line,
         )
 
+        self.textChanged.connect(
+            self._on_text_changed,
+        )
+
+    # ======================
+    # === EVENT HANDLERS ===
+    # ======================
+
+    def _on_text_changed(
+        self,
+    ) -> None:
+        """
+        Notifica al autocompletador que el contenido
+        del documento ha cambiado.
+
+        Permite actualizar las sugerencias dinámicas
+        cuando sea necesario.
+        """
+
+        self.completer.update_document_completion(
+            self.toPlainText(),
+        )
+
     # =====================
     # === EVENT HELPERS ===
     # =====================
 
-    def _emit_execute_requested(
+    def execute(
         self,
         scope: SqlScope,
     ) -> None:
@@ -235,6 +276,114 @@ class SqlEditor(QPlainTextEdit):
             scope,
         )
 
+    def text_under_cursor(
+        self,
+    ) -> str:
+        """
+        Obtiene la palabra situada bajo el cursor.
+
+        Considera ':', '_' y '@' como parte de una palabra
+        para soportar parámetros y variables SQL.
+
+        Returns:
+            str:
+                Texto de la palabra sobre la que se
+                encuentra el cursor. Si no existe,
+                devuelve una cadena vacía.
+        """
+
+        cursor = self.textCursor()
+
+        pos = cursor.position()
+        text = self.toPlainText()
+
+        start = pos
+
+        while start > 0:
+            c = text[start - 1]
+
+            if c.isalnum() or c in "_:@":
+                start -= 1
+            else:
+                break
+
+        return text[start:pos]
+
+    def _handle_completer_popup_key_event(
+        self,
+        event: QKeyEvent,
+    ) -> bool:
+        """
+        Permite que el popup del autocompletador
+        gestione determinadas teclas cuando está visible.
+
+        Args:
+            event (QKeyEvent):
+                Evento de teclado recibido.
+
+        Returns:
+            bool:
+                ``True`` si el evento ha sido gestionado
+                por el popup y no debe seguir procesándose.
+        """
+
+        if not self.completer.popup().isVisible():
+            return False
+
+        if event.key() in (
+            Qt.Key.Key_Escape,
+            Qt.Key.Key_Tab,
+        ):
+            event.ignore()
+            return True
+
+        return False
+
+    def _update_completer(
+        self,
+        event: QKeyEvent,
+    ) -> None:
+        """
+        Actualiza el estado del autocompletador tras
+        una pulsación de teclado.
+
+        Obtiene el prefijo situado bajo el cursor y,
+        si corresponde, actualiza y muestra el popup
+        de sugerencias. En caso contrario, lo oculta.
+
+        Args:
+            event (QKeyEvent):
+                Evento de teclado recibido.
+        """
+
+        popup_visible = self.completer.popup().isVisible()
+
+        # Evitar que el popup aparezca al borrar texto
+        # si todavía no estaba visible.
+        if not popup_visible and event.key() in (
+            Qt.Key.Key_Backspace,
+            Qt.Key.Key_Delete,
+        ):
+            return
+
+        # Ctrl + Space: Fuerza la aparicion del popup
+        # de autocompletado.
+        is_shortcut = (
+            event.modifiers() & Qt.KeyboardModifier.ControlModifier
+            and event.key() == Qt.Key.Key_Space
+        )
+
+        completion_prefix = self.text_under_cursor()
+
+        if not is_shortcut and (len(completion_prefix) < 1 or not event.text()):
+            self.completer.popup().hide()
+            return
+
+        self.completer.complete_at(
+            prefix=completion_prefix,
+            rect=self.cursorRect(),
+        )
+
     # ====================
     # === QT OVERRIDES ===
     # ====================
@@ -252,6 +401,9 @@ class SqlEditor(QPlainTextEdit):
                 Evento de teclado recibido.
         """
 
+        if self._handle_completer_popup_key_event(event):
+            return
+
         modifiers = event.modifiers()
 
         # Tab -> 4 espacios
@@ -265,18 +417,34 @@ class SqlEditor(QPlainTextEdit):
             and modifiers & Qt.KeyboardModifier.ControlModifier
             and modifiers & Qt.KeyboardModifier.ShiftModifier
         ):
-            self._emit_execute_requested(SqlScope.FULL_SCRIPT)
+            self.execute(SqlScope.FULL_SCRIPT)
             return
 
-        # Ctrl + Enter -> Ejecutar texto seleccionado
+        # Ctrl + Alt + Enter -> Ejecutar texto seleccionado
+        elif (
+            event.key() == Qt.Key.Key_Return
+            and modifiers & Qt.KeyboardModifier.ControlModifier
+            and modifiers & Qt.KeyboardModifier.AltModifier
+        ):
+            self.execute(SqlScope.SELECTED_TEXT)
+            return
+
+        # Ctrl + Enter -> Ejecutar consulta actual
         elif (
             event.key() == Qt.Key.Key_Return
             and modifiers & Qt.KeyboardModifier.ControlModifier
         ):
-            self._emit_execute_requested(SqlScope.SELECTED_TEXT)
+            self.execute(SqlScope.ACTUAL_QUERY)
+            return
+
+        # Shift + Tab -> No hacer nada
+        if event.key() == Qt.Key.Key_Backtab:
+            event.accept()
             return
 
         super().keyPressEvent(event)
+
+        self._update_completer(event)
 
     def resizeEvent(
         self,
@@ -349,6 +517,9 @@ class SqlEditor(QPlainTextEdit):
         if scope == SqlScope.SELECTED_TEXT:
             text = self.textCursor().selectedText()
 
+        elif scope == SqlScope.ACTUAL_QUERY:
+            text = self._get_current_query()
+
         elif scope == SqlScope.FULL_SCRIPT:
             text = self.toPlainText()
 
@@ -356,6 +527,60 @@ class SqlEditor(QPlainTextEdit):
             return None
 
         return self._normalize_sql(text) if self._has_content(text) else None
+
+    def _get_current_query(
+        self,
+    ) -> str | None:
+        """
+        Obtiene la sentencia SQL sobre la que se encuentra
+        actualmente el cursor.
+
+        Returns:
+            str | None:
+                Sentencia SQL normalizada o ``None`` si no se
+                encuentra ninguna consulta válida.
+        """
+
+        text = self.toPlainText()
+
+        if not self._has_content(text):
+            return None
+
+        cursor_position = self.textCursor().position()
+
+        offset = 0
+
+        for statement in sqlparse.parse(text):
+
+            statement_text = str(statement)
+
+            start = text.find(
+                statement_text,
+                offset,
+            )
+
+            if start == -1:
+                continue
+
+            end = start + len(statement_text)
+
+            # Ignorar espacios y saltos de línea
+            # exteriores a la sentencia.
+            leading = len(statement_text) - len(statement_text.lstrip())
+            trailing = len(statement_text) - len(statement_text.rstrip())
+
+            statement_start = start + leading
+            statement_end = end - trailing
+
+            if statement_start <= cursor_position <= statement_end:
+
+                statement_text = statement_text.strip()
+
+                return self._normalize_sql(statement_text)
+
+            offset = end
+
+        return None
 
     @staticmethod
     def _normalize_sql(
@@ -455,7 +680,7 @@ class SqlEditor(QPlainTextEdit):
 
         # Radio de las esquinas
         # redondeadas del panel.
-        radius = 8
+        radius = 4
 
         # Área completa del panel lateral.
         rect = QRectF(self.line_number_area.rect())
@@ -619,3 +844,24 @@ class SqlEditor(QPlainTextEdit):
             bottom = top + round(self.blockBoundingRect(block).height())
 
             block_number += 1
+
+    def insert_query_at_cursor(
+        self,
+        text: str,
+    ) -> None:
+        """
+        Inserta un fragmento de texto SQL en la posición
+        actual del cursor, reemplazando la selección si existe.
+
+        Args:
+            text (str): Texto SQL a insertar.
+        """
+
+        if not text:
+            return
+
+        # Insertar el texto en la posición del cursor actual
+        self.insertPlainText(text)
+
+        # Asegurar que el editor recupere el foco visual
+        self.setFocus()

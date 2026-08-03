@@ -1,7 +1,12 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import (
+    MagicMock,
+    patch,
+)
 
 import pytest
 
+from entities.connection import Connection
+from entities.driver import Driver
 from entities.message_type import MessageType
 from ui.widgets.workspace.results_view.results_view import ResultsView
 
@@ -10,28 +15,57 @@ from ui.widgets.workspace.results_view.results_view import ResultsView
 # =============================================================================
 
 
-@pytest.fixture
-def results_view(qtbot):
-    """
-    Crea una instancia de ResultsView.
-    """
-
-    widget = ResultsView()
-    qtbot.addWidget(widget)
-
-    return widget
-
-
 @pytest.fixture(autouse=True)
 def patch_dependencies():
     """
-    Evita dependencias externas (notify, dialogs, etc).
+    Evita dependencias externas e intercepta llamadas externas
+    durante la inicialización de widgets.
     """
+
+    task_manager = MagicMock()
 
     with patch("ui.widgets.workspace.results_view.results_view.notify"), patch(
         "ui.widgets.workspace.results_view.results_view.ConfirmationDialog"
+    ), patch(
+        "ui.widgets.workspace.results_view.connection_queries_history.notify"
+    ), patch(
+        "ui.widgets.workspace.results_view.connection_queries_history.get_queries_history",
+        return_value=[],
+    ), patch(
+        "ui.widgets.workspace.results_view.connection_queries_history.AppContext.get_task_manager",
+        return_value=task_manager,
     ):
         yield
+
+
+@pytest.fixture
+def mock_connection():
+    """
+    Crea una instancia válida de la dataclass
+    Connection para los componentes visuales.
+    """
+
+    return Connection(
+        name="Test Connection",
+        driver=Driver.POSTGRESQL,
+        host="localhost",
+        port=5432,
+        database="test_db",
+        username="admin",
+        password="password",
+    )
+
+
+@pytest.fixture
+def results_view(qtbot, mock_connection):
+    """
+    Crea una instancia de ResultsView pasándole la conexión requerida.
+    """
+
+    widget = ResultsView(connection=mock_connection)
+    qtbot.addWidget(widget)
+
+    return widget
 
 
 # =============================================================================
@@ -71,6 +105,36 @@ def test_show_table_switches_view(results_view):
     )
 
 
+def test_show_session_queries_history_switches_view(results_view):
+    """
+    Verifica que se muestra el historial de consultas de la sesión.
+    """
+
+    results_view.session_queries_history = MagicMock()
+    results_view.stacklayout = MagicMock()
+
+    results_view._show_session_queries_history()
+
+    results_view.stacklayout.setCurrentWidget.assert_called_once_with(
+        results_view.session_queries_history
+    )
+
+
+def test_show_connection_queries_history_switches_view(results_view):
+    """
+    Verifica que se muestra el historial de consultas de la conexión.
+    """
+
+    results_view.connection_queries_history = MagicMock()
+    results_view.stacklayout = MagicMock()
+
+    results_view._show_connection_queries_history()
+
+    results_view.stacklayout.setCurrentWidget.assert_called_once_with(
+        results_view.connection_queries_history
+    )
+
+
 # =============================================================================
 # BUTTON STATE
 # =============================================================================
@@ -95,12 +159,10 @@ def test_set_tab_buttons_state(results_view):
     Verifica enable/disable de botones de tabs.
     """
 
-    results_view.console_button = MagicMock()
     results_view.table_button = MagicMock()
 
     results_view.set_tab_buttons_state(False)
 
-    results_view.console_button.setEnabled.assert_called_once_with(False)
     results_view.table_button.setEnabled.assert_called_once_with(False)
 
 
@@ -147,19 +209,16 @@ def test_write_message_clears_and_writes(results_view):
 # =============================================================================
 
 
-def test_save_changes_emits_signal_and_notify(results_view):
+def test_save_changes_emits_signal(results_view):
     """
     Verifica emisión de save_requested.
     """
 
-    with patch("ui.widgets.workspace.results_view.results_view.notify") as mock_notify:
-        results_view.save_requested = MagicMock()
+    results_view.save_requested = MagicMock()
 
-        results_view._save_changes()
+    results_view._save_changes()
 
-        results_view.save_requested.emit.assert_called_once()
-
-        mock_notify.assert_called_once()
+    results_view.save_requested.emit.assert_called_once()
 
 
 def test_discard_changes_calls_table_and_notify(results_view):
@@ -335,3 +394,47 @@ def test_on_discard_button_clicked_connects_and_execs(results_view, monkeypatch)
     )
 
     dialog_mock.exec.assert_called_once()
+
+
+# =============================================================================
+# PUBLIC API
+# =============================================================================
+
+
+def test_add_entry_to_session_queries_history_forwards_to_widget(results_view):
+    """
+    Verifica que la inserción de entradas se delega
+    al widget del historial.
+    """
+
+    results_view.session_queries_history = MagicMock()
+
+    entry = MagicMock()
+
+    results_view.add_entry_to_session_queries_history(entry)
+
+    results_view.session_queries_history.add_entry.assert_called_once_with(
+        entry,
+        None,
+    )
+
+
+def test_add_entry_to_session_queries_history_forwards_row(results_view):
+    """
+    Verifica que la posición de inserción se reenvía
+    correctamente.
+    """
+
+    results_view.session_queries_history = MagicMock()
+
+    entry = MagicMock()
+
+    results_view.add_entry_to_session_queries_history(
+        entry,
+        row=0,
+    )
+
+    results_view.session_queries_history.add_entry.assert_called_once_with(
+        entry,
+        0,
+    )

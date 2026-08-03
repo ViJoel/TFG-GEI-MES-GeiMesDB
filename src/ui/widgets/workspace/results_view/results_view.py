@@ -6,13 +6,24 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from entities.connection import Connection
 from entities.message_type import MessageType
+from entities.queries_history_entry import QueriesHistoryEntry
 from entities.query_result import QueryResult
 from entities.script_result import ScriptResult
 from ui.app.app_actions import notify
-from ui.utils.layouts import hbox, vbox
+from ui.utils.layouts import (
+    hbox,
+    vbox,
+)
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
+from ui.widgets.workspace.results_view.connection_queries_history import (
+    ConnectionQueriesHistory,
+)
 from ui.widgets.workspace.results_view.console import Console
+from ui.widgets.workspace.results_view.session_queries_history import (
+    SessionQueriesHistory,
+)
 from ui.widgets.workspace.results_view.table import Table
 
 
@@ -31,6 +42,7 @@ class ResultsView(QWidget):
     # =================
 
     save_requested = Signal()
+    query_selected_from_session_queries_history = Signal(str)
 
     # ============
     # === INIT ===
@@ -38,12 +50,15 @@ class ResultsView(QWidget):
 
     def __init__(
         self,
+        connection: Connection,
     ) -> None:
         """
         Inicializa la vista de resultados.
         """
 
         super().__init__()
+
+        self.connection = connection
 
         self._setup_ui()
         self._connect_signals()
@@ -105,6 +120,24 @@ class ResultsView(QWidget):
 
         self.stacklayout.setCurrentWidget(self.table)
 
+    def _show_session_queries_history(
+        self,
+    ) -> None:
+        """
+        Muestra la vista del historial de consultas de la sesión.
+        """
+
+        self.stacklayout.setCurrentWidget(self.session_queries_history)
+
+    def _show_connection_queries_history(
+        self,
+    ) -> None:
+        """
+        Muestra la vista del historial de consultas de la conexión.
+        """
+
+        self.stacklayout.setCurrentWidget(self.connection_queries_history)
+
     # ==================
     # === UI HELPERS ===
     # ==================
@@ -159,6 +192,20 @@ class ResultsView(QWidget):
 
         self.left_toolbar_layout.addWidget(self.table_button)
 
+        self.session_queries_history_button = self._create_button(
+            "Session queries history",
+            "primary",
+        )
+
+        self.left_toolbar_layout.addWidget(self.session_queries_history_button)
+
+        self.connection_queries_history_button = self._create_button(
+            "Connection queries history",
+            "primary",
+        )
+
+        self.left_toolbar_layout.addWidget(self.connection_queries_history_button)
+
     def _create_action_buttons(
         self,
     ) -> None:
@@ -197,6 +244,14 @@ class ResultsView(QWidget):
         self.table = Table()
         self.stacklayout.addWidget(self.table)
 
+        self.session_queries_history = SessionQueriesHistory()
+        self.stacklayout.addWidget(self.session_queries_history)
+
+        self.connection_queries_history = ConnectionQueriesHistory(
+            connection=self.connection
+        )
+        self.stacklayout.addWidget(self.connection_queries_history)
+
     def _set_action_buttons_initial_state(
         self,
     ) -> None:
@@ -226,6 +281,14 @@ class ResultsView(QWidget):
             self.show_table,
         )
 
+        self.session_queries_history_button.pressed.connect(
+            self._show_session_queries_history
+        )
+
+        self.connection_queries_history_button.pressed.connect(
+            self._show_connection_queries_history
+        )
+
         self.save_button.clicked.connect(
             self._on_save_button_clicked,
         )
@@ -236,6 +299,10 @@ class ResultsView(QWidget):
 
         self.table.data_changed.connect(
             self.set_action_buttons_state,
+        )
+
+        self.session_queries_history.query_selected.connect(
+            self.query_selected_from_session_queries_history.emit
         )
 
     # ======================
@@ -284,11 +351,6 @@ class ResultsView(QWidget):
 
         self.save_requested.emit()
 
-        notify(
-            MessageType.SUCCESS,
-            "Changes saved",
-        )
-
     def _discard_changes(
         self,
     ) -> None:
@@ -332,7 +394,6 @@ class ResultsView(QWidget):
                 Estado que se aplicará a los botones.
         """
 
-        self.console_button.setEnabled(state)
         self.table_button.setEnabled(state)
 
     def set_editable(
@@ -433,4 +494,31 @@ class ResultsView(QWidget):
         self.console.write(
             text=text,
             message_type=message_type,
+        )
+
+    def add_entry_to_session_queries_history(
+        self,
+        entry: QueriesHistoryEntry,
+        row: int | None = None,
+    ) -> None:
+        """
+        Añade una nueva entrada al historial
+        de consultas de la sesión.
+
+        Args:
+            entry (QueriesHistoryEntry):
+                Nueva entrada que se añadirá al historial.
+
+            row (int | None):
+                Posición donde insertar la entrada.
+
+                - Si se especifica, la entrada se inserta
+                en dicha posición.
+                - Si es `None`, la entrada se añade al
+                final del historial.
+        """
+
+        self.session_queries_history.add_entry(
+            entry,
+            row,
         )

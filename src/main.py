@@ -18,6 +18,7 @@ from modules.database.model import init_database
 from modules.sessions.service import close_all_sessions
 from ui.app.app_context import AppContext
 from ui.app.main_window import MainWindow
+from ui.app.task_manager import TaskManager
 from ui.themes.theme_manager import ThemeManager
 from ui.widgets.notifications.notification_manager import NotificationManager
 
@@ -57,6 +58,9 @@ def main() -> int:
     # Inicializar contexto de la aplicación.
     AppContext.initialize(app)
 
+    # Registrar TaskManager global.
+    AppContext.set_task_manager(TaskManager())
+
     # Inicializar tema.
     ThemeManager.initialize()
 
@@ -67,8 +71,10 @@ def main() -> int:
     window = MainWindow()
 
     # Crear manejador de notificaciones.
-    AppContext.set_notification_manager(NotificationManager())
-    AppContext.get_notification_manager().set_main_window(window)
+    notification_manager = NotificationManager()
+    notification_manager.set_main_window(window)
+
+    AppContext.set_notification_manager(notification_manager)
 
     # Mostrar maximizada.
     window.showMaximized()

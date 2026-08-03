@@ -3,7 +3,11 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from log.app_logger import AppLogger, get_logger, setup_logging
+from log.app_logger import (
+    AppLogger,
+    get_logger,
+    setup_logging,
+)
 from log.logger_config import SUCCESS
 
 # =============================================================================
