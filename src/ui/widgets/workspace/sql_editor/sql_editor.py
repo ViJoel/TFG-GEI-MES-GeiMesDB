@@ -242,6 +242,10 @@ class SqlEditor(QPlainTextEdit):
             self._on_text_changed,
         )
 
+        ThemeManager.events().theme_changed.connect(
+            self._on_theme_changed,
+        )
+
     # ======================
     # === EVENT HANDLERS ===
     # ======================
@@ -266,6 +270,25 @@ class SqlEditor(QPlainTextEdit):
         self.completer.update_document_completion(
             sql=text,
         )
+
+    def _on_theme_changed(
+        self,
+        _: str,
+    ) -> None:
+        """
+        Actualiza todos los elementos del editor
+        dependientes del tema.
+        """
+
+        self._highlight_current_line()
+
+        self.force_update_completer()
+
+        self.syntax_highlighter.reload_theme()
+
+        self.line_number_area.update()
+
+        self.viewport().update()
 
     # =====================
     # === EVENT HELPERS ===
@@ -904,6 +927,15 @@ class SqlEditor(QPlainTextEdit):
     def force_update_completer(
         self,
     ) -> None:
+        """
+        Fuerza la reconstrucción completa del modelo del
+        autocompletador.
+
+        Se utiliza cuando cambian los datos externos del
+        modelo, como el esquema de la base de datos o el
+        tema de la aplicación.
+        """
+
         self.completer.update_document_completion(
             force_update=True,
         )

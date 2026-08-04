@@ -62,11 +62,11 @@ class Sidebar(QWidget):
 
         # Lista de conexiones persistidas.
         self.connections_list = ConnectionsList()
-
         self.main_layout.addWidget(self.connections_list)
 
         # Botón de ajustes globales.
-        self.main_layout.addWidget(SettingsButton())
+        self.settings_button = SettingsButton()
+        self.main_layout.addWidget(self.settings_button)
 
     def _setup_layout(
         self,

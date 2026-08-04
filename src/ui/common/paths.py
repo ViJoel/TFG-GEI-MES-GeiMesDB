@@ -162,6 +162,11 @@ SESSION_QUERIES_HISTORY_QSS = os.path.join(
     "session_queries_history.qss",
 )
 
+SETTINGS_MENU_QSS = os.path.join(
+    STYLES_DIR,
+    "settings_menu.qss",
+)
+
 SIDEBAR_QSS = os.path.join(
     STYLES_DIR,
     "sidebar.qss",
@@ -221,6 +226,7 @@ STYLE_FILES = [
     RESULTS_VIEW_QSS,
     SCROLLBAR_QSS,
     SESSION_QUERIES_HISTORY_QSS,
+    SETTINGS_MENU_QSS,
     SIDEBAR_QSS,
     SQL_COMPLETER_QSS,
     SQL_EDITOR_QSS,

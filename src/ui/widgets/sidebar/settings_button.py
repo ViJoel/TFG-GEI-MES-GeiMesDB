@@ -27,7 +27,7 @@ class SettingsButton(QPushButton):
         self.setIcon(QIcon(SETTINGS_ICON))
 
         # Tooltip informativo
-        self.setToolTip("Configuración")
+        self.setToolTip("Settings")
 
         # Cursor tipo mano
         self.setCursor(Qt.CursorShape.PointingHandCursor)

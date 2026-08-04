@@ -1,16 +1,34 @@
 import re
 from string import Template
 
+from PySide6.QtCore import (
+    QObject,
+    Signal,
+)
 from PySide6.QtGui import QColor
 
+from entities.setting import Setting
+from entities.setting_key import SettingKey
 from log.app_logger import get_logger
+from modules.settings.service import (
+    get_setting,
+    save_setting,
+)
 from ui.app.app_context import AppContext
 from ui.common.paths import STYLE_FILES
-from ui.themes import dark
+from ui.themes import (
+    dark,
+    light,
+)
 
 logger = get_logger(__name__)
 
 type ThemePalette = dict[str, str]
+
+
+class _ThemeEvents(QObject):
+
+    theme_changed = Signal(str)
 
 
 class ThemeManager:
@@ -26,11 +44,18 @@ class ThemeManager:
     activa.
     """
 
+    # =================
+    # === VARIABLES ===
+    # =================
+
     _themes: dict[str, ThemePalette] = {
         "dark": dark.THEME,
+        "light": light.THEME,
     }
 
     _current_theme: str = "dark"
+
+    _events = _ThemeEvents()
 
     # ======================
     # === INITIALIZATION ===
@@ -50,6 +75,11 @@ class ThemeManager:
         """
 
         logger.info("Initializing theme manager...")
+
+        setting = get_setting(SettingKey.THEME)
+
+        if setting is not None and setting.value in cls._themes:
+            cls._current_theme = setting.value
 
         cls.apply()
 
@@ -85,7 +115,7 @@ class ThemeManager:
         app.setStyleSheet(cls._build_stylesheet())
 
         logger.success(
-            "Theme '%s' applied successfully.",
+            "Theme '%s' applied.",
             cls._current_theme,
         )
 
@@ -99,7 +129,7 @@ class ThemeManager:
         theme_name: str,
     ) -> None:
         """
-        Cambia el tema activo de la aplicación.
+        Cambia el tema activo de la aplicación y persiste el ajuste.
 
         Args:
             theme_name (str):
@@ -119,6 +149,9 @@ class ThemeManager:
 
             raise ValueError(f"Theme '{theme_name}' is not registered.")
 
+        if cls._current_theme == theme_name:
+            return
+
         logger.info(
             "Switching theme from '%s' to '%s'.",
             cls._current_theme,
@@ -127,7 +160,16 @@ class ThemeManager:
 
         cls._current_theme = theme_name
 
+        save_setting(
+            Setting(
+                key=SettingKey.THEME,
+                value=theme_name,
+            )
+        )
+
         cls.apply()
+
+        cls._events.theme_changed.emit(theme_name)
 
     # ==================
     # === THEME INFO ===
@@ -292,3 +334,33 @@ class ThemeManager:
             color.setAlpha(alpha)
 
         return color
+
+    # ===========================
+    # === EXTRACT THEMES INFO ===
+    # ===========================
+
+    @classmethod
+    def get_themes(
+        cls,
+    ) -> dict[str, str | tuple[str, ...]]:
+        """
+        Retorna información básica sobre los temas.
+
+        Returns:
+            dict[str, str | tuple[str, ...]]:
+                Diccionario con el tema activo y los
+                temas disponibles.
+        """
+
+        return {
+            "current_theme": cls._current_theme,
+            "themes": tuple(cls._themes),
+        }
+
+    # ==============
+    # === EVENTS ===
+    # ==============
+
+    @classmethod
+    def events(cls) -> _ThemeEvents:
+        return cls._events
