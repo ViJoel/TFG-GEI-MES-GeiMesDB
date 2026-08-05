@@ -264,9 +264,9 @@ class SqlEditorArea(QWidget):
 
         path, _ = QFileDialog.getOpenFileName(
             self,
-            "Open file",
+            self.tr("Open file"),
             "",
-            "SQL Files (*.sql);;Text Files (*.txt);;All Files (*)",
+            self.tr("SQL Files (*.sql);;Text Files (*.txt);;All Files (*)"),
         )
 
         if not path:
@@ -279,7 +279,9 @@ class SqlEditorArea(QWidget):
         if file is None:
             notify(
                 message_type=MessageType.ERROR,
-                message="File not opened.\nSee logs for details.",
+                message=self.tr("File not opened.")
+                + "\n"
+                + self.tr("See logs for details."),
             )
             return
 
@@ -324,9 +326,9 @@ class SqlEditorArea(QWidget):
 
             path, _ = QFileDialog.getSaveFileName(
                 self,
-                "Save file",
+                self.tr("Save file"),
                 file.name,
-                "SQL Files (*.sql);;Text Files (*.txt);;All Files (*)",
+                self.tr("SQL Files (*.sql);;Text Files (*.txt);;All Files (*)"),
             )
 
             if not path:
@@ -353,7 +355,9 @@ class SqlEditorArea(QWidget):
         else:
             notify(
                 message_type=MessageType.ERROR,
-                message="File changes not saved.\nSee logs for details.",
+                message=self.tr("File changes not saved.")
+                + "\n"
+                + self.tr("See logs for details."),
             )
 
     def _on_rename_file_requested(
@@ -436,12 +440,12 @@ class SqlEditorArea(QWidget):
 
         if file.has_changes:
             dialog = ConfirmationDialog(
-                title="Close file",
-                message=(
+                title=self.tr("Close file"),
+                message=self.tr(
                     "⚠️ <b>Discard unsaved changes?</b> ⚠️<br><br>"
-                    f"The file <code>{file.name}</code> has unsaved changes.<br>"
+                    "The file <code>{}</code> has unsaved changes.<br>"
                     "If you continue, you will lose these changes and this action cannot be undone."
-                ),
+                ).format(file.name),
                 parent=self,
             )
 

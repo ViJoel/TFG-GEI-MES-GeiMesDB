@@ -29,6 +29,7 @@ from ui.app.app_actions import notify
 from ui.app.app_context import AppContext
 from ui.app.worker_error import WorkerError
 from ui.themes.theme_manager import ThemeManager
+from ui.translations.translation_manager import TranslationManager
 from ui.utils.layouts import (
     hbox,
     vbox,
@@ -141,6 +142,8 @@ class NavigationTree(QWidget):
         self.tree_view = self._create_tree_view()
         layout.addWidget(self.tree_view)
 
+        self._retranslate_ui()
+
     def _setup_models(
         self,
     ) -> None:
@@ -152,6 +155,28 @@ class NavigationTree(QWidget):
         self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
         self.proxy_model.setRecursiveFilteringEnabled(True)
 
+    def _retranslate_ui(
+        self,
+    ) -> None:
+        """
+        Actualiza todos los textos traducibles del widget.
+
+        Los textos se generan en el momento de la llamada
+        utilizando el traductor activo de Qt, permitiendo
+        refrescar la interfaz después de cambiar el idioma
+        de la aplicación.
+        """
+
+        self.refresh_button.setToolTip(
+            self.tr("Refresh tree."),
+        )
+
+        self.search_bar.setPlaceholderText(
+            self.tr("🔍 Filter schema..."),
+        )
+
+        self._retranslate_tree()
+
     # ==================
     # === UI HELPERS ===
     # ==================
@@ -162,7 +187,6 @@ class NavigationTree(QWidget):
 
         search_bar = QLineEdit()
         search_bar.setObjectName("navigation_tree_search_bar")
-        search_bar.setPlaceholderText("🔍 Filter schema...")
         search_bar.setClearButtonEnabled(True)
 
         return search_bar
@@ -183,8 +207,6 @@ class NavigationTree(QWidget):
                 ),
             )
         )
-
-        button.setToolTip("Refresh tree")
 
         return button
 
@@ -235,7 +257,7 @@ class NavigationTree(QWidget):
     ) -> None:
 
         return self._create_node(
-            text="Tables",
+            text=self.tr("Tables"),
             node_type=TreeNodeType.TABLES_FOLDER,
         )
 
@@ -283,7 +305,7 @@ class NavigationTree(QWidget):
     ) -> QStandardItem:
 
         item = self._create_node(
-            text="Columns",
+            text=self.tr("Columns"),
             node_type=TreeNodeType.COLUMNS_FOLDER,
         )
 
@@ -318,7 +340,7 @@ class NavigationTree(QWidget):
     ) -> QStandardItem:
 
         item = self._create_node(
-            text="Constraints",
+            text=self.tr("Constraints"),
             node_type=TreeNodeType.CONSTRAINTS_FOLDER,
         )
 
@@ -370,7 +392,7 @@ class NavigationTree(QWidget):
     ) -> QStandardItem:
 
         item = self._create_node(
-            text="Indexes",
+            text=self.tr("Indexes"),
             node_type=TreeNodeType.INDEXES_FOLDER,
         )
 
@@ -397,7 +419,7 @@ class NavigationTree(QWidget):
     ) -> QStandardItem:
 
         return self._create_node(
-            text="Views",
+            text=self.tr("Views"),
             node_type=TreeNodeType.VIEWS_FOLDER,
         )
 
@@ -539,6 +561,74 @@ class NavigationTree(QWidget):
         else:
             return ThemeManager.get_color(f"navigation_tree_{color_id}_icon_color")
 
+    def _retranslate_tree(
+        self,
+    ) -> None:
+        """
+        Actualiza los textos traducibles de todos los
+        nodos del árbol.
+
+        Recorre recursivamente el modelo y sustituye
+        únicamente las etiquetas de los nodos
+        pertenecientes a la interfaz de usuario
+        (carpetas de tablas, vistas, columnas,
+        restricciones e índices).
+        """
+
+        for row in range(self.model.rowCount()):
+            item = self.model.item(row)
+
+            if item is not None:
+                self._retranslate_item(item)
+
+    def _retranslate_item(
+        self,
+        item: QStandardItem,
+    ) -> None:
+        """
+        Actualiza recursivamente los textos traducibles
+        de un nodo y de todos sus descendientes.
+
+        Args:
+            item (QStandardItem):
+                Nodo raíz desde el que comienza la
+                actualización.
+        """
+
+        info = item.data(Qt.UserRole)
+
+        match info["type"]:
+
+            case TreeNodeType.TABLES_FOLDER:
+                item.setText(
+                    self.tr("Tables"),
+                )
+
+            case TreeNodeType.VIEWS_FOLDER:
+                item.setText(
+                    self.tr("Views"),
+                )
+
+            case TreeNodeType.COLUMNS_FOLDER:
+                item.setText(
+                    self.tr("Columns"),
+                )
+
+            case TreeNodeType.CONSTRAINTS_FOLDER:
+                item.setText(
+                    self.tr("Constraints"),
+                )
+
+            case TreeNodeType.INDEXES_FOLDER:
+                item.setText(
+                    self.tr("Indexes"),
+                )
+
+        for row in range(item.rowCount()):
+            child = item.child(row)
+            if child is not None:
+                self._retranslate_item(child)
+
     # ===============
     # === SIGNALS ===
     # ===============
@@ -569,6 +659,10 @@ class NavigationTree(QWidget):
 
         ThemeManager.events().theme_changed.connect(
             self._on_theme_changed,
+        )
+
+        TranslationManager.events().language_changed.connect(
+            self._retranslate_ui,
         )
 
     # ======================
@@ -783,7 +877,7 @@ class NavigationTree(QWidget):
 
         notify(
             message_type=MessageType.SUCCESS,
-            message="Tree loaded.",
+            message=self.tr("Tree loaded."),
         )
 
         self.tree_reloaded.emit()
@@ -797,7 +891,7 @@ class NavigationTree(QWidget):
 
         notify(
             MessageType.ERROR,
-            "Error loading tree.\nSee logs for details.",
+            self.tr("Error loading tree.") + "\n" + self.tr("See logs for details."),
         )
 
     # ==================
@@ -810,7 +904,7 @@ class NavigationTree(QWidget):
 
         notify(
             message_type=MessageType.WARNING,
-            message="Loading tree...",
+            message=self.tr("Loading tree..."),
         )
 
         self._load_data()

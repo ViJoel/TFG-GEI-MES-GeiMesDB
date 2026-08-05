@@ -167,7 +167,7 @@ class Workspace(QWidget):
 
         notify(
             MessageType.WARNING,
-            "Executing sql...",
+            self.tr("Executing sql..."),
         )
 
         if scope == SqlScope.SELECTED_TEXT:
@@ -197,7 +197,7 @@ class Workspace(QWidget):
 
         notify(
             MessageType.WARNING,
-            "Saving changes...",
+            self.tr("Saving changes..."),
         )
 
         # Fuerza el repintado de la interfaz para que la
@@ -276,13 +276,13 @@ class Workspace(QWidget):
         if saving_operation_success:
             notify(
                 MessageType.SUCCESS,
-                "Changes saved",
+                self.tr("Changes saved."),
             )
 
         else:
             notify(
                 MessageType.ERROR,
-                "Saving changes failed.",
+                self.tr("Saving changes failed."),
             )
 
     def _on_query_selected_from_session_queries_history(
@@ -351,10 +351,13 @@ class Workspace(QWidget):
 
         if len(queries) > 1:
             string = (
-                "Execution aborted.\n"
-                + "More than one SQL statement detected in the selected text.\n"
-                + "Multiple statements cannot be executed as a single query.\n"
-                + "Execute it as a script instead."
+                self.tr("Execution aborted.")
+                + "\n"
+                + self.tr("More than one SQL statement detected in the selected text.")
+                + "\n"
+                + self.tr("Multiple statements cannot be executed as a single query.")
+                + "\n"
+                + self.tr("Execute it as a script instead.")
             )
 
             logger.warning(string)
@@ -368,7 +371,7 @@ class Workspace(QWidget):
 
             notify(
                 MessageType.WARNING,
-                "Execution aborted.",
+                self.tr("Execution aborted."),
             )
 
             return
@@ -453,7 +456,7 @@ class Workspace(QWidget):
 
         notify(
             MessageType.SUCCESS,
-            "SQL query executed.",
+            self.tr("SQL query executed."),
         )
 
     def _on_execution_error(
@@ -477,7 +480,7 @@ class Workspace(QWidget):
 
         notify(
             message_type=MessageType.ERROR,
-            message="Error in execution.",
+            message=self.tr("Error in execution."),
         )
 
     def _execute_script(
@@ -576,7 +579,7 @@ class Workspace(QWidget):
 
         notify(
             MessageType.SUCCESS,
-            "SQL script executed.",
+            self.tr("SQL script executed."),
         )
 
     def _save_queries_history(
@@ -597,7 +600,7 @@ class Workspace(QWidget):
 
         notify(
             MessageType.WARNING,
-            "Saving queries history...",
+            self.tr("Saving queries history..."),
         )
 
         entries: list[QueriesHistoryEntry] = []
@@ -645,7 +648,7 @@ class Workspace(QWidget):
 
         notify(
             MessageType.SUCCESS,
-            "Queries history updated.",
+            self.tr("Queries history updated."),
         )
 
     def _on_save_queries_history_error(
@@ -661,7 +664,9 @@ class Workspace(QWidget):
 
         notify(
             MessageType.ERROR,
-            "Error updating queries history.\nSee logs for details.",
+            self.tr("Error updating queries history.")
+            + "\n"
+            + self.tr("See logs for details."),
         )
 
     # ==================

@@ -16,6 +16,7 @@ from modules.queries_history.service import get_queries_history
 from ui.app.app_actions import notify
 from ui.app.app_context import AppContext
 from ui.app.worker_error import WorkerError
+from ui.translations.translation_manager import TranslationManager
 from ui.utils.layouts import (
     hbox,
     vbox,
@@ -86,11 +87,11 @@ class ConnectionQueriesHistory(QWidget):
         inputs_widget.setLayout(inputs_layout)
 
         # Inputs de fechas con calendario flotante
-        start_widget, self.start_date = self._create_date_input("Start date")
+        start_widget, self.start_date_label, self.start_date = self._create_date_input()
         self.start_date.setDate(QDate.currentDate().addDays(-7))
         inputs_layout.addWidget(start_widget)
 
-        end_widget, self.end_date = self._create_date_input("End date")
+        end_widget, self.end_date_label, self.end_date = self._create_date_input()
         self.end_date.setDate(QDate.currentDate())
         inputs_layout.addWidget(end_widget)
 
@@ -98,7 +99,7 @@ class ConnectionQueriesHistory(QWidget):
         inputs_layout.addSpacing(16)
 
         # Botón de acción
-        self.filter_button = QPushButton("Filtrar")
+        self.filter_button = QPushButton()
         self.filter_button.setProperty(
             "type",
             "accent",
@@ -109,7 +110,33 @@ class ConnectionQueriesHistory(QWidget):
         self.console = Console()
         layout.addWidget(self.console)
 
+        self._retranslate_ui()
+
         self._load_history()
+
+    def _retranslate_ui(
+        self,
+    ) -> None:
+        """
+        Actualiza todos los textos traducibles del widget.
+
+        Los textos se generan en el momento de la llamada
+        utilizando el traductor activo de Qt, permitiendo
+        refrescar la interfaz después de cambiar el idioma
+        de la aplicación.
+        """
+
+        self.start_date_label.setText(
+            self.tr("Start date"),
+        )
+
+        self.end_date_label.setText(
+            self.tr("End date"),
+        )
+
+        self.filter_button.setText(
+            self.tr("Filter"),
+        )
 
     # ==================
     # === UI HELPERS ===
@@ -117,20 +144,15 @@ class ConnectionQueriesHistory(QWidget):
 
     def _create_date_input(
         self,
-        label_text: str,
-    ) -> tuple[QWidget, QDateEdit]:
+    ) -> tuple[QWidget, QLabel, QDateEdit]:
         """
         Crea un campo de fecha compuesto por
         un label y un QDateEdit.
 
-        Args:
-            label_text (str):
-                Texto del label.
-
         Returns:
-            tuple[QWidget, QDateEdit]:
-                Contenedor del campo y el
-                QDateEdit asociado.
+            tuple[QWidget, QLabel, QDateEdit]:
+                Contenedor del campo, label del
+                campo y el QDateEdit asociado.
         """
 
         widget = QWidget()
@@ -145,7 +167,6 @@ class ConnectionQueriesHistory(QWidget):
 
         label = QLabel()
         label.setObjectName("connection_queries_history_date_input_label")
-        label.setText(label_text)
         layout.addWidget(label)
 
         date_input = QDateEdit()
@@ -157,7 +178,7 @@ class ConnectionQueriesHistory(QWidget):
         calendar = date_input.calendarWidget()
         calendar.setMinimumSize(360, 300)
 
-        return widget, date_input
+        return widget, label, date_input
 
     # ===============
     # === SIGNALS ===
@@ -171,9 +192,17 @@ class ConnectionQueriesHistory(QWidget):
         con sus handlers correspondientes.
         """
 
-        self.filter_button.clicked.connect(self._load_history)
+        self.filter_button.clicked.connect(
+            self._load_history,
+        )
 
-        self.start_date.dateChanged.connect(self._on_start_date_changed)
+        self.start_date.dateChanged.connect(
+            self._on_start_date_changed,
+        )
+
+        TranslationManager.events().language_changed.connect(
+            self._retranslate_ui,
+        )
 
     # ======================
     # === EVENT HANDLERS ===
@@ -211,7 +240,7 @@ class ConnectionQueriesHistory(QWidget):
 
         notify(
             MessageType.WARNING,
-            "Loading history...",
+            self.tr("Loading history..."),
         )
 
         start_date = self.start_date.dateTime().toPython()
@@ -269,7 +298,7 @@ class ConnectionQueriesHistory(QWidget):
 
         notify(
             MessageType.SUCCESS,
-            "History loaded.",
+            self.tr("History loaded."),
         )
 
     def _on_load_history_error(
@@ -281,5 +310,5 @@ class ConnectionQueriesHistory(QWidget):
 
         notify(
             MessageType.ERROR,
-            "History load failed.",
+            self.tr("History load failed."),
         )

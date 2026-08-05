@@ -236,3 +236,9 @@ STYLE_FILES = [
     TOOLTIP_QSS,
     WORKSPACE_QSS,
 ]
+
+# ====================
+# === TRADUCCIONES ===
+# ====================
+
+TRANSLATIONS_DIR = os.path.join(RESOURCE_ROOT, "ui", "translations")

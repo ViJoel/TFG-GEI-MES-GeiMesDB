@@ -372,7 +372,7 @@ class MainWindow(QMainWindow):
 
         notify(
             MessageType.WARNING,
-            "Connecting...",
+            self.tr("Connecting..."),
         )
 
         AppContext.get_task_manager().run(
@@ -397,7 +397,7 @@ class MainWindow(QMainWindow):
 
         notify(
             MessageType.WARNING,
-            "Disconnecting...",
+            self.tr("Disconnecting..."),
         )
 
         AppContext.get_task_manager().run(
@@ -440,7 +440,7 @@ class MainWindow(QMainWindow):
 
         notify(
             MessageType.SUCCESS,
-            "Connected.",
+            self.tr("Connected."),
         )
 
         if connection.id not in self.workspaces:
@@ -462,7 +462,7 @@ class MainWindow(QMainWindow):
 
         notify(
             MessageType.ERROR,
-            "Connection failed.",
+            self.tr("Connection failed."),
         )
 
     def _on_close_connection_session_success(
@@ -472,7 +472,7 @@ class MainWindow(QMainWindow):
 
         notify(
             MessageType.SUCCESS,
-            "Disconnected.",
+            self.tr("Disconnected."),
         )
 
         # Eliminar espacio de trabajo.
@@ -497,7 +497,7 @@ class MainWindow(QMainWindow):
 
         notify(
             MessageType.ERROR,
-            "Disconnection failed.",
+            self.tr("Disconnection failed."),
         )
 
     # ====================
@@ -620,14 +620,14 @@ class MainWindow(QMainWindow):
             )
 
             dialog = ConfirmationDialog(
-                title="Exit application",
-                message=(
+                title=self.tr("Exit application"),
+                message=self.tr(
                     "⚠️ <b>Discard unsaved changes?</b> ⚠️<br><br>"
-                    "You have unsaved changes in the following workspace(s):<br>"
-                    f"{details_html}<br><br>"
+                    "You have unsaved changes in the following workspaces:<br>"
+                    "{}<br><br>"
                     "If you exit now, all unsaved changes will be lost.<br>"
                     "This action can not be undone."
-                ),
+                ).format(details_html),
                 parent=self,
             )
 

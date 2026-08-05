@@ -126,6 +126,29 @@ def test_toolbar_has_rename_file_button(toolbar):
 
 
 # =============================================================================
+# BUTTONS
+# =============================================================================
+
+
+def test_set_buttons_text(toolbar):
+    """
+    Verifica que se actualizan los textos de los botones.
+    """
+
+    toolbar._set_buttons_text()
+
+    assert toolbar.execute_selection_button.text() == toolbar.tr("Selection")
+    assert toolbar.execute_query_button.text() == toolbar.tr("Query")
+    assert toolbar.execute_script_button.text() == toolbar.tr("Script")
+    assert toolbar.undo_button.text() == toolbar.tr("Undo")
+    assert toolbar.redo_button.text() == toolbar.tr("Redo")
+    assert toolbar.new_button.text() == toolbar.tr("New")
+    assert toolbar.open_button.text() == toolbar.tr("Open")
+    assert toolbar.save_button.text() == toolbar.tr("Save")
+    assert toolbar.rename_button.text() == toolbar.tr("Rename")
+
+
+# =============================================================================
 # TOOLTIPS
 # =============================================================================
 
@@ -280,3 +303,25 @@ def test_rename_file_requested_signal(toolbar, qtbot):
             toolbar.rename_button,
             Qt.MouseButton.LeftButton,
         )
+
+
+# =============================================================================
+# TRANSLATIONS
+# =============================================================================
+
+
+def test_retranslate_ui(toolbar):
+    """
+    Verifica que se actualizan todos los textos traducibles.
+    """
+
+    toolbar._retranslate_ui()
+
+    assert toolbar.execute_selection_button.text() == toolbar.tr("Selection")
+    assert toolbar.execute_query_button.text() == toolbar.tr("Query")
+    assert toolbar.execute_script_button.text() == toolbar.tr("Script")
+
+    assert "Execute the text selected" in toolbar.execute_selection_button.toolTip()
+    assert (
+        "Execute the query under the cursor" in toolbar.execute_query_button.toolTip()
+    )

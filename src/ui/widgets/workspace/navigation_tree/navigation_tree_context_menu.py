@@ -70,6 +70,7 @@ class NavigationTreeContextMenu(QMenu):
             self.parent_item.text() if self.parent_item is not None else None
         )
 
+        self._init_translations()
         self._setup_ui()
 
     # ================
@@ -117,6 +118,30 @@ class NavigationTreeContextMenu(QMenu):
             case TreeNodeType.VIEW:
                 self._build_view_menu()
 
+    def _init_translations(
+        self,
+    ) -> None:
+        """
+        Inicializa los textos de forma centralizada
+        para facilitar la traducción.
+        """
+
+        self.text_generate_select = self.tr("Generate SELECT")
+        self.text_generate_insert = self.tr("Generate INSERT")
+        self.text_generate_update = self.tr("Generate UPDATE")
+        self.text_generate_delete = self.tr("Generate DELETE")
+        self.text_generate_alter = self.tr("Generate ALTER")
+        self.text_generate_drop = self.tr("Generate DROP")
+        self.text_generate_where = self.tr("Generate WHERE")
+
+        self.text_show_data = self.tr("Show data")
+        self.text_show_metadata = self.tr("Show metadata")
+        self.text_show_columns = self.tr("Show columns")
+        self.text_show_details = self.tr("Show details")
+
+        self.text_copy_name = self.tr("Copy name")
+        self.text_copy_type = self.tr("Copy type")
+
     # ==================
     # === UI HELPERS ===
     # ==================
@@ -131,7 +156,7 @@ class NavigationTreeContextMenu(QMenu):
         """
 
         generate_select_action = self.addAction(
-            "Generate SELECT",
+            self.text_generate_select,
         )
 
         generate_select_action.triggered.connect(
@@ -141,7 +166,7 @@ class NavigationTreeContextMenu(QMenu):
         self.addSeparator()
 
         show_metadata_action = self.addAction(
-            "Show metadata",
+            self.text_show_metadata,
         )
 
         show_metadata_action.triggered.connect(
@@ -158,7 +183,7 @@ class NavigationTreeContextMenu(QMenu):
         """
 
         generate_select_action = self.addAction(
-            "Generate SELECT",
+            self.text_generate_select,
         )
 
         generate_select_action.triggered.connect(
@@ -166,7 +191,7 @@ class NavigationTreeContextMenu(QMenu):
         )
 
         generate_insert_action = self.addAction(
-            "Generate INSERT",
+            self.text_generate_insert,
         )
 
         generate_insert_action.triggered.connect(
@@ -174,7 +199,7 @@ class NavigationTreeContextMenu(QMenu):
         )
 
         generate_update_action = self.addAction(
-            "Generate UPDATE",
+            self.text_generate_update,
         )
 
         generate_update_action.triggered.connect(
@@ -182,7 +207,7 @@ class NavigationTreeContextMenu(QMenu):
         )
 
         generate_delete_action = self.addAction(
-            "Generate DELETE",
+            self.text_generate_delete,
         )
 
         generate_delete_action.triggered.connect(
@@ -190,7 +215,7 @@ class NavigationTreeContextMenu(QMenu):
         )
 
         generate_alter_action = self.addAction(
-            "Generate ALTER",
+            self.text_generate_alter,
         )
 
         generate_alter_action.triggered.connect(
@@ -198,7 +223,7 @@ class NavigationTreeContextMenu(QMenu):
         )
 
         generate_drop_action = self.addAction(
-            "Generate DROP",
+            self.text_generate_drop,
         )
 
         generate_drop_action.triggered.connect(
@@ -208,7 +233,7 @@ class NavigationTreeContextMenu(QMenu):
         self.addSeparator()
 
         show_data_action = self.addAction(
-            "Show data",
+            self.text_show_data,
         )
 
         show_data_action.triggered.connect(
@@ -216,7 +241,7 @@ class NavigationTreeContextMenu(QMenu):
         )
 
         show_metadata_action = self.addAction(
-            "Show metadata",
+            self.text_show_metadata,
         )
 
         show_metadata_action.triggered.connect(
@@ -224,7 +249,7 @@ class NavigationTreeContextMenu(QMenu):
         )
 
         show_columns_action = self.addAction(
-            "Show columns",
+            self.text_show_columns,
         )
 
         show_columns_action.triggered.connect(
@@ -234,7 +259,7 @@ class NavigationTreeContextMenu(QMenu):
         self.addSeparator()
 
         copy_name_action = self.addAction(
-            "Copy name",
+            self.text_copy_name,
         )
 
         copy_name_action.triggered.connect(
@@ -251,7 +276,7 @@ class NavigationTreeContextMenu(QMenu):
         """
 
         generate_select_action = self.addAction(
-            "Generate SELECT",
+            self.text_generate_select,
         )
 
         generate_select_action.triggered.connect(
@@ -261,7 +286,7 @@ class NavigationTreeContextMenu(QMenu):
         self.addSeparator()
 
         show_metadata_action = self.addAction(
-            "Show metadata",
+            self.text_show_metadata,
         )
 
         show_metadata_action.triggered.connect(
@@ -278,7 +303,7 @@ class NavigationTreeContextMenu(QMenu):
         """
 
         generate_select_action = self.addAction(
-            "Generate SELECT",
+            self.text_generate_select,
         )
 
         generate_select_action.triggered.connect(
@@ -286,7 +311,7 @@ class NavigationTreeContextMenu(QMenu):
         )
 
         generate_where_action = self.addAction(
-            "Generate WHERE",
+            self.text_generate_where,
         )
 
         generate_where_action.triggered.connect(
@@ -296,7 +321,7 @@ class NavigationTreeContextMenu(QMenu):
         self.addSeparator()
 
         show_data_action = self.addAction(
-            "Show data",
+            self.text_show_data,
         )
 
         show_data_action.triggered.connect(
@@ -304,7 +329,7 @@ class NavigationTreeContextMenu(QMenu):
         )
 
         show_metadata_action = self.addAction(
-            "Show metadata",
+            self.text_show_metadata,
         )
 
         show_metadata_action.triggered.connect(
@@ -314,7 +339,7 @@ class NavigationTreeContextMenu(QMenu):
         self.addSeparator()
 
         copy_name_action = self.addAction(
-            "Copy name",
+            self.text_copy_name,
         )
 
         copy_name_action.triggered.connect(
@@ -322,7 +347,7 @@ class NavigationTreeContextMenu(QMenu):
         )
 
         copy_type_action = self.addAction(
-            "Copy type",
+            self.text_copy_type,
         )
 
         copy_type_action.triggered.connect(
@@ -339,7 +364,7 @@ class NavigationTreeContextMenu(QMenu):
         """
 
         generate_select_action = self.addAction(
-            "Generate SELECT",
+            self.text_generate_select,
         )
 
         generate_select_action.triggered.connect(
@@ -349,7 +374,7 @@ class NavigationTreeContextMenu(QMenu):
         self.addSeparator()
 
         show_metadata_action = self.addAction(
-            "Show metadata",
+            self.text_show_metadata,
         )
 
         show_metadata_action.triggered.connect(
@@ -366,7 +391,7 @@ class NavigationTreeContextMenu(QMenu):
         """
 
         generate_select_action = self.addAction(
-            "Generate SELECT",
+            self.text_generate_select,
         )
 
         generate_select_action.triggered.connect(
@@ -376,7 +401,7 @@ class NavigationTreeContextMenu(QMenu):
         self.addSeparator()
 
         show_details_action = self.addAction(
-            "Show details",
+            self.text_show_details,
         )
 
         show_details_action.triggered.connect(
@@ -386,7 +411,7 @@ class NavigationTreeContextMenu(QMenu):
         self.addSeparator()
 
         copy_name_action = self.addAction(
-            "Copy name",
+            self.text_copy_name,
         )
 
         copy_name_action.triggered.connect(
@@ -403,7 +428,7 @@ class NavigationTreeContextMenu(QMenu):
         """
 
         generate_select_action = self.addAction(
-            "Generate SELECT",
+            self.text_generate_select,
         )
 
         generate_select_action.triggered.connect(
@@ -413,7 +438,7 @@ class NavigationTreeContextMenu(QMenu):
         self.addSeparator()
 
         show_metadata_action = self.addAction(
-            "Show metadata",
+            self.text_show_metadata,
         )
 
         show_metadata_action.triggered.connect(
@@ -430,7 +455,7 @@ class NavigationTreeContextMenu(QMenu):
         """
 
         generate_select_action = self.addAction(
-            "Generate SELECT",
+            self.text_generate_select,
         )
 
         generate_select_action.triggered.connect(
@@ -440,7 +465,7 @@ class NavigationTreeContextMenu(QMenu):
         self.addSeparator()
 
         show_details_action = self.addAction(
-            "Show details",
+            self.text_show_details,
         )
 
         show_details_action.triggered.connect(
@@ -450,7 +475,7 @@ class NavigationTreeContextMenu(QMenu):
         self.addSeparator()
 
         copy_name_action = self.addAction(
-            "Copy name",
+            self.text_copy_name,
         )
 
         copy_name_action.triggered.connect(
@@ -467,7 +492,7 @@ class NavigationTreeContextMenu(QMenu):
         """
 
         generate_select_action = self.addAction(
-            "Generate SELECT",
+            self.text_generate_select,
         )
 
         generate_select_action.triggered.connect(
@@ -477,7 +502,7 @@ class NavigationTreeContextMenu(QMenu):
         self.addSeparator()
 
         show_metadata_action = self.addAction(
-            "Show metadata",
+            self.text_show_metadata,
         )
 
         show_metadata_action.triggered.connect(
@@ -494,7 +519,7 @@ class NavigationTreeContextMenu(QMenu):
         """
 
         generate_select_action = self.addAction(
-            "Generate SELECT",
+            self.text_generate_select,
         )
 
         generate_select_action.triggered.connect(
@@ -502,7 +527,7 @@ class NavigationTreeContextMenu(QMenu):
         )
 
         generate_drop_action = self.addAction(
-            "Generate DROP",
+            self.text_generate_drop,
         )
 
         generate_drop_action.triggered.connect(
@@ -512,7 +537,7 @@ class NavigationTreeContextMenu(QMenu):
         self.addSeparator()
 
         show_data_action = self.addAction(
-            "Show data",
+            self.text_show_data,
         )
 
         show_data_action.triggered.connect(
@@ -520,7 +545,7 @@ class NavigationTreeContextMenu(QMenu):
         )
 
         show_metadata_action = self.addAction(
-            "Show metadata",
+            self.text_show_metadata,
         )
 
         show_metadata_action.triggered.connect(
@@ -528,7 +553,7 @@ class NavigationTreeContextMenu(QMenu):
         )
 
         show_columns_action = self.addAction(
-            "Show columns",
+            self.text_show_columns,
         )
 
         show_columns_action.triggered.connect(
@@ -538,7 +563,7 @@ class NavigationTreeContextMenu(QMenu):
         self.addSeparator()
 
         copy_name_action = self.addAction(
-            "Copy name",
+            self.text_copy_name,
         )
 
         copy_name_action.triggered.connect(
@@ -1605,7 +1630,7 @@ class NavigationTreeContextMenu(QMenu):
                     "SELECT *\n"
                     "FROM pg_indexes\n"
                     "WHERE schemaname = 'public'\n"
-                    f"AND indexname = '{self.data["name"]}';"
+                    f"AND indexname = '{self.data['name']}';"
                 )
 
             case Driver.MYSQL:
@@ -1613,7 +1638,7 @@ class NavigationTreeContextMenu(QMenu):
                     "SELECT *\n"
                     "FROM information_schema.statistics\n"
                     "WHERE table_schema = DATABASE()\n"
-                    f"AND index_name = '{self.data["name"]}';"
+                    f"AND index_name = '{self.data['name']}';"
                 )
 
             case Driver.SQLITE:
@@ -1621,7 +1646,7 @@ class NavigationTreeContextMenu(QMenu):
                     "SELECT *\n"
                     "FROM sqlite_master\n"
                     "WHERE type = 'index'\n"
-                    f"AND name = '{self.data["name"]}';"
+                    f"AND name = '{self.data['name']}';"
                 )
 
             case Driver.ORACLE:

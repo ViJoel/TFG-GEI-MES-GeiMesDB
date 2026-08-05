@@ -198,6 +198,26 @@ def test_close_file_button_on_theme_changed_recreates_icons(
     )
 
 
+# =====================================
+# INTERNATIONALIZATION
+# =====================================
+
+
+def test_close_file_button_retranslate_updates_tooltip(
+    close_button,
+):
+    """
+    Verifica que la interfaz actualiza correctamente
+    el texto traducible del tooltip.
+    """
+
+    close_button._retranslate_ui()
+
+    assert close_button.toolTip() == close_button.tr(
+        "Close the editor tab.<br><br><b>Shortcut:</b> <code>Ctrl + W</code>"
+    )
+
+
 # =============================================================================
 # ELIDED LABEL
 # =============================================================================

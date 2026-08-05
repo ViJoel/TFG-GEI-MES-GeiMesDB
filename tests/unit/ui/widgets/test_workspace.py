@@ -300,7 +300,7 @@ def test_on_execute_requested_dispatches_execution(
 
     notify_mock.assert_called_once_with(
         MessageType.WARNING,
-        "Executing sql...",
+        workspace.tr("Executing sql..."),
     )
 
 
@@ -366,7 +366,7 @@ def test_execute_query_aborts_when_multiple_queries_are_received(
 
     notify_mock.assert_called_once_with(
         MessageType.WARNING,
-        "Execution aborted.",
+        workspace.tr("Execution aborted."),
     )
 
 
@@ -471,7 +471,7 @@ def test_on_execution_error(
 
     notify_mock.assert_called_once_with(
         message_type=MessageType.ERROR,
-        message="Error in execution.",
+        message=workspace.tr("Error in execution."),
     )
 
 
@@ -650,7 +650,7 @@ def test_on_save_queries_history_success(
 
     notify_mock.assert_called_once_with(
         MessageType.SUCCESS,
-        "Queries history updated.",
+        workspace.tr("Queries history updated."),
     )
 
 
@@ -672,7 +672,9 @@ def test_on_save_queries_history_error(
 
     notify_mock.assert_called_once_with(
         MessageType.ERROR,
-        "Error updating queries history.\nSee logs for details.",
+        workspace.tr("Error updating queries history.")
+        + "\n"
+        + workspace.tr("See logs for details."),
     )
 
 
@@ -748,8 +750,14 @@ def test_save_requested_refreshes_results_when_updates_succeed(
     workspace.results_view.set_tab_buttons_state.assert_called_once_with(True)
 
     assert notify_mock.call_args_list == [
-        mocker.call(MessageType.WARNING, "Saving changes..."),
-        mocker.call(MessageType.SUCCESS, "Changes saved"),
+        mocker.call(
+            MessageType.WARNING,
+            workspace.tr("Saving changes..."),
+        ),
+        mocker.call(
+            MessageType.SUCCESS,
+            workspace.tr("Changes saved."),
+        ),
     ]
 
 
@@ -805,8 +813,14 @@ def test_save_requested_does_not_refresh_results_when_updates_are_rolled_back(
     workspace.results_view.set_tab_buttons_state.assert_called_once_with(True)
 
     assert notify_mock.call_args_list == [
-        mocker.call(MessageType.WARNING, "Saving changes..."),
-        mocker.call(MessageType.ERROR, "Saving changes failed."),
+        mocker.call(
+            MessageType.WARNING,
+            workspace.tr("Saving changes..."),
+        ),
+        mocker.call(
+            MessageType.ERROR,
+            workspace.tr("Saving changes failed."),
+        ),
     ]
 
 

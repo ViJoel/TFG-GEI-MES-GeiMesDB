@@ -12,6 +12,7 @@ from log.app_logger import get_logger
 from ui.app.app_actions import notify
 from ui.app.app_context import AppContext
 from ui.themes.theme_manager import ThemeManager
+from ui.translations.translation_manager import TranslationManager
 from ui.utils.layouts import (
     hbox,
     vbox,
@@ -21,10 +22,6 @@ logger = get_logger(__name__)
 
 
 class SettingsMenu(QWidget):
-
-    # =================
-    # === VARIABLES ===
-    # =================
 
     # ============
     # === INIT ===
@@ -37,6 +34,7 @@ class SettingsMenu(QWidget):
         super().__init__()
 
         self.themes = ThemeManager.get_themes()
+        self.languages = TranslationManager.get_languages()
 
         self._setup_ui()
         self._connect_signals()
@@ -76,14 +74,49 @@ class SettingsMenu(QWidget):
         self._build_form_title(layout)
 
         layout.addLayout(self._create_theme_setting())
+        layout.addLayout(self._create_language_setting())
         layout.addStretch()
         layout.addLayout(self._create_buttons())
 
         self.setFixedHeight(self.sizeHint().height())
 
-    # ================
-    # === UI STATE ===
-    # ================
+        self._retranslate_ui()
+
+    def _retranslate_ui(
+        self,
+    ) -> None:
+        """
+        Actualiza todos los textos traducibles del widget.
+
+        Los textos se generan en el momento de la llamada
+        utilizando el traductor activo de Qt, permitiendo
+        refrescar la interfaz después de cambiar el idioma
+        de la aplicación.
+        """
+
+        self.title_label.setText(
+            self.tr("Settings menu"),
+        )
+
+        self.theme_label.setText(
+            self.tr("Theme"),
+        )
+
+        self.language_label.setText(
+            self.tr("Language"),
+        )
+
+        self.cancel_button.setText(
+            self.tr("Cancel"),
+        )
+
+        self.apply_button.setText(
+            self.tr("Apply"),
+        )
+
+        self.accept_button.setText(
+            self.tr("Accept"),
+        )
 
     # ==================
     # === UI HELPERS ===
@@ -98,20 +131,18 @@ class SettingsMenu(QWidget):
         del formulario.
         """
 
-        title_label = QLabel()
+        self.title_label = QLabel()
 
-        title_label.setObjectName("settings_menu_title")
+        self.title_label.setObjectName("settings_menu_title")
 
-        title_label.setSizePolicy(
+        self.title_label.setSizePolicy(
             QSizePolicy.Policy.Preferred,
             QSizePolicy.Policy.Maximum,
         )
 
-        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        title_label.setText("Settings menu")
-
-        parent_layout.addWidget(title_label)
+        parent_layout.addWidget(self.title_label)
 
     def _create_theme_setting(
         self,
@@ -122,7 +153,7 @@ class SettingsMenu(QWidget):
 
         layout = vbox(sp=8)
 
-        self.theme_label = QLabel("Theme:")
+        self.theme_label = QLabel()
         self.theme_label.setObjectName("settings_menu_input_label")
 
         self.theme_input = QComboBox()
@@ -142,6 +173,36 @@ class SettingsMenu(QWidget):
 
         return layout
 
+    def _create_language_setting(
+        self,
+    ):
+        """
+        Crea el ajuste de selección del idioma.
+        """
+
+        layout = vbox(sp=8)
+
+        self.language_label = QLabel()
+        self.language_label.setObjectName("settings_menu_input_label")
+
+        self.language_input = QComboBox()
+        self.language_input.setObjectName("settings_menu_input")
+
+        for code, name in self.languages["languages"].items():
+            self.language_input.addItem(name, code)
+
+        index = self.language_input.findData(
+            self.languages["current_language"],
+        )
+
+        if index >= 0:
+            self.language_input.setCurrentIndex(index)
+
+        layout.addWidget(self.language_label)
+        layout.addWidget(self.language_input)
+
+        return layout
+
     def _create_buttons(
         self,
     ):
@@ -151,15 +212,15 @@ class SettingsMenu(QWidget):
 
         layout = hbox(sp=8)
 
-        self.cancel_button = QPushButton("Cancel")
+        self.cancel_button = QPushButton()
         self.cancel_button.setObjectName("settings_menu_cancel_button")
         self.cancel_button.setProperty("type", "danger")
 
-        self.apply_button = QPushButton("Apply")
+        self.apply_button = QPushButton()
         self.apply_button.setObjectName("settings_menu_apply_button")
         self.apply_button.setProperty("type", "secondary")
 
-        self.accept_button = QPushButton("Accept")
+        self.accept_button = QPushButton()
         self.accept_button.setObjectName("settings_menu_accept_button")
         self.accept_button.setProperty("type", "primary")
 
@@ -184,6 +245,10 @@ class SettingsMenu(QWidget):
 
         # Inputs.
         self.theme_input.currentTextChanged.connect(
+            self._on_setting_changed,
+        )
+
+        self.language_input.currentIndexChanged.connect(
             self._on_setting_changed,
         )
 
@@ -215,11 +280,11 @@ class SettingsMenu(QWidget):
 
         try:
 
-            logger.info("Changing theme...")
+            logger.info("Changing settings...")
 
             notify(
                 message_type=MessageType.WARNING,
-                message="Changing theme...",
+                message=self.tr("Changing settings..."),
             )
 
             # Fuerza el repintado de la interfaz para que la
@@ -227,23 +292,29 @@ class SettingsMenu(QWidget):
             # operación síncrona potencialmente bloqueante.
             AppContext.get_app().processEvents()
 
-            self._apply_theme()
+            self._apply_settings()
+
+            self._retranslate_ui()
 
             # Al aplicar ya no quedan cambios pendientes
             self._on_setting_changed()
 
-            logger.success("Theme changed.")
+            logger.success("Settings changed.")
 
             notify(
                 message_type=MessageType.SUCCESS,
-                message="Theme changed.",
+                message=self.tr("Settings changed."),
             )
-        except Exception as e:
-            logger.error(f"Error changin theme: {e}")
+
+        except Exception:
+
+            logger.exception(f"Error changing settings.")
 
             notify(
-                message_type=MessageType.SUCCESS,
-                message="Error changin theme.\nSee logs for details.",
+                message_type=MessageType.ERROR,
+                message=self.tr("Error changing settings.")
+                + "\n"
+                + self.tr("See logs for details."),
             )
 
             return
@@ -256,9 +327,15 @@ class SettingsMenu(QWidget):
         self,
     ) -> bool:
 
-        return self.theme_input.currentText() != ThemeManager.current_theme()
+        theme_changed = self.theme_input.currentText() != ThemeManager.current_theme()
 
-    def _apply_theme(
+        language_changed = (
+            self.language_input.currentData() != TranslationManager.current_language()
+        )
+
+        return theme_changed or language_changed
+
+    def _apply_settings(
         self,
     ) -> None:
 
@@ -266,14 +343,6 @@ class SettingsMenu(QWidget):
             self.theme_input.currentText(),
         )
 
-    # ====================
-    # === QT OVERRIDES ===
-    # ====================
-
-    # ===================
-    # === PRIVATE API ===
-    # ===================
-
-    # ==================
-    # === PUBLIC API ===
-    # ==================
+        TranslationManager.set_language(
+            self.language_input.currentData(),
+        )
