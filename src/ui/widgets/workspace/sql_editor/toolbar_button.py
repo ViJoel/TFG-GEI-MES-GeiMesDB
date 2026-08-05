@@ -18,14 +18,12 @@ class ToolbarButton(QToolButton):
         self,
         icon: str,
         action: str,
-        text: str,
     ) -> None:
 
         super().__init__()
 
         self._icon = icon
         self._action = action
-        self._text = text
 
         self._setup_ui()
         self._connect_signals()
@@ -51,8 +49,6 @@ class ToolbarButton(QToolButton):
                 16,
             )
         )
-
-        self.setText(self._text)
 
         self.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
 

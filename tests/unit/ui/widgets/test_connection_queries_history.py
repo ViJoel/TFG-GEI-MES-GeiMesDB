@@ -77,11 +77,13 @@ def test_create_date_input_creates_widget(history_widget):
     Verifica creación de input de fecha.
     """
 
-    widget, date_input = history_widget._create_date_input(
-        "Test date",
-    )
+    widget, label, date_input = history_widget._create_date_input()
 
     assert widget.objectName() == ("connection_queries_history_date")
+
+    assert label.objectName() == ("connection_queries_history_date_input_label")
+
+    assert label.text() == ""
 
     assert date_input.objectName() == ("connection_queries_history_date_input")
 
@@ -213,7 +215,7 @@ def test_on_load_history_success_with_empty_history(
 
     notify_mock.assert_called_once_with(
         MessageType.SUCCESS,
-        "History loaded.",
+        history_widget.tr("History loaded."),
     )
 
 
@@ -285,7 +287,7 @@ def test_on_load_history_error_logs_and_notifies(
 
     notify_mock.assert_called_once_with(
         MessageType.ERROR,
-        "History load failed.",
+        history_widget.tr("History load failed."),
     )
 
 
@@ -318,3 +320,25 @@ def test_filter_button_connected_to_load_history(
     )
 
     assert called is True
+
+
+# =============================================================================
+# INTERNATIONALIZATION
+# =============================================================================
+
+
+def test_retranslate_ui_updates_all_translatable_texts(
+    history_widget,
+):
+    """
+    Verifica que la interfaz actualiza correctamente todos
+    los textos traducibles del widget.
+    """
+
+    history_widget._retranslate_ui()
+
+    assert history_widget.start_date_label.text() == history_widget.tr("Start date")
+
+    assert history_widget.end_date_label.text() == history_widget.tr("End date")
+
+    assert history_widget.filter_button.text() == history_widget.tr("Filter")

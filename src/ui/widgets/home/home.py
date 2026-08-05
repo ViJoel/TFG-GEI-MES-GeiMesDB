@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
 )
 
 from common.constants import APP_NAME
+from ui.translations.translation_manager import TranslationManager
 from ui.utils.layouts import vbox
 from ui.widgets.logos.app_logo import AppLogo
 
@@ -35,6 +36,7 @@ class Home(QWidget):
         self.setObjectName("home_page")
 
         self._setup_ui()
+        self._connect_signals()
 
     # ================
     # === UI SETUP ===
@@ -88,16 +90,48 @@ class Home(QWidget):
         )
 
         # Texto principal.
-        slogan_label = QLabel(
-            self.tr("Everything you need. Nothing you don't."),
-        )
-        slogan_label.setObjectName("home_page_slogan")
-        slogan_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.slogan_label = QLabel()
+        self.slogan_label.setObjectName("home_page_slogan")
+        self.slogan_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         main_layout.addWidget(
-            slogan_label,
+            self.slogan_label,
             alignment=Qt.AlignmentFlag.AlignCenter,
         )
 
         # Espacio inferior.
         main_layout.addStretch()
+
+        self._retranslate_ui()
+
+    def _retranslate_ui(
+        self,
+    ) -> None:
+        """
+        Actualiza todos los textos traducibles del widget.
+
+        Los textos se generan en el momento de la llamada
+        utilizando el traductor activo de Qt, permitiendo
+        refrescar la interfaz después de cambiar el idioma
+        de la aplicación.
+        """
+
+        self.slogan_label.setText(
+            self.tr("Everything you need. Nothing you don't."),
+        )
+
+    # ===============
+    # === SIGNALS ===
+    # ===============
+
+    def _connect_signals(
+        self,
+    ) -> None:
+        """
+        Conecta señales de widgets
+        con sus handlers correspondientes.
+        """
+
+        TranslationManager.events().language_changed.connect(
+            self._retranslate_ui,
+        )

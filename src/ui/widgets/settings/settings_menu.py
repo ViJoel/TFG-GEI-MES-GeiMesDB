@@ -17,7 +17,6 @@ from ui.utils.layouts import (
     hbox,
     vbox,
 )
-import traceback
 
 logger = get_logger(__name__)
 
@@ -86,6 +85,14 @@ class SettingsMenu(QWidget):
     def _retranslate_ui(
         self,
     ) -> None:
+        """
+        Actualiza todos los textos traducibles del widget.
+
+        Los textos se generan en el momento de la llamada
+        utilizando el traductor activo de Qt, permitiendo
+        refrescar la interfaz después de cambiar el idioma
+        de la aplicación.
+        """
 
         self.title_label.setText(
             self.tr("Settings menu"),
@@ -298,9 +305,10 @@ class SettingsMenu(QWidget):
                 message_type=MessageType.SUCCESS,
                 message=self.tr("Settings changed."),
             )
-        except Exception as e:
-            logger.error(f"Error changing settings: {e}\n")
-            traceback.print_exc()
+
+        except Exception:
+
+            logger.exception(f"Error changing settings.")
 
             notify(
                 message_type=MessageType.ERROR,

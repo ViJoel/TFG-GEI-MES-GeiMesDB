@@ -400,7 +400,7 @@ def test_apply_requested_error(menu):
 
         menu._on_apply_requested()
 
-    logger.error.assert_called_once()
+    logger.exception.assert_called_once()
 
     app.processEvents.assert_called_once()
 

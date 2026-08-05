@@ -173,14 +173,6 @@ def test_initial_state(tree):
     assert tree.proxy_model is not None
 
 
-def test_setup_models_connects_source_model(tree):
-    """
-    Verifica que el proxy utiliza el modelo principal.
-    """
-
-    assert tree.proxy_model.sourceModel() is tree.model
-
-
 def test_search_bar_is_created(tree):
     """
     Verifica la creación de la barra de búsqueda.
@@ -190,7 +182,7 @@ def test_search_bar_is_created(tree):
 
     assert tree.search_bar.isClearButtonEnabled()
 
-    assert "Filter schema" in tree.search_bar.placeholderText()
+    assert tree.search_bar.placeholderText() == tree.tr("🔍 Filter schema...")
 
 
 def test_refresh_button_is_created(tree):
@@ -200,7 +192,7 @@ def test_refresh_button_is_created(tree):
 
     assert tree.refresh_button.objectName() == ("navigation_tree_refresh_button")
 
-    assert tree.refresh_button.toolTip() == "Refresh tree"
+    assert tree.refresh_button.toolTip() == tree.tr("Refresh tree.")
 
 
 def test_tree_view_is_created(tree):
@@ -215,6 +207,37 @@ def test_tree_view_is_created(tree):
     assert tree.tree_view.header().isHidden()
 
     assert tree.tree_view.contextMenuPolicy() == Qt.CustomContextMenu
+
+
+def test_tree_view_is_not_editable(tree):
+    """
+    Verifica que el árbol no permite edición.
+    """
+
+    assert tree.tree_view.editTriggers() == tree.tree_view.EditTrigger.NoEditTriggers
+
+
+# =============================================================================
+# MODELS
+# =============================================================================
+
+
+def test_setup_models_connects_source_model(tree):
+    """
+    Verifica que el proxy utiliza el modelo principal.
+    """
+
+    assert tree.proxy_model.sourceModel() is tree.model
+
+
+def test_proxy_model_configuration(tree):
+    """
+    Verifica la configuración del proxy de filtrado.
+    """
+
+    assert tree.proxy_model.isRecursiveFilteringEnabled()
+
+    assert tree.proxy_model.filterCaseSensitivity() == Qt.CaseInsensitive
 
 
 # =============================================================================
@@ -250,7 +273,7 @@ def test_create_tables_root_node(tree):
 
     item = tree._create_tables_root_node()
 
-    assert item.text() == "Tables"
+    assert item.text() == tree.tr("Tables")
 
     assert item.data(Qt.UserRole)["type"] == TreeNodeType.TABLES_FOLDER
 
@@ -262,7 +285,7 @@ def test_create_views_root_node(tree):
 
     item = tree._create_views_root_node()
 
-    assert item.text() == "Views"
+    assert item.text() == tree.tr("Views")
 
     assert item.data(Qt.UserRole)["type"] == TreeNodeType.VIEWS_FOLDER
 
@@ -429,7 +452,7 @@ def test_create_columns_folder(
         table_name="users",
     )
 
-    assert folder.text() == "Columns"
+    assert folder.text() == tree.tr("Columns")
 
     assert folder.rowCount() == 2
 
@@ -452,7 +475,7 @@ def test_create_constraints_folder(
         table_name="users",
     )
 
-    assert folder.text() == "Constraints"
+    assert folder.text() == tree.tr("Constraints")
 
     assert folder.rowCount() == 1
 
@@ -473,7 +496,7 @@ def test_create_indexes_folder(
         ]
     )
 
-    assert folder.text() == "Indexes"
+    assert folder.text() == tree.tr("Indexes")
 
     assert folder.rowCount() == 1
 
@@ -1100,6 +1123,26 @@ def test_load_data_success_emits_tree_reloaded_signal(qtbot):
     assert spy.count() == 1
 
 
+def test_load_data_success_clears_previous_model(tree):
+    """
+    Verifica que el modelo se limpia antes de cargar datos nuevos.
+    """
+
+    tree.model.appendRow(QStandardItem("old"))
+
+    with patch(
+        "ui.widgets.workspace.navigation_tree.navigation_tree.notify",
+    ):
+        tree._load_data_success(
+            {
+                "tables": {},
+                "views": {},
+            }
+        )
+
+    assert tree.model.rowCount() == 0
+
+
 # =============================================================================
 # PUBLIC API
 # =============================================================================
@@ -1121,6 +1164,31 @@ def test_refresh(tree, monkeypatch):
 
     notify.assert_called_once()
     tree._load_data.assert_called_once()
+
+
+def test_refresh_notifies_loading(tree, monkeypatch):
+    """
+    Verifica que refresh notifica el inicio de la carga.
+    """
+
+    monkeypatch.setattr(
+        NavigationTree,
+        "refresh",
+        REAL_REFRESH,
+    )
+
+    tree._load_data = MagicMock()
+
+    with patch(
+        "ui.widgets.workspace.navigation_tree.navigation_tree.notify",
+    ) as notify:
+
+        tree.refresh()
+
+    notify.assert_called_once_with(
+        message_type=MessageType.WARNING,
+        message=tree.tr("Loading tree..."),
+    )
 
 
 # =============================================================================
@@ -1221,3 +1289,139 @@ def test_update_item_icons(tree):
 
     parent.setIcon.assert_called_once()
     child.setIcon.assert_called_once()
+
+
+# =============================================================================
+# TRANSLATIONS
+# =============================================================================
+
+
+def test_retranslate_ui(tree):
+    """
+    Verifica que se actualizan los textos traducibles.
+    """
+
+    tree._retranslate_tree = MagicMock()
+
+    tree._retranslate_ui()
+
+    assert tree.refresh_button.toolTip() == tree.tr("Refresh tree.")
+    assert tree.search_bar.placeholderText() == tree.tr("🔍 Filter schema...")
+
+    tree._retranslate_tree.assert_called_once()
+
+
+def test_retranslate_tree(tree):
+    """
+    Verifica que se actualizan todos los nodos raíz
+    del árbol.
+    """
+
+    item1 = QStandardItem("Tables")
+    item2 = QStandardItem("Views")
+
+    tree.model.appendRow(item1)
+    tree.model.appendRow(item2)
+
+    tree._retranslate_item = MagicMock()
+
+    tree._retranslate_tree()
+
+    tree._retranslate_item.assert_any_call(item1)
+    tree._retranslate_item.assert_any_call(item2)
+
+    assert tree._retranslate_item.call_count == 2
+
+
+def test_retranslate_item(tree):
+    """
+    Verifica que se actualizan recursivamente los
+    textos traducibles de un nodo y sus hijos.
+    """
+
+    parent = QStandardItem("Tables")
+    child = QStandardItem("Columns")
+
+    parent.setData(
+        {
+            "type": TreeNodeType.TABLES_FOLDER,
+            "data": None,
+        },
+        Qt.UserRole,
+    )
+
+    child.setData(
+        {
+            "type": TreeNodeType.COLUMNS_FOLDER,
+            "data": None,
+        },
+        Qt.UserRole,
+    )
+
+    parent.appendRow(child)
+
+    tree._retranslate_item(parent)
+
+    assert parent.text() == tree.tr("Tables")
+    assert child.text() == tree.tr("Columns")
+
+
+def test_retranslate_tree_updates_folder_nodes(tree):
+    """
+    Verifica que se actualizan los textos de los nodos
+    traducibles del árbol.
+    """
+
+    tables = tree._create_tables_root_node()
+    columns = tree._create_columns_folder([], "users")
+    constraints = tree._create_constraints_folder([], "users")
+    indexes = tree._create_indexes_folder([])
+    views = tree._create_views_root_node()
+
+    tables.appendRow(columns)
+    tables.appendRow(constraints)
+    tables.appendRow(indexes)
+
+    tree.model.appendRow(tables)
+    tree.model.appendRow(views)
+
+    tree._retranslate_tree()
+
+    assert tables.text() == tree.tr("Tables")
+    assert columns.text() == tree.tr("Columns")
+    assert constraints.text() == tree.tr("Constraints")
+    assert indexes.text() == tree.tr("Indexes")
+    assert views.text() == tree.tr("Views")
+
+
+def test_retranslate_tree_does_not_update_non_folder_nodes(tree):
+    """
+    Verifica que únicamente se actualizan los textos
+    de los nodos carpeta.
+    """
+
+    tables = tree._create_tables_root_node()
+    columns = tree._create_columns_folder([], "users")
+    table = tree._create_table_node(
+        "users",
+        {
+            "columns": [],
+            "constraints": [],
+            "indexes": [],
+        },
+    )
+
+    tables.appendRow(columns)
+    tables.appendRow(table)
+
+    tree.model.appendRow(tables)
+
+    tables.setText = MagicMock()
+    columns.setText = MagicMock()
+    table.setText = MagicMock()
+
+    tree._retranslate_tree()
+
+    tables.setText.assert_called_once_with(tree.tr("Tables"))
+    columns.setText.assert_called_once_with(tree.tr("Columns"))
+    table.setText.assert_not_called()

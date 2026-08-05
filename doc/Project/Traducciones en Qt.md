@@ -11,10 +11,10 @@ El comando `pyside6-lupdate` analiza el código fuente y extrae todas las cadena
 ### Ejemplo incorrecto
 
 ```bash
-(venv) usuario$ pyside6-lupdate src -ts src/translations/geimesdb_es.ts
+(venv) usuario$ pyside6-lupdate src -ts src/ui/translations/geimesdb_es.ts
 
 Scanning directory 'src'...
-Updating 'src/translations/geimesdb_es.ts'...
+Updating 'src/ui/translations/geimesdb_es.ts'...
     Found 0 source text(s) (0 new and 0 already existing)
 ```
 
@@ -23,10 +23,10 @@ No se detectó ninguna cadena traducible porque `lupdate` no analiza archivos Py
 ### Ejemplo correcto
 
 ```bash
-(venv) usuario$ pyside6-lupdate -extensions py src -ts src/translations/geimesdb_es.ts
+(venv) usuario$ pyside6-lupdate -extensions py src -ts src/ui/translations/geimesdb_es.ts
 
 Scanning directory 'src'...
-Updating 'src/translations/geimesdb_es.ts'...
+Updating 'src/ui/translations/geimesdb_es.ts'...
     Found 111 source text(s) (111 new and 0 already existing)
 ```
 
@@ -39,7 +39,7 @@ El archivo generado (`.ts`) contiene todas las cadenas traducibles de la aplicac
 Abrir el archivo de traducciones con:
 
 ```bash
-pyside6-linguist src/translations/geimesdb_es.ts
+pyside6-linguist src/ui/translations/geimesdb_es.ts
 ```
 
 En Qt Linguist se introduce la traducción correspondiente a cada cadena y se marca como finalizada.
@@ -49,7 +49,7 @@ En Qt Linguist se introduce la traducción correspondiente a cada cadena y se ma
 Una vez completadas las traducciones, el archivo `.ts` debe compilarse a formato `.qm`, que es el utilizado por la aplicación en tiempo de ejecución:
 
 ```bash
-pyside6-lrelease src/translations/geimesdb_es.ts
+pyside6-lrelease src/ui/translations/geimesdb_es.ts
 ```
 
 Esto generará:
@@ -66,9 +66,18 @@ Por este motivo, únicamente es necesario crear archivos `.ts` para los idiomas 
 
 ```text
 src/
-└── translations/
-    ├── geimesdb_es.ts
-    ├── geimesdb_es.qm
-    ├── geimesdb_fr.ts
-    └── geimesdb_fr.qm
+└── ui/
+    └── translations/
+        ├── geimesdb_es.ts
+        ├── geimesdb_es.qm
+        ├── geimesdb_fr.ts
+        └── geimesdb_fr.qm
+```
+
+## Resumen de comandos
+
+```bash
+pyside6-lupdate -extensions py src -ts src/ui/translations/geimesdb_es.ts
+pyside6-linguist src/ui/translations/geimesdb_es.ts
+pyside6-lrelease src/ui/translations/geimesdb_es.ts
 ```

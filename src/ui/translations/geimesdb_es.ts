@@ -4,7 +4,7 @@
 <context>
     <name>CloseFileButton</name>
     <message>
-        <location filename="../widgets/workspace/sql_editor/files_list_item.py" line="97"/>
+        <location filename="../widgets/workspace/sql_editor/files_list_item.py" line="113"/>
         <source>Close the editor tab.&lt;br&gt;&lt;br&gt;&lt;b&gt;Shortcut:&lt;/b&gt; &lt;code&gt;Ctrl + W&lt;/code&gt;</source>
         <translation>Cerrar la pestaña del editor.&lt;br&gt;&lt;br&gt;&lt;b&gt;Atajo de teclado:&lt;/b&gt; &lt;code&gt;Ctrl + W&lt;/code&gt;</translation>
     </message>
@@ -25,102 +25,122 @@
 <context>
     <name>ConnectionForm</name>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="142"/>
+        <location filename="../widgets/forms/connection_form.py" line="139"/>
         <source>Connection form</source>
         <translation>Formulario de conexión</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="362"/>
+        <location filename="../widgets/forms/connection_form.py" line="145"/>
         <source>Name</source>
         <translation>Nombre</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="385"/>
+        <location filename="../widgets/forms/connection_form.py" line="149"/>
+        <source>My personal DB</source>
+        <translation>Mi BD personal</translation>
+    </message>
+    <message>
+        <location filename="../widgets/forms/connection_form.py" line="153"/>
         <source>Driver</source>
         <translation>Driver</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="402"/>
+        <location filename="../widgets/forms/connection_form.py" line="157"/>
         <source>Host</source>
         <translation>Host</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="421"/>
+        <location filename="../widgets/forms/connection_form.py" line="161"/>
         <source>Port</source>
         <translation>Puerto</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="439"/>
+        <location filename="../widgets/forms/connection_form.py" line="165"/>
         <source>Database</source>
         <translation>Base de datos</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="456"/>
+        <location filename="../widgets/forms/connection_form.py" line="169"/>
         <source>Username</source>
         <translation>Nombre de usuario</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="476"/>
+        <location filename="../widgets/forms/connection_form.py" line="173"/>
         <source>Password</source>
         <translation>Contraseña</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="503"/>
+        <location filename="../widgets/forms/connection_form.py" line="177"/>
         <source>Path to the file</source>
         <translation>Ruta al archivo</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="510"/>
+        <location filename="../widgets/forms/connection_form.py" line="181"/>
+        <source>/path/to/the/file.db</source>
+        <translation>/ruta/hacia/el/archivo.db</translation>
+    </message>
+    <message>
+        <location filename="../widgets/forms/connection_form.py" line="187"/>
         <source>Browse</source>
         <translation>Buscar</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="544"/>
+        <location filename="../widgets/forms/connection_form.py" line="193"/>
         <source>Test connection</source>
         <translation>Probar conexión</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="550"/>
+        <location filename="../widgets/forms/connection_form.py" line="197"/>
         <source>Cancel</source>
         <translation>Cancelar</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="556"/>
+        <location filename="../widgets/forms/connection_form.py" line="201"/>
         <source>Save</source>
         <translation>Guardar</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="730"/>
+        <location filename="../widgets/forms/connection_form.py" line="760"/>
+        <source>Select database</source>
+        <translation>Selecionar base de datos</translation>
+    </message>
+    <message>
+        <location filename="../widgets/forms/connection_form.py" line="762"/>
+        <source>Database Files (*.db);;All Files (*)</source>
+        <translation>Archivos de Base de Datos (*.db);;Todos los archivos (*)</translation>
+    </message>
+    <message>
+        <location filename="../widgets/forms/connection_form.py" line="794"/>
         <source>Connection updated.</source>
         <translation>Conexión actualizada.</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="739"/>
+        <location filename="../widgets/forms/connection_form.py" line="803"/>
         <source>Connection saved.</source>
         <translation>Conexión guardada.</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="756"/>
+        <location filename="../widgets/forms/connection_form.py" line="820"/>
         <source>Error saving.</source>
         <translation>Error al guardar.</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="772"/>
+        <location filename="../widgets/forms/connection_form.py" line="836"/>
         <source>Testing connection...</source>
         <translation>Probando conexión...</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="853"/>
+        <location filename="../widgets/forms/connection_form.py" line="917"/>
         <source>Connection successful.</source>
         <translation>Conexión exitosa.</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="860"/>
+        <location filename="../widgets/forms/connection_form.py" line="924"/>
         <source>Connection failed.</source>
         <translation>Conexión fallida.</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="872"/>
+        <location filename="../widgets/forms/connection_form.py" line="936"/>
         <source>Invalid connection data.</source>
         <translation>Datos de conexión no válidos.</translation>
     </message>
@@ -128,32 +148,32 @@
 <context>
     <name>ConnectionQueriesHistory</name>
     <message>
-        <location filename="../widgets/workspace/results_view/connection_queries_history.py" line="90"/>
+        <location filename="../widgets/workspace/results_view/connection_queries_history.py" line="130"/>
         <source>Start date</source>
         <translation>Fecha de inicio</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/results_view/connection_queries_history.py" line="96"/>
+        <location filename="../widgets/workspace/results_view/connection_queries_history.py" line="134"/>
         <source>End date</source>
         <translation>Fecha de fin</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/results_view/connection_queries_history.py" line="106"/>
+        <location filename="../widgets/workspace/results_view/connection_queries_history.py" line="138"/>
         <source>Filter</source>
         <translation>Filtrar</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/results_view/connection_queries_history.py" line="220"/>
+        <location filename="../widgets/workspace/results_view/connection_queries_history.py" line="243"/>
         <source>Loading history...</source>
         <translation>Cargando historial...</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/results_view/connection_queries_history.py" line="278"/>
+        <location filename="../widgets/workspace/results_view/connection_queries_history.py" line="301"/>
         <source>History loaded.</source>
         <translation>Historial cargado.</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/results_view/connection_queries_history.py" line="290"/>
+        <location filename="../widgets/workspace/results_view/connection_queries_history.py" line="313"/>
         <source>History load failed.</source>
         <translation>Carga del historial fallida.</translation>
     </message>
@@ -179,7 +199,7 @@
 <context>
     <name>Home</name>
     <message>
-        <location filename="../widgets/home/home.py" line="92"/>
+        <location filename="../widgets/home/home.py" line="120"/>
         <source>Everything you need. Nothing you don&apos;t.</source>
         <translation>Todo lo que necesitas. Nada que sobre.</translation>
     </message>
@@ -230,27 +250,62 @@
 <context>
     <name>NavigationTree</name>
     <message>
-        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="188"/>
+        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="171"/>
         <source>Refresh tree.</source>
         <translation>Refrescar árbol.</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="788"/>
+        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="175"/>
+        <source>🔍 Filter schema...</source>
+        <translation>🔍 Filtrar esquema...</translation>
+    </message>
+    <message>
+        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="260"/>
+        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="604"/>
+        <source>Tables</source>
+        <translation>Tablas</translation>
+    </message>
+    <message>
+        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="308"/>
+        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="614"/>
+        <source>Columns</source>
+        <translation>Columnas</translation>
+    </message>
+    <message>
+        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="343"/>
+        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="619"/>
+        <source>Constraints</source>
+        <translation>Restricciones</translation>
+    </message>
+    <message>
+        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="395"/>
+        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="624"/>
+        <source>Indexes</source>
+        <translation>Índices</translation>
+    </message>
+    <message>
+        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="422"/>
+        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="609"/>
+        <source>Views</source>
+        <translation>Vistas</translation>
+    </message>
+    <message>
+        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="880"/>
         <source>Tree loaded.</source>
         <translation>Árbol cargado.</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="802"/>
+        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="894"/>
         <source>Error loading tree.</source>
         <translation>Error al cargar el árbol.</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="802"/>
+        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="894"/>
         <source>See logs for details.</source>
         <translation>Ver logs para detalles.</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="815"/>
+        <location filename="../widgets/workspace/navigation_tree/navigation_tree.py" line="907"/>
         <source>Loading tree...</source>
         <translation>Cargando árbol.</translation>
     </message>
@@ -326,57 +381,57 @@
 <context>
     <name>ResultsView</name>
     <message>
-        <location filename="../widgets/workspace/results_view/results_view.py" line="185"/>
+        <location filename="../widgets/workspace/results_view/results_view.py" line="120"/>
         <source>Console</source>
         <translation>Consola</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/results_view/results_view.py" line="192"/>
+        <location filename="../widgets/workspace/results_view/results_view.py" line="124"/>
         <source>Table</source>
         <translation>Tabla</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/results_view/results_view.py" line="199"/>
+        <location filename="../widgets/workspace/results_view/results_view.py" line="128"/>
         <source>Session queries history</source>
         <translation>Historial de consultas de sesión</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/results_view/results_view.py" line="206"/>
+        <location filename="../widgets/workspace/results_view/results_view.py" line="132"/>
         <source>Connection queries history</source>
         <translation>Historial de consultas de conexión</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/results_view/results_view.py" line="221"/>
+        <location filename="../widgets/workspace/results_view/results_view.py" line="136"/>
         <source>Save</source>
         <translation>Guardar</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/results_view/results_view.py" line="228"/>
+        <location filename="../widgets/workspace/results_view/results_view.py" line="140"/>
         <source>Discard</source>
         <translation>Descartar</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/results_view/results_view.py" line="320"/>
+        <location filename="../widgets/workspace/results_view/results_view.py" line="340"/>
         <source>Save changes</source>
         <translation>Guardar cambios</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/results_view/results_view.py" line="322"/>
+        <location filename="../widgets/workspace/results_view/results_view.py" line="342"/>
         <source>Are you sure you want to &lt;code&gt;&lt;b&gt;save&lt;/b&gt;&lt;/code&gt; the changes?</source>
         <translation>¿Estás seguro de que quieres &lt;code&gt;&lt;b&gt;guardar&lt;/b&gt;&lt;/code&gt; los cambios?</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/results_view/results_view.py" line="338"/>
+        <location filename="../widgets/workspace/results_view/results_view.py" line="358"/>
         <source>Discard changes</source>
         <translation>Descartar cambios</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/results_view/results_view.py" line="340"/>
+        <location filename="../widgets/workspace/results_view/results_view.py" line="360"/>
         <source>Are you sure you want to &lt;code&gt;&lt;b&gt;discard&lt;/b&gt;&lt;/code&gt; the changes?</source>
         <translation>¿Estás seguro de que quieres &lt;code&gt;&lt;b&gt;descartar&lt;/b&gt;&lt;/code&gt; los cambios?</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/results_view/results_view.py" line="369"/>
+        <location filename="../widgets/workspace/results_view/results_view.py" line="389"/>
         <source>Changes discarded.</source>
         <translation>Cambios descartados.</translation>
     </message>
@@ -384,42 +439,42 @@
 <context>
     <name>SettingsMenu</name>
     <message>
-        <location filename="../widgets/settings/settings_menu.py" line="95"/>
+        <location filename="../widgets/settings/settings_menu.py" line="98"/>
         <source>Settings menu</source>
         <translation>Menú de ajustes</translation>
     </message>
     <message>
-        <location filename="../widgets/settings/settings_menu.py" line="99"/>
+        <location filename="../widgets/settings/settings_menu.py" line="102"/>
         <source>Theme</source>
         <translation>Tema</translation>
     </message>
     <message>
-        <location filename="../widgets/settings/settings_menu.py" line="103"/>
+        <location filename="../widgets/settings/settings_menu.py" line="106"/>
         <source>Language</source>
         <translation>Lenguaje</translation>
     </message>
     <message>
-        <location filename="../widgets/settings/settings_menu.py" line="107"/>
+        <location filename="../widgets/settings/settings_menu.py" line="110"/>
         <source>Cancel</source>
         <translation>Cancelar</translation>
     </message>
     <message>
-        <location filename="../widgets/settings/settings_menu.py" line="111"/>
+        <location filename="../widgets/settings/settings_menu.py" line="114"/>
         <source>Apply</source>
         <translation>Aplicar</translation>
     </message>
     <message>
-        <location filename="../widgets/settings/settings_menu.py" line="115"/>
+        <location filename="../widgets/settings/settings_menu.py" line="118"/>
         <source>Accept</source>
         <translation>Aceptar</translation>
     </message>
     <message>
-        <location filename="../widgets/settings/settings_menu.py" line="288"/>
+        <location filename="../widgets/settings/settings_menu.py" line="287"/>
         <source>Changing settings...</source>
         <translation>Cambiando ajustes...</translation>
     </message>
     <message>
-        <location filename="../widgets/settings/settings_menu.py" line="307"/>
+        <location filename="../widgets/settings/settings_menu.py" line="306"/>
         <source>Settings changed.</source>
         <translation>Ajustes cambiados.</translation>
     </message>
@@ -427,18 +482,6 @@
         <location filename="../widgets/settings/settings_menu.py" line="315"/>
         <source>Error changing settings.</source>
         <translation>Error cambiando ajustes.</translation>
-    </message>
-    <message>
-        <source>Changing theme...</source>
-        <translation type="vanished">Cambiando tema...</translation>
-    </message>
-    <message>
-        <source>Theme changed.</source>
-        <translation type="vanished">Tema cambiado.</translation>
-    </message>
-    <message>
-        <source>Error changing theme.</source>
-        <translation type="vanished">Error al cambiar el tema.</translation>
     </message>
     <message>
         <location filename="../widgets/settings/settings_menu.py" line="317"/>
@@ -449,6 +492,17 @@
 <context>
     <name>SqlEditorArea</name>
     <message>
+        <location filename="../widgets/workspace/sql_editor/sql_editor_area.py" line="267"/>
+        <source>Open file</source>
+        <translation>Abrir archivo</translation>
+    </message>
+    <message>
+        <location filename="../widgets/workspace/sql_editor/sql_editor_area.py" line="269"/>
+        <location filename="../widgets/workspace/sql_editor/sql_editor_area.py" line="331"/>
+        <source>SQL Files (*.sql);;Text Files (*.txt);;All Files (*)</source>
+        <translation>Archivos SQL (*.sql);;Archivos de texto (*.txt);;Todos los archivos (*)</translation>
+    </message>
+    <message>
         <location filename="../widgets/workspace/sql_editor/sql_editor_area.py" line="282"/>
         <source>File not opened.</source>
         <translation>Archivo no abierto.</translation>
@@ -458,6 +512,11 @@
         <location filename="../widgets/workspace/sql_editor/sql_editor_area.py" line="360"/>
         <source>See logs for details.</source>
         <translation>Ver logs para detalles.</translation>
+    </message>
+    <message>
+        <location filename="../widgets/workspace/sql_editor/sql_editor_area.py" line="329"/>
+        <source>Save file</source>
+        <translation>Guardar archivo</translation>
     </message>
     <message>
         <location filename="../widgets/workspace/sql_editor/sql_editor_area.py" line="358"/>
@@ -478,92 +537,92 @@
 <context>
     <name>Toolbar</name>
     <message>
-        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="87"/>
-        <source>Execute selection</source>
-        <translation>Ejecutar selección</translation>
-    </message>
-    <message>
-        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="93"/>
-        <source>Execute query</source>
-        <translation>Ejecutar consulta</translation>
-    </message>
-    <message>
-        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="99"/>
-        <source>Execute script</source>
-        <translation>Ejecutar script</translation>
-    </message>
-    <message>
-        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="105"/>
+        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="165"/>
         <source>Undo</source>
         <translation>Deshacer</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="111"/>
+        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="169"/>
         <source>Redo</source>
         <translation>Rehacer</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="117"/>
-        <source>New file</source>
-        <translation>Nuevo archivo</translation>
+        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="153"/>
+        <source>Selection</source>
+        <translation>Selección</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="123"/>
-        <source>Open file</source>
-        <translation>Abrir archivo</translation>
+        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="157"/>
+        <source>Query</source>
+        <translation>Consulta</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="129"/>
-        <source>Save file</source>
-        <translation>Guardar archivo</translation>
+        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="161"/>
+        <source>Script</source>
+        <translation>Script</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="135"/>
-        <source>Rename file</source>
-        <translation>Renombrar archivo</translation>
+        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="173"/>
+        <source>New</source>
+        <translation>Nuevo</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="148"/>
+        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="177"/>
+        <source>Open</source>
+        <translation>Abrir</translation>
+    </message>
+    <message>
+        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="181"/>
+        <source>Save</source>
+        <translation>Guardar</translation>
+    </message>
+    <message>
+        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="185"/>
+        <source>Rename</source>
+        <translation>Renombrar</translation>
+    </message>
+    <message>
+        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="198"/>
         <source>Execute the text selected.&lt;br&gt;&lt;br&gt;&lt;b&gt;Shortcut:&lt;/b&gt; &lt;code&gt;Ctrl + Alt + Enter&lt;/code&gt;</source>
-        <translation>Ejecuta el texto seleccionado.&lt;br&gt;&lt;br&gt;&lt;b&gt;Atajo de teclado:&lt;/b&gt; &lt;code&gt;Ctrl + Alt + Enter&lt;/code&gt;</translation>
+        <translation>Ejecutar el texto seleccionado.&lt;br&gt;&lt;br&gt;&lt;b&gt;Atajo de teclado:&lt;/b&gt; &lt;code&gt;Ctrl + Alt + Enter&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="154"/>
+        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="204"/>
         <source>Execute the query under the cursor.&lt;br&gt;&lt;br&gt;&lt;b&gt;Shortcut:&lt;/b&gt; &lt;code&gt;Ctrl + Enter&lt;/code&gt;</source>
-        <translation>Ejecuta la consulta bajo el cursor.&lt;br&gt;&lt;br&gt;&lt;b&gt;Atajo de teclado:&lt;/b&gt; &lt;code&gt;Ctrl + Enter&lt;/code&gt;</translation>
+        <translation>Ejecutar la consulta bajo el cursor.&lt;br&gt;&lt;br&gt;&lt;b&gt;Atajo de teclado:&lt;/b&gt; &lt;code&gt;Ctrl + Enter&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="160"/>
+        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="210"/>
         <source>Execute the full script.&lt;br&gt;&lt;br&gt;&lt;b&gt;Shortcut:&lt;/b&gt; &lt;code&gt;Ctrl + Shift + Enter&lt;/code&gt;</source>
-        <translation>Ejecuta el script completo.&lt;br&gt;&lt;br&gt;&lt;b&gt;Atajo de teclado:&lt;/b&gt; &lt;code&gt;Ctrl + Shift + Enter&lt;/code&gt;</translation>
+        <translation>Ejecutar el script completo.&lt;br&gt;&lt;br&gt;&lt;b&gt;Atajo de teclado:&lt;/b&gt; &lt;code&gt;Ctrl + Shift + Enter&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="166"/>
+        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="216"/>
         <source>Undo action on the text.&lt;br&gt;&lt;br&gt;&lt;b&gt;Shortcut:&lt;/b&gt; &lt;code&gt;Ctrl + Z&lt;/code&gt;</source>
         <translation>Deshacer acción en el texto.&lt;br&gt;&lt;br&gt;&lt;b&gt;Atajo de teclado:&lt;/b&gt; &lt;code&gt;Ctrl + Z&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="172"/>
+        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="222"/>
         <source>Redo action on the text.&lt;br&gt;&lt;br&gt;&lt;b&gt;Shortcut:&lt;/b&gt; &lt;code&gt;Ctrl + Shift + Z&lt;/code&gt;</source>
         <translation>Rehacer acción en el texto.&lt;br&gt;&lt;br&gt;&lt;b&gt;Atajo de teclado:&lt;/b&gt; &lt;code&gt;Ctrl + Shift + Z&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="178"/>
+        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="228"/>
         <source>Create a new file.&lt;br&gt;&lt;br&gt;&lt;b&gt;Shortcut:&lt;/b&gt; &lt;code&gt;Ctrl + N&lt;/code&gt;</source>
         <translation>Crear un nuevo archivo.&lt;br&gt;&lt;br&gt;&lt;b&gt;Atajo de teclado:&lt;/b&gt; &lt;code&gt;Ctrl + N&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="184"/>
+        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="234"/>
         <source>Open a file from your computer.&lt;br&gt;&lt;br&gt;&lt;b&gt;Shortcut:&lt;/b&gt; &lt;code&gt;Ctrl + O&lt;/code&gt;</source>
         <translation>Abrir un archivo de tu ordenador.&lt;br&gt;&lt;br&gt;&lt;b&gt;Atajo de teclado:&lt;/b&gt; &lt;code&gt;Ctrl + O&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="190"/>
+        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="240"/>
         <source>Save the file changes.&lt;br&gt;&lt;br&gt;&lt;b&gt;Shortcut:&lt;/b&gt; &lt;code&gt;Ctrl + S&lt;/code&gt;</source>
         <translation>Guardar cambios en el archivo.&lt;br&gt;&lt;br&gt;&lt;b&gt;Atajo de teclado:&lt;/b&gt; &lt;code&gt;Ctrl + S&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="196"/>
+        <location filename="../widgets/workspace/sql_editor/toolbar.py" line="246"/>
         <source>Rename the file.&lt;br&gt;&lt;br&gt;&lt;b&gt;Shortcut:&lt;/b&gt; &lt;code&gt;Ctrl + R&lt;/code&gt;</source>
         <translation>Renombrar el archivo.&lt;br&gt;&lt;br&gt;&lt;b&gt;Atajo de teclado:&lt;/b&gt; &lt;code&gt;Ctrl + R&lt;/code&gt;</translation>
     </message>

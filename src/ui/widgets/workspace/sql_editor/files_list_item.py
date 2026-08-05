@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from ui.translations.translation_manager import TranslationManager
+
 if TYPE_CHECKING:
     from PySide6.QtGui import QPaintEvent
 
@@ -92,6 +94,20 @@ class CloseFileButton(QPushButton):
             self._current_icon(),
         )
 
+        self._retranslate_ui()
+
+    def _retranslate_ui(
+        self,
+    ) -> None:
+        """
+        Actualiza todos los textos traducibles del widget.
+
+        Los textos se generan en el momento de la llamada
+        utilizando el traductor activo de Qt, permitiendo
+        refrescar la interfaz después de cambiar el idioma
+        de la aplicación.
+        """
+
         self.setToolTip(
             self.tr(
                 "Close the editor tab.<br><br><b>Shortcut:</b> <code>Ctrl + W</code>"
@@ -141,6 +157,10 @@ class CloseFileButton(QPushButton):
 
         ThemeManager.events().theme_changed.connect(
             self._on_theme_changed,
+        )
+
+        TranslationManager.events().language_changed.connect(
+            self._retranslate_ui,
         )
 
     # ======================

@@ -4,6 +4,7 @@ from PySide6.QtCore import (
 )
 from PySide6.QtWidgets import QWidget
 
+from ui.translations.translation_manager import TranslationManager
 from ui.utils.layouts import flow
 from ui.widgets.workspace.sql_editor.toolbar_button import ToolbarButton
 from ui.widgets.workspace.sql_editor.toolbar_separator import ToolbarSeparator
@@ -61,13 +62,28 @@ class Toolbar(QWidget):
         """
 
         self._create_buttons()
-        self._set_buttons_tooltips()
+        self._retranslate_ui()
         self._build_layout()
 
         self.setAttribute(
             Qt.WidgetAttribute.WA_StyledBackground,
             True,
         )
+
+    def _retranslate_ui(
+        self,
+    ) -> None:
+        """
+        Actualiza todos los textos traducibles del widget.
+
+        Los textos se generan en el momento de la llamada
+        utilizando el traductor activo de Qt, permitiendo
+        refrescar la interfaz después de cambiar el idioma
+        de la aplicación.
+        """
+
+        self._set_buttons_text()
+        self._set_buttons_tooltips()
 
     # ==================
     # === UI HELPERS ===
@@ -84,55 +100,89 @@ class Toolbar(QWidget):
         self.execute_selection_button = ToolbarButton(
             "fa5s.play",
             "execute_selection",
-            self.tr("Execute selection"),
         )
 
         self.execute_query_button = ToolbarButton(
             "fa5s.play-circle",
             "execute_query",
-            self.tr("Execute query"),
         )
 
         self.execute_script_button = ToolbarButton(
             "mdi.script-text-play",
             "execute_script",
-            self.tr("Execute script"),
         )
 
         self.undo_button = ToolbarButton(
             "fa5s.undo-alt",
             "undo",
-            self.tr("Undo"),
         )
 
         self.redo_button = ToolbarButton(
             "fa5s.redo-alt",
             "redo",
-            self.tr("Redo"),
         )
 
         self.new_button = ToolbarButton(
             "ei.file-new",
             "new_file",
-            self.tr("New file"),
         )
 
         self.open_button = ToolbarButton(
             "fa5s.folder-open",
             "open_file",
-            self.tr("Open file"),
         )
 
         self.save_button = ToolbarButton(
             "fa5s.save",
             "save_file",
-            self.tr("Save file"),
         )
 
         self.rename_button = ToolbarButton(
             "mdi6.rename-box",
             "rename_file",
-            self.tr("Rename file"),
+        )
+
+    def _set_buttons_text(
+        self,
+    ) -> None:
+        """
+        Establece los textos de los botones.
+        """
+
+        self.execute_selection_button.setText(
+            self.tr("Selection"),
+        )
+
+        self.execute_query_button.setText(
+            self.tr("Query"),
+        )
+
+        self.execute_script_button.setText(
+            self.tr("Script"),
+        )
+
+        self.undo_button.setText(
+            self.tr("Undo"),
+        )
+
+        self.redo_button.setText(
+            self.tr("Redo"),
+        )
+
+        self.new_button.setText(
+            self.tr("New"),
+        )
+
+        self.open_button.setText(
+            self.tr("Open"),
+        )
+
+        self.save_button.setText(
+            self.tr("Save"),
+        )
+
+        self.rename_button.setText(
+            self.tr("Rename"),
         )
 
     def _set_buttons_tooltips(
@@ -276,4 +326,8 @@ class Toolbar(QWidget):
 
         self.rename_button.clicked.connect(
             self.rename_file_requested,
+        )
+
+        TranslationManager.events().language_changed.connect(
+            self._retranslate_ui,
         )

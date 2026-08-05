@@ -25,7 +25,6 @@ def button(qtbot):
     widget = ToolbarButton(
         "fa5s.play",
         "execute_query",
-        "Execute",
     )
 
     qtbot.addWidget(widget)
@@ -52,14 +51,6 @@ def test_toolbar_button_object_name(button):
     """
 
     assert button.objectName() == "toolbar_button"
-
-
-def test_toolbar_button_text(button):
-    """
-    Verifica que el texto del botón se establece correctamente.
-    """
-
-    assert button.text() == "Execute"
 
 
 def test_toolbar_button_icon_size(button):
@@ -139,7 +130,6 @@ def test_connect_signals_connects_theme_changed(monkeypatch):
     button = ToolbarButton(
         "fa5s.play",
         "execute_query",
-        "Execute",
     )
 
     connect.assert_called_once_with(
@@ -158,3 +148,20 @@ def test_on_theme_changed_updates_icon(button):
     button._on_theme_changed("dark")
 
     button._update_icon.assert_called_once()
+
+
+def test_setup_ui_updates_icon(button):
+    """
+    Verifica que la interfaz reconstruye el icono.
+    """
+
+    button._update_icon = MagicMock()
+
+    button._setup_ui()
+
+    button._update_icon.assert_called_once()
+
+    assert isinstance(
+        button.icon(),
+        QIcon,
+    )
