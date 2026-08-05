@@ -1121,3 +1121,103 @@ def test_refresh(tree, monkeypatch):
 
     notify.assert_called_once()
     tree._load_data.assert_called_once()
+
+
+# =============================================================================
+# THEME
+# =============================================================================
+
+
+def test_on_theme_changed_updates_icons(tree):
+    """
+    Verifica que un cambio de tema actualiza todos
+    los iconos dependientes del tema.
+    """
+
+    tree._update_refresh_button_icon = MagicMock()
+    tree._update_tree_icons = MagicMock()
+
+    tree._on_theme_changed("dark")
+
+    tree._update_refresh_button_icon.assert_called_once()
+    tree._update_tree_icons.assert_called_once()
+
+
+def test_update_refresh_button_icon(tree):
+    """
+    Verifica que se actualiza el icono del botón
+    de refresco.
+    """
+
+    tree.refresh_button.setIcon = MagicMock()
+
+    with patch(
+        "ui.widgets.workspace.navigation_tree.navigation_tree.qta.icon",
+        return_value=QIcon(),
+    ) as icon:
+        tree._update_refresh_button_icon()
+
+    icon.assert_called_once()
+
+    tree.refresh_button.setIcon.assert_called_once()
+
+
+def test_update_tree_icons(tree):
+    """
+    Verifica que se actualizan los iconos de todos
+    los nodos raíz.
+    """
+
+    item1 = QStandardItem("item1")
+    item2 = QStandardItem("item2")
+
+    tree.model.appendRow(item1)
+    tree.model.appendRow(item2)
+
+    tree._update_item_icons = MagicMock()
+
+    tree._update_tree_icons()
+
+    tree._update_item_icons.assert_any_call(item1)
+    tree._update_item_icons.assert_any_call(item2)
+    assert tree._update_item_icons.call_count == 2
+
+
+def test_update_item_icons(tree):
+    """
+    Verifica que se actualiza recursivamente el
+    icono de un nodo y sus hijos.
+    """
+
+    parent = QStandardItem("parent")
+    child = QStandardItem("child")
+
+    parent.setData(
+        {
+            "type": TreeNodeType.TABLE,
+            "data": {},
+        },
+        Qt.UserRole,
+    )
+
+    child.setData(
+        {
+            "type": TreeNodeType.TABLE,
+            "data": {},
+        },
+        Qt.UserRole,
+    )
+
+    parent.appendRow(child)
+
+    parent.setIcon = MagicMock()
+    child.setIcon = MagicMock()
+
+    tree._get_icon = MagicMock(return_value=QIcon())
+
+    tree._update_item_icons(parent)
+
+    assert tree._get_icon.call_count == 2
+
+    parent.setIcon.assert_called_once()
+    child.setIcon.assert_called_once()

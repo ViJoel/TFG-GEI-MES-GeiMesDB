@@ -41,6 +41,7 @@ from ui.utils.layouts import hbox
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
 from ui.widgets.forms.connection_form import ConnectionForm
 from ui.widgets.home.home import Home
+from ui.widgets.settings.settings_menu import SettingsMenu
 from ui.widgets.sidebar.sidebar import Sidebar
 from ui.widgets.workspace.workspace import Workspace
 
@@ -75,6 +76,8 @@ class MainWindow(QMainWindow):
         """
 
         super().__init__()
+
+        self._last_page: QWidget | None = None
 
         self._setup_ui()
         self._connect_signals()
@@ -134,12 +137,23 @@ class MainWindow(QMainWindow):
 
         connection_form_layout.addWidget(self.connection_form)
 
-        # Espacio de trabajo
+        # Menú de ajustes.
+        self.settings_menu_page = QWidget()
+        settings_menu_layout = hbox()
+        settings_menu_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.settings_menu_page.setLayout(settings_menu_layout)
+
+        self.settings_menu = SettingsMenu()
+
+        settings_menu_layout.addWidget(self.settings_menu)
+
+        # Espacios de trabajo.
         self.workspaces: dict[str, Workspace] = {}
 
         # Registrar páginas.
         self.stack.addWidget(self.home_page)
         self.stack.addWidget(self.connection_form_page)
+        self.stack.addWidget(self.settings_menu_page)
 
         # Mostrar pantalla inicial.
         self._show_home_page()
@@ -151,6 +165,48 @@ class MainWindow(QMainWindow):
     # === UI STATE ===
     # ================
 
+    def _show_page(
+        self,
+        page: QWidget,
+        return_to: QWidget | None = None,
+    ) -> None:
+        """
+        Muestra la página indicada y, opcionalmente,
+        registra la página a la que debe regresar
+        posteriormente.
+
+        Args:
+            page (QWidget):
+                Página que debe mostrarse.
+
+            return_to (QWidget | None):
+                Página que se utilizará como destino
+                al regresar desde la vista actual.
+
+                Si es `None`, se conserva la página
+                de retorno previamente registrada.
+        """
+
+        if return_to is not None:
+            self._last_page = return_to
+
+        self.stack.setCurrentWidget(page)
+
+    def _show_last_page(
+        self,
+    ) -> None:
+        """
+        Muestra la última página registrada como
+        destino de retorno.
+
+        Si no existe ninguna página registrada,
+        se muestra la pantalla principal.
+        """
+
+        self.stack.setCurrentWidget(
+            self._last_page or self.home_page,
+        )
+
     def _show_home_page(
         self,
     ) -> None:
@@ -158,7 +214,10 @@ class MainWindow(QMainWindow):
         Navega hacia la pantalla principal.
         """
 
-        self.stack.setCurrentWidget(self.home_page)
+        self._show_page(
+            page=self.home_page,
+            return_to=self.home_page,
+        )
 
     def _show_connection_form(
         self,
@@ -170,7 +229,9 @@ class MainWindow(QMainWindow):
 
         self.connection_form.clear_form()
 
-        self.stack.setCurrentWidget(self.connection_form_page)
+        self._show_page(
+            page=self.connection_form_page,
+        )
 
     def _show_edit_connection_form(
         self,
@@ -187,7 +248,10 @@ class MainWindow(QMainWindow):
 
         self.connection_form.load_connection(connection)
 
-        self.stack.setCurrentWidget(self.connection_form_page)
+        self._show_page(
+            page=self.connection_form_page,
+            return_to=self.home_page,
+        )
 
     def _show_workspace(
         self,
@@ -205,7 +269,21 @@ class MainWindow(QMainWindow):
         workspace = self.workspaces.get(connection.id)
 
         if workspace:
-            self.stack.setCurrentWidget(workspace)
+            self._show_page(
+                page=workspace,
+                return_to=workspace,
+            )
+
+    def _show_settings_menu(
+        self,
+    ) -> None:
+        """
+        Muestra el menú de ajustes.
+        """
+
+        self._show_page(
+            page=self.settings_menu_page,
+        )
 
     # ===============
     # === SIGNALS ===
@@ -230,7 +308,7 @@ class MainWindow(QMainWindow):
         )
 
         # Retorno al home desde formulario.
-        self.connection_form.cancel_requested.connect(self._show_home_page)
+        self.connection_form.cancel_requested.connect(self._show_last_page)
 
         # Evento de guardado exitoso.
         self.connection_form.connection_saved.connect(self._on_connection_saved)
@@ -246,6 +324,20 @@ class MainWindow(QMainWindow):
 
         self.sidebar.connections_list.connection_selected.connect(
             self._on_connection_selected
+        )
+
+        # Navegación hacia el menú de ajustes
+        self.sidebar.settings_button.clicked.connect(
+            self._show_settings_menu,
+        )
+
+        # Retorno desde el menú de ajustes.
+        self.settings_menu.cancel_button.clicked.connect(
+            self._show_last_page,
+        )
+
+        self.settings_menu.accept_button.clicked.connect(
+            self._show_last_page,
         )
 
     # ======================

@@ -17,6 +17,7 @@ from PySide6.QtWidgets import QPlainTextEdit
 
 from entities.file import File
 from entities.sql_scope import SqlScope
+from ui.themes.theme_manager import ThemeManager
 from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
 
 # =============================================================================
@@ -785,3 +786,74 @@ def test_force_update_completer_forces_document_completion_refresh(
     editor.completer.update_document_completion.assert_called_once_with(
         force_update=True,
     )
+
+
+# =============================================================================
+# THEME
+# =============================================================================
+
+
+def test_connect_signals_connects_theme_changed(editor):
+    """
+    Verifica que el editor se conecta a la señal
+    theme_changed del ThemeManager.
+    """
+
+    with patch(
+        "ui.widgets.workspace.sql_editor.sql_editor.ThemeManager.events"
+    ) as events:
+
+        signal = MagicMock()
+        events.return_value.theme_changed = signal
+
+        editor._connect_signals()
+
+        signal.connect.assert_any_call(
+            editor._on_theme_changed,
+        )
+
+
+def test_on_theme_changed_refreshes_theme_dependent_components(
+    editor,
+):
+    """
+    Verifica que al cambiar el tema se actualizan
+    todos los componentes dependientes del mismo.
+    """
+
+    editor._highlight_current_line = MagicMock()
+    editor.force_update_completer = MagicMock()
+    editor.syntax_highlighter.reload_theme = MagicMock()
+    editor.line_number_area.update = MagicMock()
+    editor.viewport().update = MagicMock()
+
+    editor._on_theme_changed("dark")
+
+    editor._highlight_current_line.assert_called_once_with()
+
+    editor.force_update_completer.assert_called_once_with()
+
+    editor.syntax_highlighter.reload_theme.assert_called_once_with()
+
+    editor.line_number_area.update.assert_called_once_with()
+
+    editor.viewport().update.assert_called_once_with()
+
+
+def test_theme_changed_signal_updates_editor(editor):
+    """
+    Verifica que emitir theme_changed ejecuta el
+    refresco del editor.
+    """
+
+    editor._on_theme_changed = MagicMock()
+
+    ThemeManager.events().theme_changed.disconnect()
+
+    ThemeManager.events().theme_changed.connect(
+        editor._on_theme_changed,
+    )
+
+    ThemeManager.events().theme_changed.emit("dark")
+
+    editor._on_theme_changed.assert_called_once_with("dark")

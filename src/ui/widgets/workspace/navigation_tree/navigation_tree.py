@@ -567,6 +567,10 @@ class NavigationTree(QWidget):
             self._show_context_menu,
         )
 
+        ThemeManager.events().theme_changed.connect(
+            self._on_theme_changed,
+        )
+
     # ======================
     # === EVENT HANDLERS ===
     # ======================
@@ -618,6 +622,18 @@ class NavigationTree(QWidget):
 
         menu.exec(self.tree_view.viewport().mapToGlobal(pos))
 
+    def _on_theme_changed(
+        self,
+        _: str,
+    ) -> None:
+        """
+        Actualiza todos los recursos dependientes
+        del tema.
+        """
+
+        self._update_refresh_button_icon()
+        self._update_tree_icons()
+
     # =====================
     # === EVENT HELPERS ===
     # =====================
@@ -649,6 +665,51 @@ class NavigationTree(QWidget):
 
             self._collapse_children(child)
             self.tree_view.collapse(child)
+
+    def _update_refresh_button_icon(
+        self,
+    ) -> None:
+
+        self.refresh_button.setIcon(
+            qta.icon(
+                "mdi.refresh",
+                color=ThemeManager.get_color(
+                    "navigation_tree_refresh_button_color",
+                ),
+            )
+        )
+
+    def _update_tree_icons(
+        self,
+    ) -> None:
+
+        for row in range(self.model.rowCount()):
+
+            item = self.model.item(row)
+
+            if item is not None:
+                self._update_item_icons(item)
+
+    def _update_item_icons(
+        self,
+        item: QStandardItem,
+    ) -> None:
+
+        info = item.data(Qt.UserRole)
+
+        item.setIcon(
+            self._get_icon(
+                node_type=info["type"],
+                data=info["data"],
+            )
+        )
+
+        for row in range(item.rowCount()):
+
+            child = item.child(row)
+
+            if child is not None:
+                self._update_item_icons(child)
 
     # ===================
     # === PRIVATE API ===

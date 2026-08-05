@@ -45,15 +45,29 @@ class CloseFileButton(QPushButton):
         parent: QWidget | None = None,
     ) -> None:
         """
-        Inicializa el botón configurando su identidad,
-        dimensiones e iconos basales.
+        Inicializa el botón configurando su apariencia,
+        estado inicial e iconos dependientes del tema.
 
         Args:
             parent (QWidget | None):
-                El widget padre que contendrá este botón.
+                Widget padre que contendrá este botón.
         """
 
         super().__init__(parent)
+
+        self._setup_ui()
+        self._connect_signals()
+
+    # ================
+    # === UI SETUP ===
+    # ================
+
+    def _setup_ui(
+        self,
+    ) -> None:
+        """
+        Construye la interfaz principal del widget.
+        """
 
         self.setObjectName("files_list_item_close_button")
 
@@ -72,10 +86,11 @@ class CloseFileButton(QPushButton):
 
         self._create_icons()
 
-        # Estado inicial
-        self.current_base_icon = self.icon_default
-        self.previus_icon: QIcon = None
-        self.setIcon(self.current_base_icon)
+        # Estado inicial.
+        self._alternative_state = False
+        self.setIcon(
+            self._current_icon(),
+        )
 
         self.setToolTip(
             "Close the editor tab.<br><br><b>Shortcut:</b> <code>Ctrl + W</code>"
@@ -100,15 +115,68 @@ class CloseFileButton(QPushButton):
             "files_list_item_color",
         )
 
-        self.icon_default = qta.icon(
+        self._icon_default = qta.icon(
             "mdi.close",
             color=color,
         )
 
-        self.icon_alt = qta.icon(
+        self._icon_alt = qta.icon(
             "mdi.close-circle",
             color=color,
         )
+
+    # ===============
+    # === SIGNALS ===
+    # ===============
+
+    def _connect_signals(
+        self,
+    ) -> None:
+        """
+        Conecta señales de widgets
+        con sus handlers correspondientes.
+        """
+
+        ThemeManager.events().theme_changed.connect(
+            self._on_theme_changed,
+        )
+
+    # ======================
+    # === EVENT HANDLERS ===
+    # ======================
+
+    def _on_theme_changed(
+        self,
+        _: str,
+    ) -> None:
+        """
+        Actualiza los recursos dependientes del tema.
+        """
+
+        self._create_icons()
+
+        self.setIcon(
+            self._current_icon(),
+        )
+
+    # ===================
+    # === PRIVATE API ===
+    # ===================
+
+    def _current_icon(
+        self,
+    ) -> QIcon:
+        """
+        Devuelve el icono que corresponde al estado
+        visual actual del botón.
+
+        Returns:
+            QIcon:
+                Icono por defecto o alternativo según
+                el estado almacenado.
+        """
+
+        return self._icon_alt if self._alternative_state else self._icon_default
 
     # ==================
     # === PUBLIC API ===
@@ -119,23 +187,26 @@ class CloseFileButton(QPushButton):
         use_alternative: bool,
     ) -> None:
         """
-        Cambia el icono base del botón.
+        Actualiza el estado visual del botón.
 
-        Si el cursor no está realizando hover sobre
-        el botón en este instante, el cambio visual
-        se aplica de inmediato.
+        Si el cursor no se encuentra sobre el botón,
+        el icono correspondiente se aplica de forma
+        inmediata. En caso contrario, el cambio se
+        reflejará al finalizar el estado de hover.
 
         Args:
             use_alternative (bool):
-                - `True` para fijar el icono alternativo.
-                - `False` para restablecer el icono por defecto.
+                - `True` para utilizar el icono alternativo.
+                - `False` para utilizar el icono por defecto.
         """
 
-        self.current_base_icon = self.icon_alt if use_alternative else self.icon_default
+        self._alternative_state = use_alternative
 
         # Si el ratón no está encima, aplicamos el cambio visual inmediatamente
         if not self.underMouse():
-            self.setIcon(self.current_base_icon)
+            self.setIcon(
+                self._current_icon(),
+            )
 
 
 class ElidedLabel(QLabel):

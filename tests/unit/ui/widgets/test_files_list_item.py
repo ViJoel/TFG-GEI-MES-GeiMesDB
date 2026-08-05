@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 from PySide6.QtCore import (
@@ -129,15 +130,20 @@ def test_close_file_button_size_policy(close_button):
     assert close_button.sizePolicy().verticalPolicy().name == "Fixed"
 
 
-def test_close_file_button_has_default_icon(close_button):
+def test_close_file_button_initial_state_uses_default_icon(
+    close_button,
+):
     """
-    Verifica que inicializa el icono por defecto.
+    Verifica que el estado inicial utiliza el icono por defecto.
     """
 
-    assert close_button.current_base_icon is close_button.icon_default
+    assert close_button._alternative_state is False
+    assert close_button._current_icon() is close_button._icon_default
 
 
-def test_close_file_button_alternative_state_enabled(close_button):
+def test_close_file_button_alternative_state_enabled(
+    close_button,
+):
     """
     Verifica que activa el icono alternativo.
     """
@@ -146,10 +152,13 @@ def test_close_file_button_alternative_state_enabled(close_button):
         True,
     )
 
-    assert close_button.current_base_icon is close_button.icon_alt
+    assert close_button._alternative_state is True
+    assert close_button._current_icon() is close_button._icon_alt
 
 
-def test_close_file_button_alternative_state_disabled(close_button):
+def test_close_file_button_alternative_state_disabled(
+    close_button,
+):
     """
     Verifica que restaura el icono por defecto.
     """
@@ -162,7 +171,31 @@ def test_close_file_button_alternative_state_disabled(close_button):
         False,
     )
 
-    assert close_button.current_base_icon is close_button.icon_default
+    assert close_button._alternative_state is False
+    assert close_button._current_icon() is close_button._icon_default
+
+
+def test_close_file_button_on_theme_changed_recreates_icons(
+    close_button,
+):
+    """
+    Verifica que un cambio de tema reconstruye los
+    iconos y actualiza el icono mostrado.
+    """
+
+    close_button._create_icons = MagicMock()
+    close_button.setIcon = MagicMock()
+    close_button._current_icon = MagicMock()
+
+    close_button._on_theme_changed(
+        "dark",
+    )
+
+    close_button._create_icons.assert_called_once_with()
+
+    close_button.setIcon.assert_called_once_with(
+        close_button._current_icon.return_value,
+    )
 
 
 # =============================================================================
@@ -337,7 +370,9 @@ def test_files_list_item_refresh_updates_name(item):
     assert item.file_name_label.text() == "changed.sql"
 
 
-def test_files_list_item_refresh_updates_close_button_state(item):
+def test_files_list_item_refresh_updates_close_button_state(
+    item,
+):
     """
     Verifica que actualiza el estado del botón de cierre.
     """
@@ -346,4 +381,5 @@ def test_files_list_item_refresh_updates_close_button_state(item):
 
     item.refresh()
 
-    assert item.close_button.current_base_icon == item.close_button.icon_alt
+    assert item.close_button._alternative_state is True
+    assert item.close_button._current_icon() is item.close_button._icon_alt

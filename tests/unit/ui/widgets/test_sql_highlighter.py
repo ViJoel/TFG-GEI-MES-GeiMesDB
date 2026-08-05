@@ -372,3 +372,91 @@ def test_highlight_block_calls_internal_helpers(
     highlighter._highlight_multiline_comments.assert_called_once()
     highlighter._highlight_protected_rules.assert_called_once()
     highlighter._highlight_standard_rules.assert_called_once()
+
+
+# =============================================================================
+# PUBLIC API
+# =============================================================================
+
+
+def test_reload_theme_clears_rules(monkeypatch, highlighter):
+    """
+    Verifica que reload_theme elimina las reglas
+    existentes antes de reconstruirlas.
+    """
+
+    highlighter.rules = [MagicMock()]
+    highlighter.protected_rules = [MagicMock()]
+
+    register = MagicMock()
+    rehighlight = MagicMock()
+
+    monkeypatch.setattr(
+        highlighter,
+        "_register_rules",
+        register,
+    )
+
+    monkeypatch.setattr(
+        highlighter,
+        "rehighlight",
+        rehighlight,
+    )
+
+    highlighter.reload_theme()
+
+    assert highlighter.rules == []
+    assert highlighter.protected_rules == []
+
+    register.assert_called_once()
+    rehighlight.assert_called_once()
+
+
+def test_reload_theme_calls_register_rules(monkeypatch, highlighter):
+    """
+    Verifica que reload_theme reconstruye las
+    reglas de resaltado.
+    """
+
+    register = MagicMock()
+
+    monkeypatch.setattr(
+        highlighter,
+        "_register_rules",
+        register,
+    )
+
+    monkeypatch.setattr(
+        highlighter,
+        "rehighlight",
+        MagicMock(),
+    )
+
+    highlighter.reload_theme()
+
+    register.assert_called_once()
+
+
+def test_reload_theme_rehighlights_document(monkeypatch, highlighter):
+    """
+    Verifica que reload_theme fuerza el
+    rehighlight del documento.
+    """
+
+    monkeypatch.setattr(
+        highlighter,
+        "_register_rules",
+        MagicMock(),
+    )
+
+    rehighlight = MagicMock()
+
+    monkeypatch.setattr(
+        highlighter,
+        "rehighlight",
+        rehighlight,
+    )
+
+    highlighter.reload_theme()
+
+    rehighlight.assert_called_once()

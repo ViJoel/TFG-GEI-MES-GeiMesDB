@@ -51,6 +51,31 @@ def test_button_is_created(button):
     assert button._pressed is False
 
 
+def test_connect_signals_connects_theme_changed(monkeypatch):
+    """
+    Verifica que el botón se suscribe al cambio de tema.
+    """
+
+    connect = MagicMock()
+    events = MagicMock()
+    events.theme_changed.connect = connect
+
+    monkeypatch.setattr(
+        icon_button_module.ThemeManager,
+        "events",
+        MagicMock(return_value=events),
+    )
+
+    button = IconButton(
+        "fa5s.plus",
+        "primary",
+    )
+
+    connect.assert_called_once_with(
+        button._on_theme_changed,
+    )
+
+
 # =============================================================================
 # UI HELPERS
 # =============================================================================
@@ -221,6 +246,68 @@ def test_apply_icon_uses_pressed_color(monkeypatch, button):
         "pressed",
         "disabled",
     )
+
+
+# =============================================================================
+# UI HELPERS
+# =============================================================================
+
+
+def test_make_icon_creates_new_icon_for_different_disabled_color(
+    monkeypatch,
+    button,
+):
+    """
+    Verifica que cambiar el color del estado
+    deshabilitado genera un nuevo icono.
+    """
+
+    factory = MagicMock(
+        side_effect=[
+            MagicMock(),
+            MagicMock(),
+        ]
+    )
+
+    monkeypatch.setattr(
+        icon_button_module.qta,
+        "icon",
+        factory,
+    )
+
+    button._make_icon(
+        "#ffffff",
+        "#000000",
+    )
+
+    button._make_icon(
+        "#ffffff",
+        "#111111",
+    )
+
+    assert factory.call_count == 2
+
+
+# =============================================================================
+# QT OVERRIDES
+# =============================================================================
+
+
+def test_on_theme_changed_clears_cache_and_reapplies_icon(button):
+    """
+    Verifica que un cambio de tema limpia la caché
+    y vuelve a aplicar el icono.
+    """
+
+    button._icon_cache[("a", "b", "c")] = MagicMock()
+
+    button._apply_icon = MagicMock()
+
+    button._on_theme_changed("dark")
+
+    assert button._icon_cache == {}
+
+    button._apply_icon.assert_called_once()
 
 
 # =============================================================================
