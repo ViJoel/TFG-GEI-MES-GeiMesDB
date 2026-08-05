@@ -366,7 +366,7 @@ class ResultsView(QWidget):
 
         notify(
             MessageType.INFO,
-            self.tr("Changes discarted."),
+            self.tr("Changes discarded."),
         )
 
     # ==================
