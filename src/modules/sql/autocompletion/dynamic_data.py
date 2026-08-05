@@ -7,11 +7,35 @@ from modules.sql.theme.colors import (
 
 
 class DynamicCategory(TypedDict):
+    """
+    Estructura de una categoría de autocompletado
+    obtenida dinámicamente a partir del documento SQL.
+
+    Attributes:
+        values:
+            Conjunto de identificadores detectados
+            durante el análisis del documento.
+
+        color:
+            Nombre del color asociado a la categoría
+            dentro del tema de la aplicación.
+    """
+
     values: set[str]
     color: str
 
 
 class SqlDynamicCompletionData:
+    """
+    Almacena los datos dinámicos utilizados por el
+    autocompletador SQL.
+
+    Contiene los identificadores extraídos del
+    documento actualmente editado, como parámetros
+    y variables, permitiendo actualizar las
+    sugerencias de forma incremental conforme el
+    usuario modifica el contenido del editor.
+    """
 
     def __init__(
         self,

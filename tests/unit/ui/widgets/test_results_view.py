@@ -5,6 +5,7 @@ from unittest.mock import (
 
 import pytest
 
+import ui.widgets.workspace.results_view.results_view as results_view_module
 from entities.connection import Connection
 from entities.driver import Driver
 from entities.message_type import MessageType
@@ -66,6 +67,34 @@ def results_view(qtbot, mock_connection):
     qtbot.addWidget(widget)
 
     return widget
+
+
+# =============================================================================
+# INIT
+# =============================================================================
+
+
+def test_action_buttons_are_disabled_initially(results_view):
+    """
+    Verifica que los botones de acción comienzan deshabilitados.
+    """
+
+    assert not results_view.save_button.isEnabled()
+    assert not results_view.discard_button.isEnabled()
+
+
+def test_set_action_buttons_initial_state(results_view):
+    """
+    Verifica que el estado inicial deshabilita ambos botones.
+    """
+
+    results_view.save_button = MagicMock()
+    results_view.discard_button = MagicMock()
+
+    results_view._set_action_buttons_initial_state()
+
+    results_view.save_button.setEnabled.assert_called_once_with(False)
+    results_view.discard_button.setEnabled.assert_called_once_with(False)
 
 
 # =============================================================================
@@ -438,3 +467,27 @@ def test_add_entry_to_session_queries_history_forwards_row(results_view):
         entry,
         0,
     )
+
+
+# =============================================================================
+# TRANSLATIONS
+# =============================================================================
+
+
+def test_retranslate_ui_updates_all_texts(results_view):
+    """
+    Verifica que se actualizan todos los textos traducibles.
+    """
+
+    results_view._retranslate_ui()
+
+    assert results_view.console_button.text() == results_view.tr("Console")
+    assert results_view.table_button.text() == results_view.tr("Table")
+    assert results_view.session_queries_history_button.text() == results_view.tr(
+        "Session queries history"
+    )
+    assert results_view.connection_queries_history_button.text() == results_view.tr(
+        "Connection queries history"
+    )
+    assert results_view.save_button.text() == results_view.tr("Save")
+    assert results_view.discard_button.text() == results_view.tr("Discard")

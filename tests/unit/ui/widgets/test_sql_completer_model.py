@@ -100,6 +100,46 @@ def test_refresh_applies_foreground_color():
     assert color.name() == "#ffffff"
 
 
+def test_refresh_loads_schema_completion_items():
+    """
+    Verifica que refresh incorpora los datos
+    provenientes del esquema SQL.
+    """
+
+    model = SqlCompleterModel()
+
+    model.clear()
+
+    with (
+        patch(
+            "ui.widgets.workspace.sql_editor.sql_completer_model.SQL_STATIC_COMPLETION_DATA",
+            {},
+        ),
+        patch(
+            "ui.widgets.workspace.sql_editor.sql_completer_model.SQL_SCHEMA_COMPLETION_DATA.get_data",
+            return_value={
+                "tables": {
+                    "values": {"users", "orders"},
+                    "color": "table",
+                },
+            },
+        ),
+        patch.object(
+            model._dynamic_data,
+            "get_data",
+            return_value={},
+        ),
+    ):
+        model.refresh()
+
+    values = {model.item(row).text() for row in range(model.rowCount())}
+
+    assert values == {
+        "users",
+        "orders",
+    }
+
+
 def test_update_refreshes_model_when_dynamic_data_changes():
     """
     Verifica que update reconstruye el modelo
@@ -144,3 +184,20 @@ def test_update_does_not_refresh_when_no_changes():
     assert changed is False
 
     model.refresh.assert_not_called()
+
+
+def test_update_force_refreshes_model():
+    """
+    Verifica que force_update reconstruye el modelo.
+    """
+
+    model = SqlCompleterModel()
+
+    model.refresh = MagicMock()
+
+    result = model.update(
+        force_update=True,
+    )
+
+    assert result is True
+    model.refresh.assert_called_once()

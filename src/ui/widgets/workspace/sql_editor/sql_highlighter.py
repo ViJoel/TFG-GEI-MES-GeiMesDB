@@ -375,3 +375,23 @@ class SqlHighlighter(QSyntaxHighlighter):
                     match.capturedLength(),
                     fmt,
                 )
+
+
+    # ==================
+    # === PUBLIC API ===
+    # ==================
+
+    def reload_theme(
+        self,
+    ) -> None:
+        """
+        Reconstruye todos los formatos de resaltado
+        utilizando el tema actualmente activo.
+        """
+
+        self.rules.clear()
+        self.protected_rules.clear()
+
+        self._register_rules()
+
+        self.rehighlight()

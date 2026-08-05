@@ -437,7 +437,7 @@ def test_save_button_handles_create_exception(
 
     notify.assert_called_once_with(
         MessageType.ERROR,
-        "Error saving",
+        form.tr("Error saving."),
     )
 
     saved.assert_not_called()
@@ -479,7 +479,7 @@ def test_save_button_handles_update_exception(
 
     notify.assert_called_once_with(
         MessageType.ERROR,
-        "Error saving",
+        form.tr("Error saving."),
     )
 
     saved.assert_not_called()
@@ -557,7 +557,7 @@ def test_on_test_connection_success(form, monkeypatch):
 
     notify.assert_called_once_with(
         MessageType.SUCCESS,
-        "Connection successful.",
+        form.tr("Connection successful."),
     )
 
 
@@ -578,7 +578,7 @@ def test_on_test_connection_failure(form, monkeypatch):
 
     notify.assert_called_once_with(
         MessageType.ERROR,
-        "Connection failed.",
+        form.tr("Connection failed."),
     )
 
 
@@ -604,7 +604,7 @@ def test_on_test_connection_error(form, monkeypatch):
 
     notify.assert_called_once_with(
         MessageType.ERROR,
-        "Invalid connection data.",
+        form.tr("Invalid connection data."),
     )
 
 
@@ -686,3 +686,47 @@ def test_cancel_button_emits_signal(form, qtbot):
 
     with qtbot.waitSignal(form.cancel_requested):
         form.cancel_button.click()
+
+
+# =============================================================================
+# INTERNATIONALIZATION
+# =============================================================================
+
+
+def test_retranslate_ui_updates_all_translatable_texts(form):
+    """
+    Verifica que la interfaz actualiza correctamente todos
+    los textos traducibles del formulario.
+    """
+
+    form._retranslate_ui()
+
+    # Título.
+
+    assert form.title_label.text() == form.tr("Connection form")
+
+    # Labels.
+
+    assert form._name_field_label.text() == form.tr("Name")
+    assert form._driver_field_label.text() == form.tr("Driver")
+    assert form._host_field_label.text() == form.tr("Host")
+    assert form._port_field_label.text() == form.tr("Port")
+    assert form._database_field_label.text() == form.tr("Database")
+    assert form._username_field_label.text() == form.tr("Username")
+    assert form._password_field_label.text() == form.tr("Password")
+    assert form.path_input_label.text() == form.tr("Path to the file")
+
+    # Placeholders.
+
+    assert form.name_input.placeholderText() == form.tr("My personal DB")
+    assert form.path_input.placeholderText() == form.tr("/path/to/the/file.db")
+
+    # Botón de selección de archivo.
+
+    assert form.browse_button.text() == form.tr("Browse")
+
+    # Botones de acción.
+
+    assert form.test_connection_button.text() == form.tr("Test connection")
+    assert form.cancel_button.text() == form.tr("Cancel")
+    assert form.save_button.text() == form.tr("Save")

@@ -15,7 +15,9 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import QPlainTextEdit
 
+from entities.file import File
 from entities.sql_scope import SqlScope
+from ui.themes.theme_manager import ThemeManager
 from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
 
 # =============================================================================
@@ -24,15 +26,51 @@ from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
 
 
 @pytest.fixture
-def editor(qtbot):
+def editor(
+    qtbot,
+):
     """
     Crea una instancia del SqlEditor para tests UI.
     """
 
-    widget = SqlEditor()
+    file = File()
+
+    widget = SqlEditor(file)
+
     qtbot.addWidget(widget)
     widget.show()
+
     return widget
+
+
+# =============================================================================
+# INIT
+# =============================================================================
+
+
+def test_editor_saves_file_reference(
+    editor,
+):
+    """
+    Verifica que el editor conserva la referencia
+    al archivo asociado.
+    """
+
+    file = File()
+
+    editor = SqlEditor(file=file)
+
+    assert editor.file is file
+
+
+def test_editor_content_at_start(
+    editor,
+):
+    """
+    Verifica que el contenido inicial del editor
+    coincide con el contenido del archivo asociado.
+    """
+    assert editor.toPlainText() == editor.file.content
 
 
 # =============================================================================
@@ -40,7 +78,9 @@ def editor(qtbot):
 # =============================================================================
 
 
-def test_tab_inserts_spaces(editor):
+def test_tab_inserts_spaces(
+    editor,
+):
     """
     Verifica que TAB inserta 4 espacios.
     """
@@ -56,7 +96,10 @@ def test_tab_inserts_spaces(editor):
     assert editor.toPlainText() == "    "
 
 
-def test_ctrl_enter_emits_actual_query_scope(editor, qtbot):
+def test_ctrl_enter_emits_actual_query_scope(
+    editor,
+    qtbot,
+):
     """
     Verifica ejecución de la consulta actual (ACTUAL_QUERY).
     """
@@ -76,7 +119,10 @@ def test_ctrl_enter_emits_actual_query_scope(editor, qtbot):
     assert statements == ["SELECT 1;"]
 
 
-def test_ctrl_alt_enter_emits_selected_scope(editor, qtbot):
+def test_ctrl_alt_enter_emits_selected_scope(
+    editor,
+    qtbot,
+):
     """
     Verifica ejecución de texto seleccionado (SELECTED_TEXT).
     """
@@ -100,7 +146,10 @@ def test_ctrl_alt_enter_emits_selected_scope(editor, qtbot):
     assert statements == ["SELECT 1;"]
 
 
-def test_ctrl_shift_enter_emits_full_script(editor, qtbot):
+def test_ctrl_shift_enter_emits_full_script(
+    editor,
+    qtbot,
+):
     """
     Verifica ejecución de script completo (FULL_SCRIPT).
     """
@@ -121,7 +170,9 @@ def test_ctrl_shift_enter_emits_full_script(editor, qtbot):
     assert "SELECT 2;" in statements
 
 
-def test_key_press_event_returns_when_popup_handles_event(editor):
+def test_key_press_event_returns_when_popup_handles_event(
+    editor,
+):
     """
     Verifica que keyPressEvent finaliza cuando el popup
     del autocompletador consume el evento.
@@ -137,7 +188,9 @@ def test_key_press_event_returns_when_popup_handles_event(editor):
     super_key_press.assert_not_called()
 
 
-def test_key_press_event_backtab_does_nothing(editor):
+def test_key_press_event_backtab_does_nothing(
+    editor,
+):
     """
     Verifica que Shift+Tab se consume y no se delega
     al comportamiento por defecto de Qt.
@@ -160,7 +213,9 @@ def test_key_press_event_backtab_does_nothing(editor):
 # =============================================================================
 
 
-def test_split_sql_statements(editor):
+def test_split_sql_statements(
+    editor,
+):
     """
     Verifica que el SQL se divide correctamente en sentencias.
     """
@@ -172,7 +227,9 @@ def test_split_sql_statements(editor):
     assert result == ["SELECT 1;", "SELECT 2;"]
 
 
-def test_normalize_sql(editor):
+def test_normalize_sql(
+    editor,
+):
     """
     Verifica normalización de saltos de línea especiales de Qt.
     """
@@ -185,7 +242,9 @@ def test_normalize_sql(editor):
     assert "\r" not in normalized
 
 
-def test_has_content(editor):
+def test_has_content(
+    editor,
+):
     """
     Verifica detección de contenido útil en texto.
     """
@@ -195,7 +254,9 @@ def test_has_content(editor):
     assert editor._has_content("") is False
 
 
-def test_get_sql_full_script(editor):
+def test_get_sql_full_script(
+    editor,
+):
     """
     Verifica obtención de SQL en modo FULL_SCRIPT.
     """
@@ -207,7 +268,9 @@ def test_get_sql_full_script(editor):
     assert result == "SELECT 1;"
 
 
-def test_get_sql_empty_returns_none(editor):
+def test_get_sql_empty_returns_none(
+    editor,
+):
     """
     Verifica que texto vacío devuelve None.
     """
@@ -219,7 +282,9 @@ def test_get_sql_empty_returns_none(editor):
     assert result is None
 
 
-def test_get_sql_invalid_scope(editor):
+def test_get_sql_invalid_scope(
+    editor,
+):
     """
     Verifica que _get_sql devuelve None cuando el scope es inválido.
     """
@@ -237,7 +302,10 @@ def test_get_sql_invalid_scope(editor):
 # =============================================================================
 
 
-def test_execute_signal_emits_correct_data(editor, qtbot):
+def test_execute_signal_emits_correct_data(
+    editor,
+    qtbot,
+):
     """
     Verifica que el signal execute_requested emite datos correctos.
     """
@@ -258,7 +326,10 @@ def test_execute_signal_emits_correct_data(editor, qtbot):
 # =============================================================================
 
 
-def test_execute_does_not_emit_signal_when_sql_is_none(editor, qtbot):
+def test_execute_does_not_emit_signal_when_sql_is_none(
+    editor,
+    qtbot,
+):
     """
     Verifica que no se emite la señal de ejecución
     cuando no existe SQL válido.
@@ -275,7 +346,9 @@ def test_execute_does_not_emit_signal_when_sql_is_none(editor, qtbot):
 # =============================================================================
 
 
-def test_line_number_area_exists(editor):
+def test_line_number_area_exists(
+    editor,
+):
     """
     Verifica que el área de números de línea está creada.
     """
@@ -283,7 +356,9 @@ def test_line_number_area_exists(editor):
     assert editor.line_number_area is not None
 
 
-def test_line_number_area_width(editor):
+def test_line_number_area_width(
+    editor,
+):
     """
     Verifica que el cálculo del ancho del área de líneas es válido.
     """
@@ -294,7 +369,9 @@ def test_line_number_area_width(editor):
     assert width > 0
 
 
-def test_update_line_number_area_scrolls_when_dy_is_not_zero(editor):
+def test_update_line_number_area_scrolls_when_dy_is_not_zero(
+    editor,
+):
     """
     Verifica que el área de números se desplaza cuando
     existe un desplazamiento vertical.
@@ -321,7 +398,9 @@ def test_update_line_number_area_scrolls_when_dy_is_not_zero(editor):
 # =============================================================================
 
 
-def test_insert_query_at_cursor_inserts_text(editor):
+def test_insert_query_at_cursor_inserts_text(
+    editor,
+):
     """
     Verifica que el texto SQL se inserta en la posición
     actual del cursor.
@@ -338,7 +417,9 @@ def test_insert_query_at_cursor_inserts_text(editor):
     assert editor.toPlainText() == "SELECT * FROM users"
 
 
-def test_insert_query_at_cursor_ignores_empty_text(editor):
+def test_insert_query_at_cursor_ignores_empty_text(
+    editor,
+):
     """
     Verifica que no se modifica el contenido cuando
     el texto a insertar está vacío.
@@ -356,7 +437,9 @@ def test_insert_query_at_cursor_ignores_empty_text(editor):
 # =============================================================================
 
 
-def test_get_current_query_returns_first_statement(editor):
+def test_get_current_query_returns_first_statement(
+    editor,
+):
     """
     Verifica que devuelve la sentencia donde está
     situado el cursor.
@@ -373,7 +456,9 @@ def test_get_current_query_returns_first_statement(editor):
     assert result == "SELECT 1;"
 
 
-def test_get_current_query_returns_second_statement(editor):
+def test_get_current_query_returns_second_statement(
+    editor,
+):
     """
     Verifica que detecta correctamente una sentencia
     posterior dentro del documento.
@@ -390,7 +475,9 @@ def test_get_current_query_returns_second_statement(editor):
     assert result == "SELECT 2;"
 
 
-def test_get_current_query_returns_none_between_statements(editor):
+def test_get_current_query_returns_none_between_statements(
+    editor,
+):
     """
     Verifica que no devuelve una consulta cuando
     el cursor está fuera de cualquier sentencia.
@@ -407,7 +494,9 @@ def test_get_current_query_returns_none_between_statements(editor):
     assert result is None
 
 
-def test_get_current_query_empty_editor_returns_none(editor):
+def test_get_current_query_empty_editor_returns_none(
+    editor,
+):
     """
     Verifica que no devuelve consulta si el editor está vacío.
     """
@@ -419,7 +508,14 @@ def test_get_current_query_empty_editor_returns_none(editor):
     assert result is None
 
 
-def test_get_current_query_ignores_statement_not_found(editor):
+def test_get_current_query_ignores_statement_not_found(
+    editor,
+):
+    """
+    Verifica que devuelve None cuando la sentencia
+    obtenida no existe dentro del documento.
+    """
+
     editor.setPlainText("SELECT 1;")
 
     fake_statement = "SELECT 2;"
@@ -438,7 +534,9 @@ def test_get_current_query_ignores_statement_not_found(editor):
 # =============================================================================
 
 
-def test_on_text_changed_updates_document_completion(editor):
+def test_on_text_changed_updates_document_completion(
+    editor,
+):
     """
     Verifica que el editor delega la actualización del
     autocompletado dinámico al completer cuando cambia
@@ -447,14 +545,18 @@ def test_on_text_changed_updates_document_completion(editor):
 
     editor.completer.update_document_completion = MagicMock()
 
-    editor.setPlainText("SELECT :id")
+    text = "SELECT :id"
+
+    editor.setPlainText(text)
 
     editor.completer.update_document_completion.assert_called_once_with(
-        "SELECT :id",
+        sql=text,
     )
 
 
-def test_on_text_changed_passes_current_document_text(editor):
+def test_on_text_changed_passes_current_document_text(
+    editor,
+):
     """
     Verifica que siempre se envía al completer el contenido
     completo y actualizado del documento.
@@ -462,14 +564,18 @@ def test_on_text_changed_passes_current_document_text(editor):
 
     editor.completer.update_document_completion = MagicMock()
 
-    editor.setPlainText("SELECT @var FROM table")
+    text = "SELECT @var FROM table"
 
-    args = editor.completer.update_document_completion.call_args[0]
+    editor.setPlainText(text)
 
-    assert args == ("SELECT @var FROM table",)
+    editor.completer.update_document_completion.assert_called_once_with(
+        sql=text,
+    )
 
 
-def test_update_completer_does_not_show_popup_on_backspace_if_hidden(editor):
+def test_update_completer_does_not_show_popup_on_backspace_if_hidden(
+    editor,
+):
     """
     Verifica que pulsar Backspace no abre el popup cuando
     éste no estaba visible.
@@ -489,7 +595,9 @@ def test_update_completer_does_not_show_popup_on_backspace_if_hidden(editor):
     editor.completer.complete_at.assert_not_called()
 
 
-def test_update_completer_keeps_popup_updated_on_backspace_if_visible(editor):
+def test_update_completer_keeps_popup_updated_on_backspace_if_visible(
+    editor,
+):
     """
     Verifica que si el popup ya estaba visible, Backspace
     vuelve a actualizar el autocompletador.
@@ -516,7 +624,9 @@ def test_update_completer_keeps_popup_updated_on_backspace_if_visible(editor):
     )
 
 
-def test_handle_completer_popup_key_event_returns_false_for_return(editor):
+def test_handle_completer_popup_key_event_returns_false_for_return(
+    editor,
+):
     """
     Verifica que Return no es gestionado por el popup
     para permitir insertar una nueva línea.
@@ -530,7 +640,9 @@ def test_handle_completer_popup_key_event_returns_false_for_return(editor):
     assert editor._handle_completer_popup_key_event(event) is False
 
 
-def test_handle_completer_popup_key_event_returns_true_for_tab(editor):
+def test_handle_completer_popup_key_event_returns_true_for_tab(
+    editor,
+):
     """
     Verifica que Tab es gestionado por el popup
     cuando éste está visible.
@@ -544,7 +656,9 @@ def test_handle_completer_popup_key_event_returns_true_for_tab(editor):
     assert editor._handle_completer_popup_key_event(event) is True
 
 
-def test_text_under_cursor_returns_empty_when_cursor_after_separator(editor):
+def test_text_under_cursor_returns_empty_when_cursor_after_separator(
+    editor,
+):
     """
     Verifica que no se retrocede cuando el carácter
     anterior no forma parte de una palabra SQL.
@@ -557,3 +671,189 @@ def test_text_under_cursor_returns_empty_when_cursor_after_separator(editor):
     editor.setTextCursor(cursor)
 
     assert editor.text_under_cursor() == ""
+
+
+# =============================================================================
+# FILES
+# =============================================================================
+
+
+def test_text_changed_updates_file_content(
+    editor,
+):
+    """
+    Verifica que modificar el contenido del editor
+    actualiza el contenido del archivo asociado.
+    """
+
+    editor.setPlainText("SELECT * FROM users")
+
+    assert editor.file.content == "SELECT * FROM users"
+
+
+def test_text_changed_emits_file_modified(
+    editor,
+    qtbot,
+):
+    """
+    Verifica que modificar el contenido del editor
+    emite la señal file_modified.
+    """
+
+    with qtbot.waitSignal(editor.file_modified) as blocker:
+        editor.setPlainText("SELECT 1")
+
+    assert blocker.args == [editor.file]
+
+
+def test_ctrl_s_emits_save_changes(
+    editor,
+    qtbot,
+):
+    """
+    Verifica que Ctrl+S emite la señal
+    save_changes con el archivo actual.
+    """
+
+    with qtbot.waitSignal(editor.save_changes) as blocker:
+        qtbot.keyPress(
+            editor,
+            Qt.Key_S,
+            modifier=Qt.ControlModifier,
+        )
+
+    assert blocker.args == [editor.file]
+
+
+def test_ctrl_r_emits_rename_file(
+    editor,
+    qtbot,
+):
+    """
+    Verifica que Ctrl+R emite la señal
+    rename_file con el archivo actual.
+    """
+
+    with qtbot.waitSignal(editor.rename_file) as blocker:
+        qtbot.keyPress(
+            editor,
+            Qt.Key_R,
+            modifier=Qt.ControlModifier,
+        )
+
+    assert blocker.args == [editor.file]
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("SELECT customer_id", "customer_id"),
+        ("SELECT * FROM users WHERE id = :user_id", ":user_id"),
+        ("SELECT @my_var", "@my_var"),
+    ],
+)
+def test_text_under_cursor_returns_word(
+    editor,
+    text,
+    expected,
+):
+    editor.setPlainText(text)
+
+    cursor = editor.textCursor()
+    cursor.movePosition(QTextCursor.MoveOperation.End)
+    editor.setTextCursor(cursor)
+
+    assert editor.text_under_cursor() == expected
+
+
+# =============================================================================
+# FORCE UPDATE COMPLETER
+# =============================================================================
+
+
+def test_force_update_completer_forces_document_completion_refresh(
+    editor,
+):
+    """
+    Verifica que force_update_completer solicita una
+    actualización forzada del autocompletador.
+    """
+
+    editor.completer.update_document_completion = MagicMock()
+
+    editor.force_update_completer()
+
+    editor.completer.update_document_completion.assert_called_once_with(
+        force_update=True,
+    )
+
+
+# =============================================================================
+# THEME
+# =============================================================================
+
+
+def test_connect_signals_connects_theme_changed(editor):
+    """
+    Verifica que el editor se conecta a la señal
+    theme_changed del ThemeManager.
+    """
+
+    with patch(
+        "ui.widgets.workspace.sql_editor.sql_editor.ThemeManager.events"
+    ) as events:
+
+        signal = MagicMock()
+        events.return_value.theme_changed = signal
+
+        editor._connect_signals()
+
+        signal.connect.assert_any_call(
+            editor._on_theme_changed,
+        )
+
+
+def test_on_theme_changed_refreshes_theme_dependent_components(
+    editor,
+):
+    """
+    Verifica que al cambiar el tema se actualizan
+    todos los componentes dependientes del mismo.
+    """
+
+    editor._highlight_current_line = MagicMock()
+    editor.force_update_completer = MagicMock()
+    editor.syntax_highlighter.reload_theme = MagicMock()
+    editor.line_number_area.update = MagicMock()
+    editor.viewport().update = MagicMock()
+
+    editor._on_theme_changed("dark")
+
+    editor._highlight_current_line.assert_called_once_with()
+
+    editor.force_update_completer.assert_called_once_with()
+
+    editor.syntax_highlighter.reload_theme.assert_called_once_with()
+
+    editor.line_number_area.update.assert_called_once_with()
+
+    editor.viewport().update.assert_called_once_with()
+
+
+def test_theme_changed_signal_updates_editor(editor):
+    """
+    Verifica que emitir theme_changed ejecuta el
+    refresco del editor.
+    """
+
+    editor._on_theme_changed = MagicMock()
+
+    ThemeManager.events().theme_changed.disconnect()
+
+    ThemeManager.events().theme_changed.connect(
+        editor._on_theme_changed,
+    )
+
+    ThemeManager.events().theme_changed.emit("dark")
+
+    editor._on_theme_changed.assert_called_once_with("dark")

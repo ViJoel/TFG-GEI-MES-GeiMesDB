@@ -26,6 +26,7 @@ from modules.sessions.service import test_connection
 from ui.app.app_actions import notify
 from ui.app.app_context import AppContext
 from ui.app.worker_error import WorkerError
+from ui.translations.translation_manager import TranslationManager
 from ui.utils.layouts import (
     hbox,
     vbox,
@@ -113,10 +114,92 @@ class ConnectionForm(QWidget):
 
         self._build_action_buttons(main_layout)
 
+        self._retranslate_ui()
+
         self.setFixedHeight(self.sizeHint().height())
 
         # Aplicar estado visual inicial.
         self._update_fields_visibility()
+
+    def _retranslate_ui(
+        self,
+    ) -> None:
+        """
+        Actualiza todos los textos traducibles del widget.
+
+        Los textos se generan en el momento de la llamada
+        utilizando el traductor activo de Qt, permitiendo
+        refrescar la interfaz después de cambiar el idioma
+        de la aplicación.
+        """
+
+        # Título.
+
+        self.title_label.setText(
+            self.tr("Connection form"),
+        )
+
+        # Labels del formulario.
+
+        self._name_field_label.setText(
+            self.tr("Name"),
+        )
+
+        self.name_input.setPlaceholderText(
+            self.tr("My personal DB"),
+        )
+
+        self._driver_field_label.setText(
+            self.tr("Driver"),
+        )
+
+        self._host_field_label.setText(
+            self.tr("Host"),
+        )
+
+        self._port_field_label.setText(
+            self.tr("Port"),
+        )
+
+        self._database_field_label.setText(
+            self.tr("Database"),
+        )
+
+        self._username_field_label.setText(
+            self.tr("Username"),
+        )
+
+        self._password_field_label.setText(
+            self.tr("Password"),
+        )
+
+        self.path_input_label.setText(
+            self.tr("Path to the file"),
+        )
+
+        self.path_input.setPlaceholderText(
+            self.tr("/path/to/the/file.db"),
+        )
+
+        # Botón de buscar del path input.
+
+        self.browse_button.setText(
+            self.tr("Browse"),
+        )
+
+        # Botones de acción.
+
+        self.test_connection_button.setText(
+            self.tr("Test connection"),
+        )
+
+        self.cancel_button.setText(
+            self.tr("Cancel"),
+        )
+
+        self.save_button.setText(
+            self.tr("Save"),
+        )
 
     def _build_form_title(
         self,
@@ -125,22 +208,24 @@ class ConnectionForm(QWidget):
         """
         Construye el título principal
         del formulario.
+
+        Args:
+            parent_layout:
+                Layout padre que contendrá el widget.
         """
 
-        title_label = QLabel()
+        self.title_label = QLabel()
 
-        title_label.setObjectName("connection_form_title")
+        self.title_label.setObjectName("connection_form_title")
 
-        title_label.setSizePolicy(
+        self.title_label.setSizePolicy(
             QSizePolicy.Policy.Preferred,
             QSizePolicy.Policy.Maximum,
         )
 
-        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        title_label.setText("Connection form")
-
-        parent_layout.addWidget(title_label)
+        parent_layout.addWidget(self.title_label)
 
     def _build_form_fields(
         self,
@@ -149,6 +234,10 @@ class ConnectionForm(QWidget):
         """
         Construye y registra todos los
         campos editables del formulario.
+
+        Args:
+            parent_layout:
+                Layout padre que contendrá el widget.
         """
 
         inputs_layout = vbox(sp=16)
@@ -224,15 +313,10 @@ class ConnectionForm(QWidget):
 
     def _create_input_label(
         self,
-        label_text: str,
     ) -> QLabel:
         """
         Crea un label reutilizable para
         los campos del formulario.
-
-        Args:
-            label_text (str):
-                Texto mostrado en el label.
 
         Returns:
             QLabel:
@@ -241,7 +325,6 @@ class ConnectionForm(QWidget):
 
         label = QLabel()
         label.setObjectName("connection_form_input_label")
-        label.setText(label_text)
 
         return label
 
@@ -271,9 +354,8 @@ class ConnectionForm(QWidget):
 
     def _build_field(
         self,
-        label_text: str,
         widget: QWidget,
-    ) -> QWidget:
+    ) -> tuple[QWidget, QLabel]:
         """
         Construye un campo estándar compuesto por:
         - Contenedor vertical.
@@ -281,15 +363,13 @@ class ConnectionForm(QWidget):
         - Widget principal,
 
         Args:
-            label_text (str):
-                Texto del label principal.
-
             widget (QWidget):
                 Widget principal del campo.
 
         Returns:
-            QWidget:
-                Contenedor completo del campo.
+            tuple[QWidget, QLabel]:
+                Contenedor completo del campo y label
+                del campo (necesario para traducción).
         """
 
         field_widget = QWidget()
@@ -300,16 +380,15 @@ class ConnectionForm(QWidget):
 
         field_widget.setLayout(field_layout)
 
-        field_label = self._create_input_label(label_text)
+        field_label = self._create_input_label()
 
         field_layout.addWidget(field_label)
         field_layout.addWidget(widget)
 
-        return field_widget
+        return field_widget, field_label
 
     def _create_button(
         self,
-        text: str,
         property_name: str,
         property_value: str,
     ) -> QPushButton:
@@ -317,9 +396,6 @@ class ConnectionForm(QWidget):
         Crea un botón del formulario.
 
         Args:
-            text (str):
-                Texto que aparecerá en el botón.
-
             property_name (str):
                 Nombre de la propiedad QSS.
 
@@ -330,7 +406,7 @@ class ConnectionForm(QWidget):
             QPushButton: Botón creado.
         """
 
-        button = QPushButton(text)
+        button = QPushButton()
 
         button.setObjectName("connection_form_button")
 
@@ -356,8 +432,7 @@ class ConnectionForm(QWidget):
 
         self.name_input = self._create_input("My personal DB")
 
-        self.name_field = self._build_field(
-            "Name",
+        self.name_field, self._name_field_label = self._build_field(
             self.name_input,
         )
 
@@ -379,8 +454,7 @@ class ConnectionForm(QWidget):
         for driver in Driver:
             self.driver_input.addItem(driver.value)
 
-        self.driver_field = self._build_field(
-            "Driver",
+        self.driver_field, self._driver_field_label = self._build_field(
             self.driver_input,
         )
 
@@ -396,8 +470,7 @@ class ConnectionForm(QWidget):
 
         self.host_input = self._create_input("255.255.255.255")
 
-        self.host_field = self._build_field(
-            "Host",
+        self.host_field, self._host_field_label = self._build_field(
             self.host_input,
         )
 
@@ -415,8 +488,7 @@ class ConnectionForm(QWidget):
 
         self._set_port_regex()
 
-        self.port_field = self._build_field(
-            "Port",
+        self.port_field, self._port_field_label = self._build_field(
             self.port_input,
         )
 
@@ -433,8 +505,7 @@ class ConnectionForm(QWidget):
 
         self.database_input = self._create_input("my_database")
 
-        self.database_field = self._build_field(
-            "Database",
+        self.database_field, self._database_field_label = self._build_field(
             self.database_input,
         )
 
@@ -450,8 +521,7 @@ class ConnectionForm(QWidget):
 
         self.username_input = self._create_input("admin")
 
-        self.username_field = self._build_field(
-            "Username",
+        self.username_field, self._username_field_label = self._build_field(
             self.username_input,
         )
 
@@ -470,8 +540,7 @@ class ConnectionForm(QWidget):
         # Ocultar caracteres sensibles.
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
 
-        self.password_field = self._build_field(
-            "Password",
+        self.password_field, self._password_field_label = self._build_field(
             self.password_input,
         )
 
@@ -497,12 +566,12 @@ class ConnectionForm(QWidget):
         sub_layout = hbox(sp=4)
         field_layout.addLayout(sub_layout)
 
-        label = self._create_input_label("Path to the file")
-        sub_layout.addWidget(label)
+        self.path_input_label = self._create_input_label()
+        sub_layout.addWidget(self.path_input_label)
 
         sub_layout.addStretch()
 
-        self.browse_button = QPushButton("Browse")
+        self.browse_button = QPushButton()
         self.browse_button.setProperty(
             "type",
             "accent",
@@ -535,19 +604,16 @@ class ConnectionForm(QWidget):
 
         # Botones
         self.test_connection_button = self._create_button(
-            "Test connection",
             "type",
             "secondary",
         )
 
         self.cancel_button = self._create_button(
-            "Cancel",
             "type",
             "danger",
         )
 
         self.save_button = self._create_button(
-            "Save",
             "type",
             "primary",
         )
@@ -607,6 +673,10 @@ class ConnectionForm(QWidget):
 
         self.cancel_button.clicked.connect(
             self._cancel_button_clicked,
+        )
+
+        TranslationManager.events().language_changed.connect(
+            self._retranslate_ui,
         )
 
     # ======================
@@ -687,9 +757,9 @@ class ConnectionForm(QWidget):
         # y el cuarto es el filtro de archivos
         file_path, _ = QFileDialog.getOpenFileName(
             self,
-            "Seleccionar base de datos",
+            self.tr("Select database"),
             "",
-            "Archivos de Base de Datos (*.db);;Todos los archivos (*)",
+            self.tr("Database Files (*.db);;All Files (*)"),
         )
 
         if file_path:
@@ -721,7 +791,7 @@ class ConnectionForm(QWidget):
 
                 notify(
                     MessageType.SUCCESS,
-                    "Connection updated",
+                    self.tr("Connection updated."),
                 )
 
             # CREATE
@@ -730,7 +800,7 @@ class ConnectionForm(QWidget):
 
                 notify(
                     MessageType.SUCCESS,
-                    "Connection saved",
+                    self.tr("Connection saved."),
                 )
 
             logger.success(f"Connection saved '{connection.name}'...")
@@ -747,7 +817,7 @@ class ConnectionForm(QWidget):
 
             notify(
                 MessageType.ERROR,
-                "Error saving",
+                self.tr("Error saving."),
             )
 
     def _test_connection_button_clicked(
@@ -763,7 +833,7 @@ class ConnectionForm(QWidget):
 
         notify(
             MessageType.WARNING,
-            "Testing connection...",
+            self.tr("Testing connection..."),
         )
 
         AppContext.get_task_manager().run(
@@ -844,14 +914,14 @@ class ConnectionForm(QWidget):
 
             notify(
                 MessageType.SUCCESS,
-                "Connection successful.",
+                self.tr("Connection successful."),
             )
 
         else:
 
             notify(
                 MessageType.ERROR,
-                "Connection failed.",
+                self.tr("Connection failed."),
             )
 
     def _on_test_connection_error(
@@ -863,5 +933,5 @@ class ConnectionForm(QWidget):
 
         notify(
             MessageType.ERROR,
-            "Invalid connection data.",
+            self.tr("Invalid connection data."),
         )

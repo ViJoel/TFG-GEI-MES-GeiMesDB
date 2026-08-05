@@ -171,6 +171,10 @@ def test_insert_completion_replaces_word_under_cursor(qtbot):
 
 
 def test_update_document_completion_delegates_to_model(qtbot):
+    """
+    Verifica que update_document_completion delega
+    la actualización al modelo interno.
+    """
 
     widget = QWidget()
     qtbot.addWidget(widget)
@@ -179,6 +183,33 @@ def test_update_document_completion_delegates_to_model(qtbot):
 
     completer._model.update = MagicMock(return_value=True)
 
-    completer.update_document_completion("SELECT * FROM table")
+    completer.update_document_completion(
+        sql="SELECT * FROM table",
+    )
 
-    completer._model.update.assert_called_once_with("SELECT * FROM table")
+    completer._model.update.assert_called_once_with(
+        sql="SELECT * FROM table",
+        force_update=False,
+    )
+
+
+def test_update_document_completion_can_force_model_update(qtbot):
+    """
+    Verifica que force_update se transmite al modelo.
+    """
+
+    widget = QWidget()
+    qtbot.addWidget(widget)
+
+    completer = SqlCompleter(widget)
+
+    completer._model.update = MagicMock(return_value=True)
+
+    completer.update_document_completion(
+        force_update=True,
+    )
+
+    completer._model.update.assert_called_once_with(
+        sql=None,
+        force_update=True,
+    )

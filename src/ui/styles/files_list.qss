@@ -1,0 +1,11 @@
+QListWidget#files_list {
+    background-color: $files_list_background_color;
+    border: 2px solid $files_list_border_color;
+    border-radius: 4px;
+}
+
+QListWidget#files_list::item,
+QListWidget#files_list::item:hover,
+QListWidget#files_list::item:selected {
+    background-color: transparent;
+}

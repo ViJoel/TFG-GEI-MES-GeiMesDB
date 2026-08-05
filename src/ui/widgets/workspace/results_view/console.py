@@ -177,8 +177,10 @@ class Console(QTextEdit):
             self.write(
                 "=" * 80
                 + "\n"
-                + "One or more UPDATE operations failed.\n"
-                + "The transaction was rolled back.\n"
-                + "No changes were saved.",
+                + self.tr("One or more UPDATE operations failed.")
+                + "\n"
+                + self.tr("The transaction was rolled back.")
+                + "\n"
+                + self.tr("No changes were saved."),
                 MessageType.INFO,
             )

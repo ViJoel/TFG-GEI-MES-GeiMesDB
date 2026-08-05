@@ -3,7 +3,9 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
+from ui.utils.flow_layout import FlowLayout
 from ui.utils.layouts import (
+    flow,
     hbox,
     vbox,
 )
@@ -131,6 +133,73 @@ def test_hbox_default_values():
     """
 
     layout = hbox()
+
+    margins = layout.contentsMargins()
+
+    assert margins.left() == 0
+    assert margins.top() == 0
+    assert margins.right() == 0
+    assert margins.bottom() == 0
+
+    assert layout.spacing() == 0
+
+
+# =============================================================================
+# FLOW
+# =============================================================================
+
+
+def test_flow_returns_flowlayout():
+    """
+    Verifica que flow crea un FlowLayout.
+    """
+
+    layout = flow()
+
+    assert isinstance(
+        layout,
+        FlowLayout,
+    )
+
+
+def test_flow_sets_contents_margins():
+    """
+    Verifica configuración de márgenes.
+    """
+
+    layout = flow(
+        ml=10,
+        mt=20,
+        mr=30,
+        mb=40,
+    )
+
+    margins = layout.contentsMargins()
+
+    assert margins.left() == 10
+    assert margins.top() == 20
+    assert margins.right() == 30
+    assert margins.bottom() == 40
+
+
+def test_flow_sets_spacing():
+    """
+    Verifica configuración del espaciado.
+    """
+
+    layout = flow(
+        sp=16,
+    )
+
+    assert layout.spacing() == 16
+
+
+def test_flow_default_values():
+    """
+    Verifica valores por defecto.
+    """
+
+    layout = flow()
 
     margins = layout.contentsMargins()
 

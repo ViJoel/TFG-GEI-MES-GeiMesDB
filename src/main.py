@@ -11,7 +11,8 @@ Responsabilidades:
 
 import sys
 
-from PySide6 import QtWidgets
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QApplication
 
 from log.app_logger import setup_logging
 from modules.database.model import init_database
@@ -20,6 +21,7 @@ from ui.app.app_context import AppContext
 from ui.app.main_window import MainWindow
 from ui.app.task_manager import TaskManager
 from ui.themes.theme_manager import ThemeManager
+from ui.translations.translation_manager import TranslationManager
 from ui.widgets.notifications.notification_manager import NotificationManager
 
 
@@ -52,8 +54,14 @@ def main() -> int:
     # Inicializar base de datos interna.
     init_database()
 
+    # Configurar política de escalado High-DPI
+    # (debe ir ANTES de instanciar QApplication).
+    QApplication.setHighDpiScaleFactorRoundingPolicy(
+        Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
+    )
+
     # Crear aplicación Qt.
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
 
     # Inicializar contexto de la aplicación.
     AppContext.initialize(app)
@@ -63,6 +71,9 @@ def main() -> int:
 
     # Inicializar tema.
     ThemeManager.initialize()
+
+    # Inicializar lenguaje.
+    TranslationManager.initialize()
 
     # Registrar cleanup global.
     app.aboutToQuit.connect(shutdown)

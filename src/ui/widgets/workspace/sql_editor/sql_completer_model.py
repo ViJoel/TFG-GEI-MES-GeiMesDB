@@ -6,6 +6,9 @@ from PySide6.QtGui import (
 )
 
 from modules.sql.autocompletion.dynamic_data import SqlDynamicCompletionData
+from modules.sql.autocompletion.schema_data import (
+    SQL_SCHEMA_COMPLETION_DATA,
+)
 from modules.sql.autocompletion.sql_document_completion_provider import (
     SqlDocumentCompletionProvider,
 )
@@ -51,8 +54,12 @@ class SqlCompleterModel(QStandardItemModel):
     ) -> None:
         """
         Recarga los elementos del modelo de
-        autocompletado a partir de los datos
-        estáticos y dinámicos disponibles.
+        autocompletado combinando todas las
+        fuentes de datos disponibles:
+
+        - Datos estáticos del lenguaje SQL.
+        - Datos del esquema de la base de datos.
+        - Datos dinámicos obtenidos del documento SQL.
         """
 
         self.clear()
@@ -61,6 +68,7 @@ class SqlCompleterModel(QStandardItemModel):
 
         for completion_data in (
             SQL_STATIC_COMPLETION_DATA,
+            SQL_SCHEMA_COMPLETION_DATA.get_data(),
             self._dynamic_data.get_data(),
         ):
             for value in completion_data.values():
@@ -86,27 +94,50 @@ class SqlCompleterModel(QStandardItemModel):
 
     def update(
         self,
-        sql: str,
+        sql: str | None = None,
+        force_update: bool = False,
     ) -> bool:
         """
-        Actualiza los datos dinámicos del
-        autocompletador a partir del contenido
-        del documento.
+        Actualiza el modelo del autocompletador.
 
-        Si se detectan cambios, el modelo se
-        reconstruye automáticamente.
+        Cuando `force_update` es `False`, analiza el
+        contenido del documento SQL para detectar
+        cambios en los datos dinámicos. Si se detectan,
+        reconstruye automáticamente el modelo.
+
+        Cuando `force_update` es `True`, reconstruye el
+        modelo directamente sin analizar el documento,
+        permitiendo reflejar cambios externos como una
+        actualización del esquema de la base de datos.
 
         Args:
-            sql (str):
-                Contenido completo del documento.
+            sql (str | None):
+                Contenido completo del documento SQL.
+
+                Debe proporcionarse cuando `force_update`
+                es `False`. Se ignora cuando `force_update`
+                es `True`.
+
+            force_update (bool):
+                Indica si se debe reconstruir el modelo
+                sin comprobar los datos dinámicos del
+                documento.
 
         Returns:
             bool:
-                - `True` si los datos dinámicos
-                han cambiado.
-                - `False` si no se ha detectado
-                ningún cambio.
+                - `True` si el modelo ha sido
+                reconstruido.
+                - `False` si no se ha detectado ningún
+                cambio y no ha sido necesario
+                actualizarlo.
         """
+
+        if force_update:
+            self.refresh()
+            return True
+
+        if sql is None:
+            return False
 
         changed = self._document_completion_provider.update(
             sql=sql,

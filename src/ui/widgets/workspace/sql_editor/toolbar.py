@@ -4,12 +4,19 @@ from PySide6.QtCore import (
 )
 from PySide6.QtWidgets import QWidget
 
-from ui.utils.layouts import hbox
+from ui.translations.translation_manager import TranslationManager
+from ui.utils.layouts import flow
 from ui.widgets.workspace.sql_editor.toolbar_button import ToolbarButton
 from ui.widgets.workspace.sql_editor.toolbar_separator import ToolbarSeparator
 
 
 class Toolbar(QWidget):
+    """
+    Barra de herramientas del editor SQL.
+
+    Proporciona accesos a las operaciones más habituales y
+    expone señales para que el contenedor gestione su lógica.
+    """
 
     # =================
     # === VARIABLES ===
@@ -20,6 +27,10 @@ class Toolbar(QWidget):
     execute_script_requested = Signal()
     undo_requested = Signal()
     redo_requested = Signal()
+    new_file_requested = Signal()
+    open_file_requested = Signal()
+    save_file_requested = Signal()
+    rename_file_requested = Signal()
 
     # ============
     # === INIT ===
@@ -28,6 +39,9 @@ class Toolbar(QWidget):
     def __init__(
         self,
     ) -> None:
+        """
+        Inicializa la barra de herramientas.
+        """
 
         super().__init__()
 
@@ -47,37 +61,201 @@ class Toolbar(QWidget):
         Construye la interfaz principal del widget.
         """
 
+        self._create_buttons()
+        self._retranslate_ui()
+        self._build_layout()
+
+        self.setAttribute(
+            Qt.WidgetAttribute.WA_StyledBackground,
+            True,
+        )
+
+    def _retranslate_ui(
+        self,
+    ) -> None:
+        """
+        Actualiza todos los textos traducibles del widget.
+
+        Los textos se generan en el momento de la llamada
+        utilizando el traductor activo de Qt, permitiendo
+        refrescar la interfaz después de cambiar el idioma
+        de la aplicación.
+        """
+
+        self._set_buttons_text()
+        self._set_buttons_tooltips()
+
+    # ==================
+    # === UI HELPERS ===
+    # ==================
+
+    def _create_buttons(
+        self,
+    ) -> None:
+        """
+        Crea los botones que componen la barra
+        de herramientas.
+        """
+
         self.execute_selection_button = ToolbarButton(
             "fa5s.play",
             "execute_selection",
-            "Execute selection",
         )
 
         self.execute_query_button = ToolbarButton(
             "fa5s.play-circle",
             "execute_query",
-            "Execute query",
         )
 
         self.execute_script_button = ToolbarButton(
             "mdi.script-text-play",
             "execute_script",
-            "Execute script",
         )
 
         self.undo_button = ToolbarButton(
             "fa5s.undo-alt",
             "undo",
-            "Undo",
         )
 
         self.redo_button = ToolbarButton(
             "fa5s.redo-alt",
             "redo",
-            "Redo",
         )
 
-        layout = hbox(
+        self.new_button = ToolbarButton(
+            "ei.file-new",
+            "new_file",
+        )
+
+        self.open_button = ToolbarButton(
+            "fa5s.folder-open",
+            "open_file",
+        )
+
+        self.save_button = ToolbarButton(
+            "fa5s.save",
+            "save_file",
+        )
+
+        self.rename_button = ToolbarButton(
+            "mdi6.rename-box",
+            "rename_file",
+        )
+
+    def _set_buttons_text(
+        self,
+    ) -> None:
+        """
+        Establece los textos de los botones.
+        """
+
+        self.execute_selection_button.setText(
+            self.tr("Selection"),
+        )
+
+        self.execute_query_button.setText(
+            self.tr("Query"),
+        )
+
+        self.execute_script_button.setText(
+            self.tr("Script"),
+        )
+
+        self.undo_button.setText(
+            self.tr("Undo"),
+        )
+
+        self.redo_button.setText(
+            self.tr("Redo"),
+        )
+
+        self.new_button.setText(
+            self.tr("New"),
+        )
+
+        self.open_button.setText(
+            self.tr("Open"),
+        )
+
+        self.save_button.setText(
+            self.tr("Save"),
+        )
+
+        self.rename_button.setText(
+            self.tr("Rename"),
+        )
+
+    def _set_buttons_tooltips(
+        self,
+    ) -> None:
+        """
+        Configura los textos de ayuda mostrados
+        al situar el cursor sobre cada botón.
+        """
+
+        self.execute_selection_button.setToolTip(
+            self.tr(
+                "Execute the text selected.<br><br><b>Shortcut:</b> <code>Ctrl + Alt + Enter</code>",
+            )
+        )
+
+        self.execute_query_button.setToolTip(
+            self.tr(
+                "Execute the query under the cursor.<br><br><b>Shortcut:</b> <code>Ctrl + Enter</code>",
+            )
+        )
+
+        self.execute_script_button.setToolTip(
+            self.tr(
+                "Execute the full script.<br><br><b>Shortcut:</b> <code>Ctrl + Shift + Enter</code>",
+            )
+        )
+
+        self.undo_button.setToolTip(
+            self.tr(
+                "Undo action on the text.<br><br><b>Shortcut:</b> <code>Ctrl + Z</code>",
+            )
+        )
+
+        self.redo_button.setToolTip(
+            self.tr(
+                "Redo action on the text.<br><br><b>Shortcut:</b> <code>Ctrl + Shift + Z</code>",
+            )
+        )
+
+        self.new_button.setToolTip(
+            self.tr(
+                "Create a new file.<br><br><b>Shortcut:</b> <code>Ctrl + N</code>",
+            )
+        )
+
+        self.open_button.setToolTip(
+            self.tr(
+                "Open a file from your computer.<br><br><b>Shortcut:</b> <code>Ctrl + O</code>",
+            )
+        )
+
+        self.save_button.setToolTip(
+            self.tr(
+                "Save the file changes.<br><br><b>Shortcut:</b> <code>Ctrl + S</code>",
+            )
+        )
+
+        self.rename_button.setToolTip(
+            self.tr(
+                "Rename the file.<br><br><b>Shortcut:</b> <code>Ctrl + R</code>",
+            )
+        )
+
+    def _build_layout(
+        self,
+    ) -> None:
+        """
+        Construye la disposición visual de los
+        controles de la barra de herramientas.
+        """
+
+        layout = flow(
             ml=4,
             mt=4,
             mr=4,
@@ -88,16 +266,19 @@ class Toolbar(QWidget):
 
         layout.addWidget(self.undo_button)
         layout.addWidget(self.redo_button)
+
         layout.addWidget(ToolbarSeparator())
+
         layout.addWidget(self.execute_selection_button)
         layout.addWidget(self.execute_query_button)
         layout.addWidget(self.execute_script_button)
-        layout.addStretch()
 
-        self.setAttribute(
-            Qt.WidgetAttribute.WA_StyledBackground,
-            True,
-        )
+        layout.addWidget(ToolbarSeparator())
+
+        layout.addWidget(self.new_button)
+        layout.addWidget(self.open_button)
+        layout.addWidget(self.save_button)
+        layout.addWidget(self.rename_button)
 
     # ===============
     # === SIGNALS ===
@@ -129,4 +310,24 @@ class Toolbar(QWidget):
 
         self.redo_button.clicked.connect(
             self.redo_requested,
+        )
+
+        self.new_button.clicked.connect(
+            self.new_file_requested,
+        )
+
+        self.open_button.clicked.connect(
+            self.open_file_requested,
+        )
+
+        self.save_button.clicked.connect(
+            self.save_file_requested,
+        )
+
+        self.rename_button.clicked.connect(
+            self.rename_file_requested,
+        )
+
+        TranslationManager.events().language_changed.connect(
+            self._retranslate_ui,
         )

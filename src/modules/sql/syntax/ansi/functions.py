@@ -26,8 +26,6 @@ SQL_FUNCTIONS = {
     # === FECHAS ===
     # ==============
     "NOW",
-    "CURRENT_DATE",
-    "CURRENT_TIMESTAMP",
     "DATE",
     # ==================
     # === CONVERSIÓN ===

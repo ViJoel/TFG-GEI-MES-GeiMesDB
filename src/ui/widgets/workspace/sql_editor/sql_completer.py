@@ -209,20 +209,34 @@ class SqlCompleter(QCompleter):
 
     def update_document_completion(
         self,
-        sql: str,
+        sql: str | None = None,
+        force_update: bool = False,
     ) -> None:
         """
-        Actualiza los datos dinámicos del
-        autocompletador a partir del contenido
-        del documento.
+        Actualiza los datos del autocompletador.
 
-        Si se detectan cambios, el modelo se
-        recarga automáticamente para reflejar
-        las nuevas sugerencias.
+        Cuando `force_update` es `False`, analiza el
+        contenido del documento SQL para actualizar
+        las sugerencias dinámicas.
+
+        Cuando `force_update` es `True`, fuerza la
+        recarga del modelo sin analizar el documento,
+        permitiendo reflejar cambios externos como
+        una actualización del esquema de la base de
+        datos.
 
         Args:
-            sql (str):
-                Contenido completo del documento.
+            sql (str | None):
+                Contenido completo del documento SQL.
+                Se ignora cuando `force_update` es
+                `True`.
+
+            force_update (bool):
+                Indica si se debe forzar la recarga
+                del modelo del autocompletador.
         """
 
-        self._model.update(sql)
+        self._model.update(
+            sql=sql,
+            force_update=force_update,
+        )

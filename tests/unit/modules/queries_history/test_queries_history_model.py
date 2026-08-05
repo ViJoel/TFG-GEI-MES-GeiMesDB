@@ -218,9 +218,9 @@ def test_get_queries_history(sqlite_db):
 
     assert len(result) == 2
 
-    # ORDER BY DESC
-    assert result[0].query == "SELECT 2"
-    assert result[1].query == "SELECT 1"
+    # ORDER BY ASC
+    assert result[0].query == "SELECT 1"
+    assert result[1].query == "SELECT 2"
 
 
 def test_get_queries_history_filters_connection_and_dates(sqlite_db):

@@ -1,13 +1,18 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
+    QSizePolicy,
     QSplitter,
     QWidget,
 )
 
 from entities.connection import Connection
 from entities.message_type import MessageType
+from entities.navigation_tree_action import NavigationTreeAction
 from entities.queries_history_entry import QueriesHistoryEntry
+from entities.query_execution import QueryExecution
+from entities.script_result import ScriptResult
 from entities.sql_scope import SqlScope
+from entities.unsaved_changes_count import UnsavedChangesCount
 from log.app_logger import get_logger
 from modules.queries_history.service import save_queries_history_batch
 from modules.sessions.service import (
@@ -18,7 +23,9 @@ from modules.sessions.service import (
 )
 from ui.app.app_actions import notify
 from ui.app.app_context import AppContext
+from ui.app.worker_error import WorkerError
 from ui.utils.layouts import hbox
+from ui.widgets.workspace.navigation_tree.navigation_tree import NavigationTree
 from ui.widgets.workspace.results_view.results_view import ResultsView
 from ui.widgets.workspace.sql_editor.sql_editor_area import SqlEditorArea
 
@@ -79,24 +86,30 @@ class Workspace(QWidget):
         main_layout = hbox()
         self.setLayout(main_layout)
 
-        self.sql_editor = SqlEditorArea()
+        self.sql_editor_area = SqlEditorArea()
         self.results_view = ResultsView(connection=self.connection)
+        self.navigation_tree = NavigationTree(connection_id=self.connection.id)
 
-        self.splitter = QSplitter(Qt.Vertical)
+        splitter = QSplitter(Qt.Vertical)
+        splitter.setHandleWidth(4)
+        splitter.setSizes([1, 3])
+        splitter.setChildrenCollapsible(True)
+        splitter.addWidget(self.sql_editor_area)
+        splitter.addWidget(self.results_view)
 
-        # Grosor de la barra.
-        self.splitter.setHandleWidth(4)
+        splitter_2 = QSplitter(Qt.Horizontal)
+        splitter_2.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Expanding,
+        )
+        splitter_2.setHandleWidth(1)
+        splitter_2.setSizes([3, 1])
+        splitter_2.setChildrenCollapsible(True)
 
-        # Proporciones de tamaño iniciales de los widgets.
-        self.splitter.setSizes([1, 3])
+        splitter_2.addWidget(splitter)
+        splitter_2.addWidget(self.navigation_tree)
 
-        # Evita que alguno de los paneles desaparezca.
-        self.splitter.setChildrenCollapsible(False)
-
-        self.splitter.addWidget(self.sql_editor)
-        self.splitter.addWidget(self.results_view)
-
-        main_layout.addWidget(self.splitter)
+        main_layout.addWidget(splitter_2)
 
     # ===============
     # === SIGNALS ===
@@ -110,7 +123,7 @@ class Workspace(QWidget):
         con sus handlers correspondientes.
         """
 
-        self.sql_editor.execute_requested.connect(
+        self.sql_editor_area.execute_requested.connect(
             self._on_execute_requested,
         )
 
@@ -120,6 +133,14 @@ class Workspace(QWidget):
 
         self.results_view.query_selected_from_session_queries_history.connect(
             self._on_query_selected_from_session_queries_history
+        )
+
+        self.navigation_tree.action_requested.connect(
+            self._on_navigation_tree_action,
+        )
+
+        self.navigation_tree.tree_reloaded.connect(
+            self.sql_editor_area.force_update_editors_completers
         )
 
     # ======================
@@ -146,17 +167,16 @@ class Workspace(QWidget):
 
         notify(
             MessageType.WARNING,
-            "Executing sql...",
+            self.tr("Executing sql..."),
         )
 
-        # Forzar el repintado de la UI antes de iniciar una operación
-        # síncrona que bloqueará temporalmente el hilo principal.
-        AppContext.get_app().processEvents()
+        if scope == SqlScope.SELECTED_TEXT:
+            if len(sql) > 1:
+                self._execute_script(sql)
+            else:
+                self._execute_query(sql)
 
-        if scope in (
-            SqlScope.SELECTED_TEXT,
-            SqlScope.ACTUAL_QUERY,
-        ):
+        elif scope == SqlScope.ACTUAL_QUERY:
             self._execute_query(sql)
 
         elif scope == SqlScope.FULL_SCRIPT:
@@ -166,11 +186,6 @@ class Workspace(QWidget):
 
         self.results_view.set_action_buttons_state(False)
 
-        notify(
-            MessageType.SUCCESS,
-            "SQL executed.",
-        )
-
     def _on_save_requested(
         self,
     ) -> None:
@@ -179,6 +194,16 @@ class Workspace(QWidget):
         los datos mostrados en la tabla y
         actualiza los resultados.
         """
+
+        notify(
+            MessageType.WARNING,
+            self.tr("Saving changes..."),
+        )
+
+        # Fuerza el repintado de la interfaz para que la
+        # notificación sea visible antes de iniciar una
+        # operación síncrona potencialmente bloqueante.
+        AppContext.get_app().processEvents()
 
         saving_operation_success: bool = False
 
@@ -251,13 +276,13 @@ class Workspace(QWidget):
         if saving_operation_success:
             notify(
                 MessageType.SUCCESS,
-                "Changes saved",
+                self.tr("Changes saved."),
             )
 
         else:
             notify(
                 MessageType.ERROR,
-                "Saving changes failed.",
+                self.tr("Saving changes failed."),
             )
 
     def _on_query_selected_from_session_queries_history(
@@ -265,7 +290,35 @@ class Workspace(QWidget):
         query: str,
     ) -> None:
 
-        self.sql_editor.set_query_text(query)
+        self.sql_editor_area.set_query_text(query)
+
+    def _on_navigation_tree_action(
+        self,
+        action: NavigationTreeAction,
+        sql: str,
+    ) -> None:
+        """
+        Gestiona las acciones emitidas por el árbol de navegación.
+
+        Dependiendo del tipo de acción solicitada, inserta el SQL en el
+        editor o lo ejecuta directamente utilizando el mismo flujo de
+        ejecución que el resto de la aplicación.
+
+        Args:
+            action (NavigationTreeAction):
+                Acción solicitada por el menú contextual del árbol.
+
+            sql (str):
+                Sentencia SQL asociada a la acción.
+        """
+
+        match action:
+
+            case NavigationTreeAction.INSERT_SQL_IN_EDITOR:
+                self.sql_editor_area.set_query_text(sql)
+
+            case NavigationTreeAction.EXECUTE_SQL:
+                self._execute_query([sql])
 
     # =====================
     # === EVENT HELPERS ===
@@ -276,13 +329,15 @@ class Workspace(QWidget):
         queries: list[str],
     ) -> None:
         """
-        Ejecuta una única consulta SQL y muestra
-        el resultado obtenido.
+        Ejecuta una única consulta SQL en segundo plano.
 
-        Si se reciben varias sentencias, la
-        ejecución se cancela y se notifica al
-        usuario para que ejecute el contenido
-        como un script.
+        Si se reciben varias sentencias, la ejecución
+        se cancela y se notifica al usuario para que
+        ejecute el contenido como un script.
+
+        La consulta válida se delega al gestor de
+        tareas para evitar bloquear el hilo principal
+        de la interfaz.
 
         Args:
             queries (list[str]):
@@ -296,10 +351,13 @@ class Workspace(QWidget):
 
         if len(queries) > 1:
             string = (
-                "Execution aborted.\n"
-                + "More than one SQL statement detected in the selected text.\n"
-                + "Multiple statements cannot be executed as a single query.\n"
-                + "Execute it as a script instead."
+                self.tr("Execution aborted.")
+                + "\n"
+                + self.tr("More than one SQL statement detected in the selected text.")
+                + "\n"
+                + self.tr("Multiple statements cannot be executed as a single query.")
+                + "\n"
+                + self.tr("Execute it as a script instead.")
             )
 
             logger.warning(string)
@@ -313,13 +371,38 @@ class Workspace(QWidget):
 
             notify(
                 MessageType.WARNING,
-                "Execution aborted.",
+                self.tr("Execution aborted."),
             )
 
             return
 
-        query = queries[0]
-        self.current_query = query
+        AppContext.get_task_manager().run(
+            self._execute_query_backend,
+            queries[0],
+            on_success=self._on_query_finished,
+            on_error=self._on_execution_error,
+        )
+
+    def _execute_query_backend(
+        self,
+        query: str,
+    ) -> QueryExecution:
+        """
+        Ejecuta una consulta SQL en segundo plano.
+
+        Este método contiene únicamente la lógica de
+        acceso a datos y está diseñado para ser
+        ejecutado mediante el ``TaskManager``.
+
+        Args:
+            query (str):
+                Consulta SQL a ejecutar.
+
+        Returns:
+            QueryExecution:
+                Consulta ejecutada junto con el
+                resultado obtenido.
+        """
 
         logger.debug("Executing query...")
 
@@ -330,21 +413,74 @@ class Workspace(QWidget):
 
         logger.debug("Query execution completed.")
 
+        return QueryExecution(
+            query=query,
+            result=result,
+        )
+
+    def _on_query_finished(
+        self,
+        execution: QueryExecution,
+    ) -> None:
+        """
+        Actualiza la interfaz tras finalizar la
+        ejecución de una consulta.
+
+        Muestra el resultado obtenido y actualiza el
+        estado de edición del visor de resultados.
+
+        Args:
+            execution (QueryExecution):
+                Información asociada a la consulta
+                ejecutada y su resultado.
+        """
+
+        self.current_query = execution.query
+
         logger.debug("Updating results view...")
 
         self.results_view.show_result(
-            result=result,
+            result=execution.result,
             script_result=None,
             is_script=False,
         )
 
-        self.results_view.set_editable(is_editable_query(query))
+        self.results_view.set_editable(is_editable_query(execution.query))
 
         logger.debug("Results view updated.")
 
         logger.success(
-            f"Query executed successfully for "
+            f"Query execution finished for "
             f"'{self.connection.name}' (ID: {self.connection.id})."
+        )
+
+        notify(
+            MessageType.SUCCESS,
+            self.tr("SQL query executed."),
+        )
+
+    def _on_execution_error(
+        self,
+        error: WorkerError,
+    ) -> None:
+        """
+        Gestiona los errores inesperados producidos
+        durante la ejecución de una consulta o script.
+
+        Registra el error en el log y notifica al
+        usuario que la operación no pudo completarse.
+
+        Args:
+            error (WorkerError):
+                Información del error producido por
+                el worker.
+        """
+
+        logger.error(f"Error during SQL execution.\n{error.traceback}")
+
+        notify(
+            message_type=MessageType.ERROR,
+            message=self.tr("Error in execution."),
         )
 
     def _execute_script(
@@ -352,9 +488,11 @@ class Workspace(QWidget):
         queries: list[str],
     ) -> None:
         """
-        Ejecuta un script compuesto por una o
-        varias sentencias SQL y muestra el
-        resultado de la ejecución.
+        Ejecuta un script SQL en segundo plano.
+
+        El script se delega al gestor de tareas
+        para evitar bloquear el hilo principal de
+        la interfaz.
 
         Args:
             queries (list[str]):
@@ -367,6 +505,33 @@ class Workspace(QWidget):
             f"'{self.connection.name}' (ID: {self.connection.id})."
         )
 
+        AppContext.get_task_manager().run(
+            self._execute_script_backend,
+            queries,
+            on_success=self._on_script_finished,
+            on_error=self._on_execution_error,
+        )
+
+    def _execute_script_backend(
+        self,
+        queries: list[str],
+    ) -> ScriptResult:
+        """
+        Ejecuta un script SQL en segundo plano.
+
+        Este método contiene únicamente la lógica
+        de acceso a datos y está diseñado para ser
+        ejecutado mediante el ``TaskManager``.
+
+        Args:
+            queries (list[str]):
+                Sentencias SQL que forman el script.
+
+        Returns:
+            ScriptResult:
+                Resultado de la ejecución del script.
+        """
+
         logger.debug(f"Executing {len(queries)} SQL statements...")
 
         script_result = execute_script(
@@ -375,6 +540,25 @@ class Workspace(QWidget):
         )
 
         logger.debug("Script execution completed.")
+
+        return script_result
+
+    def _on_script_finished(
+        self,
+        script_result: ScriptResult,
+    ) -> None:
+        """
+        Actualiza la interfaz tras finalizar la
+        ejecución de un script.
+
+        Muestra el resultado obtenido y deshabilita
+        la edición del visor de resultados.
+
+        Args:
+            script_result (ScriptResult):
+                Resultado devuelto por la ejecución
+                del script.
+        """
 
         logger.debug("Updating results view...")
 
@@ -389,46 +573,124 @@ class Workspace(QWidget):
         logger.debug("Results view updated.")
 
         logger.success(
-            f"Script executed successfully for "
+            f"Script execution finished for "
             f"'{self.connection.name}' (ID: {self.connection.id})."
         )
 
-    def _save_queries_history(self, queries: list[str]) -> None:
+        notify(
+            MessageType.SUCCESS,
+            self.tr("SQL script executed."),
+        )
+
+    def _save_queries_history(
+        self,
+        queries: list[str],
+    ) -> None:
+        """
+        Guarda el historial de consultas ejecutadas.
+
+        Actualiza el historial de la sesión de forma
+        inmediata y persiste las consultas en segundo
+        plano para evitar bloquear la interfaz.
+
+        Args:
+            queries (list[str]):
+                Consultas SQL ejecutadas.
+        """
 
         notify(
             MessageType.WARNING,
-            "Saving queries history...",
+            self.tr("Saving queries history..."),
         )
 
-        # Forzar el repintado de la UI antes de iniciar una operación
-        # síncrona que bloqueará temporalmente el hilo principal.
-        AppContext.get_app().processEvents()
+        entries: list[QueriesHistoryEntry] = []
 
-        try:
+        for query in queries:
 
-            entries: list[QueriesHistoryEntry] = []
-
-            for q in queries:
-
-                entry = QueriesHistoryEntry(
-                    connection_id=self.connection.id,
-                    query=q,
-                )
-
-                entries.append(entry)
-
-                self.results_view.add_entry_to_session_queries_history(entry=entry)
-
-            save_queries_history_batch(
-                connection=self.connection,
-                entries=entries,
+            entry = QueriesHistoryEntry(
+                connection_id=self.connection.id,
+                query=query,
             )
 
-            notify(MessageType.SUCCESS, "Queries history updated.")
+            entries.append(entry)
 
-        except:
+            self.results_view.add_entry_to_session_queries_history(entry=entry)
 
-            notify(
-                MessageType.SUCCESS,
-                "Error updating queries history.\nSee logs for details.",
-            )
+        AppContext.get_task_manager().run(
+            self._save_queries_history_backend,
+            entries,
+            on_success=self._on_save_queries_history_success,
+            on_error=self._on_save_queries_history_error,
+        )
+
+    def _save_queries_history_backend(
+        self,
+        entries: list[QueriesHistoryEntry],
+    ) -> None:
+        """
+        Persiste el historial de consultas en
+        segundo plano.
+        """
+
+        save_queries_history_batch(
+            connection=self.connection,
+            entries=entries,
+        )
+
+    def _on_save_queries_history_success(
+        self,
+        _: None,
+    ) -> None:
+        """
+        Notifica que el historial se ha
+        almacenado correctamente.
+        """
+
+        notify(
+            MessageType.SUCCESS,
+            self.tr("Queries history updated."),
+        )
+
+    def _on_save_queries_history_error(
+        self,
+        error: WorkerError,
+    ) -> None:
+        """
+        Gestiona los errores producidos al
+        guardar el historial de consultas.
+        """
+
+        logger.error(f"Error updating queries history.\n{error.traceback}")
+
+        notify(
+            MessageType.ERROR,
+            self.tr("Error updating queries history.")
+            + "\n"
+            + self.tr("See logs for details."),
+        )
+
+    # ==================
+    # === PUBLIC API ===
+    # ==================
+
+    def get_unsaved_changes_count(
+        self,
+    ) -> UnsavedChangesCount:
+        """
+        Devuelve el número de archivos abiertos que tienen
+        cambios sin guardar/procesar.
+
+        Returns:
+            UnsavedChangesCount:
+                Cambios sin guardar.
+        """
+
+        count = self.sql_editor_area.get_unsaved_changes_count()
+
+        if count <= 0:
+            return
+
+        return UnsavedChangesCount(
+            connection_name=self.connection.name,
+            unsaved_changes=count,
+        )

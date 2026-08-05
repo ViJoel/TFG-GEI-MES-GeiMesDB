@@ -93,6 +93,105 @@ def test_toolbar_has_layout(toolbar):
     assert toolbar.layout() is not None
 
 
+def test_toolbar_has_new_file_button(toolbar):
+    """
+    Verifica que el botón de nuevo archivo se crea correctamente.
+    """
+
+    assert isinstance(toolbar.new_button, ToolbarButton)
+
+
+def test_toolbar_has_open_file_button(toolbar):
+    """
+    Verifica que el botón de abrir archivo se crea correctamente.
+    """
+
+    assert isinstance(toolbar.open_button, ToolbarButton)
+
+
+def test_toolbar_has_save_file_button(toolbar):
+    """
+    Verifica que el botón de guardar archivo se crea correctamente.
+    """
+
+    assert isinstance(toolbar.save_button, ToolbarButton)
+
+
+def test_toolbar_has_rename_file_button(toolbar):
+    """
+    Verifica que el botón de renombrar archivo se crea correctamente.
+    """
+
+    assert isinstance(toolbar.rename_button, ToolbarButton)
+
+
+# =============================================================================
+# BUTTONS
+# =============================================================================
+
+
+def test_set_buttons_text(toolbar):
+    """
+    Verifica que se actualizan los textos de los botones.
+    """
+
+    toolbar._set_buttons_text()
+
+    assert toolbar.execute_selection_button.text() == toolbar.tr("Selection")
+    assert toolbar.execute_query_button.text() == toolbar.tr("Query")
+    assert toolbar.execute_script_button.text() == toolbar.tr("Script")
+    assert toolbar.undo_button.text() == toolbar.tr("Undo")
+    assert toolbar.redo_button.text() == toolbar.tr("Redo")
+    assert toolbar.new_button.text() == toolbar.tr("New")
+    assert toolbar.open_button.text() == toolbar.tr("Open")
+    assert toolbar.save_button.text() == toolbar.tr("Save")
+    assert toolbar.rename_button.text() == toolbar.tr("Rename")
+
+
+# =============================================================================
+# TOOLTIPS
+# =============================================================================
+
+
+def test_toolbar_buttons_have_tooltips(toolbar):
+    """
+    Verifica que todos los botones tienen texto de ayuda configurado.
+    """
+
+    buttons = [
+        toolbar.execute_selection_button,
+        toolbar.execute_query_button,
+        toolbar.execute_script_button,
+        toolbar.undo_button,
+        toolbar.redo_button,
+        toolbar.new_button,
+        toolbar.open_button,
+        toolbar.save_button,
+        toolbar.rename_button,
+    ]
+
+    for button in buttons:
+        assert button.toolTip() != ""
+
+
+def test_toolbar_buttons_have_expected_tooltips(toolbar):
+    """
+    Verifica que los botones tienen los textos de ayuda esperados.
+    """
+
+    assert "Execute the text selected" in toolbar.execute_selection_button.toolTip()
+    assert (
+        "Execute the query under the cursor" in toolbar.execute_query_button.toolTip()
+    )
+    assert "Execute the full script" in toolbar.execute_script_button.toolTip()
+    assert "Undo action on the text" in toolbar.undo_button.toolTip()
+    assert "Redo action on the text" in toolbar.redo_button.toolTip()
+    assert "Create a new file" in toolbar.new_button.toolTip()
+    assert "Open a file from your computer" in toolbar.open_button.toolTip()
+    assert "Save the file changes" in toolbar.save_button.toolTip()
+    assert "Rename the file" in toolbar.rename_button.toolTip()
+
+
 # =============================================================================
 # SIGNALS
 # =============================================================================
@@ -156,3 +255,73 @@ def test_redo_requested_signal(toolbar, qtbot):
             toolbar.redo_button,
             Qt.MouseButton.LeftButton,
         )
+
+
+def test_new_file_requested_signal(toolbar, qtbot):
+    """
+    Verifica que pulsar New file emite la señal correspondiente.
+    """
+
+    with qtbot.waitSignal(toolbar.new_file_requested):
+        QTest.mouseClick(
+            toolbar.new_button,
+            Qt.MouseButton.LeftButton,
+        )
+
+
+def test_open_file_requested_signal(toolbar, qtbot):
+    """
+    Verifica que pulsar Open file emite la señal correspondiente.
+    """
+
+    with qtbot.waitSignal(toolbar.open_file_requested):
+        QTest.mouseClick(
+            toolbar.open_button,
+            Qt.MouseButton.LeftButton,
+        )
+
+
+def test_save_file_requested_signal(toolbar, qtbot):
+    """
+    Verifica que pulsar Save file emite la señal correspondiente.
+    """
+
+    with qtbot.waitSignal(toolbar.save_file_requested):
+        QTest.mouseClick(
+            toolbar.save_button,
+            Qt.MouseButton.LeftButton,
+        )
+
+
+def test_rename_file_requested_signal(toolbar, qtbot):
+    """
+    Verifica que pulsar Rename file emite la señal correspondiente.
+    """
+
+    with qtbot.waitSignal(toolbar.rename_file_requested):
+        QTest.mouseClick(
+            toolbar.rename_button,
+            Qt.MouseButton.LeftButton,
+        )
+
+
+# =============================================================================
+# TRANSLATIONS
+# =============================================================================
+
+
+def test_retranslate_ui(toolbar):
+    """
+    Verifica que se actualizan todos los textos traducibles.
+    """
+
+    toolbar._retranslate_ui()
+
+    assert toolbar.execute_selection_button.text() == toolbar.tr("Selection")
+    assert toolbar.execute_query_button.text() == toolbar.tr("Query")
+    assert toolbar.execute_script_button.text() == toolbar.tr("Script")
+
+    assert "Execute the text selected" in toolbar.execute_selection_button.toolTip()
+    assert (
+        "Execute the query under the cursor" in toolbar.execute_query_button.toolTip()
+    )

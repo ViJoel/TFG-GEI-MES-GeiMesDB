@@ -4,6 +4,7 @@ from modules.sql.syntax.ansi.functions import SQL_FUNCTIONS
 from modules.sql.syntax.ansi.keywords import SQL_KEYWORDS
 from modules.sql.syntax.ansi.literals import (
     SQL_BOOLEAN_VALUES,
+    SQL_CONSTANTS,
     SQL_NULL_VALUES,
 )
 from modules.sql.syntax.ansi.symbols import SQL_SYMBOLS
@@ -92,6 +93,11 @@ SQL_HIGHLIGHT_RULES = {
             r"--[^\n]*",
         ],
         "protected": True,
+    },
+    "constants": {
+        "patterns": [],
+        "patterns_builder": build_word_pattern,
+        "values": SQL_CONSTANTS,
     },
     "functions": {
         "patterns": [],

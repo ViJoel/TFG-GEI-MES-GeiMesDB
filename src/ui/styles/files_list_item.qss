@@ -1,0 +1,33 @@
+QWidget#files_list_item {
+    background-color: $files_list_item_background_color;
+    border-radius: 4px;
+}
+
+QWidget#files_list_item:hover {
+    background-color: $files_list_item_background_color_hover;
+    border-radius: 4px;
+}
+
+QWidget#files_list_item[selected="true"] {
+    background-color: $files_list_item_background_color_selected;
+    border-radius: 4px;
+}
+
+QLabel#files_list_item_label {
+    background-color: transparent;
+    color: $files_list_item_color;
+}
+
+QPushButton#files_list_item_close_button {
+    background-color: transparent;
+    border: none;
+    border-radius: 4px;
+}
+
+QPushButton#files_list_item_close_button:hover {
+    background-color: $files_list_item_close_button_background_color_hover;
+}
+
+QPushButton#files_list_item_close_button:pressed {
+    background-color: $files_list_item_close_button_background_color_pressed;
+}

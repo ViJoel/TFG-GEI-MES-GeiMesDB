@@ -1,13 +1,15 @@
-from unittest.mock import (
-    MagicMock,
-    patch,
-)
+from unittest.mock import MagicMock
 
 import pytest
+from PySide6.QtWidgets import QWidget
 
 from entities.connection import Connection
 from entities.message_type import MessageType
+from entities.navigation_tree_action import NavigationTreeAction
+from entities.queries_history_entry import QueriesHistoryEntry
 from entities.sql_scope import SqlScope
+from entities.unsaved_changes_count import UnsavedChangesCount
+from ui.app.worker_error import WorkerError
 from ui.widgets.workspace.workspace import Workspace
 
 # =============================================================================
@@ -16,73 +18,157 @@ from ui.widgets.workspace.workspace import Workspace
 
 
 @pytest.fixture(autouse=True)
-def patch_dependencies():
-    with patch("ui.widgets.workspace.results_view.results_view.notify"), patch(
-        "ui.widgets.workspace.results_view.results_view.ConfirmationDialog"
-    ), patch(
-        "ui.widgets.workspace.results_view.connection_queries_history.notify"
-    ), patch(
+def patch_global_dependencies(mocker):
+    """
+    Bloquea dependencias globales ajenas al componente.
+    """
+
+    mocker.patch(
+        "ui.widgets.workspace.workspace.notify",
+    )
+
+    mocker.patch(
+        "ui.widgets.workspace.results_view.results_view.notify",
+    )
+
+    mocker.patch(
+        "ui.widgets.workspace.results_view.results_view.ConfirmationDialog",
+    )
+
+    mocker.patch(
+        "ui.widgets.workspace.results_view.connection_queries_history.notify",
+    )
+
+    mocker.patch(
         "ui.widgets.workspace.results_view.connection_queries_history.get_queries_history",
         return_value=[],
-    ), patch(
-        "ui.widgets.workspace.results_view.connection_queries_history.AppContext.get_task_manager"
-    ), patch(
-        "ui.widgets.workspace.results_view.connection_queries_history.AppContext.get_app"
-    ), patch(
-        "ui.widgets.workspace.workspace.notify"
-    ):
-        yield
+    )
+
+    mocker.patch(
+        "ui.widgets.workspace.results_view.connection_queries_history.AppContext.get_task_manager",
+    )
+
+    mocker.patch(
+        "ui.widgets.workspace.results_view.connection_queries_history.AppContext.get_app",
+    )
+
+    mocker.patch(
+        "ui.widgets.workspace.navigation_tree.navigation_tree.notify",
+    )
+
+    mocker.patch(
+        "ui.widgets.workspace.navigation_tree.navigation_tree.AppContext.get_task_manager",
+        return_value=mocker.Mock(),
+    )
+
+
+@pytest.fixture(autouse=True)
+def patch_navigation_tree(mocker):
+
+    tree = QWidget()
+
+    tree.refresh = mocker.Mock()
+    tree.action_requested = mocker.Mock()
+    tree.tree_reloaded = mocker.Mock()
+
+    mocker.patch(
+        "ui.widgets.workspace.workspace.NavigationTree",
+        return_value=tree,
+    )
+
+    return tree
 
 
 @pytest.fixture
-def mock_get_app():
-    with patch("ui.widgets.workspace.workspace.AppContext.get_app") as mock:
-        yield mock
+def task_manager(mocker):
+    """
+    Mock del TaskManager global.
+    """
+
+    manager = mocker.Mock()
+
+    mocker.patch(
+        "ui.widgets.workspace.workspace.AppContext.get_task_manager",
+        return_value=manager,
+    )
+
+    return manager
 
 
 @pytest.fixture
-def mock_save():
-    with patch("ui.widgets.workspace.workspace.save_queries_history_batch") as mock:
-        yield mock
+def notify_mock(mocker):
+    """
+    Mock de la función notify.
+    """
+
+    return mocker.patch(
+        "ui.widgets.workspace.workspace.notify",
+    )
 
 
 @pytest.fixture
-def mock_notify():
-    with patch("ui.widgets.workspace.workspace.notify") as mock:
-        yield mock
+def execute_query_mock(mocker):
+    """
+    Mock de execute_query().
+    """
+
+    return mocker.patch(
+        "ui.widgets.workspace.workspace.execute_query",
+    )
 
 
 @pytest.fixture
-def mock_execute_query():
-    with patch("ui.widgets.workspace.workspace.execute_query") as mock:
-        yield mock
+def execute_script_mock(mocker):
+    """
+    Mock de execute_script().
+    """
+
+    return mocker.patch(
+        "ui.widgets.workspace.workspace.execute_script",
+    )
 
 
 @pytest.fixture
-def mock_execute_script():
-    with patch("ui.widgets.workspace.workspace.execute_script") as mock:
-        yield mock
+def execute_updates_mock(mocker):
+    """
+    Mock de execute_updates().
+    """
+
+    return mocker.patch(
+        "ui.widgets.workspace.workspace.execute_updates",
+    )
 
 
 @pytest.fixture
-def mock_execute_updates():
-    with patch("ui.widgets.workspace.workspace.execute_updates") as mock:
-        yield mock
+def save_history_mock(mocker):
+    """
+    Mock de save_queries_history_batch().
+    """
+
+    return mocker.patch(
+        "ui.widgets.workspace.workspace.save_queries_history_batch",
+    )
 
 
 @pytest.fixture
-def mock_is_editable_query():
-    with patch("ui.widgets.workspace.workspace.is_editable_query") as mock:
-        yield mock
+def editable_query_mock(mocker):
+    """
+    Mock de is_editable_query().
+    """
+
+    return mocker.patch(
+        "ui.widgets.workspace.workspace.is_editable_query",
+    )
 
 
 @pytest.fixture
 def connection():
     """
-    Crea una conexión simulada para los tests.
+    Conexión simulada.
     """
 
     connection = MagicMock(spec=Connection)
+
     connection.id = 1
     connection.name = "Test Connection"
 
@@ -95,15 +181,24 @@ def workspace(
     connection,
 ):
     """
-    Crea una instancia de Workspace y la registra
-    en qtbot asegurando que los parches de inicialización
-    estén activos.
+    Workspace registrado en qtbot.
     """
 
     widget = Workspace(connection)
+
     qtbot.addWidget(widget)
 
     return widget
+
+
+@pytest.fixture
+def app_mock(mocker):
+    app = mocker.Mock()
+    mocker.patch(
+        "ui.widgets.workspace.workspace.AppContext.get_app",
+        return_value=app,
+    )
+    return app
 
 
 # =============================================================================
@@ -111,147 +206,102 @@ def workspace(
 # =============================================================================
 
 
-def test_selected_text_executes_query(
+@pytest.mark.parametrize(
+    (
+        "scope",
+        "queries",
+        "execute_query_calls",
+        "execute_script_calls",
+    ),
+    [
+        (
+            SqlScope.SELECTED_TEXT,
+            ["SELECT * FROM users"],
+            1,
+            0,
+        ),
+        (
+            SqlScope.SELECTED_TEXT,
+            [
+                "CREATE TABLE test(id INTEGER);",
+                "SELECT * FROM test;",
+            ],
+            0,
+            1,
+        ),
+        (
+            SqlScope.ACTUAL_QUERY,
+            ["SELECT * FROM users"],
+            1,
+            0,
+        ),
+        (
+            SqlScope.FULL_SCRIPT,
+            [
+                "CREATE TABLE test(id INTEGER);",
+                "SELECT * FROM test;",
+            ],
+            0,
+            1,
+        ),
+    ],
+)
+def test_on_execute_requested_dispatches_execution(
     workspace,
+    notify_mock,
+    mocker,
+    scope,
+    queries,
+    execute_query_calls,
+    execute_script_calls,
 ):
     """
-    Verifica que una solicitud de ejecución sobre
-    el texto seleccionado ejecuta una consulta.
+    Verifica que cada ámbito de ejecución delega
+    en el método correspondiente.
     """
 
-    workspace._execute_query = MagicMock()
-    workspace._execute_script = MagicMock()
-    workspace.results_view.set_action_buttons_state = MagicMock()
+    execute_query = mocker.patch.object(
+        workspace,
+        "_execute_query",
+    )
 
-    queries = ["SELECT * FROM users"]
+    execute_script = mocker.patch.object(
+        workspace,
+        "_execute_script",
+    )
+
+    save_history = mocker.patch.object(
+        workspace,
+        "_save_queries_history",
+    )
+
+    set_buttons = mocker.patch.object(
+        workspace.results_view,
+        "set_action_buttons_state",
+    )
 
     workspace._on_execute_requested(
         queries,
-        SqlScope.SELECTED_TEXT,
+        scope,
     )
 
-    workspace._execute_query.assert_called_once_with(queries)
-    workspace._execute_script.assert_not_called()
+    assert execute_query.call_count == execute_query_calls
+    assert execute_script.call_count == execute_script_calls
 
-    workspace.results_view.set_action_buttons_state.assert_called_once_with(
-        False,
+    if execute_query_calls:
+        execute_query.assert_called_once_with(queries)
+
+    if execute_script_calls:
+        execute_script.assert_called_once_with(queries)
+
+    save_history.assert_called_once_with(queries)
+
+    set_buttons.assert_called_once_with(False)
+
+    notify_mock.assert_called_once_with(
+        MessageType.WARNING,
+        workspace.tr("Executing sql..."),
     )
-
-
-def test_full_script_executes_script(
-    workspace,
-):
-    """
-    Verifica que una solicitud de ejecución del
-    script completo ejecuta un script SQL.
-    """
-
-    workspace._execute_query = MagicMock()
-    workspace._execute_script = MagicMock()
-    workspace.results_view.set_action_buttons_state = MagicMock()
-
-    queries = [
-        "CREATE TABLE test(id INTEGER);",
-        "SELECT * FROM test;",
-    ]
-
-    workspace._on_execute_requested(
-        queries,
-        SqlScope.FULL_SCRIPT,
-    )
-
-    workspace._execute_script.assert_called_once_with(queries)
-    workspace._execute_query.assert_not_called()
-
-    workspace.results_view.set_action_buttons_state.assert_called_once_with(
-        False,
-    )
-
-
-def test_execute_requested_adds_query_to_session_history(
-    workspace,
-):
-    """
-    Verifica que cada consulta ejecutada se añade
-    al historial de consultas de la sesión.
-    """
-
-    workspace._execute_query = MagicMock()
-    workspace.results_view.add_entry_to_session_queries_history = MagicMock()
-    workspace.results_view.set_action_buttons_state = MagicMock()
-
-    queries = ["SELECT * FROM users"]
-
-    workspace._on_execute_requested(
-        queries,
-        SqlScope.SELECTED_TEXT,
-    )
-
-    workspace.results_view.add_entry_to_session_queries_history.assert_called_once()
-
-    call = workspace.results_view.add_entry_to_session_queries_history.call_args
-    entry = call.kwargs["entry"]
-
-    assert entry.connection_id == workspace.connection.id
-    assert entry.query == "SELECT * FROM users"
-
-
-def test_execute_requested_adds_all_script_queries_to_session_history(
-    workspace,
-):
-    """
-    Verifica que cada sentencia de un script se
-    registra individualmente en el historial.
-    """
-
-    workspace._execute_script = MagicMock()
-    workspace.results_view.add_entry_to_session_queries_history = MagicMock()
-    workspace.results_view.set_action_buttons_state = MagicMock()
-
-    queries = [
-        "CREATE TABLE test(id INTEGER);",
-        "SELECT * FROM test;",
-    ]
-
-    workspace._on_execute_requested(
-        queries,
-        SqlScope.FULL_SCRIPT,
-    )
-
-    assert workspace.results_view.add_entry_to_session_queries_history.call_count == 2
-
-    calls = workspace.results_view.add_entry_to_session_queries_history.call_args_list
-
-    assert calls[0].kwargs["entry"].query == queries[0]
-    assert calls[1].kwargs["entry"].query == queries[1]
-
-
-def test_execute_requested_processes_events_and_saves_history(
-    mock_get_app,
-    workspace,
-):
-    """
-    Debe repintar la UI y guardar el historial
-    antes de finalizar la ejecución.
-    """
-
-    app = MagicMock()
-    mock_get_app.return_value = app
-
-    workspace._execute_query = MagicMock()
-    workspace._save_queries_history = MagicMock()
-    workspace.results_view.set_action_buttons_state = MagicMock()
-
-    queries = ["SELECT * FROM users"]
-
-    workspace._on_execute_requested(
-        queries,
-        SqlScope.SELECTED_TEXT,
-    )
-
-    app.processEvents.assert_called_once()
-
-    workspace._save_queries_history.assert_called_once_with(queries)
 
 
 # =============================================================================
@@ -259,72 +309,170 @@ def test_execute_requested_processes_events_and_saves_history(
 # =============================================================================
 
 
-def test_execute_single_query(
-    mock_execute_query,
-    mock_is_editable_query,
+def test_execute_query_submits_task(
     workspace,
+    task_manager,
 ):
     """
-    Verifica que una única consulta se ejecuta y
-    actualiza correctamente la vista de resultados.
+    Verifica que una consulta válida se delega al
+    TaskManager para su ejecución en segundo plano.
     """
-
-    result = MagicMock()
-
-    mock_execute_query.return_value = result
-    mock_is_editable_query.return_value = True
-
-    workspace.results_view.show_result = MagicMock()
-    workspace.results_view.set_editable = MagicMock()
 
     query = "SELECT * FROM users"
 
     workspace._execute_query([query])
 
-    assert workspace.current_query == query
+    task_manager.run.assert_called_once_with(
+        workspace._execute_query_backend,
+        query,
+        on_success=workspace._on_query_finished,
+        on_error=workspace._on_execution_error,
+    )
 
-    mock_execute_query.assert_called_once_with(
-        connection_id=1,
+
+def test_execute_query_aborts_when_multiple_queries_are_received(
+    workspace,
+    notify_mock,
+    task_manager,
+    mocker,
+):
+    """
+    Verifica que la ejecución se cancela cuando se
+    reciben varias sentencias SQL.
+    """
+
+    write_message = mocker.patch.object(
+        workspace.results_view,
+        "write_message",
+    )
+
+    show_console = mocker.patch.object(
+        workspace.results_view,
+        "show_console",
+    )
+
+    workspace._execute_query(
+        [
+            "SELECT * FROM users;",
+            "SELECT * FROM products;",
+        ]
+    )
+
+    task_manager.run.assert_not_called()
+
+    write_message.assert_called_once()
+
+    show_console.assert_called_once()
+
+    notify_mock.assert_called_once_with(
+        MessageType.WARNING,
+        workspace.tr("Execution aborted."),
+    )
+
+
+def test_execute_query_backend(
+    workspace,
+    execute_query_mock,
+):
+    """
+    Verifica que el backend ejecuta la consulta y
+    devuelve una entidad QueryExecution.
+    """
+
+    result = object()
+
+    execute_query_mock.return_value = result
+
+    query = "SELECT * FROM users"
+
+    execution = workspace._execute_query_backend(query)
+
+    execute_query_mock.assert_called_once_with(
+        connection_id=workspace.connection.id,
         query=query,
     )
 
-    mock_is_editable_query.assert_called_once_with(query)
+    assert execution.query == query
+    assert execution.result is result
 
-    workspace.results_view.show_result.assert_called_once_with(
+
+def test_on_query_finished_updates_results_view(
+    workspace,
+    editable_query_mock,
+    mocker,
+):
+    """
+    Verifica que la finalización de una consulta
+    actualiza correctamente la interfaz.
+    """
+
+    editable_query_mock.return_value = True
+
+    show_result = mocker.patch.object(
+        workspace.results_view,
+        "show_result",
+    )
+
+    set_editable = mocker.patch.object(
+        workspace.results_view,
+        "set_editable",
+    )
+
+    result = object()
+
+    from entities.query_execution import QueryExecution
+
+    execution = QueryExecution(
+        query="SELECT * FROM users",
+        result=result,
+    )
+
+    workspace._on_query_finished(execution)
+
+    assert workspace.current_query == execution.query
+
+    show_result.assert_called_once_with(
         result=result,
         script_result=None,
         is_script=False,
     )
 
-    workspace.results_view.set_editable.assert_called_once_with(True)
+    editable_query_mock.assert_called_once_with(
+        execution.query,
+    )
+
+    set_editable.assert_called_once_with(True)
 
 
-def test_execute_multiple_queries_aborts_execution(
-    mock_execute_query,
-    mock_notify,
+def test_on_execution_error(
     workspace,
+    notify_mock,
+    mocker,
 ):
     """
-    Verifica que la ejecución se cancela cuando se
-    intenta ejecutar más de una consulta como una
-    única query.
+    Verifica que un error producido por el worker
+    se notifica correctamente.
     """
 
-    workspace.results_view.write_message = MagicMock()
-    workspace.results_view.show_console = MagicMock()
+    logger = mocker.patch(
+        "ui.widgets.workspace.workspace.logger",
+    )
 
-    queries = [
-        "SELECT * FROM users;",
-        "SELECT * FROM products;",
-    ]
+    from ui.app.worker_error import WorkerError
 
-    workspace._execute_query(queries)
+    error = WorkerError(
+        exception=RuntimeError("Boom"),
+        traceback="Traceback...",
+    )
 
-    mock_execute_query.assert_not_called()
+    workspace._on_execution_error(error)
 
-    workspace.results_view.write_message.assert_called_once()
-    workspace.results_view.show_console.assert_called_once()
-    mock_notify.assert_called_once()
+    logger.error.assert_called_once()
+
+    notify_mock.assert_called_once_with(
+        message_type=MessageType.ERROR,
+        message=workspace.tr("Error in execution."),
+    )
 
 
 # =============================================================================
@@ -332,41 +480,202 @@ def test_execute_multiple_queries_aborts_execution(
 # =============================================================================
 
 
-def test_execute_script(
-    mock_execute_script,
+def test_execute_script_submits_task(
     workspace,
+    task_manager,
 ):
     """
-    Verifica que un script SQL se ejecuta y que
-    los resultados se muestran correctamente.
+    Verifica que un script SQL se delega al
+    TaskManager para su ejecución en segundo plano.
     """
 
-    script_result = MagicMock()
-
-    mock_execute_script.return_value = script_result
-
-    workspace.results_view.show_result = MagicMock()
-    workspace.results_view.set_editable = MagicMock()
-
     queries = [
-        "CREATE TABLE users(id INTEGER);",
-        "INSERT INTO users VALUES (1);",
+        "CREATE TABLE test(id INTEGER);",
+        "INSERT INTO test VALUES (1);",
     ]
 
     workspace._execute_script(queries)
 
-    mock_execute_script.assert_called_once_with(
-        connection_id=1,
+    task_manager.run.assert_called_once_with(
+        workspace._execute_script_backend,
+        queries,
+        on_success=workspace._on_script_finished,
+        on_error=workspace._on_execution_error,
+    )
+
+
+def test_execute_script_backend(
+    workspace,
+    execute_script_mock,
+):
+    """
+    Verifica que el backend ejecuta el script y
+    devuelve el resultado obtenido.
+    """
+
+    script_result = object()
+
+    execute_script_mock.return_value = script_result
+
+    queries = [
+        "CREATE TABLE test(id INTEGER);",
+        "INSERT INTO test VALUES (1);",
+    ]
+
+    result = workspace._execute_script_backend(queries)
+
+    execute_script_mock.assert_called_once_with(
+        connection_id=workspace.connection.id,
         queries=queries,
     )
 
-    workspace.results_view.show_result.assert_called_once_with(
+    assert result is script_result
+
+
+def test_on_script_finished_updates_results_view(
+    workspace,
+    mocker,
+):
+    """
+    Verifica que la finalización de un script
+    actualiza correctamente la interfaz.
+    """
+
+    show_result = mocker.patch.object(
+        workspace.results_view,
+        "show_result",
+    )
+
+    set_editable = mocker.patch.object(
+        workspace.results_view,
+        "set_editable",
+    )
+
+    script_result = object()
+
+    workspace._on_script_finished(script_result)
+
+    show_result.assert_called_once_with(
         result=None,
         script_result=script_result,
         is_script=True,
     )
 
-    workspace.results_view.set_editable.assert_called_once_with(False)
+    set_editable.assert_called_once_with(False)
+
+
+# =============================================================================
+# SAVE QUERIES HISTORY
+# =============================================================================
+
+
+def test_save_queries_history_submits_task(
+    workspace,
+    task_manager,
+    mocker,
+):
+    """
+    Verifica que el guardado del historial se
+    delega al TaskManager.
+    """
+
+    add_entry = mocker.patch.object(
+        workspace.results_view,
+        "add_entry_to_session_queries_history",
+    )
+
+    queries = [
+        "SELECT 1",
+        "SELECT 2",
+    ]
+
+    workspace._save_queries_history(queries)
+
+    assert add_entry.call_count == 2
+
+    task_manager.run.assert_called_once()
+
+    args, kwargs = task_manager.run.call_args
+
+    assert args[0] == workspace._save_queries_history_backend
+
+    entries = args[1]
+
+    assert len(entries) == 2
+    assert entries[0].query == "SELECT 1"
+    assert entries[1].query == "SELECT 2"
+
+    assert kwargs["on_success"] == workspace._on_save_queries_history_success
+    assert kwargs["on_error"] == workspace._on_save_queries_history_error
+
+
+def test_save_queries_history_backend(
+    workspace,
+    save_history_mock,
+):
+    """
+    Verifica que el backend persiste el historial
+    recibido.
+    """
+
+    entries = [
+        QueriesHistoryEntry(
+            connection_id=1,
+            query="SELECT 1",
+        ),
+        QueriesHistoryEntry(
+            connection_id=1,
+            query="SELECT 2",
+        ),
+    ]
+
+    workspace._save_queries_history_backend(entries)
+
+    save_history_mock.assert_called_once_with(
+        connection=workspace.connection,
+        entries=entries,
+    )
+
+
+def test_on_save_queries_history_success(
+    notify_mock,
+    workspace,
+):
+    """
+    Verifica que el usuario es notificado cuando
+    el historial se guarda correctamente.
+    """
+
+    workspace._on_save_queries_history_success(None)
+
+    notify_mock.assert_called_once_with(
+        MessageType.SUCCESS,
+        workspace.tr("Queries history updated."),
+    )
+
+
+def test_on_save_queries_history_error(
+    notify_mock,
+    workspace,
+):
+    """
+    Verifica que el usuario es notificado cuando
+    falla el guardado del historial.
+    """
+
+    error = WorkerError(
+        exception=Exception("boom"),
+        traceback="traceback",
+    )
+
+    workspace._on_save_queries_history_error(error)
+
+    notify_mock.assert_called_once_with(
+        MessageType.ERROR,
+        workspace.tr("Error updating queries history.")
+        + "\n"
+        + workspace.tr("See logs for details."),
+    )
 
 
 # =============================================================================
@@ -375,15 +684,17 @@ def test_execute_script(
 
 
 def test_save_requested_refreshes_results_when_updates_succeed(
-    mock_execute_updates,
-    mock_execute_query,
-    mock_notify,
     workspace,
+    execute_updates_mock,
+    execute_query_mock,
+    notify_mock,
+    app_mock,
+    mocker,
 ):
     """
-    Verifica que, si las operaciones UPDATE se
-    ejecutan correctamente, se vuelve a ejecutar
-    la consulta original y se actualiza la vista.
+    Verifica que, cuando los UPDATE se ejecutan
+    correctamente, se refrescan los resultados y
+    se notifica el éxito.
     """
 
     operations = [MagicMock()]
@@ -400,23 +711,23 @@ def test_save_requested_refreshes_results_when_updates_succeed(
 
     query_result = MagicMock()
 
-    mock_execute_updates.return_value = script_result
-    mock_execute_query.return_value = query_result
+    execute_updates_mock.return_value = script_result
+    execute_query_mock.return_value = query_result
 
-    workspace.results_view.show_result = MagicMock()
-    workspace.results_view.set_tab_buttons_state = MagicMock()
-    workspace.results_view.set_action_buttons_state = MagicMock()
+    mocker.patch.object(workspace.results_view, "show_result")
+    mocker.patch.object(workspace.results_view, "set_tab_buttons_state")
+    mocker.patch.object(workspace.results_view, "set_action_buttons_state")
 
     workspace._on_save_requested()
 
-    workspace.results_view.table.model.generate_update_operations.assert_called_once()
+    app_mock.processEvents.assert_called_once()
 
-    mock_execute_updates.assert_called_once_with(
+    execute_updates_mock.assert_called_once_with(
         connection_id=1,
         operations=operations,
     )
 
-    mock_execute_query.assert_called_once_with(
+    execute_query_mock.assert_called_once_with(
         connection_id=1,
         query="SELECT * FROM users",
     )
@@ -436,26 +747,31 @@ def test_save_requested_refreshes_results_when_updates_succeed(
     )
 
     workspace.results_view.set_action_buttons_state.assert_called_once_with(False)
-
     workspace.results_view.set_tab_buttons_state.assert_called_once_with(True)
 
-    mock_notify.assert_called_once_with(
-        MessageType.SUCCESS,
-        "Changes saved",
-    )
+    assert notify_mock.call_args_list == [
+        mocker.call(
+            MessageType.WARNING,
+            workspace.tr("Saving changes..."),
+        ),
+        mocker.call(
+            MessageType.SUCCESS,
+            workspace.tr("Changes saved."),
+        ),
+    ]
 
 
 def test_save_requested_does_not_refresh_results_when_updates_are_rolled_back(
-    mock_execute_updates,
-    mock_execute_query,
-    mock_notify,
     workspace,
+    execute_updates_mock,
+    execute_query_mock,
+    notify_mock,
+    app_mock,
+    mocker,
 ):
     """
-    Verifica que, si las operaciones UPDATE
-    provocan un rollback, no se vuelve a ejecutar
-    la consulta original y se conserva el estado
-    actual de la tabla.
+    Verifica que, si la transacción hace rollback,
+    no se vuelve a ejecutar la consulta original.
     """
 
     operations = [MagicMock()]
@@ -470,22 +786,22 @@ def test_save_requested_does_not_refresh_results_when_updates_are_rolled_back(
     script_result = MagicMock()
     script_result.rolled_back = True
 
-    mock_execute_updates.return_value = script_result
+    execute_updates_mock.return_value = script_result
 
-    workspace.results_view.show_result = MagicMock()
-    workspace.results_view.set_tab_buttons_state = MagicMock()
-    workspace.results_view.set_action_buttons_state = MagicMock()
+    mocker.patch.object(workspace.results_view, "show_result")
+    mocker.patch.object(workspace.results_view, "set_tab_buttons_state")
+    mocker.patch.object(workspace.results_view, "set_action_buttons_state")
 
     workspace._on_save_requested()
 
-    workspace.results_view.table.model.generate_update_operations.assert_called_once()
+    app_mock.processEvents.assert_called_once()
 
-    mock_execute_updates.assert_called_once_with(
+    execute_updates_mock.assert_called_once_with(
         connection_id=1,
         operations=operations,
     )
 
-    mock_execute_query.assert_not_called()
+    execute_query_mock.assert_not_called()
 
     workspace.results_view.show_result.assert_called_once_with(
         result=None,
@@ -494,73 +810,185 @@ def test_save_requested_does_not_refresh_results_when_updates_are_rolled_back(
     )
 
     workspace.results_view.set_action_buttons_state.assert_not_called()
-
     workspace.results_view.set_tab_buttons_state.assert_called_once_with(True)
 
-    mock_notify.assert_called_once_with(
-        MessageType.ERROR,
-        "Saving changes failed.",
-    )
+    assert notify_mock.call_args_list == [
+        mocker.call(
+            MessageType.WARNING,
+            workspace.tr("Saving changes..."),
+        ),
+        mocker.call(
+            MessageType.ERROR,
+            workspace.tr("Saving changes failed."),
+        ),
+    ]
 
 
 # =============================================================================
-# ON QUERY SELECTED FROM SESSION QUERIES HISTORY
+# PUBLIC API
 # =============================================================================
 
 
-def test_query_selected_from_session_history_updates_editor(
+@pytest.mark.parametrize(
+    (
+        "count",
+        "expected",
+    ),
+    [
+        (0, None),
+        (-1, None),
+        (3, UnsavedChangesCount),
+    ],
+)
+def test_get_unsaved_changes_count(
     workspace,
+    mocker,
+    count,
+    expected,
 ):
     """
-    Verifica que seleccionar una consulta del
-    historial la inserta en el editor SQL.
+    Devuelve None cuando no existen cambios pendientes y
+    una entidad UnsavedChangesCount cuando sí los hay.
     """
 
-    workspace.sql_editor.set_query_text = MagicMock()
+    mocker.patch.object(
+        workspace.sql_editor_area,
+        "get_unsaved_changes_count",
+        return_value=count,
+    )
+
+    result = workspace.get_unsaved_changes_count()
+
+    if expected is None:
+        assert result is None
+
+    else:
+        assert isinstance(result, UnsavedChangesCount)
+        assert result.connection_name == workspace.connection.name
+        assert result.unsaved_changes == count
+
+
+# =============================================================================
+# SESSION HISTORY
+# =============================================================================
+
+
+def test_query_selected_from_history_sets_editor_text(
+    workspace,
+    mocker,
+):
+    """
+    Verifica que seleccionar una consulta del historial
+    la copia al editor.
+    """
+
+    set_query_text = mocker.patch.object(
+        workspace.sql_editor_area,
+        "set_query_text",
+    )
 
     query = "SELECT * FROM users"
 
-    workspace._on_query_selected_from_session_queries_history(query)
-
-    workspace.sql_editor.set_query_text.assert_called_once_with(
+    workspace._on_query_selected_from_session_queries_history(
         query,
     )
 
+    set_query_text.assert_called_once_with(query)
+
 
 # =============================================================================
-# SAVE QUERIES HISTORY
+# NAVIGATION TREE
 # =============================================================================
 
 
-def test_save_queries_history(
-    mock_get_app,
-    mock_save,
+def test_navigation_tree_insert_sql_sets_editor_text(
     workspace,
+    mocker,
 ):
     """
-    Debe crear las entradas y persistirlas.
+    Verifica que INSERT_SQL_IN_EDITOR copia el SQL
+    al editor.
     """
 
-    app = MagicMock()
-    mock_get_app.return_value = app
+    set_query_text = mocker.patch.object(
+        workspace.sql_editor_area,
+        "set_query_text",
+    )
 
-    workspace.results_view.add_entry_to_session_queries_history = MagicMock()
+    sql = "SELECT * FROM users"
 
-    queries = [
-        "SELECT 1",
-        "SELECT 2",
-    ]
+    workspace._on_navigation_tree_action(
+        NavigationTreeAction.INSERT_SQL_IN_EDITOR,
+        sql,
+    )
 
-    workspace._save_queries_history(queries)
+    set_query_text.assert_called_once_with(sql)
 
-    app.processEvents.assert_called_once()
 
-    assert workspace.results_view.add_entry_to_session_queries_history.call_count == 2
+def test_navigation_tree_execute_sql_executes_query(
+    workspace,
+    mocker,
+):
+    """
+    Verifica que EXECUTE_SQL delega la ejecución
+    al flujo habitual de consultas.
+    """
 
-    mock_save.assert_called_once()
+    execute_query = mocker.patch.object(
+        workspace,
+        "_execute_query",
+    )
 
-    entries = mock_save.call_args.kwargs["entries"]
+    sql = "SELECT * FROM users"
 
-    assert len(entries) == 2
-    assert entries[0].query == "SELECT 1"
-    assert entries[1].query == "SELECT 2"
+    workspace._on_navigation_tree_action(
+        NavigationTreeAction.EXECUTE_SQL,
+        sql,
+    )
+
+    execute_query.assert_called_once_with([sql])
+
+
+# =============================================================================
+# SIGNALS
+# =============================================================================
+
+
+def test_connect_signals(
+    workspace,
+    mocker,
+):
+    """
+    Verifica que todas las señales se conectan
+    a sus handlers.
+    """
+
+    workspace = Workspace(workspace.connection)
+
+    workspace.sql_editor_area.execute_requested = mocker.Mock()
+    workspace.results_view.save_requested = mocker.Mock()
+    workspace.results_view.query_selected_from_session_queries_history = mocker.Mock()
+    workspace.navigation_tree.action_requested = mocker.Mock()
+    workspace.navigation_tree.tree_reloaded = mocker.Mock()
+
+    workspace._connect_signals()
+
+    workspace.sql_editor_area.execute_requested.connect.assert_called_once_with(
+        workspace._on_execute_requested,
+    )
+
+    workspace.results_view.save_requested.connect.assert_called_once_with(
+        workspace._on_save_requested,
+    )
+
+    workspace.results_view.query_selected_from_session_queries_history.connect.assert_called_once_with(
+        workspace._on_query_selected_from_session_queries_history,
+    )
+
+    workspace.navigation_tree.action_requested.connect.assert_called_once_with(
+        workspace._on_navigation_tree_action,
+    )
+
+    workspace.navigation_tree.tree_reloaded.connect.assert_called_once_with(
+        workspace.sql_editor_area.force_update_editors_completers,
+    )

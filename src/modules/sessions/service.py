@@ -1,14 +1,19 @@
+from typing import Any
+
 from entities.connection import Connection
+from entities.driver import Driver
 from entities.query_result import QueryResult
 from entities.script_result import ScriptResult
 from entities.session import Session
 from entities.update_operation import UpdateOperation
+from modules.sessions.db_tree import get_db_tree as gdt
 from modules.sessions.manager import close_all_sessions as cas
 from modules.sessions.manager import close_session as cs
 from modules.sessions.manager import execute_query as eq
 from modules.sessions.manager import execute_script as es
 from modules.sessions.manager import execute_updates as eu
 from modules.sessions.manager import get_session as gs
+from modules.sessions.manager import get_session_driver as gsd
 from modules.sessions.manager import has_session as hs
 from modules.sessions.manager import is_editable_query as ieq
 from modules.sessions.manager import open_session as os
@@ -63,6 +68,25 @@ def get_session(
     """
 
     return gs(connection_id)
+
+
+def get_session_driver(
+    connection_id: str,
+) -> Driver | None:
+    """
+    Recupera una sesión activa registrada.
+
+    Args:
+        connection_id (str):
+            Identificador único de la conexión.
+
+    Returns:
+        Driver | None:
+            Driver de la conexión asociada a la sesión
+            activa encontrada o None si no existe la sesión.
+    """
+
+    return gsd(connection_id)
 
 
 def has_session(
@@ -198,3 +222,31 @@ def execute_updates(
         connection_id=connection_id,
         operations=operations,
     )
+
+
+def get_db_tree(
+    connection_id: str,
+) -> (
+    dict[
+        str,
+        Any,
+    ]
+    | None
+):
+    """
+    Obtiene la estructura completa de metadatos (tablas y vistas)
+    de una base de datos activa.
+
+    Args:
+        connection_id:
+            Identificador único de la conexión/sesión activa.
+
+    Returns:
+        dict[str,Any]:
+            Un diccionario con la estructura de la base de datos ("tables" y "views").
+
+        None:
+            Si no existe una sesión activa para el identificador proporcionado.
+    """
+
+    return gdt(connection_id=connection_id)

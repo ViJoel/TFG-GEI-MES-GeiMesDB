@@ -1,0 +1,32 @@
+QInputDialog {
+    background-color: $rename_file_dialog_background_color;
+    border: 2px solid $rename_file_dialog_border_color;
+    border-radius: 4px;
+    color: $rename_file_dialog_color;
+}
+
+QInputDialog QLabel{
+    background-color: transparent;
+    color: $rename_file_dialog_color;
+    font-size: 14px;
+    margin-top: 8px;
+    margin-bottom: 4px;
+}
+
+QInputDialog QLineEdit{
+    background-color: $rename_file_dialog_input_background_color;
+    border: 1px solid $rename_file_dialog_input_border_color;
+    border-radius: 4px;
+    color: $rename_file_dialog_input_color;
+    font-size: 14px;
+    margin-bottom: 12px;
+    min-height: 28px;
+    min-width: 400px;
+    padding: 6px 10px;
+}
+
+QInputDialog QLineEdit:hover{
+    background-color: $rename_file_dialog_input_background_color_hover;
+    border-color: $rename_file_dialog_input_border_color_hover;
+    color: $rename_file_dialog_input_color_hover;
+}

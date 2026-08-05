@@ -1,7 +1,10 @@
-from enum import Enum
+from enum import (
+    StrEnum,
+    auto,
+)
 
 
-class Driver(Enum):
+class Driver(StrEnum):
     """
     Motores de base de datos soportados por la aplicación.
 
@@ -12,7 +15,7 @@ class Driver(Enum):
         ORACLE: Driver para bases de datos Oracle.
     """
 
-    SQLITE = "sqlite"
-    POSTGRESQL = "postgresql"
-    MYSQL = "mysql"
-    ORACLE = "oracle"
+    SQLITE = auto()
+    POSTGRESQL = auto()
+    MYSQL = auto()
+    ORACLE = auto()

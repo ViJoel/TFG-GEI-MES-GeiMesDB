@@ -12,6 +12,7 @@ from entities.queries_history_entry import QueriesHistoryEntry
 from entities.query_result import QueryResult
 from entities.script_result import ScriptResult
 from ui.app.app_actions import notify
+from ui.translations.translation_manager import TranslationManager
 from ui.utils.layouts import (
     hbox,
     vbox,
@@ -76,7 +77,10 @@ class ResultsView(QWidget):
 
         pagelayout = vbox(mt=12)
 
-        toolbar_layout = hbox(mb=8)
+        toolbar_layout = hbox(
+            mb=8,
+            sp=4,
+        )
         self.left_toolbar_layout = hbox()
         self.right_toolbar_layout = hbox()
 
@@ -97,6 +101,44 @@ class ResultsView(QWidget):
         self._create_tabs()
 
         self.setLayout(pagelayout)
+
+        self._retranslate_ui()
+
+    def _retranslate_ui(
+        self,
+    ) -> None:
+        """
+        Actualiza todos los textos traducibles del widget.
+
+        Los textos se generan en el momento de la llamada
+        utilizando el traductor activo de Qt, permitiendo
+        refrescar la interfaz después de cambiar el idioma
+        de la aplicación.
+        """
+
+        self.console_button.setText(
+            self.tr("Console"),
+        )
+
+        self.table_button.setText(
+            self.tr("Table"),
+        )
+
+        self.session_queries_history_button.setText(
+            self.tr("Session queries history"),
+        )
+
+        self.connection_queries_history_button.setText(
+            self.tr("Connection queries history"),
+        )
+
+        self.save_button.setText(
+            self.tr("Save"),
+        )
+
+        self.discard_button.setText(
+            self.tr("Discard"),
+        )
 
     # ================
     # === UI STATE ===
@@ -144,22 +186,17 @@ class ResultsView(QWidget):
 
     @staticmethod
     def _create_button(
-        text: str,
         button_type: str,
     ) -> QPushButton:
         """
         Crea un botón con tamaño fijo.
-
-        Args:
-            text (str):
-                Texto que se mostrará en el botón.
 
         Returns:
             QPushButton:
                 Botón creado.
         """
 
-        btn = QPushButton(text)
+        btn = QPushButton()
 
         btn.setProperty("type", button_type)
 
@@ -178,31 +215,19 @@ class ResultsView(QWidget):
         entre las distintas vistas.
         """
 
-        self.console_button = self._create_button(
-            "Console",
-            "primary",
-        )
+        self.console_button = self._create_button("primary")
 
         self.left_toolbar_layout.addWidget(self.console_button)
 
-        self.table_button = self._create_button(
-            "Table",
-            "primary",
-        )
+        self.table_button = self._create_button("primary")
 
         self.left_toolbar_layout.addWidget(self.table_button)
 
-        self.session_queries_history_button = self._create_button(
-            "Session queries history",
-            "primary",
-        )
+        self.session_queries_history_button = self._create_button("primary")
 
         self.left_toolbar_layout.addWidget(self.session_queries_history_button)
 
-        self.connection_queries_history_button = self._create_button(
-            "Connection queries history",
-            "primary",
-        )
+        self.connection_queries_history_button = self._create_button("primary")
 
         self.left_toolbar_layout.addWidget(self.connection_queries_history_button)
 
@@ -214,17 +239,11 @@ class ResultsView(QWidget):
         disponibles sobre los resultados.
         """
 
-        self.save_button = self._create_button(
-            "Save",
-            "secondary",
-        )
+        self.save_button = self._create_button("secondary")
 
         self.right_toolbar_layout.addWidget(self.save_button)
 
-        self.discard_button = self._create_button(
-            "Discard",
-            "secondary",
-        )
+        self.discard_button = self._create_button("secondary")
 
         self.right_toolbar_layout.addWidget(self.discard_button)
 
@@ -305,6 +324,10 @@ class ResultsView(QWidget):
             self.query_selected_from_session_queries_history.emit
         )
 
+        TranslationManager.events().language_changed.connect(
+            self._retranslate_ui,
+        )
+
     # ======================
     # === EVENT HANDLERS ===
     # ======================
@@ -314,8 +337,10 @@ class ResultsView(QWidget):
     ) -> None:
 
         dialog = ConfirmationDialog(
-            title="Save changes",
-            message="Are you sure you want to save the changes?",
+            title=self.tr("Save changes"),
+            message=self.tr(
+                "Are you sure you want to <code><b>save</b></code> the changes?"
+            ),
             parent=self,
         )
 
@@ -330,8 +355,10 @@ class ResultsView(QWidget):
     ) -> None:
 
         dialog = ConfirmationDialog(
-            title="Discard changes",
-            message="Are you sure you want to discard the changes?",
+            title=self.tr("Discard changes"),
+            message=self.tr(
+                "Are you sure you want to <code><b>discard</b></code> the changes?"
+            ),
             parent=self,
         )
 
@@ -359,7 +386,7 @@ class ResultsView(QWidget):
 
         notify(
             MessageType.INFO,
-            "Changes discarted",
+            self.tr("Changes discarded."),
         )
 
     # ==================

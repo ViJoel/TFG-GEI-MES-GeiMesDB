@@ -122,7 +122,7 @@ def get_queries_history(
         SELECT connection_id, query, executed_at
         FROM queries_history
         WHERE connection_id = ? AND executed_at BETWEEN ? AND ?
-        ORDER BY executed_at DESC
+        ORDER BY executed_at ASC
         """
 
     entries_list: list[QueriesHistoryEntry] = []

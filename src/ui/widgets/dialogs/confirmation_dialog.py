@@ -3,9 +3,12 @@ from PySide6.QtCore import (
     Signal,
 )
 from PySide6.QtWidgets import (
+    QApplication,
     QDialog,
-    QLabel,
+    QFrame,
     QPushButton,
+    QSizePolicy,
+    QTextEdit,
     QWidget,
 )
 
@@ -30,6 +33,13 @@ class ConfirmationDialog(QDialog):
     # Señales emitidas por el diálogo.
     confirmed = Signal()
     cancelled = Signal()
+
+    # =================
+    # === CONSTANTS ===
+    # =================
+
+    _DIALOG_WIDTH = 400
+    _DIALOG_MARGIN = 24
 
     # ============
     # === INIT ===
@@ -58,9 +68,9 @@ class ConfirmationDialog(QDialog):
         super().__init__(parent.window())
 
         self.origin_widget = parent
+        self._previous_focus_widget = QApplication.focusWidget()
 
         self.setObjectName("confirmation_dialog")
-
         self.setWindowTitle(title)
 
         # Bloquear interacción con la ventana padre
@@ -68,6 +78,7 @@ class ConfirmationDialog(QDialog):
         self.setModal(True)
 
         self._setup_ui(message)
+        self._adjust_message_height()
         self._set_style()
         self._connect_signals()
 
@@ -90,7 +101,7 @@ class ConfirmationDialog(QDialog):
         main_layout = vbox()
         self.setLayout(main_layout)
 
-        # Overlay que ocupa toda la ventana
+        # Overlay que ocupa toda la ventana.
         overlay = QWidget()
         overlay.setObjectName("dialog_overlay")
 
@@ -101,10 +112,10 @@ class ConfirmationDialog(QDialog):
 
         overlay_layout.addStretch()
 
-        # Caja del diálogo
+        # Caja del diálogo.
         container = QWidget()
         container.setObjectName("dialog_container")
-        container.setFixedWidth(400)
+        container.setFixedWidth(self._DIALOG_WIDTH)
 
         overlay_layout.addWidget(
             container,
@@ -113,28 +124,83 @@ class ConfirmationDialog(QDialog):
 
         overlay_layout.addStretch()
 
-        # Layout interno del diálogo
+        # Layout interno.
         container_layout = vbox(
-            ml=24,
-            mt=24,
-            mr=24,
-            mb=24,
+            ml=self._DIALOG_MARGIN,
+            mt=self._DIALOG_MARGIN,
+            mr=self._DIALOG_MARGIN,
+            mb=self._DIALOG_MARGIN,
             sp=24,
         )
         container.setLayout(container_layout)
 
-        # Mensaje
-        self.message_label = QLabel(message)
+        # Mensaje.
+        self.message_view = QTextEdit()
 
-        container_layout.addWidget(self.message_label)
+        # Establecer el texto del mensaje.
+        self.message_view.setText(message)
 
-        # Botones
+        # Convertir el editor en un visor de texto.
+        self.message_view.setReadOnly(True)
+
+        # Eliminar el borde nativo del QTextEdit.
+        self.message_view.setFrameStyle(QFrame.NoFrame)
+
+        # Solo se mostrará texto plano.
+        self.message_view.setAcceptRichText(False)
+
+        # Ocultar las barras de desplazamiento.
+        self.message_view.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarAlwaysOff,
+        )
+
+        # Eliminar el margen interno del documento para que
+        # el cálculo de altura sea exacto.
+        self.message_view.document().setDocumentMargin(0)
+
+        # Eliminar los márgenes del widget y de su viewport.
+        self.message_view.setContentsMargins(0, 0, 0, 0)
+        self.message_view.setViewportMargins(0, 0, 0, 0)
+
+        # El alto será fijado manualmente según el contenido.
+        self.message_view.setSizePolicy(
+            QSizePolicy.Preferred,
+            QSizePolicy.Fixed,
+        )
+
+        # Evitar que el widget pueda recibir el foco.
+        self.message_view.setFocusPolicy(
+            Qt.FocusPolicy.NoFocus,
+        )
+
+        # Deshabilitar cualquier interacción con el texto
+        # (selección, copia, etc.).
+        self.message_view.setTextInteractionFlags(
+            Qt.TextInteractionFlag.NoTextInteraction,
+        )
+
+        # Mantener el cursor del ratón como una flecha
+        # en lugar del cursor de edición de texto.
+        self.message_view.setCursor(
+            Qt.CursorShape.ArrowCursor,
+        )
+        self.message_view.viewport().setCursor(
+            Qt.CursorShape.ArrowCursor,
+        )
+
+        container_layout.addWidget(self.message_view)
+
+        # Botones.
         buttons_layout = hbox()
 
-        self.cancel_button = QPushButton("Cancel")
+        self.cancel_button = QPushButton(
+            self.tr("Cancel"),
+        )
         self.cancel_button.setProperty("type", "primary")
 
-        self.accept_button = QPushButton("Accept")
+        self.accept_button = QPushButton(
+            self.tr("Accept"),
+        )
         self.accept_button.setProperty("type", "danger")
 
         buttons_layout.addWidget(self.cancel_button)
@@ -143,18 +209,68 @@ class ConfirmationDialog(QDialog):
 
         container_layout.addLayout(buttons_layout)
 
-    def _set_style(self):
+    # ==================
+    # === UI HELPERS ===
+    # ==================
+
+    def _adjust_message_height(
+        self,
+    ) -> None:
         """
-        Establece parámetros visuales
+        Ajusta la altura del visor de texto
+        al contenido mostrado.
+
+        QTextEdit no adapta automáticamente su altura al
+        contenido, por lo que se calcula manualmente la
+        altura del documento para evitar barras de
+        desplazamiento y que el diálogo crezca de forma
+        natural.
         """
 
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        # Ancho útil del documento descontando los
+        # márgenes internos del diálogo.
+        content_width = self._DIALOG_WIDTH - (self._DIALOG_MARGIN * 2)
 
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        document = self.message_view.document()
 
-        self.setGeometry(self.parent().rect())
+        # Recalcular el layout del documento para el
+        # ancho disponible.
+        document.setTextWidth(content_width)
+        document.adjustSize()
 
-        self.message_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # Ajustar la altura del visor exactamente a la
+        # altura del documento.
+        self.message_view.setFixedHeight(int(document.size().height()))
+
+    def _set_style(
+        self,
+    ) -> None:
+        """
+        Establece parámetros visuales.
+        """
+
+        # Eliminar el marco nativo de la ventana para
+        # dibujar un diálogo completamente personalizado.
+        self.setWindowFlags(
+            Qt.WindowType.FramelessWindowHint,
+        )
+
+        # Permitir que las zonas sin pintar del diálogo
+        # sean transparentes (necesario para el overlay).
+        self.setAttribute(
+            Qt.WidgetAttribute.WA_TranslucentBackground,
+        )
+
+        # Hacer que el diálogo ocupe exactamente el área
+        # de la ventana padre para cubrirla con el overlay.
+        self.setGeometry(
+            self.parent().rect(),
+        )
+
+        # Centrar el texto mostrado en el visor.
+        self.message_view.setAlignment(
+            Qt.AlignmentFlag.AlignCenter,
+        )
 
     # ===============
     # === SIGNALS ===
@@ -169,33 +285,86 @@ class ConfirmationDialog(QDialog):
         """
 
         self.accept_button.clicked.connect(
-            self._on_accept_clicked,
+            self.accept,
         )
 
         self.cancel_button.clicked.connect(
-            self._on_cancel_clicked,
+            self.reject,
         )
 
-    # ======================
-    # === EVENT HANDLERS ===
-    # ======================
+    # ====================
+    # === QT OVERRIDES ===
+    # ====================
 
-    def _on_accept_clicked(
+    def accept(
         self,
     ) -> None:
         """
-        Maneja la confirmación de la acción.
+        Confirma la acción y cierra el diálogo.
         """
 
         self.confirmed.emit()
-        self.accept()
 
-    def _on_cancel_clicked(
+        super().accept()
+
+        if self._previous_focus_widget is not None:
+            self._previous_focus_widget.setFocus()
+
+    def reject(
         self,
     ) -> None:
         """
-        Maneja la cancelación de la acción.
+        Cancela la acción y cierra el diálogo.
         """
 
         self.cancelled.emit()
-        self.reject()
+
+        super().reject()
+
+        if self._previous_focus_widget is not None:
+            self._previous_focus_widget.setFocus()
+
+    def showEvent(
+        self,
+        event,
+    ) -> None:
+        """
+        Asigna el foco inicial al botón de aceptación
+        cuando el diálogo se muestra.
+
+        Args:
+            event:
+                Evento de mostrado recibido desde Qt.
+        """
+
+        super().showEvent(event)
+        self.accept_button.setFocus()
+
+    def focusNextPrevChild(
+        self,
+        next: bool,
+    ) -> bool:
+        """
+        Mantiene el ciclo de foco dentro del diálogo.
+
+        Alterna el foco entre los botones de aceptar
+        y cancelar para impedir que la navegación con
+        `Tab` alcance widgets de la ventana principal.
+
+        Args:
+            next (bool):
+                Indica la dirección del cambio de foco
+                solicitado por Qt.
+
+        Returns:
+            bool:
+                `True` para indicar que el cambio de
+                foco ha sido gestionado por el diálogo.
+        """
+
+        if self.accept_button.hasFocus():
+            self.cancel_button.setFocus()
+        else:
+            self.accept_button.setFocus()
+
+        return True

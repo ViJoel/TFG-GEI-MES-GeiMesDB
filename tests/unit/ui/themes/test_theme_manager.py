@@ -43,6 +43,46 @@ def test_initialize(mock_apply, mock_get_app):
     mock_apply.assert_called_once()
 
 
+@patch.object(ThemeManager, "apply")
+@patch("ui.themes.theme_manager.get_setting")
+def test_initialize_loads_saved_theme(
+    mock_get_setting,
+    mock_apply,
+):
+    """
+    Debe cargar el tema almacenado antes
+    de aplicarlo.
+    """
+
+    mock_get_setting.return_value = MagicMock(value="light")
+
+    ThemeManager.initialize()
+
+    assert ThemeManager.current_theme() == "light"
+
+    mock_apply.assert_called_once()
+
+
+@patch.object(ThemeManager, "apply")
+@patch("ui.themes.theme_manager.get_setting")
+def test_initialize_without_saved_setting(
+    mock_get_setting,
+    mock_apply,
+):
+    """
+    Debe mantener el tema actual cuando no
+    existe un ajuste almacenado.
+    """
+
+    ThemeManager._current_theme = "dark"
+
+    mock_get_setting.return_value = None
+
+    ThemeManager.initialize()
+
+    assert ThemeManager.current_theme() == "dark"
+
+
 # =============================================================================
 # APPLY
 # =============================================================================
@@ -70,18 +110,6 @@ def test_apply(mock_build, mock_get_app):
 # =============================================================================
 
 
-@patch.object(ThemeManager, "apply")
-def test_set_theme_changes_current_theme(mock_apply):
-    """
-    Debe cambiar el tema activo.
-    """
-
-    ThemeManager.set_theme("dark")
-
-    assert ThemeManager.current_theme() == "dark"
-    mock_apply.assert_called_once()
-
-
 def test_set_theme_invalid():
     """
     Debe lanzar ValueError para temas inexistentes.
@@ -89,6 +117,44 @@ def test_set_theme_invalid():
 
     with pytest.raises(ValueError):
         ThemeManager.set_theme("invalid-theme")
+
+
+@patch.object(ThemeManager, "apply")
+def test_set_theme_emits_signal(mock_apply):
+    """
+    Debe notificar el cambio de tema.
+    """
+
+    slot = MagicMock()
+
+    ThemeManager.events().theme_changed.connect(slot)
+
+    ThemeManager._current_theme = "dark"
+
+    ThemeManager.set_theme("light")
+
+    slot.assert_called_once_with("light")
+
+    ThemeManager.events().theme_changed.disconnect(slot)
+
+
+@patch.object(ThemeManager, "apply")
+@patch("ui.themes.theme_manager.save_setting")
+def test_set_theme_same_theme_does_nothing(
+    mock_save,
+    mock_apply,
+):
+    """
+    No debe reaplicar ni guardar el tema si
+    ya se encuentra activo.
+    """
+
+    ThemeManager._current_theme = "dark"
+
+    ThemeManager.set_theme("dark")
+
+    mock_apply.assert_not_called()
+    mock_save.assert_not_called()
 
 
 # =============================================================================
@@ -239,3 +305,16 @@ def test_get_qcolor_with_alpha(mock_get_color):
     assert color.alpha() == 64
 
     mock_get_color.assert_called_once_with("primary")
+
+
+# =============================================================================
+# EVENTS
+# =============================================================================
+
+
+def test_events_returns_singleton():
+    """
+    Debe devolver el objeto de eventos compartido.
+    """
+
+    assert ThemeManager.events() is ThemeManager._events

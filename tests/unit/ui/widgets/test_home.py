@@ -77,5 +77,22 @@ def test_home_contains_application_slogan(home):
         "home_page_slogan",
     )
 
-    assert slogan is not None
-    assert slogan.text() == "Everything you need. Nothing you don't."
+    assert slogan is not None and slogan is not ""
+
+
+# =============================================================================
+# INTERNATIONALIZATION
+# =============================================================================
+
+
+def test_retranslate_ui_updates_slogan(home):
+    """
+    Verifica que la interfaz actualiza correctamente
+    el texto traducible del eslogan.
+    """
+
+    home._retranslate_ui()
+
+    assert home.slogan_label.text() == home.tr(
+        "Everything you need. Nothing you don't."
+    )
