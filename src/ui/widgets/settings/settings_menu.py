@@ -24,10 +24,6 @@ logger = get_logger(__name__)
 
 class SettingsMenu(QWidget):
 
-    # =================
-    # === VARIABLES ===
-    # =================
-
     # ============
     # === INIT ===
     # ============
@@ -114,10 +110,6 @@ class SettingsMenu(QWidget):
         self.accept_button.setText(
             self.tr("Accept"),
         )
-
-    # ================
-    # === UI STATE ===
-    # ================
 
     # ==================
     # === UI HELPERS ===
@@ -346,15 +338,3 @@ class SettingsMenu(QWidget):
         TranslationManager.set_language(
             self.language_input.currentData(),
         )
-
-    # ====================
-    # === QT OVERRIDES ===
-    # ====================
-
-    # ===================
-    # === PRIVATE API ===
-    # ===================
-
-    # ==================
-    # === PUBLIC API ===
-    # ==================
