@@ -109,7 +109,9 @@ class SettingsMenu(QWidget):
 
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        title_label.setText("Settings menu")
+        title_label.setText(
+            self.tr("Settings menu"),
+        )
 
         parent_layout.addWidget(title_label)
 
@@ -122,7 +124,9 @@ class SettingsMenu(QWidget):
 
         layout = vbox(sp=8)
 
-        self.theme_label = QLabel("Theme:")
+        self.theme_label = QLabel(
+            self.tr("Theme"),
+        )
         self.theme_label.setObjectName("settings_menu_input_label")
 
         self.theme_input = QComboBox()
@@ -151,15 +155,21 @@ class SettingsMenu(QWidget):
 
         layout = hbox(sp=8)
 
-        self.cancel_button = QPushButton("Cancel")
+        self.cancel_button = QPushButton(
+            self.tr("Cancel"),
+        )
         self.cancel_button.setObjectName("settings_menu_cancel_button")
         self.cancel_button.setProperty("type", "danger")
 
-        self.apply_button = QPushButton("Apply")
+        self.apply_button = QPushButton(
+            self.tr("Apply"),
+        )
         self.apply_button.setObjectName("settings_menu_apply_button")
         self.apply_button.setProperty("type", "secondary")
 
-        self.accept_button = QPushButton("Accept")
+        self.accept_button = QPushButton(
+            self.tr("Accept"),
+        )
         self.accept_button.setObjectName("settings_menu_accept_button")
         self.accept_button.setProperty("type", "primary")
 
@@ -219,7 +229,7 @@ class SettingsMenu(QWidget):
 
             notify(
                 message_type=MessageType.WARNING,
-                message="Changing theme...",
+                message=self.tr("Changing theme..."),
             )
 
             # Fuerza el repintado de la interfaz para que la
@@ -236,14 +246,14 @@ class SettingsMenu(QWidget):
 
             notify(
                 message_type=MessageType.SUCCESS,
-                message="Theme changed.",
+                message=self.tr("Theme changed."),
             )
         except Exception as e:
             logger.error(f"Error changin theme: {e}")
 
             notify(
                 message_type=MessageType.SUCCESS,
-                message="Error changin theme.\nSee logs for details.",
+                message=self.tr("Error changin theme.\nSee logs for details."),
             )
 
             return

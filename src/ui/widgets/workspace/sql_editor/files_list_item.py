@@ -93,7 +93,9 @@ class CloseFileButton(QPushButton):
         )
 
         self.setToolTip(
-            "Close the editor tab.<br><br><b>Shortcut:</b> <code>Ctrl + W</code>"
+            self.tr(
+                "Close the editor tab.<br><br><b>Shortcut:</b> <code>Ctrl + W</code>"
+            )
         )
 
     # ==================

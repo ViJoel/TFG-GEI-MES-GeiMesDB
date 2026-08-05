@@ -184,7 +184,9 @@ class NavigationTree(QWidget):
             )
         )
 
-        button.setToolTip("Refresh tree")
+        button.setToolTip(
+            self.tr("Refresh tree."),
+        )
 
         return button
 
@@ -783,7 +785,7 @@ class NavigationTree(QWidget):
 
         notify(
             message_type=MessageType.SUCCESS,
-            message="Tree loaded.",
+            message=self.tr("Tree loaded."),
         )
 
         self.tree_reloaded.emit()
@@ -797,7 +799,7 @@ class NavigationTree(QWidget):
 
         notify(
             MessageType.ERROR,
-            "Error loading tree.\nSee logs for details.",
+            self.tr("Error loading tree.\nSee logs for details."),
         )
 
     # ==================
@@ -810,7 +812,7 @@ class NavigationTree(QWidget):
 
         notify(
             message_type=MessageType.WARNING,
-            message="Loading tree...",
+            message=self.tr("Loading tree..."),
         )
 
         self._load_data()

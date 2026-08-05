@@ -182,28 +182,28 @@ class ResultsView(QWidget):
         """
 
         self.console_button = self._create_button(
-            "Console",
+            self.tr("Console"),
             "primary",
         )
 
         self.left_toolbar_layout.addWidget(self.console_button)
 
         self.table_button = self._create_button(
-            "Table",
+            self.tr("Table"),
             "primary",
         )
 
         self.left_toolbar_layout.addWidget(self.table_button)
 
         self.session_queries_history_button = self._create_button(
-            "Session queries history",
+            self.tr("Session queries history"),
             "primary",
         )
 
         self.left_toolbar_layout.addWidget(self.session_queries_history_button)
 
         self.connection_queries_history_button = self._create_button(
-            "Connection queries history",
+            self.tr("Connection queries history"),
             "primary",
         )
 
@@ -218,14 +218,14 @@ class ResultsView(QWidget):
         """
 
         self.save_button = self._create_button(
-            "Save",
+            self.tr("Save"),
             "secondary",
         )
 
         self.right_toolbar_layout.addWidget(self.save_button)
 
         self.discard_button = self._create_button(
-            "Discard",
+            self.tr("Discard"),
             "secondary",
         )
 
@@ -317,8 +317,10 @@ class ResultsView(QWidget):
     ) -> None:
 
         dialog = ConfirmationDialog(
-            title="Save changes",
-            message="Are you sure you want to <code><b>save</b></code> the changes?",
+            title=self.tr("Save changes"),
+            message=self.tr(
+                "Are you sure you want to <code><b>save</b></code> the changes?"
+            ),
             parent=self,
         )
 
@@ -333,8 +335,10 @@ class ResultsView(QWidget):
     ) -> None:
 
         dialog = ConfirmationDialog(
-            title="Discard changes",
-            message="Are you sure you want to <code><b>discard</b></code> the changes?",
+            title=self.tr("Discard changes"),
+            message=self.tr(
+                "Are you sure you want to <code><b>discard</b></code> the changes?"
+            ),
             parent=self,
         )
 
@@ -362,7 +366,7 @@ class ResultsView(QWidget):
 
         notify(
             MessageType.INFO,
-            "Changes discarted",
+            self.tr("Changes discarted."),
         )
 
     # ==================

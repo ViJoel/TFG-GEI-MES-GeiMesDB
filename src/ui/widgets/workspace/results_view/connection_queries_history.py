@@ -86,11 +86,15 @@ class ConnectionQueriesHistory(QWidget):
         inputs_widget.setLayout(inputs_layout)
 
         # Inputs de fechas con calendario flotante
-        start_widget, self.start_date = self._create_date_input("Start date")
+        start_widget, self.start_date = self._create_date_input(
+            self.tr("Start date"),
+        )
         self.start_date.setDate(QDate.currentDate().addDays(-7))
         inputs_layout.addWidget(start_widget)
 
-        end_widget, self.end_date = self._create_date_input("End date")
+        end_widget, self.end_date = self._create_date_input(
+            self.tr("End date"),
+        )
         self.end_date.setDate(QDate.currentDate())
         inputs_layout.addWidget(end_widget)
 
@@ -98,7 +102,9 @@ class ConnectionQueriesHistory(QWidget):
         inputs_layout.addSpacing(16)
 
         # Botón de acción
-        self.filter_button = QPushButton("Filtrar")
+        self.filter_button = QPushButton(
+            self.tr("Filter"),
+        )
         self.filter_button.setProperty(
             "type",
             "accent",
@@ -211,7 +217,7 @@ class ConnectionQueriesHistory(QWidget):
 
         notify(
             MessageType.WARNING,
-            "Loading history...",
+            self.tr("Loading history..."),
         )
 
         start_date = self.start_date.dateTime().toPython()
@@ -269,7 +275,7 @@ class ConnectionQueriesHistory(QWidget):
 
         notify(
             MessageType.SUCCESS,
-            "History loaded.",
+            self.tr("History loaded."),
         )
 
     def _on_load_history_error(
@@ -281,5 +287,5 @@ class ConnectionQueriesHistory(QWidget):
 
         notify(
             MessageType.ERROR,
-            "History load failed.",
+            self.tr("History load failed."),
         )

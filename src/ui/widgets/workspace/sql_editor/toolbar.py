@@ -84,55 +84,55 @@ class Toolbar(QWidget):
         self.execute_selection_button = ToolbarButton(
             "fa5s.play",
             "execute_selection",
-            "Execute selection",
+            self.tr("Execute selection"),
         )
 
         self.execute_query_button = ToolbarButton(
             "fa5s.play-circle",
             "execute_query",
-            "Execute query",
+            self.tr("Execute query"),
         )
 
         self.execute_script_button = ToolbarButton(
             "mdi.script-text-play",
             "execute_script",
-            "Execute script",
+            self.tr("Execute script"),
         )
 
         self.undo_button = ToolbarButton(
             "fa5s.undo-alt",
             "undo",
-            "Undo",
+            self.tr("Undo"),
         )
 
         self.redo_button = ToolbarButton(
             "fa5s.redo-alt",
             "redo",
-            "Redo",
+            self.tr("Redo"),
         )
 
         self.new_button = ToolbarButton(
             "ei.file-new",
             "new_file",
-            "New file",
+            self.tr("New file"),
         )
 
         self.open_button = ToolbarButton(
             "fa5s.folder-open",
             "open_file",
-            "Open file",
+            self.tr("Open file"),
         )
 
         self.save_button = ToolbarButton(
             "fa5s.save",
             "save_file",
-            "Save file",
+            self.tr("Save file"),
         )
 
         self.rename_button = ToolbarButton(
             "mdi6.rename-box",
             "rename_file",
-            "Rename file",
+            self.tr("Rename file"),
         )
 
     def _set_buttons_tooltips(
@@ -144,39 +144,57 @@ class Toolbar(QWidget):
         """
 
         self.execute_selection_button.setToolTip(
-            "Execute the text selected.<br><br><b>Shortcut:</b> <code>Ctrl + Alt + Enter</code>"
+            self.tr(
+                "Execute the text selected.<br><br><b>Shortcut:</b> <code>Ctrl + Alt + Enter</code>",
+            )
         )
 
         self.execute_query_button.setToolTip(
-            "Execute the query under the cursor.<br><br><b>Shortcut:</b> <code>Ctrl + Enter</code>"
+            self.tr(
+                "Execute the query under the cursor.<br><br><b>Shortcut:</b> <code>Ctrl + Enter</code>",
+            )
         )
 
         self.execute_script_button.setToolTip(
-            "Execute the full script.<br><br><b>Shortcut:</b> <code>Ctrl + Shift + Enter</code>"
+            self.tr(
+                "Execute the full script.<br><br><b>Shortcut:</b> <code>Ctrl + Shift + Enter</code>",
+            )
         )
 
         self.undo_button.setToolTip(
-            "Undo action on the text.<br><br><b>Shortcut:</b> <code>Ctrl + Z</code>"
+            self.tr(
+                "Undo action on the text.<br><br><b>Shortcut:</b> <code>Ctrl + Z</code>",
+            )
         )
 
         self.redo_button.setToolTip(
-            "Redo action on the text.<br><br><b>Shortcut:</b> <code>Ctrl + Shift + Z</code>"
+            self.tr(
+                "Redo action on the text.<br><br><b>Shortcut:</b> <code>Ctrl + Shift + Z</code>",
+            )
         )
 
         self.new_button.setToolTip(
-            "Create a new file.<br><br><b>Shortcut:</b> <code>Ctrl + N</code>"
+            self.tr(
+                "Create a new file.<br><br><b>Shortcut:</b> <code>Ctrl + N</code>",
+            )
         )
 
         self.open_button.setToolTip(
-            "Open a file from your computer.<br><br><b>Shortcut:</b> <code>Ctrl + O</code>"
+            self.tr(
+                "Open a file from your computer.<br><br><b>Shortcut:</b> <code>Ctrl + O</code>",
+            )
         )
 
         self.save_button.setToolTip(
-            "Save the file changes.<br><br><b>Shortcut:</b> <code>Ctrl + S</code>"
+            self.tr(
+                "Save the file changes.<br><br><b>Shortcut:</b> <code>Ctrl + S</code>",
+            )
         )
 
         self.rename_button.setToolTip(
-            "Rename the file.<br><br><b>Shortcut:</b> <code>Ctrl + R</code>"
+            self.tr(
+                "Rename the file.<br><br><b>Shortcut:</b> <code>Ctrl + R</code>",
+            )
         )
 
     def _build_layout(

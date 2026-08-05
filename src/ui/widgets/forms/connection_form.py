@@ -138,7 +138,9 @@ class ConnectionForm(QWidget):
 
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        title_label.setText("Connection form")
+        title_label.setText(
+            self.tr("Connection form"),
+        )
 
         parent_layout.addWidget(title_label)
 
@@ -357,7 +359,7 @@ class ConnectionForm(QWidget):
         self.name_input = self._create_input("My personal DB")
 
         self.name_field = self._build_field(
-            "Name",
+            self.tr("Name"),
             self.name_input,
         )
 
@@ -380,7 +382,7 @@ class ConnectionForm(QWidget):
             self.driver_input.addItem(driver.value)
 
         self.driver_field = self._build_field(
-            "Driver",
+            self.tr("Driver"),
             self.driver_input,
         )
 
@@ -397,7 +399,7 @@ class ConnectionForm(QWidget):
         self.host_input = self._create_input("255.255.255.255")
 
         self.host_field = self._build_field(
-            "Host",
+            self.tr("Host"),
             self.host_input,
         )
 
@@ -416,7 +418,7 @@ class ConnectionForm(QWidget):
         self._set_port_regex()
 
         self.port_field = self._build_field(
-            "Port",
+            self.tr("Port"),
             self.port_input,
         )
 
@@ -434,7 +436,7 @@ class ConnectionForm(QWidget):
         self.database_input = self._create_input("my_database")
 
         self.database_field = self._build_field(
-            "Database",
+            self.tr("Database"),
             self.database_input,
         )
 
@@ -451,7 +453,7 @@ class ConnectionForm(QWidget):
         self.username_input = self._create_input("admin")
 
         self.username_field = self._build_field(
-            "Username",
+            self.tr("Username"),
             self.username_input,
         )
 
@@ -471,7 +473,7 @@ class ConnectionForm(QWidget):
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
 
         self.password_field = self._build_field(
-            "Password",
+            self.tr("Password"),
             self.password_input,
         )
 
@@ -497,12 +499,16 @@ class ConnectionForm(QWidget):
         sub_layout = hbox(sp=4)
         field_layout.addLayout(sub_layout)
 
-        label = self._create_input_label("Path to the file")
+        label = self._create_input_label(
+            self.tr("Path to the file"),
+        )
         sub_layout.addWidget(label)
 
         sub_layout.addStretch()
 
-        self.browse_button = QPushButton("Browse")
+        self.browse_button = QPushButton(
+            self.tr("Browse"),
+        )
         self.browse_button.setProperty(
             "type",
             "accent",
@@ -535,19 +541,19 @@ class ConnectionForm(QWidget):
 
         # Botones
         self.test_connection_button = self._create_button(
-            "Test connection",
+            self.tr("Test connection"),
             "type",
             "secondary",
         )
 
         self.cancel_button = self._create_button(
-            "Cancel",
+            self.tr("Cancel"),
             "type",
             "danger",
         )
 
         self.save_button = self._create_button(
-            "Save",
+            self.tr("Save"),
             "type",
             "primary",
         )
@@ -721,7 +727,7 @@ class ConnectionForm(QWidget):
 
                 notify(
                     MessageType.SUCCESS,
-                    "Connection updated",
+                    self.tr("Connection updated."),
                 )
 
             # CREATE
@@ -730,7 +736,7 @@ class ConnectionForm(QWidget):
 
                 notify(
                     MessageType.SUCCESS,
-                    "Connection saved",
+                    self.tr("Connection saved."),
                 )
 
             logger.success(f"Connection saved '{connection.name}'...")
@@ -747,7 +753,7 @@ class ConnectionForm(QWidget):
 
             notify(
                 MessageType.ERROR,
-                "Error saving",
+                self.tr("Error saving."),
             )
 
     def _test_connection_button_clicked(
@@ -763,7 +769,7 @@ class ConnectionForm(QWidget):
 
         notify(
             MessageType.WARNING,
-            "Testing connection...",
+            self.tr("Testing connection..."),
         )
 
         AppContext.get_task_manager().run(
@@ -844,14 +850,14 @@ class ConnectionForm(QWidget):
 
             notify(
                 MessageType.SUCCESS,
-                "Connection successful.",
+                self.tr("Connection successful."),
             )
 
         else:
 
             notify(
                 MessageType.ERROR,
-                "Connection failed.",
+                self.tr("Connection failed."),
             )
 
     def _on_test_connection_error(
@@ -863,5 +869,5 @@ class ConnectionForm(QWidget):
 
         notify(
             MessageType.ERROR,
-            "Invalid connection data.",
+            self.tr("Invalid connection data."),
         )

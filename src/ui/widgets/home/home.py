@@ -88,7 +88,9 @@ class Home(QWidget):
         )
 
         # Texto principal.
-        slogan_label = QLabel("Everything you need. Nothing you don't.")
+        slogan_label = QLabel(
+            self.tr("Everything you need. Nothing you don't."),
+        )
         slogan_label.setObjectName("home_page_slogan")
         slogan_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 

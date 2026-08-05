@@ -193,10 +193,14 @@ class ConfirmationDialog(QDialog):
         # Botones.
         buttons_layout = hbox()
 
-        self.cancel_button = QPushButton("Cancel")
+        self.cancel_button = QPushButton(
+            self.tr("Cancel"),
+        )
         self.cancel_button.setProperty("type", "primary")
 
-        self.accept_button = QPushButton("Accept")
+        self.accept_button = QPushButton(
+            self.tr("Accept"),
+        )
         self.accept_button.setProperty("type", "danger")
 
         buttons_layout.addWidget(self.cancel_button)

@@ -436,12 +436,12 @@ class SqlEditorArea(QWidget):
 
         if file.has_changes:
             dialog = ConfirmationDialog(
-                title="Close file",
-                message=(
+                title=self.tr("Close file"),
+                message=self.tr(
                     "⚠️ <b>Discard unsaved changes?</b> ⚠️<br><br>"
-                    f"The file <code>{file.name}</code> has unsaved changes.<br>"
+                    "The file <code>{}</code> has unsaved changes.<br>"
                     "If you continue, you will lose these changes and this action cannot be undone."
-                ),
+                ).format(file.name),
                 parent=self,
             )
 
