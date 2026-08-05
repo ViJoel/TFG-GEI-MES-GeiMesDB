@@ -77,7 +77,21 @@ src/
 ## Resumen de comandos
 
 ```bash
+# Extrae todas las cadenas traducibles del código Python
+# y actualiza el archivo de traducciones (.ts),
+# conservando las entradas obsoletas.
 pyside6-lupdate -extensions py src -ts src/ui/translations/geimesdb_es.ts
+
+# Igual que el anterior, pero elimina del archivo .ts
+# las traducciones correspondientes a cadenas que ya
+# no existen en el código (-no-obsolete).
+pyside6-lupdate -extensions py -no-obsolete src -ts src/ui/translations/geimesdb_es.ts
+
+# Abre el archivo de traducciones en Qt Linguist
+# para traducir o revisar las cadenas pendientes.
 pyside6-linguist src/ui/translations/geimesdb_es.ts
+
+# Compila el archivo de traducciones (.ts) y genera
+# el archivo binario (.qm) que utiliza la aplicación.
 pyside6-lrelease src/ui/translations/geimesdb_es.ts
 ```
