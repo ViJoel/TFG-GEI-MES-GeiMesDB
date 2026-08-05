@@ -276,7 +276,7 @@ class Workspace(QWidget):
         if saving_operation_success:
             notify(
                 MessageType.SUCCESS,
-                self.tr("Changes saved"),
+                self.tr("Changes saved."),
             )
 
         else:
@@ -664,7 +664,9 @@ class Workspace(QWidget):
 
         notify(
             MessageType.ERROR,
-            self.tr("Error updating queries history.\nSee logs for details."),
+            self.tr("Error updating queries history.")
+            + "\n"
+            + self.tr("See logs for details."),
         )
 
     # ==================

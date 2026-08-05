@@ -799,7 +799,7 @@ class NavigationTree(QWidget):
 
         notify(
             MessageType.ERROR,
-            self.tr("Error loading tree.\nSee logs for details."),
+            self.tr("Error loading tree.") + "\n" + self.tr("See logs for details."),
         )
 
     # ==================

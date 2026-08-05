@@ -623,7 +623,7 @@ class MainWindow(QMainWindow):
                 title=self.tr("Exit application"),
                 message=self.tr(
                     "⚠️ <b>Discard unsaved changes?</b> ⚠️<br><br>"
-                    "You have unsaved changes in the following workspace(s):<br>"
+                    "You have unsaved changes in the following workspaces:<br>"
                     "{}<br><br>"
                     "If you exit now, all unsaved changes will be lost.<br>"
                     "This action can not be undone."

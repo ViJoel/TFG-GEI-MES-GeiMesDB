@@ -279,7 +279,9 @@ class SqlEditorArea(QWidget):
         if file is None:
             notify(
                 message_type=MessageType.ERROR,
-                message="File not opened.\nSee logs for details.",
+                message=self.tr("File not opened.")
+                + "\n"
+                + self.tr("See logs for details."),
             )
             return
 
@@ -353,7 +355,9 @@ class SqlEditorArea(QWidget):
         else:
             notify(
                 message_type=MessageType.ERROR,
-                message="File changes not saved.\nSee logs for details.",
+                message=self.tr("File changes not saved.")
+                + "\n"
+                + self.tr("See logs for details."),
             )
 
     def _on_rename_file_requested(

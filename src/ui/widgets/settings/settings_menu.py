@@ -253,7 +253,9 @@ class SettingsMenu(QWidget):
 
             notify(
                 message_type=MessageType.SUCCESS,
-                message=self.tr("Error changing theme.\nSee logs for details."),
+                message=self.tr("Error changing theme.")
+                + "\n"
+                + self.tr("See logs for details."),
             )
 
             return
