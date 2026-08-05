@@ -21,6 +21,7 @@ from ui.app.app_context import AppContext
 from ui.app.main_window import MainWindow
 from ui.app.task_manager import TaskManager
 from ui.themes.theme_manager import ThemeManager
+from ui.translations.translation_manager import TranslationManager
 from ui.widgets.notifications.notification_manager import NotificationManager
 
 
@@ -70,6 +71,9 @@ def main() -> int:
 
     # Inicializar tema.
     ThemeManager.initialize()
+
+    # Inicializar lenguaje.
+    TranslationManager.initialize()
 
     # Registrar cleanup global.
     app.aboutToQuit.connect(shutdown)
