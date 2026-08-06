@@ -839,7 +839,7 @@ class ConnectionForm(QWidget):
         AppContext.get_task_manager().run(
             test_connection,
             connection,
-            on_success=lambda _: self._on_test_connection_success,
+            on_success=self._on_test_connection_success,
             on_error=self._on_test_connection_error,
         )
 
