@@ -536,7 +536,7 @@ def test_test_connection_starts_background_task(
     assert args[0] is connection_form.test_connection
     assert isinstance(args[1], Connection)
 
-    assert callable(kwargs["on_success"])
+    assert kwargs["on_success"] == form._on_test_connection_success
     assert kwargs["on_error"] == form._on_test_connection_error
 
 

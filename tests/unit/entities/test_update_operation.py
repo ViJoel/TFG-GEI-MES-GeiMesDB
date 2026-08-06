@@ -1,3 +1,4 @@
+import pytest
 from sqlalchemy import (
     Column,
     Integer,
@@ -5,6 +6,10 @@ from sqlalchemy import (
     String,
     Table,
 )
+from sqlalchemy.dialects.mysql import dialect as mysql_dialect
+from sqlalchemy.dialects.oracle import dialect as oracle_dialect
+from sqlalchemy.dialects.postgresql import dialect as postgresql_dialect
+from sqlalchemy.dialects.sqlite import dialect as sqlite_dialect
 
 from entities.table_metadata import TableMetadata
 from entities.update_operation import UpdateOperation
@@ -108,13 +113,21 @@ def test_to_statement_supports_composite_primary_key():
 # =============================================================================
 
 
-def test_to_sql_generates_literal_sql():
+@pytest.mark.parametrize(
+    "dialect",
+    [
+        sqlite_dialect(),
+        postgresql_dialect(),
+        mysql_dialect(),
+        oracle_dialect(),
+    ],
+)
+def test_to_sql_generates_literal_sql(dialect):
     """
-    Debe generar la representación SQL de la
-    operación.
+    Debe generar una representación SQL con los
+    parámetros sustituidos para todos los
+    dialectos soportados.
     """
-
-    from sqlalchemy.dialects.sqlite import dialect
 
     metadata = create_metadata()
 
@@ -124,8 +137,9 @@ def test_to_sql_generates_literal_sql():
         values={"name": "John"},
     )
 
-    sql = operation.to_sql(dialect())
+    sql = operation.to_sql(dialect)
 
     assert "UPDATE users" in sql
     assert "SET name='John'" in sql
-    assert "WHERE users.id = 1" in sql
+    assert "WHERE" in sql
+    assert "id = 1" in sql

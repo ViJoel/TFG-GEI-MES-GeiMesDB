@@ -191,6 +191,8 @@ def test_show_script_result_success_and_error(console, script_result):
     correctamente resultados exitosos y errores.
     """
 
+    script_result.rolled_back = False
+
     console.write = MagicMock()
     console.clear = MagicMock()
 
@@ -206,8 +208,65 @@ def test_show_script_result_success_and_error(console, script_result):
     )
 
     console.write.assert_any_call(
-        "SELECT 2;\nError: Syntax error\n\n",
+        "-" * 80 + "\n\n",
+        MessageType.DISABLED,
+    )
+
+    console.write.assert_any_call(
+        "SELECT 2;\n\nError: Syntax error\n\n",
         MessageType.ERROR,
+    )
+
+
+def test_show_script_result_rolled_back(console, script_result):
+    """
+    Debe mostrar el resumen cuando la transacción
+    se revierte.
+    """
+
+    script_result.rolled_back = True
+
+    console.write = MagicMock()
+    console.clear = MagicMock()
+
+    console.show_script_result(script_result)
+
+    console.write.assert_any_call(
+        "=" * 80
+        + "\n"
+        + "One or more UPDATE operations failed."
+        + "\n"
+        + "The transaction was rolled back."
+        + "\n"
+        + "No changes were saved.",
+        MessageType.INFO,
+    )
+
+
+def test_show_script_result_does_not_append_separator_after_last_item(console):
+    """
+    El último resultado no debe terminar con un
+    separador.
+    """
+
+    item = MagicMock()
+    item.query = "SELECT 1;"
+    item.success = True
+    item.error = None
+
+    result = MagicMock(spec=ScriptResult)
+    result.items = [item]
+    result.rolled_back = False
+
+    console.write = MagicMock()
+
+    console.show_script_result(result)
+
+    assert console.write.call_count == 1
+
+    console.write.assert_called_once_with(
+        "SELECT 1;\n\n",
+        MessageType.SUCCESS,
     )
 
 

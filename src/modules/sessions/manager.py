@@ -562,31 +562,42 @@ def execute_updates(
 
             for operation in operations:
 
-                stmt = operation.to_statement()
+                sql = "<Unable to generate SQL>"
 
-                sql = operation.to_sql(
-                    session.engine.dialect,
-                )
+                # Preparar operación.
+                try:
 
+                    stmt = operation.to_statement()
+
+                    sql = operation.to_sql(
+                        session.engine.dialect,
+                    )
+
+                except Exception as e:
+
+                    has_errors = True
+
+                    logger.exception(
+                        f"Failed to prepare update operation.\n"
+                        f"Connection: '{session.connection.name}'.\n"
+                        f"Query: {sql}"
+                    )
+
+                    items.append(
+                        ScriptResultItem(
+                            query=sql,
+                            error=str(e),
+                        )
+                    )
+
+                    continue
+
+                # Ejecutar operación.
                 savepoint = connection.begin_nested()
 
                 try:
 
                     connection.execute(stmt)
-
-                    savepoint.commit()
-
-                    items.append(
-                        ScriptResultItem(
-                            query=sql,
-                        )
-                    )
-
-                    logger.success(
-                        f"Update executed successfully.\n"
-                        f"Connection: '{session.connection.name}'.\n"
-                        f"Query: {sql}"
-                    )
 
                 except SQLAlchemyError as e:
 
@@ -606,6 +617,22 @@ def execute_updates(
                             query=sql,
                             error=str(e),
                         )
+                    )
+
+                else:
+
+                    savepoint.commit()
+
+                    items.append(
+                        ScriptResultItem(
+                            query=sql,
+                        )
+                    )
+
+                    logger.success(
+                        f"Update executed successfully.\n"
+                        f"Connection: '{session.connection.name}'.\n"
+                        f"Query: {sql}"
                     )
 
             if has_errors:

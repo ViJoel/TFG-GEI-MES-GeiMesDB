@@ -1001,7 +1001,8 @@ def test_execute_updates_with_sqlalchemy_error():
 
 def test_execute_updates_unexpected_exception():
     """
-    Una excepción inesperada debe hacer rollback y
+    Una excepción inesperada al iniciar la
+    transacción debe hacer rollback y
     propagarse.
     """
 
@@ -1012,17 +1013,12 @@ def test_execute_updates_unexpected_exception():
 
     conn = MagicMock()
 
-    transaction = MagicMock()
-
-    conn.begin.return_value = transaction
-    conn.begin_nested.side_effect = RuntimeError("boom")
+    # Error inesperado antes de comenzar la transacción.
+    conn.begin.side_effect = RuntimeError("boom")
 
     session.engine.connect.return_value.__enter__.return_value = conn
-    session.engine.dialect = MagicMock()
 
     operation = MagicMock(spec=UpdateOperation)
-    operation.to_statement.return_value = "stmt"
-    operation.to_sql.return_value = "sql"
 
     with pytest.raises(RuntimeError, match="boom"):
         manager.execute_updates(
@@ -1030,5 +1026,51 @@ def test_execute_updates_unexpected_exception():
             [operation],
         )
 
+
+def test_execute_updates_prepare_error():
+    """
+    Si una operación falla durante la preparación
+    debe registrarse el error y continuar con el
+    resto de operaciones.
+    """
+
+    connection = create_connection()
+    session = create_session(connection)
+
+    manager._active_sessions[connection.id] = session
+
+    conn = MagicMock()
+
+    transaction = MagicMock()
+    savepoint = MagicMock()
+
+    conn.begin.return_value = transaction
+    conn.begin_nested.return_value = savepoint
+
+    session.engine.connect.return_value.__enter__.return_value = conn
+    session.engine.dialect = MagicMock()
+
+    op1 = MagicMock(spec=UpdateOperation)
+    op1.to_statement.side_effect = RuntimeError("boom")
+
+    op2 = MagicMock(spec=UpdateOperation)
+    op2.to_statement.return_value = "stmt2"
+    op2.to_sql.return_value = "sql2"
+
+    result = manager.execute_updates(
+        connection.id,
+        [op1, op2],
+    )
+
+    assert result.rolled_back is True
+
     transaction.rollback.assert_called_once()
     transaction.commit.assert_not_called()
+
+    savepoint.commit.assert_called_once()
+
+    assert result.items[0].query == "<Unable to generate SQL>"
+    assert result.items[0].error == "boom"
+
+    assert result.items[1].query == "sql2"
+    assert result.items[1].error is None

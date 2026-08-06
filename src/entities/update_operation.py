@@ -77,11 +77,81 @@ class UpdateOperation:
 
         stmt = self.to_statement()
 
-        return str(
-            stmt.compile(
-                dialect=dialect,
-                compile_kwargs={
-                    "literal_binds": True,
-                },
-            )
+        compiled = stmt.compile(
+            dialect=dialect,
         )
+
+        sql = str(compiled)
+
+        # Evitamos `literal_binds=True` y sustituimos
+        # manualmente los parámetros para obtener una
+        # representación SQL legible incluso cuando
+        # algunos valores no pueden compilarse como
+        # literales.
+        literals = {}
+
+        for key, value in compiled.params.items():
+
+            if isinstance(value, str):
+                literals[key] = f"'{value}'"
+
+            elif value is None:
+                literals[key] = "NULL"
+
+            else:
+                literals[key] = str(value)
+
+        paramstyle = dialect.paramstyle
+
+        if paramstyle == "pyformat":
+
+            for key, literal in literals.items():
+
+                sql = sql.replace(
+                    f"%({key})s",
+                    literal,
+                )
+
+        elif paramstyle == "named":
+
+            for key, literal in literals.items():
+
+                sql = sql.replace(
+                    f":{key}",
+                    literal,
+                )
+
+        elif paramstyle == "format":
+
+            for literal in literals.values():
+
+                sql = sql.replace(
+                    "%s",
+                    literal,
+                    1,
+                )
+
+        elif paramstyle == "qmark":
+
+            for literal in literals.values():
+
+                sql = sql.replace(
+                    "?",
+                    literal,
+                    1,
+                )
+
+        elif paramstyle == "numeric":
+
+            for index, literal in enumerate(
+                literals.values(),
+                start=1,
+            ):
+
+                sql = sql.replace(
+                    f":{index}",
+                    literal,
+                    1,
+                )
+
+        return sql
