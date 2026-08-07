@@ -22,17 +22,33 @@ from ui.widgets.settings.settings_menu import SettingsMenu
 @pytest.fixture
 def menu(qtbot):
 
+    widget = SettingsMenu()
+
+    qtbot.addWidget(widget)
+
+    return widget
+
+
+@pytest.fixture(autouse=True)
+def mock_settings_managers():
+
     with (
         patch(
             "ui.widgets.settings.settings_menu.ThemeManager.get_themes",
             return_value={
-                "themes": ["dark", "light"],
+                "themes": [
+                    "dark",
+                    "light",
+                ],
                 "current_theme": "dark",
             },
         ),
         patch(
             "ui.widgets.settings.settings_menu.ThemeManager.current_theme",
             return_value="dark",
+        ),
+        patch(
+            "ui.widgets.settings.settings_menu.ThemeManager.set_theme",
         ),
         patch(
             "ui.widgets.settings.settings_menu.TranslationManager.get_languages",
@@ -48,12 +64,11 @@ def menu(qtbot):
             "ui.widgets.settings.settings_menu.TranslationManager.current_language",
             return_value="en",
         ),
+        patch(
+            "ui.widgets.settings.settings_menu.TranslationManager.set_language",
+        ),
     ):
-        widget = SettingsMenu()
-
-    qtbot.addWidget(widget)
-
-    return widget
+        yield
 
 
 # =============================================================================
