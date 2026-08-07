@@ -36,6 +36,8 @@ class SettingsMenu(QWidget):
         self.themes = ThemeManager.get_themes()
         self.languages = TranslationManager.get_languages()
 
+        self._save_current_settings()
+
         self._setup_ui()
         self._connect_signals()
 
@@ -261,6 +263,10 @@ class SettingsMenu(QWidget):
             self._on_apply_requested,
         )
 
+        self.cancel_button.clicked.connect(
+            self._on_cancel_button_clicked,
+        )
+
     # ======================
     # === EVENT HANDLERS ===
     # ======================
@@ -268,6 +274,10 @@ class SettingsMenu(QWidget):
     def _on_setting_changed(
         self,
     ) -> None:
+        """
+        Actualiza el estado de los botones de acción
+        según existan cambios pendientes.
+        """
 
         dirty = self._has_pending_changes()
 
@@ -277,6 +287,10 @@ class SettingsMenu(QWidget):
     def _on_apply_requested(
         self,
     ) -> None:
+        """
+        Aplica los cambios pendientes en la configuración
+        y actualiza el estado de la interfaz.
+        """
 
         try:
 
@@ -319,6 +333,16 @@ class SettingsMenu(QWidget):
 
             return
 
+    def _on_cancel_button_clicked(
+        self,
+    ) -> None:
+        """
+        Restaura la configuración guardada,
+        descartando los cambios pendientes.
+        """
+
+        self._restore_settings()
+
     # =====================
     # === EVENT HELPERS ===
     # =====================
@@ -326,6 +350,10 @@ class SettingsMenu(QWidget):
     def _has_pending_changes(
         self,
     ) -> bool:
+        """
+        Indica si la configuración seleccionada difiere
+        de la configuración actualmente aplicada.
+        """
 
         theme_changed = self.theme_input.currentText() != ThemeManager.current_theme()
 
@@ -338,6 +366,10 @@ class SettingsMenu(QWidget):
     def _apply_settings(
         self,
     ) -> None:
+        """
+        Aplica los ajustes seleccionados y los marca
+        como configuración actual.
+        """
 
         ThemeManager.set_theme(
             self.theme_input.currentText(),
@@ -346,3 +378,53 @@ class SettingsMenu(QWidget):
         TranslationManager.set_language(
             self.language_input.currentData(),
         )
+
+        self._save_current_settings()
+
+    # ===================
+    # === PRIVATE API ===
+    # ===================
+
+    def _save_current_settings(
+        self,
+    ) -> None:
+        """
+        Guarda la configuración actualmente aplicada
+        como referencia para restauraciones posteriores.
+        """
+
+        self._saved_settings = {
+            "theme": ThemeManager.current_theme(),
+            "language": TranslationManager.current_language(),
+        }
+
+    def _restore_settings(
+        self,
+    ) -> None:
+        """
+        Restaura la configuración guardada y descarta
+        los cambios pendientes en la interfaz.
+        """
+
+        self.theme_input.blockSignals(True)
+        self.language_input.blockSignals(True)
+
+        try:
+
+            self.theme_input.setCurrentText(
+                self._saved_settings["theme"],
+            )
+
+            index = self.language_input.findData(
+                self._saved_settings["language"],
+            )
+
+            if index >= 0:
+                self.language_input.setCurrentIndex(index)
+
+        finally:
+
+            self.theme_input.blockSignals(False)
+            self.language_input.blockSignals(False)
+
+        self._on_setting_changed()

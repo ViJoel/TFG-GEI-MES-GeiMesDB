@@ -206,12 +206,17 @@ def test_apply_settings(menu):
         patch(
             "ui.widgets.settings.settings_menu.TranslationManager.set_language",
         ) as set_language,
+        patch.object(
+            menu,
+            "_save_current_settings",
+        ) as save_settings,
     ):
 
         menu._apply_settings()
 
     set_theme.assert_called_once_with("light")
     set_language.assert_called_once_with("es")
+    save_settings.assert_called_once()
 
 
 # =============================================================================
@@ -268,6 +273,18 @@ def test_on_apply_requested(menu):
 
     menu._apply_settings.assert_called_once()
     menu._on_setting_changed.assert_called_once()
+
+
+def test_on_cancel_button_clicked(menu):
+    """
+    Verifica que Cancel restaura la configuración.
+    """
+
+    menu._restore_settings = MagicMock()
+
+    menu._on_cancel_button_clicked()
+
+    menu._restore_settings.assert_called_once()
 
 
 # =============================================================================
@@ -415,3 +432,40 @@ def test_apply_requested_error(menu):
         message_type=MessageType.ERROR,
         message="Error changing settings.\nSee logs for details.",
     )
+
+
+# =============================================================================
+# PRIVATE API
+# =============================================================================
+
+
+def test_save_current_settings(menu):
+    """
+    Verifica que guarda la configuración aplicada.
+    """
+
+    menu._saved_settings = {}
+
+    menu._save_current_settings()
+
+    assert menu._saved_settings == {
+        "theme": "dark",
+        "language": "en",
+    }
+
+
+def test_restore_settings(menu):
+    """
+    Verifica que restaura la configuración guardada.
+    """
+
+    menu.theme_input.setCurrentText("light")
+    menu.language_input.setCurrentIndex(1)
+
+    menu._restore_settings()
+
+    assert menu.theme_input.currentText() == "dark"
+    assert menu.language_input.currentData() == "en"
+
+    assert not menu.apply_button.isEnabled()
+    assert not menu.accept_button.isEnabled()
