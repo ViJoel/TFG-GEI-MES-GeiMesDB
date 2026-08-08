@@ -397,8 +397,8 @@ def test_on_save_button_clicked_connects_and_execs(results_view, monkeypatch):
         or dialog_mock.confirmed.connect.called
     )
 
-    # Verifica exec llamado
-    dialog_mock.exec.assert_called_once()
+    # Verifica open llamado
+    dialog_mock.open.assert_called_once()
 
 
 def test_on_discard_button_clicked_connects_and_execs(results_view, monkeypatch):
@@ -422,7 +422,7 @@ def test_on_discard_button_clicked_connects_and_execs(results_view, monkeypatch)
         or dialog_mock.confirmed.connect.called
     )
 
-    dialog_mock.exec.assert_called_once()
+    dialog_mock.open.assert_called_once()
 
 
 # =============================================================================

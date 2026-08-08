@@ -348,7 +348,7 @@ class ResultsView(QWidget):
             self._save_changes,
         )
 
-        dialog.exec()
+        dialog.open()
 
     def _on_discard_button_clicked(
         self,
@@ -366,7 +366,7 @@ class ResultsView(QWidget):
             self._discard_changes,
         )
 
-        dialog.exec()
+        dialog.open()
 
     # =====================
     # === EVENT HELPERS ===

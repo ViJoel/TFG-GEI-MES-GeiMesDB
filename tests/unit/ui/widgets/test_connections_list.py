@@ -464,7 +464,7 @@ def test_on_delete_button_clicked_opens_confirmation_dialog(
 
     dialog_cls.assert_called_once()
 
-    dialog.exec.assert_called_once()
+    dialog.open.assert_called_once()
 
 
 def test_on_delete_button_clicked_connects_confirmation(
@@ -489,7 +489,7 @@ def test_on_delete_button_clicked_connects_confirmation(
         def __init__(self, *_, **__):
             self.confirmed = FakeSignal()
 
-        def exec(self):
+        def open(self):
             pass
 
     monkeypatch.setattr(

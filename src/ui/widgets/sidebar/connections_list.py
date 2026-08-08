@@ -442,7 +442,7 @@ class ConnectionsList(QWidget):
 
         dialog.confirmed.connect(lambda: self._close_and_delete_connection(connection))
 
-        dialog.exec()
+        dialog.open()
 
     def _on_edit_button_clicked(
         self,
