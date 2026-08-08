@@ -1,4 +1,3 @@
-from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QPushButton
 from pytestqt.qtbot import QtBot
 
@@ -22,6 +21,27 @@ def _open_connection_form(
     qtbot: QtBot,
     window: MainWindow,
 ):
+    """
+    Abre el formulario de creación de una nueva conexión.
+
+    Localiza el botón de añadir conexión en la ventana principal,
+    simula un clic sobre él y verifica que la aplicación navega
+    correctamente hasta el formulario de conexiones.
+
+    Args:
+        qtbot (QtBot):
+            Fixture de pytest-qt utilizada para interactuar con
+            la interfaz gráfica durante los tests.
+
+        window (MainWindow):
+            Ventana principal de la aplicación sobre la que se
+            realizará la interacción.
+
+    Returns:
+        ConnectionForm:
+            Formulario de conexión actualmente mostrado.
+    """
+
     add_button = window.findChild(
         QPushButton,
         "add_connection",

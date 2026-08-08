@@ -3,7 +3,7 @@ from entities.driver import Driver
 
 MYSQL_CONNECTION = Connection(
     id="1-e2e-mysql",
-    name="E2E MySQL",
+    name="1 - E2E MySQL",
     driver=Driver.MYSQL,
     host="localhost",
     port=3306,
@@ -15,7 +15,7 @@ MYSQL_CONNECTION = Connection(
 
 ORACLE_CONNECTION = Connection(
     id="1-e2e-oracle",
-    name="E2E Oracle",
+    name="1 - E2E Oracle",
     driver=Driver.ORACLE,
     host="oracle",
     port=1521,
@@ -27,7 +27,7 @@ ORACLE_CONNECTION = Connection(
 
 POSTGRESQL_CONNECTION = Connection(
     id="1-e2e-postgresql",
-    name="E2E PostgreSQL",
+    name="1 - E2E PostgreSQL",
     driver=Driver.POSTGRESQL,
     host="localhost",
     port=5432,
@@ -39,7 +39,7 @@ POSTGRESQL_CONNECTION = Connection(
 
 SQLITE_CONNECTION = Connection(
     id="1-e2e-sqlite",
-    name="E2E SQLite",
+    name="1 - E2E SQLite",
     driver=Driver.SQLITE,
     path=None,
 )
