@@ -6,6 +6,17 @@ from entities.driver import Driver
 from modules.connections.model import get_all_connections
 from ui.app.main_window import MainWindow
 
+# =============================================================================
+# VARIABLES
+# =============================================================================
+
+_INITIAL_CONNECTIONS = 4
+_NEW_CONNECTION_POSITION = 4
+
+# =============================================================================
+# FUNCTIONS
+# =============================================================================
+
 
 def _open_connection_form(
     qtbot: QtBot,
@@ -18,14 +29,16 @@ def _open_connection_form(
 
     assert add_button is not None
 
-    qtbot.mouseClick(
-        add_button,
-        Qt.MouseButton.LeftButton,
-    )
+    add_button.click()
 
     assert window.stack.currentWidget() is window.connection_form_page
 
     return window.connection_form
+
+
+# =============================================================================
+# TESTS
+# =============================================================================
 
 
 def test_create_sqlite_connection_success(
@@ -41,30 +54,17 @@ def test_create_sqlite_connection_success(
         main_window,
     )
 
-    qtbot.keyClicks(
-        form.name_input,
-        "SQLite connection",
-    )
+    form.name_input.setText("SQLite connection")
+    form.driver_input.setCurrentText(Driver.SQLITE.value)
+    form.path_input.setText("/tmp/database.db")
 
-    form.driver_input.setCurrentText(
-        Driver.SQLITE.value,
-    )
-
-    qtbot.keyClicks(
-        form.path_input,
-        "/tmp/database.db",
-    )
-
-    qtbot.mouseClick(
-        form.save_button,
-        Qt.MouseButton.LeftButton,
-    )
+    form.save_button.click()
 
     connections = get_all_connections()
 
-    assert len(connections) == 1
+    assert len(connections) == _INITIAL_CONNECTIONS + 1
 
-    connection = connections[0]
+    connection = connections[_NEW_CONNECTION_POSITION]
 
     assert connection.name == "SQLite connection"
     assert connection.driver == Driver.SQLITE
@@ -72,7 +72,10 @@ def test_create_sqlite_connection_success(
 
     assert main_window.stack.currentWidget() is main_window.home_page
 
-    assert main_window.sidebar.connections_list.list_widget.count() == 1
+    assert (
+        main_window.sidebar.connections_list.list_widget.count()
+        == _INITIAL_CONNECTIONS + 1
+    )
 
 
 def test_create_sqlite_connection_invalid_data(
@@ -88,22 +91,19 @@ def test_create_sqlite_connection_invalid_data(
         main_window,
     )
 
-    form.driver_input.setCurrentText(
-        Driver.SQLITE.value,
-    )
+    form.driver_input.setCurrentText(Driver.SQLITE.value)
 
     # Nombre y ruta vacíos.
 
-    qtbot.mouseClick(
-        form.save_button,
-        Qt.MouseButton.LeftButton,
-    )
+    form.save_button.click()
 
-    assert get_all_connections() == []
+    assert len(get_all_connections()) == _INITIAL_CONNECTIONS
 
     assert main_window.stack.currentWidget() is main_window.connection_form_page
 
-    assert main_window.sidebar.connections_list.list_widget.count() == 0
+    assert (
+        main_window.sidebar.connections_list.list_widget.count() == _INITIAL_CONNECTIONS
+    )
 
 
 def test_create_postgresql_connection_success(
@@ -131,9 +131,9 @@ def test_create_postgresql_connection_success(
 
     connections = get_all_connections()
 
-    assert len(connections) == 1
+    assert len(connections) == _INITIAL_CONNECTIONS + 1
 
-    connection = connections[0]
+    connection = connections[_NEW_CONNECTION_POSITION]
 
     assert connection.name == "PostgreSQL connection"
     assert connection.driver == Driver.POSTGRESQL
@@ -145,7 +145,10 @@ def test_create_postgresql_connection_success(
 
     assert main_window.stack.currentWidget() is main_window.home_page
 
-    assert main_window.sidebar.connections_list.list_widget.count() == 1
+    assert (
+        main_window.sidebar.connections_list.list_widget.count()
+        == _INITIAL_CONNECTIONS + 1
+    )
 
 
 def test_create_postgresql_connection_invalid_data(
@@ -161,27 +164,20 @@ def test_create_postgresql_connection_invalid_data(
         main_window,
     )
 
-    qtbot.keyClicks(
-        form.name_input,
-        "Broken connection",
-    )
-
-    form.driver_input.setCurrentText(
-        Driver.POSTGRESQL.value,
-    )
+    form.name_input.setText("Broken connection")
+    form.driver_input.setCurrentText(Driver.POSTGRESQL.value)
 
     # Dejamos todos los campos obligatorios vacíos.
 
-    qtbot.mouseClick(
-        form.save_button,
-        Qt.MouseButton.LeftButton,
-    )
+    form.save_button.click()
 
-    assert get_all_connections() == []
+    assert len(get_all_connections()) == _INITIAL_CONNECTIONS
 
     assert main_window.stack.currentWidget() is main_window.connection_form_page
 
-    assert main_window.sidebar.connections_list.list_widget.count() == 0
+    assert (
+        main_window.sidebar.connections_list.list_widget.count() == _INITIAL_CONNECTIONS
+    )
 
 
 def test_create_mysql_connection_success(
@@ -211,9 +207,9 @@ def test_create_mysql_connection_success(
 
     connections = get_all_connections()
 
-    assert len(connections) == 1
+    assert len(connections) == _INITIAL_CONNECTIONS + 1
 
-    connection = connections[0]
+    connection = connections[_NEW_CONNECTION_POSITION]
 
     assert connection.name == "MySQL connection"
     assert connection.driver == Driver.MYSQL
@@ -225,7 +221,10 @@ def test_create_mysql_connection_success(
 
     assert main_window.stack.currentWidget() is main_window.home_page
 
-    assert main_window.sidebar.connections_list.list_widget.count() == 1
+    assert (
+        main_window.sidebar.connections_list.list_widget.count()
+        == _INITIAL_CONNECTIONS + 1
+    )
 
 
 def test_create_mysql_connection_invalid_data(
@@ -241,23 +240,20 @@ def test_create_mysql_connection_invalid_data(
         main_window,
     )
 
-    form.name_input.setText(
-        "Broken connection",
-    )
-
-    form.driver_input.setCurrentText(
-        Driver.MYSQL.value,
-    )
+    form.name_input.setText("Broken connection")
+    form.driver_input.setCurrentText(Driver.MYSQL.value)
 
     # Dejamos todos los campos obligatorios vacíos.
 
     form.save_button.click()
 
-    assert get_all_connections() == []
+    assert len(get_all_connections()) == _INITIAL_CONNECTIONS
 
     assert main_window.stack.currentWidget() is main_window.connection_form_page
 
-    assert main_window.sidebar.connections_list.list_widget.count() == 0
+    assert (
+        main_window.sidebar.connections_list.list_widget.count() == _INITIAL_CONNECTIONS
+    )
 
 
 def test_create_oracle_connection_success(
@@ -273,41 +269,21 @@ def test_create_oracle_connection_success(
         main_window,
     )
 
-    form.name_input.setText(
-        "Oracle connection",
-    )
-
-    form.driver_input.setCurrentText(
-        Driver.ORACLE.value,
-    )
-
-    form.host_input.setText(
-        "localhost",
-    )
-
-    form.port_input.setText(
-        "1521",
-    )
-
-    form.database_input.setText(
-        "oracle",
-    )
-
-    form.username_input.setText(
-        "oracle",
-    )
-
-    form.password_input.setText(
-        "oracle",
-    )
+    form.name_input.setText("Oracle connection")
+    form.driver_input.setCurrentText(Driver.ORACLE.value)
+    form.host_input.setText("localhost")
+    form.port_input.setText("1521")
+    form.database_input.setText("oracle")
+    form.username_input.setText("oracle")
+    form.password_input.setText("oracle")
 
     form.save_button.click()
 
     connections = get_all_connections()
 
-    assert len(connections) == 1
+    assert len(connections) == _INITIAL_CONNECTIONS + 1
 
-    connection = connections[0]
+    connection = connections[_NEW_CONNECTION_POSITION]
 
     assert connection.name == "Oracle connection"
     assert connection.driver == Driver.ORACLE
@@ -319,7 +295,10 @@ def test_create_oracle_connection_success(
 
     assert main_window.stack.currentWidget() is main_window.home_page
 
-    assert main_window.sidebar.connections_list.list_widget.count() == 1
+    assert (
+        main_window.sidebar.connections_list.list_widget.count()
+        == _INITIAL_CONNECTIONS + 1
+    )
 
 
 def test_create_oracle_connection_invalid_data(
@@ -335,20 +314,17 @@ def test_create_oracle_connection_invalid_data(
         main_window,
     )
 
-    form.name_input.setText(
-        "Broken connection",
-    )
-
-    form.driver_input.setCurrentText(
-        Driver.ORACLE.value,
-    )
+    form.name_input.setText("Broken connection")
+    form.driver_input.setCurrentText(Driver.ORACLE.value)
 
     # Dejamos todos los campos obligatorios vacíos.
 
     form.save_button.click()
 
-    assert get_all_connections() == []
+    assert len(get_all_connections()) == _INITIAL_CONNECTIONS
 
     assert main_window.stack.currentWidget() is main_window.connection_form_page
 
-    assert main_window.sidebar.connections_list.list_widget.count() == 0
+    assert (
+        main_window.sidebar.connections_list.list_widget.count() == _INITIAL_CONNECTIONS
+    )
