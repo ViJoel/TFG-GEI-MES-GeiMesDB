@@ -120,9 +120,13 @@ def test_set_theme_invalid():
 
 
 @patch.object(ThemeManager, "apply")
-def test_set_theme_emits_signal(mock_apply):
+@patch("ui.themes.theme_manager.save_setting")
+def test_set_theme_emits_signal(
+    mock_save,
+    mock_apply,
+):
     """
-    Debe notificar el cambio de tema.
+    Debe guardar y notificar el cambio de tema.
     """
 
     slot = MagicMock()
@@ -132,6 +136,8 @@ def test_set_theme_emits_signal(mock_apply):
     ThemeManager._current_theme = "dark"
 
     ThemeManager.set_theme("light")
+
+    mock_save.assert_called_once()
 
     slot.assert_called_once_with("light")
 
