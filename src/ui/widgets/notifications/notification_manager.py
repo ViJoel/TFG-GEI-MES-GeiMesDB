@@ -149,3 +149,13 @@ class NotificationManager:
         Expone la función de reposicionamiento.
         """
         self._reposition()
+
+    def clear(
+        self,
+    ) -> None:
+        """
+        Elimina todas las notificaciones.
+        """
+
+        for notification in self.notifications.copy():
+            self._remove(notification)

@@ -1,3 +1,5 @@
+from collections.abc import Generator
+
 import pytest
 from pytestqt.qtbot import QtBot
 from qtpy.QtWidgets import QApplication
@@ -15,12 +17,12 @@ def main_window(
     qtbot: QtBot,
     temporary_database,
     temporary_logging,
-) -> MainWindow:
+) -> Generator[MainWindow, None, None]:
     """
     Construye la ventana principal de la aplicación
     sobre una base de datos temporal.
 
-    Returns:
+    Yields:
         MainWindow:
             Ventana principal lista para ser utilizada
             por los tests E2E.
@@ -53,4 +55,6 @@ def main_window(
 
     window.show()
 
-    return window
+    yield window
+
+    notification_manager.clear()
