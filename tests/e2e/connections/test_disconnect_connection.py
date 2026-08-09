@@ -112,17 +112,74 @@ def _connect_to_db(
     connect_button.click()
 
 
+def _disconnect_from_db(
+    qtbot: QtBot,
+    window: MainWindow,
+    connection_name: str,
+):
+    """
+    Selecciona una conexión activa y solicita su cierre.
+
+    Args:
+        qtbot (QtBot):
+            Objeto de pytest-qt utilizado para interactuar con la
+            interfaz de usuario y gestionar operaciones asíncronas.
+
+        window (MainWindow):
+            Ventana principal que contiene la lista de conexiones
+            y los controles para desconectarlas.
+
+        connection_name (str):
+            Nombre de la conexión que se desea cerrar.
+
+    Raises:
+        AssertionError:
+            Si la conexión no se encuentra, si el item de la conexión
+            no está seleccionado o si los botones no se encuentran
+            en el estado esperado.
+
+    Note:
+        Este método únicamente inicia la operación de desconexión.
+        La finalización de la operación se gestiona de forma asíncrona
+        y debe esperarse en el test mediante `qtbot.waitUntil()`.
+    """
+
+    # Localizar lista de conexiones.
+    list_widget = window.sidebar.connections_list.list_widget
+
+    # Obtener item de la lista y objeto Connection metido dentro del item.
+    item, connection = _get_connection_item(
+        window,
+        connection_name,
+    )
+    assert connection.name == connection_name
+
+    # Comprobamos el item seleccionado.
+    assert list_widget.currentItem() is item
+
+    # Localizar botón de conectar.
+    connect_button = window.sidebar.connections_list.connect_button
+    assert not connect_button.isEnabled()
+
+    # Localizar botón de desconectar.
+    disconnect_button = window.sidebar.connections_list.disconnect_button
+    assert disconnect_button.isEnabled()
+
+    # Clikamos el botón de desconectar.
+    disconnect_button.click()
+
+
 # =============================================================================
 # TESTS
 # =============================================================================
 
 
-def test_connect_postgresql_success(
+def test_disconnect_postgresql_success(
     qtbot: QtBot,
     main_window: MainWindow,
 ):
     """
-    Verifica el resultado de una conexión exitosa.
+    Verifica el resultado de una desconexión exitosa.
     """
 
     connection_name = "1 - E2E PostgreSQL"
@@ -149,13 +206,35 @@ def test_connect_postgresql_success(
     workspace = main_window.workspaces[connection.id]
     assert main_window.stack.currentWidget() is workspace
 
+    # Validar que se haya creado el workspace.
+    assert len(main_window.workspaces) == 1
 
-def test_connect_mysql_success(
+    _disconnect_from_db(
+        qtbot=qtbot,
+        window=main_window,
+        connection_name=connection_name,
+    )
+
+    # Esperar a que el ID de la conexión desaparezca del diccionario de workspaces.
+    qtbot.waitUntil(
+        lambda: connection.id not in main_window.workspaces,
+        timeout=5000,
+    )
+
+    # Validar que la vista actual sea la de home.
+    main_window.home_page
+    assert main_window.stack.currentWidget() is main_window.home_page
+
+    # Validar que se haya eliminado el workspace.
+    assert len(main_window.workspaces) == 0
+
+
+def test_disconnect_mysql_success(
     qtbot: QtBot,
     main_window: MainWindow,
 ):
     """
-    Verifica el resultado de una conexión exitosa.
+    Verifica el resultado de una desconexión exitosa.
     """
 
     connection_name = "1 - E2E MySQL"
@@ -182,18 +261,61 @@ def test_connect_mysql_success(
     workspace = main_window.workspaces[connection.id]
     assert main_window.stack.currentWidget() is workspace
 
+    # Validar que se haya creado el workspace.
+    assert len(main_window.workspaces) == 1
 
-def test_connect_error(
+    _disconnect_from_db(
+        qtbot=qtbot,
+        window=main_window,
+        connection_name=connection_name,
+    )
+
+    # Esperar a que el ID de la conexión desaparezca del diccionario de workspaces.
+    qtbot.waitUntil(
+        lambda: connection.id not in main_window.workspaces,
+        timeout=5000,
+    )
+
+    # Validar que la vista actual sea la de home.
+    main_window.home_page
+    assert main_window.stack.currentWidget() is main_window.home_page
+
+    # Validar que se haya eliminado el workspace.
+    assert len(main_window.workspaces) == 0
+
+
+def test_disconnect_error(
     qtbot: QtBot,
     main_window: MainWindow,
+    monkeypatch,
 ):
     """
-    Verifica que una conexión fallida no crea un
+    Verifica que una desconexión fallida no elimina el
     workspace y muestra una notificación de error.
     """
 
-    # Nombre de la conexión que provocará el error.
-    connection_name = "1 - E2E Oracle"
+    connection_name = "1 - E2E PostgreSQL"
+
+    _connect_to_db(
+        qtbot=qtbot,
+        window=main_window,
+        connection_name=connection_name,
+    )
+
+    # Obtener objeto Connection de la lista de conexiones.
+    _, connection = _get_connection_item(
+        main_window,
+        connection_name,
+    )
+
+    # Esperar a que el ID de la conexión aparezca en el diccionario de workspaces.
+    qtbot.waitUntil(
+        lambda: connection.id in main_window.workspaces,
+        timeout=5000,
+    )
+
+    # Guardar el workspace para comprobar que permanece tras el error.
+    workspace = main_window.workspaces[connection.id]
 
     # Obtener la colección de notificaciones gestionadas
     # por la ventana actual.
@@ -203,8 +325,19 @@ def test_connect_error(
     # de iniciar la operación.
     previous_count = len(notifications)
 
-    # Seleccionar la conexión y solicitar su apertura.
-    _connect_to_db(
+    # Forzar un error durante la desconexión.
+    def _raise_disconnect_error(
+        *args,
+        **kwargs,
+    ):
+        raise RuntimeError("Disconnect failed.")
+
+    monkeypatch.setattr(
+        "ui.app.main_window.close_session",
+        _raise_disconnect_error,
+    )
+
+    _disconnect_from_db(
         qtbot=qtbot,
         window=main_window,
         connection_name=connection_name,
@@ -228,14 +361,19 @@ def test_connect_error(
     )
 
     # Comprobar que el mensaje corresponde al error
-    # de conexión esperado, respetando la traducción actual.
+    # de desconexión esperado, respetando la traducción actual.
     assert error_notification.message == main_window.tr(
-        "Connection failed.",
+        "Disconnection failed.",
     )
 
+    # Validar que el workspace no haya sido eliminado.
+    assert connection.id in main_window.workspaces
+
+    # Validar que el mismo workspace siga siendo la vista actual.
+    assert main_window.workspaces[connection.id] is workspace
+    assert main_window.stack.currentWidget() is workspace
+
     # Esperar a que la notificación desaparezca automáticamente.
-    # Esto permite que finalice su temporizador antes de destruir
-    # la ventana del test.
     qtbot.waitUntil(
         lambda: not notifications,
         timeout=5000,
