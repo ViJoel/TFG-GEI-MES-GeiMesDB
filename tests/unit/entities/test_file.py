@@ -181,7 +181,8 @@ def test_change_path_updates_path_and_name():
 
 def test_exists_on_disk_without_path():
     """
-    Comprueba que indica que el archivo no existe sin una ruta asociada.
+    Comprueba que indica que el archivo no existe
+    cuando no tiene una ruta asociada.
     """
 
     file = File()
@@ -189,11 +190,52 @@ def test_exists_on_disk_without_path():
     assert file.existsOnDisk is False
 
 
-def test_exists_on_disk_with_path():
+def test_exists_on_disk_with_existing_file(
+    tmp_path: Path,
+):
     """
-    Comprueba que indica que el archivo existe cuando tiene una ruta asociada.
+    Comprueba que indica que el archivo existe
+    cuando la ruta apunta a un archivo existente.
     """
 
-    file = File(path=Path("does_not_matter.sql"))
+    path = tmp_path / "test.sql"
+    path.touch()
+
+    file = File(path=path)
+
+    assert file.existsOnDisk is True
+
+
+def test_exists_on_disk_with_non_existing_file(
+    tmp_path: Path,
+):
+    """
+    Comprueba que indica que el archivo no existe
+    cuando la ruta no apunta a un archivo existente.
+    """
+
+    path = tmp_path / "does_not_exist.sql"
+
+    file = File(path=path)
+
+    assert file.existsOnDisk is False
+
+
+def test_exists_on_disk_after_change_path(
+    tmp_path: Path,
+):
+    """
+    Comprueba que existsOnDisk refleja correctamente
+    la existencia del archivo después de cambiar su ruta.
+    """
+
+    path = tmp_path / "new.sql"
+    path.touch()
+
+    file = File()
+
+    assert file.existsOnDisk is False
+
+    file.change_path(path)
 
     assert file.existsOnDisk is True

@@ -1,0 +1,261 @@
+from pathlib import Path
+
+import pytest
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
+    QDialog,
+    QFileDialog,
+)
+from pytestqt.qtbot import QtBot
+
+from entities.connection import Connection
+from ui.app.main_window import MainWindow
+from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
+from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
+from ui.widgets.workspace.sql_editor.sql_editor_area import SqlEditorArea
+
+# =============================================================================
+# FUNCTIONS
+# =============================================================================
+
+
+def get_connection_item(
+    window: MainWindow,
+    connection_name: str,
+):
+    """
+    Obtiene el item y la conexión asociada a partir del nombre.
+
+    Args:
+        window (MainWindow):
+            Ventana principal que contiene la lista de conexiones.
+
+        connection_name (str):
+            Nombre de la conexión que se desea localizar.
+
+    Returns:
+        tuple:
+            Item de la lista y objeto Connection asociado.
+
+    Raises:
+        AssertionError:
+            Si no existe ninguna conexión con el nombre indicado.
+    """
+
+    list_widget = window.sidebar.connections_list.list_widget
+
+    for index in range(list_widget.count()):
+
+        item = list_widget.item(index)
+
+        connection = item.data(
+            Qt.ItemDataRole.UserRole,
+        )
+
+        if connection.name == connection_name:
+            return item, connection
+
+    raise AssertionError(
+        f"Connection '{connection_name}' not found in the connections list."
+    )
+
+
+def connect_to_db(
+    qtbot: QtBot,
+    window: MainWindow,
+    connection_name: str,
+):
+    """
+    Selecciona una conexión y solicita su apertura.
+
+    Args:
+        qtbot (QtBot):
+            Objeto de pytest-qt utilizado para interactuar con la
+            interfaz de usuario y gestionar operaciones asíncronas.
+
+        window (MainWindow):
+            Ventana principal que contiene la lista de conexiones
+            y los controles para conectarlas.
+
+        connection_name (str):
+            Nombre de la conexión que se desea abrir.
+
+    Raises:
+        AssertionError:
+            Si los botones no se encuentran en el estado esperado,
+            si existe una selección previa, si no se encuentra la
+            conexión indicada o si la selección de la conexión no
+            se realiza correctamente.
+
+    Note:
+        Este método únicamente inicia la operación de conexión.
+        La finalización de la operación se gestiona de forma
+        asíncrona y debe esperarse en el test mediante `qtbot.waitUntil()`.
+    """
+
+    # Localizar botón de conectar.
+    connect_button = window.sidebar.connections_list.connect_button
+    assert not connect_button.isEnabled()
+
+    # Localizar botón de desconectar.
+    disconnect_button = window.sidebar.connections_list.disconnect_button
+    assert not disconnect_button.isEnabled()
+
+    # Localizar lista de conexiones.
+    list_widget = window.sidebar.connections_list.list_widget
+    assert list_widget.currentItem() is None
+
+    # Obtener item de la lista y objeto Connection metido dentro del item.
+    item, connection = get_connection_item(
+        window,
+        connection_name,
+    )
+    assert connection.name == connection_name
+
+    # Seleccionar conexión en la lista.
+    list_widget.setCurrentItem(item)
+    assert list_widget.currentItem() is item
+    assert connect_button.isEnabled()
+
+    # Clikamos el botón de conectar.
+    connect_button.click()
+
+    # Obtener objeto Connection de la lista de conexiones.
+    _, connection = get_connection_item(
+        window,
+        connection_name,
+    )
+
+    # Esperar a que el ID de la conexión aparezca en el diccionario de workspaces.
+    qtbot.waitUntil(
+        lambda: connection.id in window.workspaces,
+        timeout=5000,
+    )
+
+
+def disconnect_from_db(
+    qtbot: QtBot,
+    window: MainWindow,
+    connection_name: str,
+):
+    """
+    Selecciona una conexión activa y solicita su cierre.
+
+    Args:
+        qtbot (QtBot):
+            Objeto de pytest-qt utilizado para interactuar con la
+            interfaz de usuario y gestionar operaciones asíncronas.
+
+        window (MainWindow):
+            Ventana principal que contiene la lista de conexiones
+            y los controles para desconectarlas.
+
+        connection_name (str):
+            Nombre de la conexión que se desea cerrar.
+
+    Raises:
+        AssertionError:
+            Si la conexión no se encuentra, si el item de la conexión
+            no está seleccionado o si los botones no se encuentran
+            en el estado esperado.
+
+    Note:
+        Este método únicamente inicia la operación de desconexión.
+        La finalización de la operación se gestiona de forma asíncrona
+        y debe esperarse en el test mediante `qtbot.waitUntil()`.
+    """
+
+    # Localizar lista de conexiones.
+    list_widget = window.sidebar.connections_list.list_widget
+
+    # Obtener item de la lista y objeto Connection metido dentro del item.
+    item, connection = get_connection_item(
+        window,
+        connection_name,
+    )
+    assert connection.name == connection_name
+
+    # Comprobamos el item seleccionado.
+    assert list_widget.currentItem() is item
+
+    # Localizar botón de conectar.
+    connect_button = window.sidebar.connections_list.connect_button
+    assert not connect_button.isEnabled()
+
+    # Localizar botón de desconectar.
+    disconnect_button = window.sidebar.connections_list.disconnect_button
+    assert disconnect_button.isEnabled()
+
+    # Clikamos el botón de desconectar.
+    disconnect_button.click()
+
+    # Esperar a que el ID de la conexión desaparezca del diccionario de workspaces.
+    qtbot.waitUntil(
+        lambda: connection.id not in window.workspaces,
+        timeout=5000,
+    )
+
+
+def auto_accept_confirmation_dialog(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """
+    Configura el ConfirmationDialog para que se acepte
+    automáticamente durante la prueba.
+
+    Esto evita la interacción manual con diálogos modales
+    que aparecen durante el cierre de ventanas o widgets.
+
+    Args:
+        monkeypatch (pytest.MonkeyPatch):
+            Utilidad de pytest para sustituir temporalmente
+            el comportamiento del diálogo.
+    """
+
+    def accept_dialog(
+        dialog: ConfirmationDialog,
+    ) -> int:
+        dialog.accept()
+
+        return QDialog.DialogCode.Accepted
+
+    monkeypatch.setattr(
+        ConfirmationDialog,
+        "exec",
+        accept_dialog,
+    )
+
+
+def get_sql_editor_area(
+    main_window: MainWindow,
+    connection: Connection,
+) -> SqlEditorArea:
+
+    workspace = main_window.workspaces[connection.id]
+    return workspace.sql_editor_area
+
+
+def open_file(
+    qtbot: QtBot,
+    sql_editor_area: SqlEditorArea,
+    file_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> SqlEditor | None:
+
+    monkeypatch.setattr(
+        QFileDialog,
+        "getOpenFileName",
+        lambda *args, **kwargs: (
+            str(file_path),
+            "",
+        ),
+    )
+
+    sql_editor_area.toolbar.open_button.click()
+
+    qtbot.waitUntil(
+        lambda: sql_editor_area._get_current_editor() is not None,
+        timeout=5000,
+    )
+
+    return sql_editor_area._get_current_editor()
