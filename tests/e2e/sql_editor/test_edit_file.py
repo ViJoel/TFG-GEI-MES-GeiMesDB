@@ -24,7 +24,9 @@ from ui.app.main_window import MainWindow
 # =============================================================================
 
 SQL_FILE_CONTENT = "SELECT 1;\n"
+SQL_FILE_CONTENT_EDITED = "SELECT 2;\n"
 TXT_FILE_CONTENT = "This is a text file.\n"
+TXT_FILE_CONTENT_EDITED = "This content has been edited.\n"
 
 
 # =============================================================================
@@ -71,13 +73,11 @@ def test_edit_sql_file_success(
     assert editor.file.path == file_path
     assert editor.file.content == SQL_FILE_CONTENT
 
-    edited_content = "SELECT 2;\n"
-
-    editor.setPlainText(edited_content)
+    editor.setPlainText(SQL_FILE_CONTENT_EDITED)
 
     sql_editor_area.toolbar.save_button.click()
 
-    assert file_path.read_text(encoding="utf-8") == edited_content
+    assert file_path.read_text(encoding="utf-8") == SQL_FILE_CONTENT_EDITED
 
     disconnect_from_db(
         qtbot=qtbot,
@@ -125,13 +125,11 @@ def test_edit_txt_file_success(
     assert editor.file.path == file_path
     assert editor.file.content == TXT_FILE_CONTENT
 
-    edited_content = "This content has been edited.\n"
-
-    editor.setPlainText(edited_content)
+    editor.setPlainText(TXT_FILE_CONTENT_EDITED)
 
     sql_editor_area.toolbar.save_button.click()
 
-    assert file_path.read_text(encoding="utf-8") == edited_content
+    assert file_path.read_text(encoding="utf-8") == TXT_FILE_CONTENT_EDITED
 
     disconnect_from_db(
         qtbot=qtbot,
@@ -254,11 +252,9 @@ def test_edit_sql_file_save_error(
     """
 
     file_path = temporary_sql_directory / FILE_SQL
-    original_content = "SELECT 1;\n"
-    edited_content = "SELECT 2;\n"
 
     file_path.write_text(
-        original_content,
+        SQL_FILE_CONTENT,
         encoding="utf-8",
     )
 
@@ -286,11 +282,11 @@ def test_edit_sql_file_save_error(
         monkeypatch=monkeypatch,
     )
 
-    editor.setPlainText(edited_content)
+    editor.setPlainText(SQL_FILE_CONTENT_EDITED)
 
     sql_editor_area.toolbar.save_button.click()
 
-    assert file_path.read_text(encoding="utf-8") == original_content
+    assert file_path.read_text(encoding="utf-8") == SQL_FILE_CONTENT
 
     disconnect_from_db(
         qtbot=qtbot,
@@ -311,11 +307,9 @@ def test_edit_txt_file_save_error(
     """
 
     file_path = temporary_sql_directory / FILE_TXT
-    original_content = "Original content.\n"
-    edited_content = "Edited content.\n"
 
     file_path.write_text(
-        original_content,
+        TXT_FILE_CONTENT,
         encoding="utf-8",
     )
 
@@ -343,11 +337,11 @@ def test_edit_txt_file_save_error(
         monkeypatch=monkeypatch,
     )
 
-    editor.setPlainText(edited_content)
+    editor.setPlainText(TXT_FILE_CONTENT_EDITED)
 
     sql_editor_area.toolbar.save_button.click()
 
-    assert file_path.read_text(encoding="utf-8") == original_content
+    assert file_path.read_text(encoding="utf-8") == TXT_FILE_CONTENT
 
     disconnect_from_db(
         qtbot=qtbot,
@@ -369,11 +363,9 @@ def test_edit_sql_file_and_close_application(
     """
 
     sql_file = temporary_sql_directory / "test.sql"
-    original_text = "SELECT 1;\n"
-    modified_text = "SELECT 2;\n"
 
     sql_file.write_text(
-        original_text,
+        SQL_FILE_CONTENT,
         encoding="utf-8",
     )
 
@@ -402,10 +394,10 @@ def test_edit_sql_file_and_close_application(
 
     assert editor is not None
     assert editor.file.path == sql_file
-    assert editor.toPlainText() == original_text
+    assert editor.toPlainText() == SQL_FILE_CONTENT
 
     # Modificar el contenido sin guardarlo.
-    editor.setPlainText(modified_text)
+    editor.setPlainText(SQL_FILE_CONTENT_EDITED)
 
     assert editor.file.has_changes is True
     assert editor.file.existsOnDisk is True
@@ -417,4 +409,4 @@ def test_edit_sql_file_and_close_application(
     # aceptar automáticamente el diálogo.
     main_window.close()
 
-    assert sql_file.read_text(encoding="utf-8") == original_text
+    assert sql_file.read_text(encoding="utf-8") == SQL_FILE_CONTENT
