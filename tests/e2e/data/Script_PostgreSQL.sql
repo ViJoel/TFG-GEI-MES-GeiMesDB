@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS table_e2e_refresh;
+
 DROP TABLE IF EXISTS table_complex;
 DROP TABLE IF EXISTS table_supported;
 DROP TABLE IF EXISTS table_simple;
