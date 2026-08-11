@@ -61,3 +61,13 @@ pytest path/to/test/file.py::test_name -vv
 ```
 
 **Ejecutar un test específico con información detallada:** Ejecuta únicamente el test indicado y muestra información detallada sobre su ejecución.
+
+---
+
+## Comandos grandes para generar reporte de covertura
+
+```bash
+pytest --cov=src --cov-branch --cov-report=xml --cov-report=html tests
+pytest --cov=src --cov-branch --cov-report=xml --cov-report=html -vv tests
+pytest --cov=src --cov-branch --cov-report=xml --cov-report=html -vv -p no:warnings tests
+```

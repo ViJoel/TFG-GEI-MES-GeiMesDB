@@ -4,6 +4,7 @@
         "--cov-branch",
         "--cov-report=xml",
         "--cov-report=html",
+        "-vv",
         "tests"
     ],
     "python.testing.unittestEnabled": false,
