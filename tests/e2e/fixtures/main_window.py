@@ -4,6 +4,7 @@ import pytest
 from pytestqt.qtbot import QtBot
 from qtpy.QtWidgets import QApplication
 
+from main import shutdown
 from ui.app.app_context import AppContext
 from ui.app.main_window import MainWindow
 from ui.app.task_manager import TaskManager
@@ -57,4 +58,4 @@ def main_window(
 
     yield window
 
-    notification_manager.clear()
+    shutdown()

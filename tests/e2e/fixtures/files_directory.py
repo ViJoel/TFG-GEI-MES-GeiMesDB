@@ -20,7 +20,7 @@ def temporary_sql_directory(tmp_path: Path) -> Path:
     sql_path = tmp_path / FILE_SQL
 
     sql_path.write_text(
-        FILE_SQL_CONTENT.strip() + "\n",
+        FILE_SQL_CONTENT,
         encoding="utf-8",
     )
 
