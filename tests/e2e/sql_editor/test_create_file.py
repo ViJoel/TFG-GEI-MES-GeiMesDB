@@ -13,15 +13,6 @@ from tests.e2e.utils.functions import (
 from ui.app.main_window import MainWindow
 
 # =============================================================================
-# VARIABLES
-# =============================================================================
-
-# =============================================================================
-# FUNCTIONS
-# =============================================================================
-
-
-# =============================================================================
 # TESTS
 # =============================================================================
 
@@ -128,8 +119,6 @@ def test_create_file_error(
     sql_editor_area.toolbar.save_button.click()
 
     assert not created_file.exists()
-
-    # auto_accept_confirmation_dialog(monkeypatch)
 
     disconnect_from_db(
         qtbot=qtbot,

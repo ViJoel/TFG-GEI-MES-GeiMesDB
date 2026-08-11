@@ -13,7 +13,6 @@ from tests.e2e.data.files import (
     FILE_TXT_CONTENT,
 )
 from tests.e2e.utils.functions import (
-    auto_accept_confirmation_dialog,
     connect_to_db,
     disconnect_from_db,
     get_sql_editor_area,

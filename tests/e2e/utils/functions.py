@@ -13,6 +13,7 @@ from ui.app.main_window import MainWindow
 from ui.widgets.dialogs.confirmation_dialog import ConfirmationDialog
 from ui.widgets.workspace.sql_editor.sql_editor import SqlEditor
 from ui.widgets.workspace.sql_editor.sql_editor_area import SqlEditorArea
+from ui.widgets.workspace.workspace import Workspace
 
 # =============================================================================
 # FUNCTIONS
@@ -204,7 +205,7 @@ def auto_accept_confirmation_dialog(
     automáticamente durante la prueba.
 
     Esto evita la interacción manual con diálogos modales
-    que aparecen durante el cierre de ventanas o widgets.
+    que aparecen durante las pruebas.
 
     Args:
         monkeypatch (pytest.MonkeyPatch):
@@ -212,18 +213,37 @@ def auto_accept_confirmation_dialog(
             el comportamiento del diálogo.
     """
 
-    def accept_dialog(
+    def accept_exec(
         dialog: ConfirmationDialog,
     ) -> int:
         dialog.accept()
 
         return QDialog.DialogCode.Accepted
 
+    def accept_open(
+        dialog: ConfirmationDialog,
+    ) -> None:
+        dialog.confirmed.emit()
+
     monkeypatch.setattr(
         ConfirmationDialog,
         "exec",
-        accept_dialog,
+        accept_exec,
     )
+
+    monkeypatch.setattr(
+        ConfirmationDialog,
+        "open",
+        accept_open,
+    )
+
+
+def get_workspace(
+    main_window: MainWindow,
+    connection: Connection,
+) -> Workspace:
+
+    return main_window.workspaces[connection.id]
 
 
 def get_sql_editor_area(
@@ -231,8 +251,41 @@ def get_sql_editor_area(
     connection: Connection,
 ) -> SqlEditorArea:
 
-    workspace = main_window.workspaces[connection.id]
+    workspace = get_workspace(
+        main_window=main_window,
+        connection=connection,
+    )
+
     return workspace.sql_editor_area
+
+
+def create_new_editor(
+    sql_editor_area: SqlEditorArea,
+) -> SqlEditor:
+    """
+    Crea un nuevo editor SQL y lo devuelve.
+
+    Args:
+        sql_editor_area (SqlEditorArea):
+            Área del editor SQL donde se creará
+            el nuevo editor.
+
+    Returns:
+        SqlEditor:
+            Editor SQL recién creado.
+
+    Raises:
+        AssertionError:
+            Si no se consigue crear el editor.
+    """
+
+    sql_editor_area.toolbar.new_button.click()
+
+    editor = sql_editor_area._get_current_editor()
+
+    assert editor is not None
+
+    return editor
 
 
 def open_file(
