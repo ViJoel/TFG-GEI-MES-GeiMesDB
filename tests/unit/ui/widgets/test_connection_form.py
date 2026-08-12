@@ -284,16 +284,187 @@ def test_build_sqlite_connection(form):
     assert connection.password is None
 
 
-def test_build_connection_reuses_loaded_connection(form, connection):
+def test_build_connection_reuses_loaded_connection(
+    form,
+    connection,
+    monkeypatch,
+):
     """
     Verifica que el formulario reutiliza la conexión cargada.
     """
 
-    form.current_connection = connection
+    notify = MagicMock()
+
+    monkeypatch.setattr(
+        connection_form,
+        "notify",
+        notify,
+    )
+
+    form.load_connection(connection)
 
     result = form._build_connection_from_form()
 
     assert result is connection
+
+
+def test_build_connection_returns_none_when_form_is_invalid(
+    form,
+    monkeypatch,
+):
+    """
+    Verifica que no se construye una conexión
+    cuando la validación falla.
+    """
+
+    notify = MagicMock()
+
+    monkeypatch.setattr(
+        connection_form,
+        "notify",
+        notify,
+    )
+
+    result = form._build_connection_from_form()
+
+    assert result is None
+
+    notify.assert_called_once()
+
+
+# =============================================================================
+# VALIDATION
+# =============================================================================
+
+
+def test_validate_form_requires_name(form, monkeypatch):
+    """
+    Verifica que el formulario requiere nombre de conexión.
+    """
+
+    notify = MagicMock()
+
+    monkeypatch.setattr(
+        connection_form,
+        "notify",
+        notify,
+    )
+
+    form.driver_input.setCurrentText(Driver.SQLITE.value)
+    form.path_input.setText("/tmp/database.db")
+
+    result = form._validate_form()
+
+    assert result is False
+
+    notify.assert_called_once_with(
+        message_type=MessageType.ERROR,
+        message=form.tr("Connection name is required."),
+    )
+
+
+def test_validate_sqlite_requires_path(form, monkeypatch):
+    """
+    Verifica que SQLite requiere una ruta de archivo.
+    """
+
+    notify = MagicMock()
+
+    monkeypatch.setattr(
+        connection_form,
+        "notify",
+        notify,
+    )
+
+    form.name_input.setText("SQLite")
+    form.driver_input.setCurrentText(Driver.SQLITE.value)
+
+    result = form._validate_form()
+
+    assert result is False
+
+    notify.assert_called_once_with(
+        message_type=MessageType.ERROR,
+        message=form.tr("SQLite path is required."),
+    )
+
+
+def test_validate_network_connection_requires_fields(form, monkeypatch):
+    """
+    Verifica que una conexión de red requiere
+    todos los campos obligatorios.
+    """
+
+    notify = MagicMock()
+
+    monkeypatch.setattr(
+        connection_form,
+        "notify",
+        notify,
+    )
+
+    form.name_input.setText("Postgres")
+    form.driver_input.setCurrentText(Driver.POSTGRESQL.value)
+
+    result = form._validate_form()
+
+    assert result is False
+
+    notify.assert_called_once_with(
+        message_type=MessageType.ERROR,
+        message=form.tr("Missing required connection data."),
+    )
+
+
+def test_validate_valid_sqlite_connection(form, monkeypatch):
+    """
+    Verifica que una conexión SQLite válida pasa la validación.
+    """
+
+    notify = MagicMock()
+
+    monkeypatch.setattr(
+        connection_form,
+        "notify",
+        notify,
+    )
+
+    form.name_input.setText("SQLite")
+    form.driver_input.setCurrentText(Driver.SQLITE.value)
+    form.path_input.setText("/tmp/database.db")
+
+    result = form._validate_form()
+
+    assert result is True
+
+    notify.assert_not_called()
+
+
+def test_validate_valid_network_connection(form, monkeypatch):
+    """
+    Verifica que una conexión de red válida pasa la validación.
+    """
+
+    notify = MagicMock()
+
+    monkeypatch.setattr(
+        connection_form,
+        "notify",
+        notify,
+    )
+
+    form.name_input.setText("Postgres")
+    form.driver_input.setCurrentText(Driver.POSTGRESQL.value)
+    form.host_input.setText("localhost")
+    form.port_input.setText("5432")
+    form.database_input.setText("postgres")
+    form.username_input.setText("admin")
+
+    result = form._validate_form()
+
+    assert result is True
+
+    notify.assert_not_called()
 
 
 # =============================================================================
@@ -485,6 +656,48 @@ def test_save_button_handles_update_exception(
     saved.assert_not_called()
 
 
+def test_save_button_does_nothing_when_form_is_invalid(
+    form,
+    monkeypatch,
+):
+    """
+    Verifica que guardar no hace nada si
+    la validación del formulario falla.
+    """
+
+    create_connection = MagicMock()
+    update_connection = MagicMock()
+    notify = MagicMock()
+
+    monkeypatch.setattr(
+        connection_form,
+        "create_connection",
+        create_connection,
+    )
+
+    monkeypatch.setattr(
+        connection_form,
+        "update_connection",
+        update_connection,
+    )
+
+    monkeypatch.setattr(
+        connection_form,
+        "notify",
+        notify,
+    )
+
+    form.save_button.click()
+
+    create_connection.assert_not_called()
+    update_connection.assert_not_called()
+
+    notify.assert_called_once_with(
+        message_type=MessageType.ERROR,
+        message=form.tr("Connection name is required."),
+    )
+
+
 # =============================================================================
 # TEST CONNECTION
 # =============================================================================
@@ -605,6 +818,41 @@ def test_on_test_connection_error(form, monkeypatch):
     notify.assert_called_once_with(
         MessageType.ERROR,
         form.tr("Invalid connection data."),
+    )
+
+
+def test_test_connection_does_nothing_when_form_is_invalid(
+    form,
+    monkeypatch,
+):
+    """
+    Verifica que probar conexión no ejecuta
+    la tarea si la validación falla.
+    """
+
+    notify = MagicMock()
+
+    task_manager = MagicMock()
+
+    monkeypatch.setattr(
+        connection_form,
+        "notify",
+        notify,
+    )
+
+    monkeypatch.setattr(
+        connection_form.AppContext,
+        "get_task_manager",
+        MagicMock(return_value=task_manager),
+    )
+
+    form.test_connection_button.click()
+
+    task_manager.run.assert_not_called()
+
+    notify.assert_called_once_with(
+        message_type=MessageType.ERROR,
+        message=form.tr("Connection name is required."),
     )
 
 
