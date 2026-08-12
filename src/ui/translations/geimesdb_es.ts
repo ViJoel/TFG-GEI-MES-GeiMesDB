@@ -130,32 +130,32 @@
         <translation>Probando conexión...</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="936"/>
+        <location filename="../widgets/forms/connection_form.py" line="886"/>
         <source>Connection name is required.</source>
         <translation>Se requiere el nombre de la conexión.</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="948"/>
+        <location filename="../widgets/forms/connection_form.py" line="898"/>
         <source>SQLite path is required.</source>
         <translation>Se requiere la ruta de SQLite.</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="966"/>
+        <location filename="../widgets/forms/connection_form.py" line="916"/>
         <source>Missing required connection data.</source>
         <translation>Faltan los datos de conexión necesarios.</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="982"/>
+        <location filename="../widgets/forms/connection_form.py" line="983"/>
         <source>Connection successful.</source>
         <translation>Conexión exitosa.</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="989"/>
+        <location filename="../widgets/forms/connection_form.py" line="990"/>
         <source>Connection failed.</source>
         <translation>Conexión fallida.</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="1001"/>
+        <location filename="../widgets/forms/connection_form.py" line="1002"/>
         <source>Invalid connection data.</source>
         <translation>Datos de conexión no válidos.</translation>
     </message>
@@ -407,13 +407,13 @@
     </message>
     <message>
         <location filename="../widgets/workspace/results_view/results_view.py" line="128"/>
-        <source>Session queries history</source>
-        <translation>Historial de consultas de sesión</translation>
+        <source>Session History</source>
+        <translation>Historial de Sesión</translation>
     </message>
     <message>
         <location filename="../widgets/workspace/results_view/results_view.py" line="132"/>
-        <source>Connection queries history</source>
-        <translation>Historial de consultas de conexión</translation>
+        <source>Connection History</source>
+        <translation>Historial de Conexión</translation>
     </message>
     <message>
         <location filename="../widgets/workspace/results_view/results_view.py" line="136"/>
