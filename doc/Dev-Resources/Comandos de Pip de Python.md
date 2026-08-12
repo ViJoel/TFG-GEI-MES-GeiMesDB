@@ -12,11 +12,13 @@ pip freeze > requirements.txt
 pip install -r requirements.txt
 ```
 
-- Comprobar las licencias de las librerías
+- Librería para ver las licencias de las librerías.
 
 ```bash
 pip install pip-licenses
 ```
+
+- Muestra las licencias de las librerías instaladas.
 
 ```bash
 pip-licenses
