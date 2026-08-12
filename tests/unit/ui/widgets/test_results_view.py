@@ -484,10 +484,10 @@ def test_retranslate_ui_updates_all_texts(results_view):
     assert results_view.console_button.text() == results_view.tr("Console")
     assert results_view.table_button.text() == results_view.tr("Table")
     assert results_view.session_queries_history_button.text() == results_view.tr(
-        "Session queries history"
+        "Session History"
     )
     assert results_view.connection_queries_history_button.text() == results_view.tr(
-        "Connection queries history"
+        "Connection History"
     )
     assert results_view.save_button.text() == results_view.tr("Save")
     assert results_view.discard_button.text() == results_view.tr("Discard")
