@@ -2,11 +2,11 @@
 
 | Plataforma     | Build                | Prueba |
 | -------------- | -------------------- | ------ |
-| Windows 10 x64 | GitHub Actions       | ✓      |
+| Windows 10 x64 | GitHub Actions/local | ✓      |
 | Windows 11 x64 | GitHub Actions       | ✓      |
 | Linux Mint x64 | GitHub Actions/local | ✓      |
 | Ubuntu x64     | GitHub Actions       | ✓      |
-| Debian x64     | GitHub Actions/VM    | ✗      |
+| Debian x64     | GitHub Actions       | ✗      |
 
 ## Caracteres para copiar y pegar directamente
 
