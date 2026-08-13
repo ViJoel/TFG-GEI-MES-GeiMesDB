@@ -14,6 +14,7 @@
     - [Testing y calidad del código](#testing-y-calidad-del-código)
     - [Generación del ejecutable](#generación-del-ejecutable)
     - [Cifrado y seguridad](#cifrado-y-seguridad)
+    - [Icono del ejecutable de la aplicación](#icono-del-ejecutable-de-la-aplicación)
   - [Requisitos previos](#requisitos-previos)
   - [Instalación](#instalación)
   - [Configuración](#configuración)
@@ -97,6 +98,16 @@ De esta forma, GeiMesDB apuesta por una experiencia de uso directa, manteniendo 
 - **keyring** — Gestión segura de credenciales y claves almacenadas en el sistema.
 - **SecretStorage** — Almacenamiento seguro de información sensible mediante los servicios de credenciales del sistema.
 
+### Icono del ejecutable de la aplicación
+
+> [!NOTE]
+>
+> **Pillow** se utilizó únicamente durante el desarrollo para convertir el icono de la aplicación al formato `.ico`. No forma parte de las dependencias de la aplicación y, por tanto, no se incluye en `requirements.txt`.
+>
+> ```bash
+> pip install Pillow
+> ```
+
 ## Requisitos previos
 
 > Vacío
@@ -171,7 +182,7 @@ El archivo `app.log` almacena los registros generados durante la ejecución de l
 
 ## Autor
 
-$✦~Víctor~Jöel~Viejo~Álvarez~✦$
+$✦$ $Víctor$ $Jöel$ $Viejo$ $Álvarez$ $✦$
 
 ## Licencia
 

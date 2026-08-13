@@ -24,6 +24,7 @@ env/
 __pycache__/
 build/
 dist/
+*.spec
 
 # Carpetas autogeneradas del proyecto.
 geimesdb_logs/
