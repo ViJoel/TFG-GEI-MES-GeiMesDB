@@ -7,6 +7,7 @@ from unittest.mock import (
 import pytest
 from PySide6.QtGui import QColor
 
+from src.entities.setting_key import SettingKey
 from ui.themes.theme_manager import ThemeManager
 
 # =============================================================================
@@ -29,18 +30,22 @@ def restore_theme():
 # =============================================================================
 
 
-@patch("ui.themes.theme_manager.AppContext.get_app")
+@patch("ui.themes.theme_manager.get_setting")
 @patch.object(ThemeManager, "apply")
-def test_initialize(mock_apply, mock_get_app):
+def test_initialize(
+    mock_apply,
+    mock_get_setting,
+):
     """
-    Debe inicializar el gestor aplicando el tema.
+    Debe inicializar el gestor de temas.
     """
 
-    mock_get_app.return_value = MagicMock()
+    mock_get_setting.return_value = None
 
     ThemeManager.initialize()
 
-    mock_apply.assert_called_once()
+    mock_get_setting.assert_called_once_with(SettingKey.THEME)
+    mock_apply.assert_called_once_with()
 
 
 @patch.object(ThemeManager, "apply")

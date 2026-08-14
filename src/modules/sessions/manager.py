@@ -741,10 +741,18 @@ def _create_result_set(
 
         if table_name is not None:
 
-            table_metadata = _reflect_table_metadata(
-                engine=engine,
-                table_name=table_name,
-            )
+            try:
+                table_metadata = _reflect_table_metadata(
+                    engine=engine,
+                    table_name=table_name,
+                )
+            except Exception as e:
+                logger.warning(
+                    "Unable to retrieve metadata for table '%s'. "
+                    "The query result will not be editable. Exception: %s",
+                    table_name,
+                    e,
+                )
 
     return ResultSet(
         rows=rows,

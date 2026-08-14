@@ -664,12 +664,11 @@ class SqlEditor(QPlainTextEdit):
         sql: str,
     ) -> list[str]:
         """
-        Divide un script SQL en sentencias
-        individuales.
+        Divide un script SQL en sentencias individuales.
 
-        Cada sentencia conserva su contenido y se
-        eliminan los espacios en blanco al principio
-        y al final.
+        Cada sentencia conserva su contenido y se eliminan
+        los espacios en blanco al principio y al final,
+        así como el punto y coma final si existe.
 
         Args:
             sql (str):
@@ -683,7 +682,11 @@ class SqlEditor(QPlainTextEdit):
         statements = []
 
         for statement in sqlparse.split(sql):
+
             cleaned_statement = statement.strip()
+
+            if cleaned_statement.endswith(";"):
+                cleaned_statement = cleaned_statement[:-1].rstrip()
 
             if cleaned_statement:
                 statements.append(cleaned_statement)
