@@ -51,7 +51,7 @@ def test_execute_query_postgresql(
 
     assert editor is not None
 
-    query = "SELECT * FROM table_simple;"
+    query = "SELECT * FROM table_simple"
 
     editor.setPlainText(query)
 
@@ -146,7 +146,7 @@ def test_execute_query_mysql(
 
     assert editor is not None
 
-    query = "SELECT * FROM table_simple;"
+    query = "SELECT * FROM table_simple"
 
     editor.setPlainText(query)
 
@@ -241,7 +241,7 @@ def test_execute_query_error_postgresql(
 
     assert editor is not None
 
-    query = "select * from tabla_inexistente;"
+    query = "select * from tabla_inexistente"
 
     editor.setPlainText(query)
 
@@ -260,7 +260,7 @@ def test_execute_query_error_postgresql(
 
     assert "UndefinedTable" in console_output
     assert 'relation "tabla_inexistente" does not exist' in console_output
-    assert "[SQL: select * from tabla_inexistente;]" in console_output
+    assert "[SQL: select * from tabla_inexistente]" in console_output
 
     # === VISTA TABULAR ===
 
@@ -317,7 +317,7 @@ def test_execute_query_error_mysql(
 
     assert editor is not None
 
-    query = "select * from tabla_inexistente;"
+    query = "select * from tabla_inexistente"
 
     editor.setPlainText(query)
 
@@ -337,7 +337,7 @@ def test_execute_query_error_mysql(
     assert "ProgrammingError" in console_output
     assert "1146" in console_output
     assert "Table 'tfg-test.tabla_inexistente' doesn't exist" in console_output
-    assert "[SQL: select * from tabla_inexistente;]" in console_output
+    assert "[SQL: select * from tabla_inexistente]" in console_output
 
     # === VISTA TABULAR ===
 

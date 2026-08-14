@@ -47,9 +47,10 @@ def test_execute_selected_query(
 
     assert editor is not None
 
-    query = "select * from table_simple;"
+    query_without_semicolon = "select * from table_simple"
+    query_with_semicolon = f"{query_without_semicolon};"
 
-    editor.setPlainText(query)
+    editor.setPlainText(query_with_semicolon)
 
     # Seleccionar toda la consulta.
     editor.selectAll()
@@ -104,7 +105,7 @@ def test_execute_selected_query(
         Qt.ItemDataRole.UserRole,
     )
 
-    assert history_entry.query == query
+    assert history_entry.query == query_without_semicolon
 
     disconnect_from_db(
         qtbot=qtbot,
@@ -181,14 +182,14 @@ def test_execute_selected_script(
     console_output = results_view.console.toPlainText()
 
     assert console_output == (
-        "select * from table_simple;\n\n"
+        "select * from table_simple\n\n"
         "--------------------------------------------------------------------------------\n\n"
-        "select * from tabla_inexistente;\n\n"
+        "select * from tabla_inexistente\n\n"
         "Error: (psycopg.errors.UndefinedTable) "
         'relation "tabla_inexistente" does not exist\n'
-        "LINE 1: select * from tabla_inexistente;\n"
+        "LINE 1: select * from tabla_inexistente\n"
         "                      ^\n"
-        "[SQL: select * from tabla_inexistente;]\n"
+        "[SQL: select * from tabla_inexistente]\n"
         "(Background on this error at: "
         "https://sqlalche.me/e/20/f405)\n\n"
     )
@@ -211,9 +212,9 @@ def test_execute_selected_script(
         Qt.ItemDataRole.UserRole,
     )
 
-    assert first_history_entry.query == "select * from table_simple;"
+    assert first_history_entry.query == "select * from table_simple"
 
-    assert second_history_entry.query == "select * from tabla_inexistente;"
+    assert second_history_entry.query == "select * from tabla_inexistente"
 
     # La tercera consulta no estaba seleccionada.
     assert history.count() == 2

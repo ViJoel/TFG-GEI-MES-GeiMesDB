@@ -194,12 +194,9 @@ def main() -> int:
         print()
 
         # Mostrar el comando completo para facilitar la depuración.
-        print(
-            " ".join(
-                f'"{argument}"' if " " in argument else argument for argument in command
-            )
-        )
-
+        print("Comando PyInstaller:")
+        print()
+        print(" ".join(command))
         print()
 
         # Ejecutar PyInstaller desde la raíz del proyecto.

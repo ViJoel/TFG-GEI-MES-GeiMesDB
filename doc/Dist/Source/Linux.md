@@ -135,22 +135,15 @@ pip list
 
 Una vez preparado el entorno virtual y con este activado, sitúate en la **carpeta raíz del proyecto**.
 
-La aplicación se compila utilizando PyInstaller. Ejecuta el siguiente comando:
+La aplicación se compila mediante el **script de compilación** de Linux, que se encarga de configurar y ejecutar **PyInstaller**, incluyendo las dependencias y recursos necesarios.
+
+Ejecuta el siguiente comando en la **Terminal**:
 
 ```bash
-pyinstaller \
-    --name GeiMesDB \
-    --onefile \
-    --clean \
-    --noconfirm \
-    --icon "icon/icon.ico" \
-    --paths src \
-    --add-data "src/data:data" \
-    --add-data "src/ui/resources:ui/resources" \
-    --add-data "src/ui/styles:ui/styles" \
-    --add-data "src/ui/translations:ui/translations" \
-    src/main.py
+python compile/linux/build.py
 ```
+
+El script realiza automáticamente la limpieza de compilaciones anteriores, configura los parámetros de PyInstaller y recopila las dependencias que requieren un tratamiento especial, como `cryptography`, `cffi` y `oracledb`.
 
 > [!NOTE]
 >
@@ -158,19 +151,19 @@ pyinstaller \
 
 Así puedes **mantener exactamente el mismo comando en Windows y Linux**. En Windows se aplicará el icono y en Linux simplemente se mostrará el aviso correspondiente.
 
-Durante el proceso, PyInstaller generará varias carpetas y archivos temporales. El resultado final se encontrará en la carpeta:
+Durante el proceso de compilación, PyInstaller generará varias carpetas y archivos temporales. Una vez finalizado el proceso, el resultado se encontrará en la carpeta:
 
 ```text
 dist/
 ```
 
-Dentro de ella estará el ejecutable:
+Dentro de esta carpeta se encontrará el ejecutable:
 
 ```text
 dist/GeiMesDB
 ```
 
-Este archivo es el ejecutable de la aplicación. Contiene el intérprete de Python y las dependencias necesarias para su ejecución, por lo que no es necesario tener Python instalado en el sistema donde se ejecute.
+Este archivo es el ejecutable de la aplicación. Contiene el intérprete de Python y las dependencias necesarias para su ejecución, por lo que **no es necesario tener Python instalado** en el sistema donde se ejecute la aplicación.
 
 ## Ubicación y ejecución del programa
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import shlex
 import shutil
 import subprocess
 import sys
@@ -28,8 +29,14 @@ APP_NAME = "GeiMesDB"
 # Paquetes que deben recogerse completamente
 # ============================================================================
 
-# Estas librerías necesitan --collect-all para que la conexión Oracle
-# funcione correctamente en el ejecutable generado por PyInstaller.
+# Se mantienen explícitamente para garantizar que las dependencias de
+# Oracle estén disponibles en el ejecutable generado por PyInstaller.
+#
+# En Windows se ha comprobado que son necesarios para que python-oracledb
+# pueda utilizar cryptography correctamente dentro del ejecutable.
+#
+# Aunque en Linux no se ha podido verificar todavía la conexión con Oracle,
+# se mantienen de momento para utilizar un empaquetado conservador.
 COLLECT_ALL = [
     "cryptography",
     "cffi",
@@ -128,11 +135,12 @@ def build_command() -> list[str]:
     # Recursos
     # ------------------------------------------------------------------------
 
+    # En Linux el separador de --add-data es ":".
     for source, destination in DATA:
         command.extend(
             [
                 "--add-data",
-                f"{ROOT_DIR / source};{destination}",
+                f"{ROOT_DIR / source}:{destination}",
             ]
         )
 
@@ -155,7 +163,7 @@ def print_environment() -> None:
 
     print()
     print("=" * 70)
-    print("GeiMesDB - Compilación Windows")
+    print("GeiMesDB - Compilación Linux")
     print("=" * 70)
     print()
 
@@ -194,12 +202,9 @@ def main() -> int:
         print()
 
         # Mostrar el comando completo para facilitar la depuración.
-        print(
-            " ".join(
-                f'"{argument}"' if " " in argument else argument for argument in command
-            )
-        )
-
+        print("Comando PyInstaller:")
+        print()
+        print(" ".join(command))
         print()
 
         # Ejecutar PyInstaller desde la raíz del proyecto.
@@ -215,7 +220,7 @@ def main() -> int:
             print("=" * 70)
             return result.returncode
 
-        executable = DIST_DIR / f"{APP_NAME}.exe"
+        executable = DIST_DIR / APP_NAME
 
         print()
         print("=" * 70)
