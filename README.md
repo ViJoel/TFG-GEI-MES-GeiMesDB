@@ -110,7 +110,7 @@ De esta forma, GeiMesDB apuesta por una experiencia de uso directa, manteniendo 
 
 ### Icono del ejecutable de la aplicación
 
-> [!INFO]
+> [!NOTE]
 >
 > **Pillow** se utilizó únicamente durante el desarrollo para convertir el icono de la aplicación al formato `.ico`. No forma parte de las dependencias de la aplicación y, por tanto, no se incluye en `requirements.txt`.
 >
@@ -134,7 +134,7 @@ Los requisitos dependen del sistema operativo:
 - No es necesario instalar Python para ejecutar el ejecutable generado.
 - Es necesario disponer de los permisos necesarios para ejecutar el archivo.
 
-  > [!INFO]
+  > [!NOTE]
   >
   > Se ha probado en distribuciones basadas en Debian, pero en principio debería funcionar en cualquier otra distribución Linux.
 
