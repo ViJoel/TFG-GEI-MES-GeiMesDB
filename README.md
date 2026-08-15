@@ -16,14 +16,24 @@
     - [Cifrado y seguridad](#cifrado-y-seguridad)
     - [Icono del ejecutable de la aplicación](#icono-del-ejecutable-de-la-aplicación)
   - [Requisitos previos](#requisitos-previos)
+    - [Windows](#windows)
+    - [Linux](#linux)
   - [Instalación](#instalación)
+    - [Compilación manual mediante el código fuente](#compilación-manual-mediante-el-código-fuente)
+    - [Instalación mediante ejecutable](#instalación-mediante-ejecutable)
+    - [Windows](#windows-1)
+    - [Linux](#linux-1)
   - [Configuración](#configuración)
   - [Uso](#uso)
+    - [Logs](#logs)
+    - [Ejecución](#ejecución)
+      - [Con terminal](#con-terminal)
+      - [Sin terminal](#sin-terminal)
   - [Estructura del proyecto](#estructura-del-proyecto)
   - [Base de datos y logs](#base-de-datos-y-logs)
     - [Estructura](#estructura)
     - [Base de datos](#base-de-datos-1)
-    - [Logs](#logs)
+    - [Logs](#logs-1)
   - [Capturas de pantalla / ejemplos](#capturas-de-pantalla--ejemplos)
   - [Autor](#autor)
   - [Licencia](#licencia)
@@ -100,7 +110,7 @@ De esta forma, GeiMesDB apuesta por una experiencia de uso directa, manteniendo 
 
 ### Icono del ejecutable de la aplicación
 
-> [!NOTE]
+> [!INFO]
 >
 > **Pillow** se utilizó únicamente durante el desarrollo para convertir el icono de la aplicación al formato `.ico`. No forma parte de las dependencias de la aplicación y, por tanto, no se incluye en `requirements.txt`.
 >
@@ -110,19 +120,156 @@ De esta forma, GeiMesDB apuesta por una experiencia de uso directa, manteniendo 
 
 ## Requisitos previos
 
-> Vacío
+GeiMesDB se distribuye como un ejecutable independiente generado mediante **PyInstaller**, por lo que **no es necesario instalar Python ni las dependencias del proyecto** para utilizar la aplicación.
+
+Los requisitos dependen del sistema operativo:
+
+### Windows
+
+- Windows 10 o superior.
+
+### Linux
+
+- Una distribución Linux compatible, como **Ubuntu** o **Linux Mint**.
+- No es necesario instalar Python para ejecutar el ejecutable generado.
+- Es necesario disponer de los permisos necesarios para ejecutar el archivo.
+
+  > [!INFO]
+  >
+  > Se ha probado en distribuciones basadas en Debian, pero en principio debería funcionar en cualquier otra distribución Linux.
+
+> [!WARNING]
+>
+> El ejecutable generado por PyInstaller es específico del sistema operativo para el que se ha realizado la compilación.
 
 ## Instalación
 
-> Vacío
+### Compilación manual mediante el código fuente
+
+Si deseas compilar GeiMesDB manualmente a partir del código fuente, puedes usar el código de la [rama main](https://github.com/ViJoel/TFG-GEI-MES-GeiMesDB/tree/main) o usar los [tags](https://github.com/ViJoel/TFG-GEI-MES-GeiMesDB/tags) de las diferentes versiones de la aplicación (utiliza el tag con la última versión).
+
+Consulta las instrucciones correspondientes a tu sistema operativo:
+
+- [Windows](doc/Dist/Source/Windows.md)
+- [Linux](doc/Dist/Source/Linux.md)
+
+### Instalación mediante ejecutable
+
+GeiMesDB puede utilizarse directamente a partir del ejecutable generado para el sistema operativo correspondiente.
+
+Las versiones compiladas de GeiMesDB están disponibles en la sección de [Releases](https://github.com/ViJoel/TFG-GEI-MES-GeiMesDB/releases).
+
+Descarga el ejecutable correspondiente a tu sistema operativo.
+
+### Windows
+
+1. Descarga el ejecutable.
+2. Crea una carpeta destinada a GeiMesDB.
+3. Coloca `GeiMesDB.exe` dentro de dicha carpeta.
+4. Ejecuta `GeiMesDB.exe`.
+
+También puedes crear un acceso directo al ejecutable para facilitar su ejecución.
+
+### Linux
+
+1. Descarga el ejecutable.
+2. Crea una carpeta destinada a GeiMesDB.
+3. Coloca el archivo `GeiMesDB` dentro de dicha carpeta.
+4. Concede permisos de ejecución al archivo:
+
+   ```bash
+   chmod +x GeiMesDB
+   ```
+
+5. Ejecuta la aplicación:
+
+   Puedes ejecutarlo desde la terminal:
+
+   ```bash
+   ./GeiMesDB
+   ```
+
+   o haciendo doble click sobre el ejecutable.
+
+> [!IMPORTANT]
+>
+> Se recomienda mantener el ejecutable dentro de una carpeta dedicada exclusivamente a GeiMesDB, ya que la aplicación genera archivos de datos y logs en directorios situados junto al ejecutable.
 
 ## Configuración
 
-> Vacío
+GeiMesDB no requiere una configuración adicional antes de su primera ejecución.
+
+Al iniciar la aplicación, se crean automáticamente los archivos y directorios necesarios para su funcionamiento.
+
+La información generada por la aplicación se almacena junto al ejecutable:
+
+```text
+Carpeta/
+├── GeiMesDB
+├── geimesdb_data/
+│   └── app.db
+└── geimesdb_logs/
+    └── app.log
+```
+
+La configuración de las conexiones con las bases de datos se realiza desde la propia aplicación.
+
+> [!IMPORTANT]
+>
+> No se recomienda modificar manualmente los archivos contenidos en `geimesdb_data/` ni `geimesdb_logs/`, ya que son gestionados por GeiMesDB.
 
 ## Uso
 
-> Vacío
+Una vez instalada, GeiMesDB puede ejecutarse directamente mediante el ejecutable correspondiente al sistema operativo.
+
+Al iniciar la aplicación, GeiMesDB comprueba automáticamente la existencia de los archivos necesarios para su funcionamiento. Si alguno de ellos no existe, la aplicación lo genera automáticamente.
+
+Los archivos utilizados por la aplicación se almacenan en directorios situados junto al ejecutable:
+
+```text
+Carpeta/
+├── GeiMesDB
+├── geimesdb_data/
+│   └── app.db
+└── geimesdb_logs/
+    └── app.log
+```
+
+> [!IMPORTANT]
+>
+> Se recomienda mantener el ejecutable y los directorios `geimesdb_data/` y `geimesdb_logs/` juntos en una misma carpeta. Si el ejecutable se mueve a otra ubicación, la aplicación generará los archivos necesarios en la nueva ubicación.
+
+### Logs
+
+La aplicación registra su actividad durante cada ejecución en el archivo:
+
+```text
+geimesdb_logs/app.log
+```
+
+El usuario puede consultar este archivo para revisar los mensajes y eventos registrados durante la **última ejecución de la aplicación**.
+
+El archivo de logs se **sobrescribe cada vez que se inicia GeiMesDB**, por lo que únicamente contiene los registros correspondientes a la ejecución más reciente.
+
+### Ejecución
+
+#### Con terminal
+
+En Windows **PowerShell**, ejecuta:
+
+```powershell
+& ".\GeiMesDB.exe"
+```
+
+En Linux:
+
+```bash
+./GeiMesDB
+```
+
+#### Sin terminal
+
+Haz doble click sobre el ejecutable.
 
 ## Estructura del proyecto
 
@@ -130,10 +277,13 @@ La estructura principal del proyecto es la siguiente:
 
 ```text
 GeiMesDB/
+├── .github/            # Archivos de configuración de cosas de GitHub.
+├── .vscode/            # Configuración de Visual Studio Code.
+├── compile/            # Scripts de compilación.
 ├── doc/                # Documentación del proyecto.
+├── Icon/               # Icono del ejecutable de la aplicación.
 ├── src/                # Código fuente de la aplicación.
 ├── tests/              # Pruebas automatizadas.
-├── .vscode/            # Configuración de Visual Studio Code.
 ├── .gitignore          # Archivos y directorios ignorados por Git.
 ├── LICENSE             # Licencia del proyecto.
 ├── pytest.ini          # Configuración de pytest.
@@ -178,7 +328,13 @@ El archivo `app.log` almacena los registros generados durante la ejecución de l
 
 ## Capturas de pantalla / ejemplos
 
-> Vacío
+![Captura 1](doc/Images/Captura_1.png)
+
+![Captura 2](doc/Images/Captura_2.png)
+
+![Captura 3](doc/Images/Captura_3.png)
+
+![Captura 4](doc/Images/Captura_4.png)
 
 ## Autor
 

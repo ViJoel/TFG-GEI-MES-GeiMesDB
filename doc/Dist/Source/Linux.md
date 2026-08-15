@@ -50,7 +50,7 @@ Antes de compilar el proyecto es necesario preparar el entorno de Python e insta
 
 ### 1. Comprobar la versión de Python
 
-El proyecto requiere **Python 3.12.12**.
+El proyecto requiere **Python 3.12.12**, aunque tambien te sirve cualquier versión **Python 3.12.x**.
 
 Puedes comprobar la versión instalada ejecutando:
 
