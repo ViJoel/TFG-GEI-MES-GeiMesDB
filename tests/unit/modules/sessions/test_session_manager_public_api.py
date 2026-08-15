@@ -81,6 +81,65 @@ def test_get_session_not_existing():
 
 
 # =============================================================================
+# get_session_driver
+# =============================================================================
+
+
+def test_get_session_driver_session_not_found(monkeypatch):
+    """
+    Debe devolver None cuando no existe una sesión
+    para la conexión indicada.
+    """
+
+    get_session = MagicMock(return_value=None)
+
+    monkeypatch.setattr(
+        manager,
+        "get_session",
+        get_session,
+    )
+
+    result = manager.get_session_driver(
+        connection_id="connection",
+    )
+
+    assert result is None
+
+    get_session.assert_called_once_with("connection")
+
+
+def test_get_session_driver_session_found(monkeypatch):
+    """
+    Debe devolver el driver de la conexión asociada
+    a la sesión encontrada.
+    """
+
+    driver = Driver.POSTGRESQL
+
+    connection = MagicMock()
+    connection.driver = driver
+
+    session = MagicMock()
+    session.connection = connection
+
+    get_session = MagicMock(return_value=session)
+
+    monkeypatch.setattr(
+        manager,
+        "get_session",
+        get_session,
+    )
+
+    result = manager.get_session_driver(
+        connection_id="connection",
+    )
+
+    assert result is driver
+
+    get_session.assert_called_once_with("connection")
+
+
+# =============================================================================
 # has_session
 # =============================================================================
 
@@ -1074,3 +1133,46 @@ def test_execute_updates_prepare_error():
 
     assert result.items[1].query == "sql2"
     assert result.items[1].error is None
+
+
+def test_execute_updates_unexpected_exception_during_operation():
+    """
+    Una excepción inesperada durante la ejecución de la
+    transacción debe hacer rollback y propagarse.
+    """
+
+    connection = create_connection()
+    session = create_session(connection)
+
+    manager._active_sessions[connection.id] = session
+
+    conn = MagicMock()
+
+    transaction = MagicMock()
+
+    conn.begin.return_value = transaction
+    conn.begin_nested.side_effect = RuntimeError("boom")
+
+    session.engine.connect.return_value.__enter__.return_value = conn
+    session.engine.dialect = MagicMock()
+
+    operation = MagicMock(spec=UpdateOperation)
+    operation.to_statement.return_value = "stmt"
+    operation.to_sql.return_value = "sql"
+
+    with pytest.raises(
+        RuntimeError,
+        match="boom",
+    ):
+        manager.execute_updates(
+            connection.id,
+            [operation],
+        )
+
+    transaction.rollback.assert_called_once()
+    transaction.commit.assert_not_called()
+
+    operation.to_statement.assert_called_once()
+    operation.to_sql.assert_called_once_with(
+        session.engine.dialect,
+    )

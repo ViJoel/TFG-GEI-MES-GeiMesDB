@@ -116,7 +116,7 @@ def test_ctrl_enter_emits_actual_query_scope(
     statements, scope = blocker.args
 
     assert scope == SqlScope.ACTUAL_QUERY
-    assert statements == ["SELECT 1;"]
+    assert statements == ["SELECT 1"]
 
 
 def test_ctrl_alt_enter_emits_selected_scope(
@@ -143,7 +143,7 @@ def test_ctrl_alt_enter_emits_selected_scope(
     statements, scope = blocker.args
 
     assert scope == SqlScope.SELECTED_TEXT
-    assert statements == ["SELECT 1;"]
+    assert statements == ["SELECT 1"]
 
 
 def test_ctrl_shift_enter_emits_full_script(
@@ -166,8 +166,8 @@ def test_ctrl_shift_enter_emits_full_script(
     statements, scope = blocker.args
 
     assert scope == SqlScope.FULL_SCRIPT
-    assert "SELECT 1;" in statements
-    assert "SELECT 2;" in statements
+    assert "SELECT 1" in statements
+    assert "SELECT 2" in statements
 
 
 def test_key_press_event_returns_when_popup_handles_event(
@@ -224,7 +224,7 @@ def test_split_sql_statements(
 
     result = editor._split_sql_statements(sql)
 
-    assert result == ["SELECT 1;", "SELECT 2;"]
+    assert result == ["SELECT 1", "SELECT 2"]
 
 
 def test_normalize_sql(

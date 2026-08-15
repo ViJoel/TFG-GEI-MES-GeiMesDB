@@ -170,6 +170,56 @@ def test_create_result_set_editable_without_table_name(monkeypatch):
     reflect.assert_not_called()
 
 
+def test_create_result_set_editable_metadata_exception(monkeypatch):
+    """
+    Si falla la reflexión de metadatos no debe propagarse
+    la excepción y el resultado no debe ser editable.
+    """
+
+    result = MagicMock()
+    result.keys.return_value = ["id"]
+    result.fetchall.return_value = [(1,)]
+
+    monkeypatch.setattr(
+        manager,
+        "is_editable_query",
+        MagicMock(return_value=True),
+    )
+
+    monkeypatch.setattr(
+        manager,
+        "_extract_table_name",
+        MagicMock(return_value="users"),
+    )
+
+    reflect = MagicMock(
+        side_effect=Exception("Reflection failed"),
+    )
+
+    monkeypatch.setattr(
+        manager,
+        "_reflect_table_metadata",
+        reflect,
+    )
+
+    engine = MagicMock()
+
+    result_set = manager._create_result_set(
+        engine=engine,
+        query="SELECT * FROM users",
+        result=result,
+    )
+
+    assert result_set.columns == ["id"]
+    assert result_set.rows == [[1]]
+    assert result_set.table_metadata is None
+
+    reflect.assert_called_once_with(
+        engine=engine,
+        table_name="users",
+    )
+
+
 # =============================================================================
 # _reflect_table_metadata
 # =============================================================================

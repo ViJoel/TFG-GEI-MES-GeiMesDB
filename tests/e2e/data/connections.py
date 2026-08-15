@@ -1,3 +1,8 @@
+"""
+Conexiones utilizadas exclusivamente para las pruebas E2E.
+Estas credenciales están destinadas únicamente al entorno de pruebas.
+"""
+
 from entities.connection import Connection
 from entities.driver import Driver
 

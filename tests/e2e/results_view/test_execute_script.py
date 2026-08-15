@@ -70,14 +70,14 @@ def test_execute_script_postgresql(
     console_output = results_view.console.toPlainText()
 
     assert console_output == (
-        "select * from table_simple;\n\n"
+        "select * from table_simple\n\n"
         "--------------------------------------------------------------------------------\n\n"
-        "select * from tabla_inexistente;\n\n"
+        "select * from tabla_inexistente\n\n"
         "Error: (psycopg.errors.UndefinedTable) "
         'relation "tabla_inexistente" does not exist\n'
-        "LINE 1: select * from tabla_inexistente;\n"
+        "LINE 1: select * from tabla_inexistente\n"
         "                      ^\n"
-        "[SQL: select * from tabla_inexistente;]\n"
+        "[SQL: select * from tabla_inexistente]\n"
         "(Background on this error at: "
         "https://sqlalche.me/e/20/f405)\n\n"
     )
@@ -100,9 +100,9 @@ def test_execute_script_postgresql(
         Qt.ItemDataRole.UserRole,
     )
 
-    assert first_history_entry.query == "select * from table_simple;"
+    assert first_history_entry.query == "select * from table_simple"
 
-    assert second_history_entry.query == "select * from tabla_inexistente;"
+    assert second_history_entry.query == "select * from tabla_inexistente"
 
     disconnect_from_db(
         qtbot=qtbot,
@@ -162,12 +162,12 @@ def test_execute_script_mysql(
     console_output = results_view.console.toPlainText()
 
     assert console_output == (
-        "select * from table_simple;\n\n"
+        "select * from table_simple\n\n"
         "--------------------------------------------------------------------------------\n\n"
-        "select * from tabla_inexistente;\n\n"
+        "select * from tabla_inexistente\n\n"
         "Error: (pymysql.err.ProgrammingError) "
         "(1146, \"Table 'tfg-test.tabla_inexistente' doesn't exist\")\n"
-        "[SQL: select * from tabla_inexistente;]\n"
+        "[SQL: select * from tabla_inexistente]\n"
         "(Background on this error at: "
         "https://sqlalche.me/e/20/f405)\n\n"
     )
@@ -190,9 +190,9 @@ def test_execute_script_mysql(
         Qt.ItemDataRole.UserRole,
     )
 
-    assert first_history_entry.query == "select * from table_simple;"
+    assert first_history_entry.query == "select * from table_simple"
 
-    assert second_history_entry.query == "select * from tabla_inexistente;"
+    assert second_history_entry.query == "select * from tabla_inexistente"
 
     disconnect_from_db(
         qtbot=qtbot,

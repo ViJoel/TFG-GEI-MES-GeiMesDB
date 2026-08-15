@@ -586,7 +586,9 @@ class NavigationTreeContextMenu(QMenu):
 
         self.action_requested.emit(
             NavigationTreeAction.INSERT_SQL_IN_EDITOR,
-            self._generate_tables_metadata(),
+            self._generate_tables_metadata(
+                with_semicolon=True,
+            ),
         )
 
     def _on_show_tables_metadata(
@@ -614,7 +616,9 @@ class NavigationTreeContextMenu(QMenu):
 
         self.action_requested.emit(
             NavigationTreeAction.INSERT_SQL_IN_EDITOR,
-            self._generate_table_select(),
+            self._generate_table_select(
+                with_semicolon=True,
+            ),
         )
 
     def _on_generate_insert_table(
@@ -627,7 +631,9 @@ class NavigationTreeContextMenu(QMenu):
 
         self.action_requested.emit(
             NavigationTreeAction.INSERT_SQL_IN_EDITOR,
-            self._generate_table_insert(),
+            self._generate_table_insert(
+                with_semicolon=True,
+            ),
         )
 
     def _on_generate_update_table(
@@ -640,7 +646,9 @@ class NavigationTreeContextMenu(QMenu):
 
         self.action_requested.emit(
             NavigationTreeAction.INSERT_SQL_IN_EDITOR,
-            self._generate_table_update(),
+            self._generate_table_update(
+                with_semicolon=True,
+            ),
         )
 
     def _on_generate_delete_table(
@@ -653,7 +661,9 @@ class NavigationTreeContextMenu(QMenu):
 
         self.action_requested.emit(
             NavigationTreeAction.INSERT_SQL_IN_EDITOR,
-            self._generate_table_delete(),
+            self._generate_table_delete(
+                with_semicolon=True,
+            ),
         )
 
     def _on_generate_alter_table(
@@ -666,7 +676,9 @@ class NavigationTreeContextMenu(QMenu):
 
         self.action_requested.emit(
             NavigationTreeAction.INSERT_SQL_IN_EDITOR,
-            self._generate_table_alter(),
+            self._generate_table_alter(
+                with_semicolon=True,
+            ),
         )
 
     def _on_generate_drop_table(
@@ -679,7 +691,9 @@ class NavigationTreeContextMenu(QMenu):
 
         self.action_requested.emit(
             NavigationTreeAction.INSERT_SQL_IN_EDITOR,
-            self._generate_table_drop(),
+            self._generate_table_drop(
+                with_semicolon=True,
+            ),
         )
 
     def _on_show_table_data(
@@ -744,7 +758,9 @@ class NavigationTreeContextMenu(QMenu):
 
         self.action_requested.emit(
             NavigationTreeAction.INSERT_SQL_IN_EDITOR,
-            self._generate_columns_metadata(),
+            self._generate_columns_metadata(
+                with_semicolon=True,
+            ),
         )
 
     def _on_show_columns_metadata(
@@ -772,7 +788,9 @@ class NavigationTreeContextMenu(QMenu):
 
         self.action_requested.emit(
             NavigationTreeAction.INSERT_SQL_IN_EDITOR,
-            self._generate_column_select(),
+            self._generate_column_select(
+                with_semicolon=True,
+            ),
         )
 
     def _on_generate_where_column(
@@ -785,7 +803,9 @@ class NavigationTreeContextMenu(QMenu):
 
         self.action_requested.emit(
             NavigationTreeAction.INSERT_SQL_IN_EDITOR,
-            self._generate_column_where(),
+            self._generate_column_where(
+                with_semicolon=True,
+            ),
         )
 
     def _on_show_column_data(
@@ -848,7 +868,9 @@ class NavigationTreeContextMenu(QMenu):
 
         self.action_requested.emit(
             NavigationTreeAction.INSERT_SQL_IN_EDITOR,
-            self._generate_constraints_metadata(),
+            self._generate_constraints_metadata(
+                with_semicolon=True,
+            ),
         )
 
     def _on_show_constraints_metadata(
@@ -876,7 +898,9 @@ class NavigationTreeContextMenu(QMenu):
 
         self.action_requested.emit(
             NavigationTreeAction.INSERT_SQL_IN_EDITOR,
-            self._generate_constraint_details(),
+            self._generate_constraint_details(
+                with_semicolon=True,
+            ),
         )
 
     def _on_show_constraint_details(
@@ -915,7 +939,9 @@ class NavigationTreeContextMenu(QMenu):
 
         self.action_requested.emit(
             NavigationTreeAction.INSERT_SQL_IN_EDITOR,
-            self._generate_indexes_metadata(),
+            self._generate_indexes_metadata(
+                with_semicolon=True,
+            ),
         )
 
     def _on_show_indexes_metadata(
@@ -943,7 +969,9 @@ class NavigationTreeContextMenu(QMenu):
 
         self.action_requested.emit(
             NavigationTreeAction.INSERT_SQL_IN_EDITOR,
-            self._generate_index_details(),
+            self._generate_index_details(
+                with_semicolon=True,
+            ),
         )
 
     def _on_show_index_details(
@@ -982,7 +1010,9 @@ class NavigationTreeContextMenu(QMenu):
 
         self.action_requested.emit(
             NavigationTreeAction.INSERT_SQL_IN_EDITOR,
-            self._generate_views_metadata(),
+            self._generate_views_metadata(
+                with_semicolon=True,
+            ),
         )
 
     def _on_show_views_metadata(
@@ -1010,7 +1040,9 @@ class NavigationTreeContextMenu(QMenu):
 
         self.action_requested.emit(
             NavigationTreeAction.INSERT_SQL_IN_EDITOR,
-            self._generate_view_select(),
+            self._generate_view_select(
+                with_semicolon=True,
+            ),
         )
 
     def _on_generate_drop_view(
@@ -1023,7 +1055,9 @@ class NavigationTreeContextMenu(QMenu):
 
         self.action_requested.emit(
             NavigationTreeAction.INSERT_SQL_IN_EDITOR,
-            self._generate_view_drop(),
+            self._generate_view_drop(
+                with_semicolon=True,
+            ),
         )
 
     def _on_show_view_data(
@@ -1084,10 +1118,15 @@ class NavigationTreeContextMenu(QMenu):
 
     def _generate_tables_metadata(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera la consulta SQL para obtener la metadata de las tablas
         según el sistema gestor de base de datos activo.
+
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
 
         Returns:
             str:
@@ -1097,54 +1136,69 @@ class NavigationTreeContextMenu(QMenu):
         match self.sgbd_driver:
 
             case Driver.POSTGRESQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.tables\n"
                     "WHERE table_schema = 'public'\n"
-                    "ORDER BY table_name;"
+                    "ORDER BY table_name"
                 )
 
             case Driver.MYSQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.tables\n"
                     "WHERE table_schema = DATABASE()\n"
-                    "ORDER BY table_name;"
+                    "ORDER BY table_name"
                 )
 
             case Driver.SQLITE:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM sqlite_master\n"
                     "WHERE type = 'table'\n"
-                    "ORDER BY name;"
+                    "ORDER BY name"
                 )
 
             case Driver.ORACLE:
-                return "SELECT *\n" "FROM user_tables\n" "ORDER BY table_name;"
+                query = "SELECT *\n" "FROM user_tables\n" "ORDER BY table_name"
 
-        return ""
+            case _:
+                query = ""
+
+        return f"{query};" if with_semicolon else query
 
     # Tabla
 
     def _generate_table_select(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera una consulta SELECT para la tabla seleccionada.
+
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
 
         Returns:
             str:
                 Consulta SQL.
         """
 
-        return "SELECT *\n" f"FROM {self.item.text()};"
+        query = "SELECT *\n" f"FROM {self.item.text()}"
+
+        return f"{query};" if with_semicolon else query
 
     def _generate_table_insert(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera una consulta INSERT para la tabla seleccionada.
+
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
 
         Returns:
             str:
@@ -1155,20 +1209,27 @@ class NavigationTreeContextMenu(QMenu):
 
         values = ",\n    ".join("?" for _ in self.data["columns"])
 
-        return (
+        query = (
             f"INSERT INTO {self.item.text()} (\n"
             f"    {columns}\n"
             ")\n"
             "VALUES (\n"
             f"    {values}\n"
-            ");"
+            ")"
         )
+
+        return f"{query};" if with_semicolon else query
 
     def _generate_table_update(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera una consulta UPDATE para la tabla seleccionada.
+
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
 
         Returns:
             str:
@@ -1179,68 +1240,103 @@ class NavigationTreeContextMenu(QMenu):
             f"{column['name']} = ?" for column in self.data["columns"]
         )
 
-        return f"UPDATE {self.item.text()}\n" "SET\n" f"    {assignments}\n" "WHERE ;"
+        query = f"UPDATE {self.item.text()}\n" "SET\n" f"    {assignments}\n" "WHERE "
+
+        return f"{query};" if with_semicolon else query
 
     def _generate_table_delete(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera una consulta DELETE para la tabla seleccionada.
 
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
+
         Returns:
             str:
                 Consulta SQL.
         """
 
-        return f"DELETE FROM {self.item.text()}\n" "WHERE ;"
+        query = f"DELETE FROM {self.item.text()}\n" "WHERE "
+
+        return f"{query};" if with_semicolon else query
 
     def _generate_table_alter(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera una plantilla ALTER para la tabla seleccionada.
 
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
+
         Returns:
             str:
                 Consulta SQL.
         """
 
-        return f"ALTER TABLE {self.item.text()}\n" "\n" ";"
+        query = f"ALTER TABLE {self.item.text()}\n" "\n"
+
+        return f"{query};" if with_semicolon else query
 
     def _generate_table_drop(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera una consulta DROP para la tabla seleccionada.
 
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
+
         Returns:
             str:
                 Consulta SQL.
         """
 
-        return f"DROP TABLE {self.item.text()};"
+        query = f"DROP TABLE {self.item.text()}"
+
+        return f"{query};" if with_semicolon else query
 
     def _generate_table_data(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera una consulta para mostrar los datos de la tabla
         seleccionada.
 
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
+
         Returns:
             str:
                 Consulta SQL.
         """
 
-        return self._generate_table_select()
+        return self._generate_table_select(
+            with_semicolon=with_semicolon,
+        )
 
     def _generate_table_metadata(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera una consulta SQL para obtener la metadata de la
         tabla seleccionada.
 
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
+
         Returns:
             str:
                 Consulta SQL compatible con el driver configurado.
@@ -1249,45 +1345,53 @@ class NavigationTreeContextMenu(QMenu):
         match self.sgbd_driver:
 
             case Driver.POSTGRESQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.tables\n"
                     "WHERE table_schema = 'public'\n"
-                    f"AND table_name = '{self.item.text()}';"
+                    f"AND table_name = '{self.item.text()}'"
                 )
 
             case Driver.MYSQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.tables\n"
                     "WHERE table_schema = DATABASE()\n"
-                    f"AND table_name = '{self.item.text()}';"
+                    f"AND table_name = '{self.item.text()}'"
                 )
 
             case Driver.SQLITE:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM sqlite_master\n"
                     "WHERE type = 'table'\n"
-                    f"AND name = '{self.item.text()}';"
+                    f"AND name = '{self.item.text()}'"
                 )
 
             case Driver.ORACLE:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM user_tables\n"
-                    f"WHERE table_name = '{self.item.text().upper()}';"
+                    f"WHERE table_name = '{self.item.text().upper()}'"
                 )
 
-        return ""
+            case _:
+                query = ""
+
+        return f"{query};" if with_semicolon else query
 
     def _generate_table_columns(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera una consulta SQL para obtener la metadata de las
         columnas de la tabla seleccionada.
 
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
+
         Returns:
             str:
                 Consulta SQL compatible con el driver configurado.
@@ -1296,44 +1400,52 @@ class NavigationTreeContextMenu(QMenu):
         match self.sgbd_driver:
 
             case Driver.POSTGRESQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.columns\n"
                     "WHERE table_schema = 'public'\n"
                     f"AND table_name = '{self.item.text()}'\n"
-                    "ORDER BY ordinal_position;"
+                    "ORDER BY ordinal_position"
                 )
 
             case Driver.MYSQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.columns\n"
                     "WHERE table_schema = DATABASE()\n"
                     f"AND table_name = '{self.item.text()}'\n"
-                    "ORDER BY ordinal_position;"
+                    "ORDER BY ordinal_position"
                 )
 
             case Driver.SQLITE:
-                return f"PRAGMA table_info('{self.item.text()}');"
+                query = f"PRAGMA table_info('{self.item.text()}')"
 
             case Driver.ORACLE:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM user_tab_columns\n"
                     f"WHERE table_name = '{self.item.text().upper()}'\n"
-                    "ORDER BY column_id;"
+                    "ORDER BY column_id"
                 )
 
-        return ""
+            case _:
+                query = ""
+
+        return f"{query};" if with_semicolon else query
 
     # Columnas
 
     def _generate_columns_metadata(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera la consulta SQL para obtener la metadata de las columnas
         de la tabla seleccionada según el sistema gestor de base de datos activo.
+
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
 
         Returns:
             str:
@@ -1343,86 +1455,115 @@ class NavigationTreeContextMenu(QMenu):
         match self.sgbd_driver:
 
             case Driver.POSTGRESQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.columns\n"
                     "WHERE table_schema = 'public'\n"
                     f"AND table_name = '{self.parent_name}'\n"
-                    "ORDER BY ordinal_position;"
+                    "ORDER BY ordinal_position"
                 )
 
             case Driver.MYSQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.columns\n"
                     "WHERE table_schema = DATABASE()\n"
                     f"AND table_name = '{self.parent_name}'\n"
-                    "ORDER BY ordinal_position;"
+                    "ORDER BY ordinal_position"
                 )
 
             case Driver.SQLITE:
-                return f"PRAGMA table_info('{self.parent_name}');"
+                query = f"PRAGMA table_info('{self.parent_name}')"
 
             case Driver.ORACLE:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM user_tab_columns\n"
                     f"WHERE table_name = '{self.parent_name.upper()}'\n"
-                    "ORDER BY column_id;"
+                    "ORDER BY column_id"
                 )
 
-        return ""
+            case _:
+                query = ""
+
+        return f"{query};" if with_semicolon else query
 
     # Columna
 
     def _generate_column_select(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera una consulta SQL para seleccionar la columna.
+
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
 
         Returns:
             str:
                 Consulta SQL compatible con el driver configurado.
         """
 
-        return f"SELECT {self.data['name']}\n" f"FROM {self.data['table']};"
+        query = f"SELECT {self.data['name']}\n" f"FROM {self.data['table']}"
+
+        return f"{query};" if with_semicolon else query
 
     def _generate_column_where(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera una cláusula WHERE para la columna seleccionada.
+
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
 
         Returns:
             str:
                 Cláusula WHERE.
         """
 
-        return f"WHERE {self.data['name']} = "
+        query = f"WHERE {self.data['name']} = "
+
+        return f"{query};" if with_semicolon else query
 
     def _generate_column_data(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera una consulta SQL para mostrar los datos de la
         columna seleccionada.
+
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
 
         Returns:
             str:
                 Consulta SQL.
         """
 
-        return f"SELECT {self.data['name']}\n" f"FROM {self.data['table']};"
+        return self._generate_column_select(
+            with_semicolon=with_semicolon,
+        )
 
     def _generate_column_metadata(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera la consulta SQL para obtener la metadata de la
         columna seleccionada según el sistema gestor de base de
         datos activo.
 
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
+
         Returns:
             str:
                 Consulta SQL compatible con el driver configurado.
@@ -1431,45 +1572,53 @@ class NavigationTreeContextMenu(QMenu):
         match self.sgbd_driver:
 
             case Driver.POSTGRESQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.columns\n"
                     "WHERE table_schema = 'public'\n"
                     f"AND table_name = '{self.data['table']}'\n"
-                    f"AND column_name = '{self.data['name']}';"
+                    f"AND column_name = '{self.data['name']}'"
                 )
 
             case Driver.MYSQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.columns\n"
                     "WHERE table_schema = DATABASE()\n"
                     f"AND table_name = '{self.data['table']}'\n"
-                    f"AND column_name = '{self.data['name']}';"
+                    f"AND column_name = '{self.data['name']}'"
                 )
 
             case Driver.SQLITE:
-                return f"PRAGMA table_info('{self.data['table']}');"
+                query = f"PRAGMA table_info('{self.data['table']}')"
 
             case Driver.ORACLE:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM user_tab_columns\n"
                     f"WHERE table_name = '{self.data['table'].upper()}'\n"
-                    f"AND column_name = '{self.data['name'].upper()}';"
+                    f"AND column_name = '{self.data['name'].upper()}'"
                 )
 
-        return ""
+            case _:
+                query = ""
+
+        return f"{query};" if with_semicolon else query
 
     # Restricciones
 
     def _generate_constraints_metadata(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera la consulta SQL para obtener la metadata de las restricciones
         de la tabla seleccionada según el sistema gestor de base de datos activo.
 
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
+
         Returns:
             str:
                 Consulta SQL compatible con el driver configurado.
@@ -1478,50 +1627,58 @@ class NavigationTreeContextMenu(QMenu):
         match self.sgbd_driver:
 
             case Driver.POSTGRESQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.table_constraints\n"
                     "WHERE constraint_schema = 'public'\n"
                     f"AND table_name = '{self.parent_name}'\n"
-                    "ORDER BY constraint_name;"
+                    "ORDER BY constraint_name"
                 )
 
             case Driver.MYSQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.table_constraints\n"
                     "WHERE constraint_schema = DATABASE()\n"
                     f"AND table_name = '{self.parent_name}'\n"
-                    "ORDER BY constraint_name;"
+                    "ORDER BY constraint_name"
                 )
 
             case Driver.SQLITE:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM sqlite_master\n"
                     "WHERE type = 'table'\n"
-                    f"AND name = '{self.parent_name}';"
+                    f"AND name = '{self.parent_name}'"
                 )
 
             case Driver.ORACLE:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM user_constraints\n"
                     f"WHERE table_name = '{self.parent_name.upper()}'\n"
-                    "ORDER BY constraint_name;"
+                    "ORDER BY constraint_name"
                 )
 
-        return ""
+            case _:
+                query = ""
+
+        return f"{query};" if with_semicolon else query
 
     # Restricción
 
     def _generate_constraint_details(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera la consulta SQL para obtener el detalle de la restricción
         seleccionada según el sistema gestor de base de datos activo.
 
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
+
         Returns:
             str:
                 Consulta SQL compatible con el driver configurado.
@@ -1530,47 +1687,55 @@ class NavigationTreeContextMenu(QMenu):
         match self.sgbd_driver:
 
             case Driver.POSTGRESQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.table_constraints\n"
                     "WHERE constraint_schema = 'public'\n"
-                    f"AND constraint_name = '{self.data['name']}';"
+                    f"AND constraint_name = '{self.data['name']}'"
                 )
 
             case Driver.MYSQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.table_constraints\n"
                     "WHERE constraint_schema = DATABASE()\n"
-                    f"AND constraint_name = '{self.data['name']}';"
+                    f"AND constraint_name = '{self.data['name']}'"
                 )
 
             case Driver.SQLITE:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM sqlite_master\n"
                     "WHERE type = 'table'\n"
-                    f"AND name = '{self.data['table']}';"
+                    f"AND name = '{self.data['table']}'"
                 )
 
             case Driver.ORACLE:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM user_constraints\n"
-                    f"WHERE constraint_name = '{self.data['name'].upper()}';"
+                    f"WHERE constraint_name = '{self.data['name'].upper()}'"
                 )
 
-        return ""
+            case _:
+                query = ""
+
+        return f"{query};" if with_semicolon else query
 
     # Índices
 
     def _generate_indexes_metadata(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera la consulta SQL para obtener la metadata de los índices
         de la tabla seleccionada según el sistema gestor de base de datos activo.
 
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
+
         Returns:
             str:
                 Consulta SQL compatible con el driver configurado.
@@ -1579,45 +1744,53 @@ class NavigationTreeContextMenu(QMenu):
         match self.sgbd_driver:
 
             case Driver.POSTGRESQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM pg_indexes\n"
                     "WHERE schemaname = 'public'\n"
                     f"AND tablename = '{self.parent_name}'\n"
-                    "ORDER BY indexname;"
+                    "ORDER BY indexname"
                 )
 
             case Driver.MYSQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.statistics\n"
                     "WHERE table_schema = DATABASE()\n"
                     f"AND table_name = '{self.parent_name}'\n"
-                    "ORDER BY index_name;"
+                    "ORDER BY index_name"
                 )
 
             case Driver.SQLITE:
-                return f"PRAGMA index_list('{self.parent_name}');"
+                query = f"PRAGMA index_list('{self.parent_name}')"
 
             case Driver.ORACLE:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM user_indexes\n"
                     f"WHERE table_name = '{self.parent_name.upper()}'\n"
-                    "ORDER BY index_name;"
+                    "ORDER BY index_name"
                 )
 
-        return ""
+            case _:
+                query = ""
+
+        return f"{query};" if with_semicolon else query
 
     # Índice
 
     def _generate_index_details(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera la consulta SQL para obtener el detalle del índice
         seleccionado según el sistema gestor de base de datos activo.
 
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
+
         Returns:
             str:
                 Consulta SQL compatible con el driver configurado.
@@ -1626,47 +1799,55 @@ class NavigationTreeContextMenu(QMenu):
         match self.sgbd_driver:
 
             case Driver.POSTGRESQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM pg_indexes\n"
                     "WHERE schemaname = 'public'\n"
-                    f"AND indexname = '{self.data['name']}';"
+                    f"AND indexname = '{self.data['name']}'"
                 )
 
             case Driver.MYSQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.statistics\n"
                     "WHERE table_schema = DATABASE()\n"
-                    f"AND index_name = '{self.data['name']}';"
+                    f"AND index_name = '{self.data['name']}'"
                 )
 
             case Driver.SQLITE:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM sqlite_master\n"
                     "WHERE type = 'index'\n"
-                    f"AND name = '{self.data['name']}';"
+                    f"AND name = '{self.data['name']}'"
                 )
 
             case Driver.ORACLE:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM user_indexes\n"
-                    f"WHERE index_name = '{self.data['name'].upper()}';"
+                    f"WHERE index_name = '{self.data['name'].upper()}'"
                 )
 
-        return ""
+            case _:
+                query = ""
+
+        return f"{query};" if with_semicolon else query
 
     # Vistas
 
     def _generate_views_metadata(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera la consulta SQL para obtener la metadata de las vistas
         según el sistema gestor de base de datos activo.
 
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
+
         Returns:
             str:
                 Consulta SQL compatible con el driver configurado.
@@ -1675,82 +1856,111 @@ class NavigationTreeContextMenu(QMenu):
         match self.sgbd_driver:
 
             case Driver.POSTGRESQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.views\n"
                     "WHERE table_schema = 'public'\n"
-                    "ORDER BY table_name;"
+                    "ORDER BY table_name"
                 )
 
             case Driver.MYSQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.views\n"
                     "WHERE table_schema = DATABASE()\n"
-                    "ORDER BY table_name;"
+                    "ORDER BY table_name"
                 )
 
             case Driver.SQLITE:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM sqlite_master\n"
                     "WHERE type = 'view'\n"
-                    "ORDER BY name;"
+                    "ORDER BY name"
                 )
 
             case Driver.ORACLE:
-                return "SELECT *\n" "FROM user_views\n" "ORDER BY view_name;"
+                query = "SELECT *\n" "FROM user_views\n" "ORDER BY view_name"
 
-        return ""
+            case _:
+                query = ""
+
+        return f"{query};" if with_semicolon else query
 
     # Vista
 
     def _generate_view_select(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera una consulta SELECT para la vista seleccionada.
 
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
+
         Returns:
             str:
                 Consulta SQL.
         """
 
-        return self._generate_table_select()
+        return self._generate_table_select(
+            with_semicolon=with_semicolon,
+        )
 
     def _generate_view_drop(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera una consulta DROP para la vista seleccionada.
 
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
+
         Returns:
             str:
                 Consulta SQL.
         """
 
-        return f"DROP VIEW {self.item.text()};"
+        query = f"DROP VIEW {self.item.text()}"
+
+        return f"{query};" if with_semicolon else query
 
     def _generate_view_data(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera una consulta para mostrar los datos de la vista
         seleccionada.
 
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
+
         Returns:
             str:
                 Consulta SQL.
         """
 
-        return self._generate_table_data()
+        return self._generate_table_data(
+            with_semicolon=with_semicolon,
+        )
 
     def _generate_view_metadata(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera una consulta SQL para obtener la metadata de la
         vista seleccionada.
+
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
 
         Returns:
             str:
@@ -1760,48 +1970,58 @@ class NavigationTreeContextMenu(QMenu):
         match self.sgbd_driver:
 
             case Driver.POSTGRESQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.views\n"
                     "WHERE table_schema = 'public'\n"
-                    f"AND table_name = '{self.item.text()}';"
+                    f"AND table_name = '{self.item.text()}'"
                 )
 
             case Driver.MYSQL:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM information_schema.views\n"
                     "WHERE table_schema = DATABASE()\n"
-                    f"AND table_name = '{self.item.text()}';"
+                    f"AND table_name = '{self.item.text()}'"
                 )
 
             case Driver.SQLITE:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM sqlite_master\n"
                     "WHERE type = 'view'\n"
-                    f"AND name = '{self.item.text()}';"
+                    f"AND name = '{self.item.text()}'"
                 )
 
             case Driver.ORACLE:
-                return (
+                query = (
                     "SELECT *\n"
                     "FROM user_views\n"
-                    f"WHERE view_name = '{self.item.text().upper()}';"
+                    f"WHERE view_name = '{self.item.text().upper()}'"
                 )
 
-        return ""
+            case _:
+                query = ""
+
+        return f"{query};" if with_semicolon else query
 
     def _generate_view_columns(
         self,
+        with_semicolon: bool = False,
     ) -> str:
         """
         Genera una consulta SQL para obtener la metadata de las
         columnas de la vista seleccionada.
+
+        Args:
+            with_semicolon (bool):
+                Indica si la consulta debe terminar con punto y coma.
 
         Returns:
             str:
                 Consulta SQL compatible con el driver configurado.
         """
 
-        return self._generate_table_columns()
+        return self._generate_table_columns(
+            with_semicolon=with_semicolon,
+        )

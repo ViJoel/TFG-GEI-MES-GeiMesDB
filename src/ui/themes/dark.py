@@ -605,7 +605,7 @@ THEME.update(
         "sql_index_color": LIGHT_PURPLE,
         "sql_keyword_color": LIGHT_GREEN,
         "sql_null_color": LIGHT_CYAN,
-        "sql_number_color": GRAY_100,
+        "sql_number_color": "#7AD69A",
         "sql_parameter_color": LIGHT_YELLOW,
         "sql_string_color": LIGHT_RED,
         "sql_symbol_color": "#DEC3E8",

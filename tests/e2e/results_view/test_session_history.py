@@ -1,3 +1,4 @@
+import pytest
 from PySide6.QtCore import Qt
 from pytestqt.qtbot import QtBot
 
@@ -19,9 +20,21 @@ from ui.app.main_window import MainWindow
 # =============================================================================
 
 
-def test_session_queries_history_postgresql(
+@pytest.mark.parametrize(
+    "connection",
+    [
+        POSTGRESQL_CONNECTION,
+        MYSQL_CONNECTION,
+    ],
+    ids=[
+        "postgresql",
+        "mysql",
+    ],
+)
+def test_session_queries_history(
     qtbot: QtBot,
     main_window: MainWindow,
+    connection,
 ):
     """
     Verifica que una consulta ejecutada se almacena en el
@@ -32,17 +45,17 @@ def test_session_queries_history_postgresql(
     connect_to_db(
         qtbot=qtbot,
         window=main_window,
-        connection_name=POSTGRESQL_CONNECTION.name,
+        connection_name=connection.name,
     )
 
     workspace = get_workspace(
         main_window=main_window,
-        connection=POSTGRESQL_CONNECTION,
+        connection=connection,
     )
 
     sql_editor_area = get_sql_editor_area(
         main_window=main_window,
-        connection=POSTGRESQL_CONNECTION,
+        connection=connection,
     )
 
     editor = create_new_editor(
@@ -51,9 +64,10 @@ def test_session_queries_history_postgresql(
 
     assert editor is not None
 
-    query = "SELECT * FROM table_simple;"
+    query_without_semicolon = "SELECT * FROM table_simple"
+    query_with_semicolon = f"{query_without_semicolon};"
 
-    editor.setPlainText(query)
+    editor.setPlainText(query_with_semicolon)
 
     sql_editor_area.toolbar.execute_query_button.click()
 
@@ -76,84 +90,11 @@ def test_session_queries_history_postgresql(
 
     assert history_item is not None
 
-    # === LIMPIAR EDITOR ===
-
-    editor.clear()
-
-    assert editor.toPlainText() == ""
-
-    # === RECUPERAR CONSULTA ===
-
-    qtbot.mouseDClick(
-        history_item,
-        Qt.MouseButton.LeftButton,
+    entry = item.data(
+        Qt.ItemDataRole.UserRole,
     )
 
-    assert editor.toPlainText() == query
-
-    disconnect_from_db(
-        qtbot=qtbot,
-        window=main_window,
-        connection_name=POSTGRESQL_CONNECTION.name,
-    )
-
-
-def test_session_queries_history_mysql(
-    qtbot: QtBot,
-    main_window: MainWindow,
-):
-    """
-    Verifica que una consulta ejecutada se almacena en el
-    historial de sesión y que al hacer doble clic sobre ella
-    se recupera en el editor.
-    """
-
-    connect_to_db(
-        qtbot=qtbot,
-        window=main_window,
-        connection_name=MYSQL_CONNECTION.name,
-    )
-
-    workspace = get_workspace(
-        main_window=main_window,
-        connection=MYSQL_CONNECTION,
-    )
-
-    sql_editor_area = get_sql_editor_area(
-        main_window=main_window,
-        connection=MYSQL_CONNECTION,
-    )
-
-    editor = create_new_editor(
-        sql_editor_area=sql_editor_area,
-    )
-
-    assert editor is not None
-
-    query = "SELECT * FROM table_simple;"
-
-    editor.setPlainText(query)
-
-    sql_editor_area.toolbar.execute_query_button.click()
-
-    results_view = workspace.results_view
-
-    qtbot.waitUntil(
-        lambda: results_view.table.model is not None,
-        timeout=5000,
-    )
-
-    # === HISTORIAL DE SESIÓN ===
-
-    history = results_view.session_queries_history
-
-    assert history.count() == 1
-
-    item = history.item(0)
-
-    history_item = history.itemWidget(item)
-
-    assert history_item is not None
+    assert entry.query == query_without_semicolon
 
     # === LIMPIAR EDITOR ===
 
@@ -168,10 +109,10 @@ def test_session_queries_history_mysql(
         Qt.MouseButton.LeftButton,
     )
 
-    assert editor.toPlainText() == query
+    assert editor.toPlainText() == query_without_semicolon
 
     disconnect_from_db(
         qtbot=qtbot,
         window=main_window,
-        connection_name=MYSQL_CONNECTION.name,
+        connection_name=connection.name,
     )

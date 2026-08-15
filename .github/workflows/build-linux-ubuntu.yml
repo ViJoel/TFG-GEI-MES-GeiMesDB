@@ -1,0 +1,71 @@
+name: Build Linux Ubuntu
+
+on:
+  push:
+    branches: [main]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check Python
+        run: |
+          python --version
+          which python
+
+      - name: Create virtual environment
+        run: |
+          python -m venv .venv
+
+      - name: Activate and check virtual environment
+        run: |
+          source .venv/bin/activate
+          python --version
+          which python
+          which pip
+
+      - name: Upgrade pip
+        run: |
+          source .venv/bin/activate
+          python --version
+          which python
+          which pip
+          python -m pip install --upgrade pip
+
+      - name: Install dependencies
+        run: |
+          source .venv/bin/activate
+          python --version
+          which python
+          which pip
+          pip install -r requirements.txt
+
+      - name: Build
+        run: |
+          source .venv/bin/activate
+          python --version
+          which python
+          which pip
+          python compile/linux/build.py
+
+      - name: Check executable
+        run: |
+          ls -lh dist/GeiMesDB
+          file dist/GeiMesDB
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: GeiMesDB-linux-ubuntu
+          path: dist/GeiMesDB
