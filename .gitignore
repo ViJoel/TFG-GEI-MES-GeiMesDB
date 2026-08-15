@@ -1,32 +1,36 @@
-# Carpeta con apuntes
+# Carpeta con cosas.
 cosas/
 
-# Carpeta con los scripts de las bases de datos de pruebas
+# Carpeta con los scripts de las bases de datos de pruebas.
 sakila/
 
-# Scripts de bash
+# Scripts de bash.
 *.sh
 
-# Visual Studio Code
+# Visual Studio Code.
 .vscode/*
 !.vscode/settings.json
+!.vscode/python.code-snippets
+!.vscode/launch.json
+!.vscode/extensions.json
 
-# Entornos virtuales
+# Entornos virtuales.
 .venv/
 venv/
 ENV/
 env/
 
-# Python
+# Python.
 __pycache__/
 build/
 dist/
+*.spec
 
-# Carpetas autogeneradas del proyecto
+# Carpetas autogeneradas del proyecto.
 geimesdb_logs/
 geimesdb_data/
 
-# Tests
+# Tests.
 .coverage
 coverage.*
 htmlcov/

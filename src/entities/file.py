@@ -86,21 +86,15 @@ class File:
         self,
     ) -> bool:
         """
-        Indica si el archivo existe físicamente en disco
-        utilizando el path (si no tiene path es que es un
-        arcihvo creado por la aplicacion que todavía no
-        existe en disco).
+        Indica si el archivo existe físicamente en disco.
 
         Returns:
             bool:
-                - `True` si el archivo existe.
-                - `False` en caso contrario.
+                - `True` si el archivo existe físicamente.
+                - `False` si no tiene ruta o no existe en disco.
         """
 
-        if self.path is not None:
-            return True
-        else:
-            return False
+        return self.path is not None and self.path.exists()
 
     def rename(
         self,

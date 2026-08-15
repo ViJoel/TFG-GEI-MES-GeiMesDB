@@ -3,7 +3,7 @@ create table if not exists connections (
     name text not null,
     driver text not null,
     host text,
-    port integer,
+    port text,
     database text,
     username text,
     password text,

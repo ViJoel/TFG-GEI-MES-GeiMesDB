@@ -31,10 +31,12 @@ def shutdown() -> None:
     de la aplicación.
 
     Responsabilidades:
+    - Eliminar las notificaciones pendientes.
     - Liberar sesiones activas.
     - Cerrar conexiones abiertas.
-    - Ejecutar cleanup global.
     """
+
+    AppContext.get_notification_manager().clear()
 
     close_all_sessions()
 

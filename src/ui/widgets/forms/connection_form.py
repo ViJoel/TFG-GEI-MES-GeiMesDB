@@ -781,6 +781,9 @@ class ConnectionForm(QWidget):
 
         connection = self._build_connection_from_form()
 
+        if connection is None:
+            return
+
         logger.info(f"Saving connection '{connection.name}'...")
 
         try:
@@ -831,6 +834,9 @@ class ConnectionForm(QWidget):
 
         connection = self._build_connection_from_form()
 
+        if connection is None:
+            return
+
         notify(
             MessageType.WARNING,
             self.tr("Testing connection..."),
@@ -839,54 +845,9 @@ class ConnectionForm(QWidget):
         AppContext.get_task_manager().run(
             test_connection,
             connection,
-            on_success=lambda _: self._on_test_connection_success,
+            on_success=self._on_test_connection_success,
             on_error=self._on_test_connection_error,
         )
-
-    def _build_connection_from_form(
-        self,
-    ) -> Connection:
-        """
-        Construye una entidad `Connection`
-        utilizando el estado actual
-        del formulario.
-
-        Returns:
-            Connection:
-                Entidad construida a partir
-                de los valores actuales de la UI.
-        """
-
-        selected_driver = Driver(self.driver_input.currentText())
-
-        # Reutilizar entidad existente
-        # durante edición.
-        connection = (
-            self.current_connection
-            if self.current_connection is not None
-            else Connection()
-        )
-
-        connection.name = self.name_input.text()
-        connection.driver = selected_driver
-
-        if selected_driver == Driver.SQLITE:
-            connection.host = None
-            connection.port = None
-            connection.database = None
-            connection.username = None
-            connection.password = None
-            connection.path = self.path_input.text()
-
-        else:
-            connection.host = self.host_input.text()
-            connection.port = int(self.port_input.text())
-            connection.database = self.database_input.text()
-            connection.username = self.username_input.text()
-            connection.password = self.password_input.text()
-            connection.path = None
-
-        return connection
 
     def _cancel_button_clicked(
         self,
@@ -904,6 +865,111 @@ class ConnectionForm(QWidget):
     # =====================
     # === EVENT HELPERS ===
     # =====================
+
+    def _validate_form(
+        self,
+    ) -> bool:
+        """
+        Comprueba que el formulario contiene
+        los datos mínimos requeridos.
+
+        Returns:
+            bool:
+                - `True` si los datos son válidos.
+                - `False` en caso contrario.
+        """
+
+        if not self.name_input.text().strip():
+
+            notify(
+                message_type=MessageType.ERROR,
+                message=self.tr("Connection name is required."),
+            )
+
+            return False
+
+        driver = Driver(self.driver_input.currentText())
+
+        if driver == Driver.SQLITE:
+            if not self.path_input.text().strip():
+
+                notify(
+                    message_type=MessageType.ERROR,
+                    message=self.tr("SQLite path is required."),
+                )
+
+                return False
+
+        else:
+            required = (
+                self.host_input,
+                self.port_input,
+                self.database_input,
+                self.username_input,
+            )
+
+            for widget in required:
+                if not widget.text().strip():
+
+                    notify(
+                        message_type=MessageType.ERROR,
+                        message=self.tr("Missing required connection data."),
+                    )
+
+                    return False
+
+        return True
+
+    def _build_connection_from_form(
+        self,
+    ) -> Connection | None:
+        """
+        Construye una entidad `Connection`
+        utilizando el estado actual
+        del formulario.
+
+        Returns:
+            Connection:
+                Entidad construida a partir
+                de los valores actuales de la UI.
+
+            None:
+                Si los datos del formulario no son válidos.
+        """
+
+        if not self._validate_form():
+            return None
+
+        selected_driver = Driver(self.driver_input.currentText().strip())
+
+        # Reutilizar entidad existente
+        # durante edición.
+        connection = (
+            self.current_connection
+            if self.current_connection is not None
+            else Connection()
+        )
+
+        connection.name = self.name_input.text().strip()
+        connection.driver = selected_driver
+
+        if selected_driver == Driver.SQLITE:
+            connection.host = None
+            connection.port = None
+            connection.database = None
+            connection.username = None
+            connection.password = None
+            connection.path = self.path_input.text().strip()
+
+        else:
+            connection.host = self.host_input.text().strip()
+            connection.port = int(self.port_input.text().strip())
+            connection.database = self.database_input.text().strip()
+            connection.username = self.username_input.text().strip()
+            connection.password = self.password_input.text().strip()
+            connection.path = None
+
+        return connection
 
     def _on_test_connection_success(
         self,

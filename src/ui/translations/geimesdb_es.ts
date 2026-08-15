@@ -110,37 +110,52 @@
         <translation>Archivos de Base de Datos (*.db);;Todos los archivos (*)</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="794"/>
+        <location filename="../widgets/forms/connection_form.py" line="797"/>
         <source>Connection updated.</source>
         <translation>Conexión actualizada.</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="803"/>
+        <location filename="../widgets/forms/connection_form.py" line="806"/>
         <source>Connection saved.</source>
         <translation>Conexión guardada.</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="820"/>
+        <location filename="../widgets/forms/connection_form.py" line="823"/>
         <source>Error saving.</source>
         <translation>Error al guardar.</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="836"/>
+        <location filename="../widgets/forms/connection_form.py" line="842"/>
         <source>Testing connection...</source>
         <translation>Probando conexión...</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="917"/>
+        <location filename="../widgets/forms/connection_form.py" line="886"/>
+        <source>Connection name is required.</source>
+        <translation>Se requiere el nombre de la conexión.</translation>
+    </message>
+    <message>
+        <location filename="../widgets/forms/connection_form.py" line="898"/>
+        <source>SQLite path is required.</source>
+        <translation>Se requiere la ruta de SQLite.</translation>
+    </message>
+    <message>
+        <location filename="../widgets/forms/connection_form.py" line="916"/>
+        <source>Missing required connection data.</source>
+        <translation>Faltan los datos de conexión necesarios.</translation>
+    </message>
+    <message>
+        <location filename="../widgets/forms/connection_form.py" line="983"/>
         <source>Connection successful.</source>
         <translation>Conexión exitosa.</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="924"/>
+        <location filename="../widgets/forms/connection_form.py" line="990"/>
         <source>Connection failed.</source>
         <translation>Conexión fallida.</translation>
     </message>
     <message>
-        <location filename="../widgets/forms/connection_form.py" line="936"/>
+        <location filename="../widgets/forms/connection_form.py" line="1002"/>
         <source>Invalid connection data.</source>
         <translation>Datos de conexión no válidos.</translation>
     </message>
@@ -181,17 +196,17 @@
 <context>
     <name>Console</name>
     <message>
-        <location filename="../widgets/workspace/results_view/console.py" line="180"/>
+        <location filename="../widgets/workspace/results_view/console.py" line="188"/>
         <source>One or more UPDATE operations failed.</source>
         <translation>Una o más operaciones UPDATE fallaron.</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/results_view/console.py" line="182"/>
+        <location filename="../widgets/workspace/results_view/console.py" line="190"/>
         <source>The transaction was rolled back.</source>
         <translation>Se hizo rollback de la transacción.</translation>
     </message>
     <message>
-        <location filename="../widgets/workspace/results_view/console.py" line="184"/>
+        <location filename="../widgets/workspace/results_view/console.py" line="192"/>
         <source>No changes were saved.</source>
         <translation>No se guardaron los cambios.</translation>
     </message>
@@ -392,13 +407,13 @@
     </message>
     <message>
         <location filename="../widgets/workspace/results_view/results_view.py" line="128"/>
-        <source>Session queries history</source>
-        <translation>Historial de consultas de sesión</translation>
+        <source>Session History</source>
+        <translation>Historial de Sesión</translation>
     </message>
     <message>
         <location filename="../widgets/workspace/results_view/results_view.py" line="132"/>
-        <source>Connection queries history</source>
-        <translation>Historial de consultas de conexión</translation>
+        <source>Connection History</source>
+        <translation>Historial de Conexión</translation>
     </message>
     <message>
         <location filename="../widgets/workspace/results_view/results_view.py" line="136"/>
@@ -439,52 +454,52 @@
 <context>
     <name>SettingsMenu</name>
     <message>
-        <location filename="../widgets/settings/settings_menu.py" line="98"/>
+        <location filename="../widgets/settings/settings_menu.py" line="100"/>
         <source>Settings menu</source>
         <translation>Menú de ajustes</translation>
     </message>
     <message>
-        <location filename="../widgets/settings/settings_menu.py" line="102"/>
+        <location filename="../widgets/settings/settings_menu.py" line="104"/>
         <source>Theme</source>
         <translation>Tema</translation>
     </message>
     <message>
-        <location filename="../widgets/settings/settings_menu.py" line="106"/>
+        <location filename="../widgets/settings/settings_menu.py" line="108"/>
         <source>Language</source>
         <translation>Lenguaje</translation>
     </message>
     <message>
-        <location filename="../widgets/settings/settings_menu.py" line="110"/>
+        <location filename="../widgets/settings/settings_menu.py" line="112"/>
         <source>Cancel</source>
         <translation>Cancelar</translation>
     </message>
     <message>
-        <location filename="../widgets/settings/settings_menu.py" line="114"/>
+        <location filename="../widgets/settings/settings_menu.py" line="116"/>
         <source>Apply</source>
         <translation>Aplicar</translation>
     </message>
     <message>
-        <location filename="../widgets/settings/settings_menu.py" line="118"/>
+        <location filename="../widgets/settings/settings_menu.py" line="120"/>
         <source>Accept</source>
         <translation>Aceptar</translation>
     </message>
     <message>
-        <location filename="../widgets/settings/settings_menu.py" line="287"/>
+        <location filename="../widgets/settings/settings_menu.py" line="301"/>
         <source>Changing settings...</source>
         <translation>Cambiando ajustes...</translation>
     </message>
     <message>
-        <location filename="../widgets/settings/settings_menu.py" line="306"/>
+        <location filename="../widgets/settings/settings_menu.py" line="320"/>
         <source>Settings changed.</source>
         <translation>Ajustes cambiados.</translation>
     </message>
     <message>
-        <location filename="../widgets/settings/settings_menu.py" line="315"/>
+        <location filename="../widgets/settings/settings_menu.py" line="329"/>
         <source>Error changing settings.</source>
         <translation>Error cambiando ajustes.</translation>
     </message>
     <message>
-        <location filename="../widgets/settings/settings_menu.py" line="317"/>
+        <location filename="../widgets/settings/settings_menu.py" line="331"/>
         <source>See logs for details.</source>
         <translation>Ver logs para detalles.</translation>
     </message>

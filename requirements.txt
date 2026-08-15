@@ -10,7 +10,13 @@ EditorConfig==0.17.1
 greenlet==3.3.2
 iniconfig==2.3.0
 isort==8.0.1
+jaraco.classes==3.4.0
+jaraco.context==6.1.2
+jaraco.functools==4.6.0
+jeepney==0.9.0
 jsbeautifier==2.0.1
+keyring==25.7.0
+more-itertools==11.1.0
 mypy_extensions==1.1.0
 oracledb==3.4.2
 packaging==26.0
@@ -32,10 +38,12 @@ PySide6_Essentials==6.11.0
 PySide6_Examples==6.11.0
 pytest==9.0.3
 pytest-cov==7.1.0
+pytest-mock==3.15.1
 pytest-qt==4.5.0
 pytokens==0.4.1
 QtAwesome==1.4.2
 QtPy==2.4.3
+SecretStorage==3.5.0
 setuptools==82.0.1
 shiboken6==6.11.0
 SQLAlchemy==2.0.48

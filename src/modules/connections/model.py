@@ -3,6 +3,10 @@ import sqlite3
 from entities.connection import Connection
 from entities.driver import Driver
 from log.app_logger import get_logger
+from modules.connections.crypto import (
+    decrypt,
+    encrypt,
+)
 from modules.database.model import get_connection as get_db_connection
 from modules.database.wrapper import handle_db_errors
 
@@ -66,7 +70,11 @@ def get_all_connections() -> list[Connection]:
         rows = cur.fetchall()
 
         for row in rows:
-            connections_list.append(_map_row_to_connection(row))
+            connections_list.append(
+                decrypt(
+                    _map_row_to_connection(row),
+                ),
+            )
 
     logger.success(f"Loaded {len(connections_list)} persisted connections.")
 
@@ -91,6 +99,10 @@ def create_connection(connection: Connection) -> None:
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     """
 
+    # Se crea una copia cifrada para persistirla.
+    # La instancia original permanece intacta.
+    encrypted_connection = encrypt(connection)
+
     with get_db_connection() as conn:
 
         cur = conn.cursor()
@@ -98,15 +110,15 @@ def create_connection(connection: Connection) -> None:
         cur.execute(
             query,
             (
-                connection.id,
-                connection.name,
-                connection.driver.value,
-                connection.host,
-                connection.port,
-                connection.database,
-                connection.username,
-                connection.password,
-                connection.path,
+                encrypted_connection.id,
+                encrypted_connection.name,
+                encrypted_connection.driver.value,
+                encrypted_connection.host,
+                encrypted_connection.port,
+                encrypted_connection.database,
+                encrypted_connection.username,
+                encrypted_connection.password,
+                encrypted_connection.path,
             ),
         )
 
@@ -139,6 +151,10 @@ def update_connection(connection: Connection) -> None:
     WHERE id = ?
     """
 
+    # Se crea una copia cifrada para persistirla.
+    # La instancia original permanece intacta.
+    encrypted_connection = encrypt(connection)
+
     with get_db_connection() as conn:
 
         cur = conn.cursor()
@@ -146,15 +162,15 @@ def update_connection(connection: Connection) -> None:
         cur.execute(
             query,
             (
-                connection.name,
-                connection.driver.value,
-                connection.host,
-                connection.port,
-                connection.database,
-                connection.username,
-                connection.password,
-                connection.path,
-                connection.id,
+                encrypted_connection.name,
+                encrypted_connection.driver.value,
+                encrypted_connection.host,
+                encrypted_connection.port,
+                encrypted_connection.database,
+                encrypted_connection.username,
+                encrypted_connection.password,
+                encrypted_connection.path,
+                encrypted_connection.id,
             ),
         )
 

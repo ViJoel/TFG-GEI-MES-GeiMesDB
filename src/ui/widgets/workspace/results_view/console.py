@@ -158,7 +158,9 @@ class Console(QTextEdit):
         if script_result is None:
             return
 
-        for item in script_result.items:
+        last_index = len(script_result.items) - 1
+
+        for index, item in enumerate(script_result.items):
 
             if item.success:
                 self.write(
@@ -168,8 +170,14 @@ class Console(QTextEdit):
 
             else:
                 self.write(
-                    f"{item.query}\nError: {item.error}\n\n",
+                    f"{item.query}\n\nError: {item.error}\n\n",
                     MessageType.ERROR,
+                )
+
+            if index != last_index:
+                self.write(
+                    "-" * 80 + "\n\n",
+                    MessageType.DISABLED,
                 )
 
         if script_result.rolled_back:

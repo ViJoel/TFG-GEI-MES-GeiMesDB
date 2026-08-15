@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 
 import modules.sessions.service as service
+from entities.driver import Driver
 
 # =============================================================================
 # FIXTURE: MOCK DEL MANAGER
@@ -19,6 +20,7 @@ def mock_manager(monkeypatch):
     monkeypatch.setattr(service, "os", MagicMock())
     monkeypatch.setattr(service, "cs", MagicMock())
     monkeypatch.setattr(service, "gs", MagicMock())
+    monkeypatch.setattr(service, "gsd", MagicMock())
     monkeypatch.setattr(service, "hs", MagicMock())
     monkeypatch.setattr(service, "cas", MagicMock())
     monkeypatch.setattr(service, "tc", MagicMock())
@@ -26,6 +28,12 @@ def mock_manager(monkeypatch):
     monkeypatch.setattr(service, "ieq", MagicMock())
     monkeypatch.setattr(service, "es", MagicMock())
     monkeypatch.setattr(service, "eu", MagicMock())
+    monkeypatch.setattr(service, "gdt", MagicMock())
+
+
+# =============================================================================
+# TESTS
+# =============================================================================
 
 
 def test_open_session():
@@ -64,6 +72,20 @@ def test_get_session():
 
     service.gs.assert_called_once_with("1")
     assert result == "session"
+
+
+def test_get_session_driver():
+    """
+    Verifica que get_session_driver delega correctamente
+    la recuperación del driver al manager.
+    """
+
+    service.gsd.return_value = Driver.POSTGRESQL
+
+    result = service.get_session_driver("1")
+
+    service.gsd.assert_called_once_with("1")
+    assert result is Driver.POSTGRESQL
 
 
 def test_has_session():
@@ -174,3 +196,25 @@ def test_execute_updates():
     )
 
     assert result == "result"
+
+
+def test_get_db_tree():
+    """
+    Verifica que get_db_tree delega correctamente
+    la obtención del árbol de la base de datos al manager.
+    """
+
+    tree = {
+        "tables": [],
+        "views": [],
+    }
+
+    service.gdt.return_value = tree
+
+    result = service.get_db_tree("1")
+
+    service.gdt.assert_called_once_with(
+        connection_id="1",
+    )
+
+    assert result == tree

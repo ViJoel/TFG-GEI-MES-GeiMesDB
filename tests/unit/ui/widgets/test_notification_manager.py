@@ -266,3 +266,40 @@ def test_close_signal_removes_notification(
     notification.close_requested.emit()
 
     assert notification not in manager.notifications
+
+
+# =============================================================================
+# CLEAR
+# =============================================================================
+
+
+def test_clear_removes_all_notifications(
+    manager,
+    notification,
+):
+    """
+    Verifica que se eliminan todas las notificaciones registradas.
+    """
+
+    notification_2 = MagicMock()
+    notification_3 = MagicMock()
+
+    manager.notifications.extend(
+        [
+            notification,
+            notification_2,
+            notification_3,
+        ],
+    )
+
+    remove = MagicMock()
+
+    manager._remove = remove
+
+    manager.clear()
+
+    assert remove.call_count == 3
+
+    remove.assert_any_call(notification)
+    remove.assert_any_call(notification_2)
+    remove.assert_any_call(notification_3)

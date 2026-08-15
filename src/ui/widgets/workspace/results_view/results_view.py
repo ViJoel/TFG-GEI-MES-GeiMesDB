@@ -125,11 +125,11 @@ class ResultsView(QWidget):
         )
 
         self.session_queries_history_button.setText(
-            self.tr("Session queries history"),
+            self.tr("Session History"),
         )
 
         self.connection_queries_history_button.setText(
-            self.tr("Connection queries history"),
+            self.tr("Connection History"),
         )
 
         self.save_button.setText(
@@ -348,7 +348,7 @@ class ResultsView(QWidget):
             self._save_changes,
         )
 
-        dialog.exec()
+        dialog.open()
 
     def _on_discard_button_clicked(
         self,
@@ -366,7 +366,7 @@ class ResultsView(QWidget):
             self._discard_changes,
         )
 
-        dialog.exec()
+        dialog.open()
 
     # =====================
     # === EVENT HELPERS ===
