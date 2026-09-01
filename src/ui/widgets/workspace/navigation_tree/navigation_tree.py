@@ -68,7 +68,7 @@ class NavigationTree(QWidget):
         str,
     )
 
-    tree_reloaded = Signal()
+    tree_reloaded = Signal(dict)
 
     # ============
     # === INIT ===
@@ -147,6 +147,10 @@ class NavigationTree(QWidget):
     def _setup_models(
         self,
     ) -> None:
+        """
+        Inicializa el modelo de datos del árbol y el modelo
+        proxy utilizado para aplicar el filtrado de nodos.
+        """
 
         self.model = QStandardItemModel()
 
@@ -184,6 +188,14 @@ class NavigationTree(QWidget):
     def _create_search_bar(
         self,
     ) -> QLineEdit:
+        """
+        Crea y configura la barra de búsqueda del árbol.
+
+        Returns:
+            QLineEdit:
+                Barra de búsqueda configurada para filtrar
+                los elementos del árbol.
+        """
 
         search_bar = QLineEdit()
         search_bar.setObjectName("navigation_tree_search_bar")
@@ -194,6 +206,14 @@ class NavigationTree(QWidget):
     def _create_refresh_button(
         self,
     ) -> QPushButton:
+        """
+        Crea y configura el botón utilizado para recargar
+        el contenido del árbol.
+
+        Returns:
+            QPushButton:
+                Botón de actualización configurado.
+        """
 
         button = QPushButton()
 
@@ -213,6 +233,15 @@ class NavigationTree(QWidget):
     def _create_tree_view(
         self,
     ) -> QTreeView:
+        """
+        Crea y configura la vista utilizada para mostrar
+        el árbol de navegación.
+
+        Returns:
+            QTreeView:
+                Vista de árbol configurada con el modelo proxy
+                y el menú contextual.
+        """
 
         # Vista de árbol
         tree_view = QTreeView()
@@ -232,6 +261,25 @@ class NavigationTree(QWidget):
         node_type: TreeNodeType,
         data: Any | None = None,
     ) -> QStandardItem:
+        """
+        Crea un nodo del árbol con su texto, icono y
+        información asociada.
+
+        Args:
+            text (str):
+                Texto que se mostrará en el nodo.
+
+            node_type (TreeNodeType):
+                Tipo de nodo representado.
+
+            data (Any | None):
+                Datos asociados al nodo.
+
+        Returns:
+            QStandardItem:
+                Nodo configurado para incorporarse al modelo
+                del árbol.
+        """
 
         item = QStandardItem(text)
 
@@ -255,6 +303,14 @@ class NavigationTree(QWidget):
     def _create_tables_root_node(
         self,
     ) -> None:
+        """
+        Crea el nodo raíz que contiene las tablas de la base
+        de datos.
+
+        Returns:
+            QStandardItem:
+                Nodo raíz de las tablas.
+        """
 
         return self._create_node(
             text=self.tr("Tables"),
@@ -266,6 +322,23 @@ class NavigationTree(QWidget):
         table_name: str,
         table: dict[str, Any],
     ) -> None:
+        """
+        Crea un nodo de tabla y sus nodos secundarios.
+
+        Los nodos secundarios representan las columnas,
+        restricciones e índices asociados a la tabla.
+
+        Args:
+            table_name (str):
+                Nombre de la tabla.
+
+            table (dict[str, Any]):
+                Datos de la tabla.
+
+        Returns:
+            QStandardItem:
+                Nodo de la tabla con sus elementos asociados.
+        """
 
         item = self._create_node(
             text=table_name,
@@ -303,6 +376,21 @@ class NavigationTree(QWidget):
         columns: list[dict[str, Any]],
         table_name: str,
     ) -> QStandardItem:
+        """
+        Crea el nodo contenedor de las columnas de una tabla
+        o vista.
+
+        Args:
+            columns (list[dict[str, Any]]):
+                Datos de las columnas.
+
+            table_name (str):
+                Nombre de la tabla o vista a la que pertenecen.
+
+        Returns:
+            QStandardItem:
+                Nodo contenedor de las columnas.
+        """
 
         item = self._create_node(
             text=self.tr("Columns"),
@@ -324,6 +412,20 @@ class NavigationTree(QWidget):
         column: dict[str, Any],
         table_name: str,
     ) -> QStandardItem:
+        """
+        Crea un nodo correspondiente a una columna.
+
+        Args:
+            column (dict[str, Any]):
+                Datos de la columna.
+
+            table_name (str):
+                Nombre de la tabla o vista a la que pertenece.
+
+        Returns:
+            QStandardItem:
+                Nodo de la columna.
+        """
 
         column["table"] = table_name
 
@@ -338,6 +440,21 @@ class NavigationTree(QWidget):
         constraints: list[dict[str, Any]],
         table_name: str,
     ) -> QStandardItem:
+        """
+        Crea el nodo contenedor de las restricciones de una
+        tabla.
+
+        Args:
+            constraints (list[dict[str, Any]]):
+                Datos de las restricciones.
+
+            table_name (str):
+                Nombre de la tabla a la que pertenecen.
+
+        Returns:
+            QStandardItem:
+                Nodo contenedor de las restricciones.
+        """
 
         item = self._create_node(
             text=self.tr("Constraints"),
@@ -359,6 +476,24 @@ class NavigationTree(QWidget):
         constraint: dict[str, Any],
         table_name: str,
     ) -> QStandardItem:
+        """
+        Crea un nodo correspondiente a una restricción.
+
+        El texto mostrado se adapta al tipo de restricción
+        e incluye la información relevante de sus columnas
+        o tablas relacionadas.
+
+        Args:
+            constraint (dict[str, Any]):
+                Datos de la restricción.
+
+            table_name (str):
+                Nombre de la tabla a la que pertenece.
+
+        Returns:
+            QStandardItem:
+                Nodo de la restricción.
+        """
 
         text = constraint["name"] or constraint["type"]
 
@@ -390,6 +525,18 @@ class NavigationTree(QWidget):
         self,
         indexes: list[dict[str, Any]],
     ) -> QStandardItem:
+        """
+        Crea el nodo contenedor de los índices de una tabla
+        o vista.
+
+        Args:
+            indexes (list[dict[str, Any]]):
+                Datos de los índices.
+
+        Returns:
+            QStandardItem:
+                Nodo contenedor de los índices.
+        """
 
         item = self._create_node(
             text=self.tr("Indexes"),
@@ -405,6 +552,17 @@ class NavigationTree(QWidget):
         self,
         index: dict[str, Any],
     ) -> QStandardItem:
+        """
+        Crea un nodo correspondiente a un índice.
+
+        Args:
+            index (dict[str, Any]):
+                Datos del índice.
+
+        Returns:
+            QStandardItem:
+                Nodo del índice.
+        """
 
         text = f"{index['name']} " f"({', '.join(index['columns'])})"
 
@@ -417,6 +575,14 @@ class NavigationTree(QWidget):
     def _create_views_root_node(
         self,
     ) -> QStandardItem:
+        """
+        Crea el nodo raíz que contiene las vistas de la base
+        de datos.
+
+        Returns:
+            QStandardItem:
+                Nodo raíz de las vistas.
+        """
 
         return self._create_node(
             text=self.tr("Views"),
@@ -428,6 +594,23 @@ class NavigationTree(QWidget):
         view_name: str,
         view: dict[str, Any],
     ) -> QStandardItem:
+        """
+        Crea un nodo de vista y sus nodos secundarios.
+
+        Los nodos secundarios representan las columnas e
+        índices asociados a la vista.
+
+        Args:
+            view_name (str):
+                Nombre de la vista.
+
+            view (dict[str, Any]):
+                Datos de la vista.
+
+        Returns:
+            QStandardItem:
+                Nodo de la vista con sus elementos asociados.
+        """
 
         item = self._create_node(
             text=view_name,
@@ -457,6 +640,24 @@ class NavigationTree(QWidget):
         node_type: TreeNodeType,
         data: dict[str, Any] | None = None,
     ) -> QIcon:
+        """
+        Obtiene el icono correspondiente a un tipo de nodo.
+
+        El icono y su color se determinan en función del tipo
+        de nodo y, cuando es necesario, de los datos asociados.
+
+        Args:
+            node_type (TreeNodeType):
+                Tipo de nodo cuyo icono se desea obtener.
+
+            data (dict[str, Any] | None):
+                Datos asociados al nodo, utilizados para
+                determinar variantes específicas del icono.
+
+        Returns:
+            QIcon:
+                Icono correspondiente al nodo.
+        """
 
         match node_type:
 
@@ -673,6 +874,13 @@ class NavigationTree(QWidget):
         self,
         text,
     ) -> None:
+        """
+        Actualiza el filtro del árbol cuando cambia el texto
+        de búsqueda.
+
+        Si existe un filtro activo, expande todos los nodos
+        para facilitar la localización de los resultados.
+        """
 
         self.proxy_model.setFilterFixedString(text)
 
@@ -683,6 +891,17 @@ class NavigationTree(QWidget):
         self,
         index: QModelIndex,
     ) -> None:
+        """
+        Gestiona el colapso de un nodo del árbol.
+
+        Si el elemento seleccionado pertenece al nodo
+        colapsado, se elimina la selección y se colapsan
+        también sus descendientes.
+
+        Args:
+            index (QModelIndex):
+                Índice del nodo que ha sido colapsado.
+        """
 
         current = self.tree_view.currentIndex()
 
@@ -696,6 +915,14 @@ class NavigationTree(QWidget):
         self,
         pos: QPoint,
     ) -> None:
+        """
+        Muestra el menú contextual correspondiente al nodo
+        situado en la posición indicada.
+
+        Args:
+            pos (QPoint):
+                Posición del cursor dentro de la vista del árbol.
+        """
 
         index = self.tree_view.indexAt(pos)
 
@@ -737,6 +964,21 @@ class NavigationTree(QWidget):
         child: QModelIndex,
         parent: QModelIndex,
     ) -> bool:
+        """
+        Comprueba si un índice pertenece al subárbol de otro.
+
+        Args:
+            child (QModelIndex):
+                Índice cuya relación se desea comprobar.
+
+            parent (QModelIndex):
+                Índice que se considera antecesor.
+
+        Returns:
+            bool:
+                True si el índice hijo es el propio padre o
+                uno de sus descendientes.
+        """
 
         while child.isValid():
 
@@ -751,6 +993,15 @@ class NavigationTree(QWidget):
         self,
         parent: QModelIndex,
     ) -> None:
+        """
+        Colapsa recursivamente todos los descendientes de un
+        nodo.
+
+        Args:
+            parent (QModelIndex):
+                Índice del nodo cuyos descendientes se desean
+                colapsar.
+        """
 
         model = self.tree_view.model()
 
@@ -763,6 +1014,10 @@ class NavigationTree(QWidget):
     def _update_refresh_button_icon(
         self,
     ) -> None:
+        """
+        Actualiza el icono del botón de actualización utilizando
+        los colores definidos por el tema actual.
+        """
 
         self.refresh_button.setIcon(
             qta.icon(
@@ -776,6 +1031,9 @@ class NavigationTree(QWidget):
     def _update_tree_icons(
         self,
     ) -> None:
+        """
+        Actualiza los iconos de todos los nodos del árbol.
+        """
 
         for row in range(self.model.rowCount()):
 
@@ -788,6 +1046,14 @@ class NavigationTree(QWidget):
         self,
         item: QStandardItem,
     ) -> None:
+        """
+        Actualiza recursivamente el icono de un nodo y de todos
+        sus descendientes.
+
+        Args:
+            item (QStandardItem):
+                Nodo a partir del cual se inicia la actualización.
+        """
 
         info = item.data(Qt.UserRole)
 
@@ -812,6 +1078,10 @@ class NavigationTree(QWidget):
     def _load_data(
         self,
     ) -> None:
+        """
+        Inicia la carga asíncrona del esquema de la base de
+        datos asociado a la conexión actual.
+        """
 
         AppContext.get_task_manager().run(
             get_db_tree,
@@ -824,8 +1094,22 @@ class NavigationTree(QWidget):
         self,
         data: dict[str, Any],
     ) -> None:
+        """
+        Procesa los datos del esquema obtenidos correctamente
+        y reconstruye el contenido del árbol de navegación.
+
+        Una vez cargado el árbol, notifica mediante una señal
+        que los datos han sido actualizados.
+
+        Args:
+            data (dict[str, Any]):
+                Datos del esquema de la base de datos.
+        """
 
         self.model.clear()
+
+        if data is None:
+            return
 
         # ==========
         # Tables
@@ -880,12 +1164,23 @@ class NavigationTree(QWidget):
             message=self.tr("Tree loaded."),
         )
 
-        self.tree_reloaded.emit()
+        self.tree_reloaded.emit(data)
 
     def _load_data_error(
         self,
         error: WorkerError,
     ) -> None:
+        """
+        Gestiona un error producido durante la carga del
+        esquema de la base de datos.
+
+        Registra la información del error y muestra una
+        notificación al usuario.
+
+        Args:
+            error (WorkerError):
+                Información del error producido durante la carga.
+        """
 
         logger.error(f"Error loading tree.\n{error.traceback}")
 
@@ -901,6 +1196,10 @@ class NavigationTree(QWidget):
     def refresh(
         self,
     ) -> None:
+        """
+        Recarga el esquema de la base de datos y reconstruye
+        el árbol de navegación.
+        """
 
         notify(
             message_type=MessageType.WARNING,

@@ -29,6 +29,7 @@ def mock_manager(monkeypatch):
     monkeypatch.setattr(service, "es", MagicMock())
     monkeypatch.setattr(service, "eu", MagicMock())
     monkeypatch.setattr(service, "gdt", MagicMock())
+    monkeypatch.setattr(service, "bcd", MagicMock())
 
 
 # =============================================================================
@@ -201,7 +202,8 @@ def test_execute_updates():
 def test_get_db_tree():
     """
     Verifica que get_db_tree delega correctamente
-    la obtención del árbol de la base de datos al manager.
+    la obtención del árbol de la base de datos al
+    manager.
     """
 
     tree = {
@@ -218,3 +220,34 @@ def test_get_db_tree():
     )
 
     assert result == tree
+
+
+def test_build_completion_data():
+    """
+    Verifica que build_completion_data delega correctamente
+    la construcción de los datos para el autocompletador al
+    manager.
+    """
+
+    tree = {
+        "tables": [],
+        "views": [],
+    }
+
+    completion_data = {
+        "tables": [],
+        "views": [],
+        "columns": [],
+        "constraints": [],
+        "indexes": [],
+    }
+
+    service.bcd.return_value = completion_data
+
+    result = service.build_completion_data(tree)
+
+    service.bcd.assert_called_once_with(
+        tree_data=tree,
+    )
+
+    assert result == completion_data

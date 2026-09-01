@@ -1,3 +1,5 @@
+from typing import Any
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import (
     QColor,
@@ -5,10 +7,9 @@ from PySide6.QtGui import (
     QStandardItemModel,
 )
 
+from modules.sessions.service import build_completion_data
 from modules.sql.autocompletion.dynamic_data import SqlDynamicCompletionData
-from modules.sql.autocompletion.schema_data import (
-    SQL_SCHEMA_COMPLETION_DATA,
-)
+from modules.sql.autocompletion.schema_data import SqlSchemaCompletionData
 from modules.sql.autocompletion.sql_document_completion_provider import (
     SqlDocumentCompletionProvider,
 )
@@ -32,9 +33,14 @@ class SqlCompleterModel(QStandardItemModel):
 
     def __init__(
         self,
+        schema_data: dict[str, Any] = None,
     ) -> None:
         """
         Inicializa el modelo del autocompletador SQL.
+
+        Args:
+            schema_data (dict[str, Any], optional):
+                Datos del esquema de la base de datos.
         """
 
         super().__init__()
@@ -43,7 +49,27 @@ class SqlCompleterModel(QStandardItemModel):
 
         self._document_completion_provider = SqlDocumentCompletionProvider()
 
-        self.refresh()
+        self._schema_data = SqlSchemaCompletionData()
+
+        self.refresh(schema_data)
+
+    # ==================
+    # === PRIVATE API ===
+    # ==================
+
+    def _reload_schema_data(
+        self,
+        schema_data: dict[str, Any] = None,
+    ) -> None:
+
+        if schema_data is None:
+            return
+
+        self._schema_data.update(
+            build_completion_data(
+                schema_data,
+            )
+        )
 
     # ==================
     # === PUBLIC API ===
@@ -51,6 +77,7 @@ class SqlCompleterModel(QStandardItemModel):
 
     def refresh(
         self,
+        schema_data: dict[str, Any] = None,
     ) -> None:
         """
         Recarga los elementos del modelo de
@@ -60,15 +87,21 @@ class SqlCompleterModel(QStandardItemModel):
         - Datos estáticos del lenguaje SQL.
         - Datos del esquema de la base de datos.
         - Datos dinámicos obtenidos del documento SQL.
+
+        Args:
+            schema_data (dict[str, Any], optional):
+                Datos del esquema de la base de datos.
         """
 
         self.clear()
+
+        self._reload_schema_data(schema_data=schema_data)
 
         items = []
 
         for completion_data in (
             SQL_STATIC_COMPLETION_DATA,
-            SQL_SCHEMA_COMPLETION_DATA.get_data(),
+            self._schema_data.get_data(),
             self._dynamic_data.get_data(),
         ):
             for value in completion_data.values():
@@ -96,6 +129,7 @@ class SqlCompleterModel(QStandardItemModel):
         self,
         sql: str | None = None,
         force_update: bool = False,
+        schema_data: dict[str, Any] = None,
     ) -> bool:
         """
         Actualiza el modelo del autocompletador.
@@ -123,6 +157,9 @@ class SqlCompleterModel(QStandardItemModel):
                 sin comprobar los datos dinámicos del
                 documento.
 
+            schema_data (dict[str, Any], optional):
+                Datos del esquema de la base de datos.
+
         Returns:
             bool:
                 - `True` si el modelo ha sido
@@ -133,7 +170,7 @@ class SqlCompleterModel(QStandardItemModel):
         """
 
         if force_update:
-            self.refresh()
+            self.refresh(schema_data)
             return True
 
         if sql is None:
@@ -145,6 +182,6 @@ class SqlCompleterModel(QStandardItemModel):
         )
 
         if changed:
-            self.refresh()
+            self.refresh(schema_data)
 
         return changed

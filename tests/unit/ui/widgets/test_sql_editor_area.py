@@ -118,11 +118,18 @@ def save_dialog_mock(mocker):
 
 def test_initialization(sql_editor_area):
     """
-    Comprueba la creación del widget.
+    Comprueba la creación del widget y del editor inicial.
     """
 
     assert sql_editor_area.objectName() == "sql_editor_area"
-    assert sql_editor_area.files == []
+
+    assert len(sql_editor_area.files) == 1
+    assert sql_editor_area.editors.count() == 1
+
+    editor = sql_editor_area._get_current_editor()
+
+    assert editor is not None
+    assert editor.file is sql_editor_area.files[0]
 
 
 def test_ui_created(sql_editor_area):
@@ -1016,6 +1023,7 @@ def test_add_file_and_editor(
 
     sql_editor_cls.assert_called_once_with(
         file=fake_file,
+        schema_data=None,
     )
 
     assert fake_file in sql_editor_area.files
@@ -1033,6 +1041,191 @@ def test_add_file_and_editor(
     fake_editor.save_changes.connect.assert_called_once()
 
     fake_editor.rename_file.connect.assert_called_once()
+
+
+def test_add_file_and_editor_uses_saved_schema_data(
+    sql_editor_area,
+    fake_file,
+    mocker,
+):
+    """
+    Verifica que un nuevo editor recibe los datos del esquema
+    almacenados previamente en el área.
+    """
+
+    schema_data = {
+        "tables": {
+            "users": [],
+            "orders": [],
+        },
+    }
+
+    sql_editor_area.save_schema_data(schema_data)
+
+    fake_editor = mocker.Mock()
+    fake_editor.file = fake_file
+
+    sql_editor_cls = mocker.patch(
+        "ui.widgets.workspace.sql_editor.sql_editor_area.SqlEditor",
+        return_value=fake_editor,
+    )
+
+    mocker.patch.object(
+        sql_editor_area.files_list,
+        "add_file",
+    )
+
+    mocker.patch.object(
+        sql_editor_area.editors,
+        "addWidget",
+    )
+
+    mocker.patch.object(
+        sql_editor_area.editors,
+        "setCurrentWidget",
+    )
+
+    sql_editor_area._add_file_and_editor(fake_file)
+
+    sql_editor_cls.assert_called_once_with(
+        file=fake_file,
+        schema_data=schema_data,
+    )
+
+
+def test_add_file_and_editor_with_template(
+    sql_editor_area,
+    fake_file,
+    mocker,
+):
+    """
+    Comprueba que al crear un editor con plantilla
+    se carga la plantilla SQL.
+    """
+
+    fake_editor = mocker.Mock()
+    fake_editor.file = fake_file
+
+    mocker.patch(
+        "ui.widgets.workspace.sql_editor.sql_editor_area.SqlEditor",
+        return_value=fake_editor,
+    )
+
+    mocker.patch.object(
+        sql_editor_area.files_list,
+        "add_file",
+    )
+
+    mocker.patch.object(
+        sql_editor_area.editors,
+        "addWidget",
+    )
+
+    mocker.patch.object(
+        sql_editor_area.editors,
+        "setCurrentWidget",
+    )
+
+    sql_editor_area._add_file_and_editor(
+        fake_file,
+        with_template=True,
+    )
+
+    fake_editor.set_template.assert_called_once_with()
+
+
+def test_add_file_and_editor_with_template_sets_focus_later(
+    sql_editor_area,
+    fake_file,
+    mocker,
+):
+    """
+    Comprueba que al crear un editor con plantilla
+    se programa un segundo setFocus para ejecutarse
+    después de que Qt termine de procesar la creación del widget.
+    """
+
+    fake_editor = mocker.Mock()
+    fake_editor.file = fake_file
+
+    mocker.patch(
+        "ui.widgets.workspace.sql_editor.sql_editor_area.SqlEditor",
+        return_value=fake_editor,
+    )
+
+    mocker.patch.object(
+        sql_editor_area.files_list,
+        "add_file",
+    )
+
+    mocker.patch.object(
+        sql_editor_area.editors,
+        "addWidget",
+    )
+
+    mocker.patch.object(
+        sql_editor_area.editors,
+        "setCurrentWidget",
+    )
+
+    single_shot_mock = mocker.patch(
+        "ui.widgets.workspace.sql_editor.sql_editor_area.QTimer.singleShot",
+    )
+
+    sql_editor_area._add_file_and_editor(
+        fake_file,
+        with_template=True,
+    )
+
+    single_shot_mock.assert_called_once_with(
+        0,
+        fake_editor.setFocus,
+    )
+
+
+def test_add_file_and_editor_without_template_does_not_set_template_focus(
+    sql_editor_area,
+    fake_file,
+    mocker,
+):
+    """
+    Comprueba que un editor creado sin plantilla
+    no carga la plantilla ni programa un foco diferido.
+    """
+
+    fake_editor = mocker.Mock()
+    fake_editor.file = fake_file
+
+    mocker.patch(
+        "ui.widgets.workspace.sql_editor.sql_editor_area.SqlEditor",
+        return_value=fake_editor,
+    )
+
+    mocker.patch.object(
+        sql_editor_area.files_list,
+        "add_file",
+    )
+
+    mocker.patch.object(
+        sql_editor_area.editors,
+        "addWidget",
+    )
+
+    mocker.patch.object(
+        sql_editor_area.editors,
+        "setCurrentWidget",
+    )
+
+    single_shot_mock = mocker.patch(
+        "ui.widgets.workspace.sql_editor.sql_editor_area.QTimer.singleShot",
+    )
+
+    sql_editor_area._add_file_and_editor(fake_file)
+
+    fake_editor.set_template.assert_not_called()
+    single_shot_mock.assert_not_called()
+
+    fake_editor.setFocus.assert_called_once_with()
 
 
 # =============================================================================
@@ -1475,6 +1668,50 @@ def test_force_update_editors_completers_updates_all_editors(
     editor_2.force_update_completer.assert_called_once()
 
 
+def test_force_update_editors_completers_updates_all_editors_with_schema(
+    sql_editor_area,
+):
+    """
+    Verifica que se fuerza la actualización del
+    autocompletador de todos los editores abiertos
+    pasando los datos del esquema.
+    """
+
+    schema_data = {
+        "tables": {
+            "users": {
+                "columns": [],
+            },
+            "orders": {
+                "columns": [],
+            },
+        },
+    }
+
+    editor_1 = QWidget()
+    editor_1.force_update_completer = MagicMock()
+
+    editor_2 = QWidget()
+    editor_2.force_update_completer = MagicMock()
+
+    sql_editor_area.editors.addWidget(editor_1)
+    sql_editor_area.editors.addWidget(editor_2)
+
+    sql_editor_area.force_update_editors_completers(
+        schema_data=schema_data,
+    )
+
+    assert sql_editor_area.schema_data == schema_data
+
+    editor_1.force_update_completer.assert_called_once_with(
+        schema_data=schema_data,
+    )
+
+    editor_2.force_update_completer.assert_called_once_with(
+        schema_data=schema_data,
+    )
+
+
 def test_force_update_editors_completers_with_no_editors(
     sql_editor_area,
 ):
@@ -1483,6 +1720,157 @@ def test_force_update_editors_completers_with_no_editors(
     editores abiertos.
     """
 
+    while sql_editor_area.editors.count():
+        editor = sql_editor_area.editors.widget(0)
+        sql_editor_area.editors.removeWidget(editor)
+        editor.deleteLater()
+
     assert sql_editor_area.editors.count() == 0
 
     sql_editor_area.force_update_editors_completers()
+
+
+# =============================================================================
+# SCHEMA DATA
+# =============================================================================
+
+
+def test_save_schema_data(
+    sql_editor_area,
+):
+    """
+    Verifica que save_schema_data almacena correctamente
+    los datos del esquema.
+    """
+
+    schema_data = {
+        "tables": {
+            "users": [],
+            "orders": [],
+        },
+    }
+
+    sql_editor_area.save_schema_data(schema_data)
+
+    assert sql_editor_area.schema_data == schema_data
+
+
+def test_save_schema_data_none(
+    sql_editor_area,
+):
+    """
+    Verifica que save_schema_data permite limpiar
+    los datos del esquema.
+    """
+
+    schema_data = {
+        "tables": {
+            "users": [],
+        },
+    }
+
+    sql_editor_area.save_schema_data(schema_data)
+
+    sql_editor_area.save_schema_data()
+
+    assert sql_editor_area.schema_data is None
+
+
+# =============================================================================
+# FORCE UPDATE EDITORS COMPLETERS
+# =============================================================================
+
+
+def test_force_update_editors_completers_updates_all_editors_with_schema_data(
+    sql_editor_area,
+):
+    """
+    Verifica que se fuerza la actualización del autocompletador
+    de todos los editores pasando los datos del esquema.
+    """
+
+    schema_data = {
+        "tables": {
+            "users": {
+                "columns": [],
+            },
+            "orders": {
+                "columns": [],
+            },
+        },
+    }
+
+    editor_1 = QWidget()
+    editor_1.force_update_completer = MagicMock()
+
+    editor_2 = QWidget()
+    editor_2.force_update_completer = MagicMock()
+
+    sql_editor_area.editors.addWidget(editor_1)
+    sql_editor_area.editors.addWidget(editor_2)
+
+    sql_editor_area.force_update_editors_completers(
+        schema_data=schema_data,
+    )
+
+    assert sql_editor_area.schema_data == schema_data
+
+    editor_1.force_update_completer.assert_called_once_with(
+        schema_data=schema_data,
+    )
+
+    editor_2.force_update_completer.assert_called_once_with(
+        schema_data=schema_data,
+    )
+
+
+def test_force_update_editors_completers_without_schema_data(
+    sql_editor_area,
+):
+    """
+    Verifica que se puede forzar la actualización sin
+    proporcionar datos del esquema.
+    """
+
+    editor = QWidget()
+    editor.force_update_completer = MagicMock()
+
+    sql_editor_area.editors.addWidget(editor)
+
+    sql_editor_area.force_update_editors_completers()
+
+    assert sql_editor_area.schema_data is None
+
+    editor.force_update_completer.assert_called_once_with(
+        schema_data=None,
+    )
+
+
+def test_force_update_editors_completers_with_no_editors_and_schema_data(
+    sql_editor_area,
+):
+    """
+    Verifica que los datos del esquema se almacenan incluso
+    cuando no existen editores abiertos.
+    """
+
+    while sql_editor_area.editors.count():
+        editor = sql_editor_area.editors.widget(0)
+        sql_editor_area.editors.removeWidget(editor)
+        editor.deleteLater()
+
+    schema_data = {
+        "tables": {
+            "users": {
+                "columns": [],
+            },
+        },
+    }
+
+    assert sql_editor_area.editors.count() == 0
+
+    sql_editor_area.force_update_editors_completers(
+        schema_data=schema_data,
+    )
+
+    assert sql_editor_area.schema_data == schema_data

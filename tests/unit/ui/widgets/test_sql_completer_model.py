@@ -76,17 +76,20 @@ def test_refresh_applies_foreground_color():
 
     model.clear()
 
-    with patch(
-        "ui.widgets.workspace.sql_editor.sql_completer_model.SQL_STATIC_COMPLETION_DATA",
-        {
-            "keywords": {
-                "values": {"SELECT"},
-                "color": "keyword",
+    with (
+        patch(
+            "ui.widgets.workspace.sql_editor.sql_completer_model.SQL_STATIC_COMPLETION_DATA",
+            {
+                "keywords": {
+                    "values": {"SELECT"},
+                    "color": "keyword",
+                },
             },
-        },
-    ), patch(
-        "ui.widgets.workspace.sql_editor.sql_completer_model.ThemeManager.get_color",
-        return_value="#ffffff",
+        ),
+        patch(
+            "ui.widgets.workspace.sql_editor.sql_completer_model.ThemeManager.get_color",
+            return_value="#ffffff",
+        ),
     ):
 
         model.refresh()
@@ -115,8 +118,9 @@ def test_refresh_loads_schema_completion_items():
             "ui.widgets.workspace.sql_editor.sql_completer_model.SQL_STATIC_COMPLETION_DATA",
             {},
         ),
-        patch(
-            "ui.widgets.workspace.sql_editor.sql_completer_model.SQL_SCHEMA_COMPLETION_DATA.get_data",
+        patch.object(
+            model._schema_data,
+            "get_data",
             return_value={
                 "tables": {
                     "values": {"users", "orders"},
@@ -201,3 +205,54 @@ def test_update_force_refreshes_model():
 
     assert result is True
     model.refresh.assert_called_once()
+
+
+def test_refresh_loads_schema_data():
+    """
+    Verifica que refresh procesa los datos del esquema
+    recibidos como argumento.
+    """
+
+    model = SqlCompleterModel()
+
+    schema_data = {
+        "tables": {
+            "users": {
+                "columns": [
+                    {"name": "id"},
+                    {"name": "name"},
+                ],
+            },
+        },
+        "views": {},
+    }
+
+    with (
+        patch(
+            "ui.widgets.workspace.sql_editor.sql_completer_model.SQL_STATIC_COMPLETION_DATA",
+            {},
+        ),
+        patch.object(
+            model._dynamic_data,
+            "get_data",
+            return_value={},
+        ),
+        patch.object(
+            model._schema_data,
+            "update",
+        ) as update_mock,
+        patch.object(
+            model._schema_data,
+            "get_data",
+            return_value={
+                "tables": {
+                    "values": {"users"},
+                    "color": "table",
+                },
+            },
+        ),
+    ):
+        model.refresh(schema_data)
+
+    update_mock.assert_called_once()
+    assert model.item(0).text() == "users"
