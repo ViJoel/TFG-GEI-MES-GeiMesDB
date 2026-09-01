@@ -7,7 +7,6 @@ from sqlalchemy.sql.sqltypes import NullType
 
 from log.app_logger import get_logger
 from modules.sessions.manager import get_session
-from modules.sql.autocompletion.schema_data import SQL_SCHEMA_COMPLETION_DATA
 
 logger = get_logger(__name__)
 
@@ -63,16 +62,6 @@ def get_db_tree(
             "Database tree loaded successfully for connection '%s'.",
             connection_id,
         )
-
-        logger.info("Extrating data for editor autocompleter...")
-
-        SQL_SCHEMA_COMPLETION_DATA.update(
-            _build_completion_data(
-                tree_data,
-            )
-        )
-
-        logger.success("Data extracted.")
 
         return tree_data
 
@@ -658,7 +647,7 @@ def _extract_single_view_metadata(
 # ==========================================
 
 
-def _build_completion_data(
+def build_completion_data(
     tree_data: dict[str, Any],
 ) -> dict[
     str,

@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import (
+    TYPE_CHECKING,
+    Any,
+)
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import (
@@ -41,6 +44,7 @@ class SqlCompleter(QCompleter):
     def __init__(
         self,
         parent_widget: QWidget,
+        schema_data: dict[str, Any] = None,
     ) -> None:
         """
         Inicializa el autocompletador SQL y su
@@ -50,11 +54,14 @@ class SqlCompleter(QCompleter):
             parent_widget (QWidget):
                 Widget sobre el que actuará el
                 autocompletador.
+
+            schema_data (dict[str, Any], optional):
+                Datos del esquema de la base de datos.
         """
 
         super().__init__()
 
-        self._model = SqlCompleterModel()
+        self._model = SqlCompleterModel(schema_data=schema_data)
 
         self._setup_ui(parent_widget)
         self._connect_signals()
@@ -211,6 +218,7 @@ class SqlCompleter(QCompleter):
         self,
         sql: str | None = None,
         force_update: bool = False,
+        schema_data: dict[str, Any] = None,
     ) -> None:
         """
         Actualiza los datos del autocompletador.
@@ -234,9 +242,13 @@ class SqlCompleter(QCompleter):
             force_update (bool):
                 Indica si se debe forzar la recarga
                 del modelo del autocompletador.
+
+            schema_data (dict[str, Any], optional):
+                Datos del esquema de la base de datos.
         """
 
         self._model.update(
             sql=sql,
             force_update=force_update,
+            schema_data=schema_data,
         )

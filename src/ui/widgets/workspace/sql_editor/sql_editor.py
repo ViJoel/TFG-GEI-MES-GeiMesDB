@@ -1,3 +1,5 @@
+from typing import Any
+
 import sqlparse
 from PySide6.QtCore import (
     QRectF,
@@ -43,6 +45,25 @@ class SqlEditor(QPlainTextEdit):
     # === VARIABLES ===
     # =================
 
+    DEFAULT_SQL = """\
+-- ==================================================
+-- Welcome to the SQL Editor
+-- ==================================================
+-- You can write and execute your SQL queries here.
+-- Try modifying this example or replace it entirely.
+-- ==================================================
+
+SELECT
+    u.id,
+    u.name,
+    u.email,
+    u.created_at
+FROM users AS u
+WHERE u.active = true
+ORDER BY u.created_at DESC
+LIMIT 100;
+"""
+
     execute_requested = Signal(
         list,
         object,
@@ -58,6 +79,7 @@ class SqlEditor(QPlainTextEdit):
     def __init__(
         self,
         file: File,
+        schema_data: dict[str, Any] = None,
     ) -> None:
         """
         Inicializa el editor sql.
@@ -65,6 +87,11 @@ class SqlEditor(QPlainTextEdit):
         Args:
             file (File):
                 Archivo abierto asociado al editor.
+
+            schema_data (dict[str, Any], optional):
+                Datos del esquema de la base de datos utilizados
+                por el autocompletador SQL. Si no se proporcionan,
+                se inicializa el editor sin datos de esquema.
         """
 
         super().__init__()
@@ -73,7 +100,7 @@ class SqlEditor(QPlainTextEdit):
 
         self.file = file
 
-        self._setup_ui()
+        self._setup_ui(schema_data)
         self._connect_signals()
 
     # ================
@@ -82,9 +109,16 @@ class SqlEditor(QPlainTextEdit):
 
     def _setup_ui(
         self,
+        schema_data: dict[str, Any] = None,
     ) -> None:
         """
         Construye la interfaz principal del widget.
+
+        Args:
+            schema_data (dict[str, Any], optional):
+                Datos del esquema de la base de datos utilizados
+                por el autocompletador SQL. Si no se proporcionan,
+                se inicializa el editor sin datos de esquema.
         """
 
         self.setPlaceholderText("Write SQL query...")
@@ -107,7 +141,10 @@ class SqlEditor(QPlainTextEdit):
         self.syntax_highlighter = SqlHighlighter(self.document())
 
         # Autocompleción de sql
-        self.completer = SqlCompleter(parent_widget=self)
+        self.completer = SqlCompleter(
+            parent_widget=self,
+            schema_data=schema_data,
+        )
 
     # ==================
     # === UI HELPERS ===
@@ -929,6 +966,7 @@ class SqlEditor(QPlainTextEdit):
 
     def force_update_completer(
         self,
+        schema_data: dict[str, Any] = None,
     ) -> None:
         """
         Fuerza la reconstrucción completa del modelo del
@@ -937,8 +975,23 @@ class SqlEditor(QPlainTextEdit):
         Se utiliza cuando cambian los datos externos del
         modelo, como el esquema de la base de datos o el
         tema de la aplicación.
+
+        Args:
+            schema_data (dict[str, Any], optional):
+                Datos del esquema de la base de datos.
         """
 
         self.completer.update_document_completion(
             force_update=True,
+            schema_data=schema_data,
         )
+
+    def set_template(
+        self,
+    ) -> None:
+
+        self.setPlainText(self.DEFAULT_SQL)
+
+        cursor = self.textCursor()
+        cursor.movePosition(cursor.MoveOperation.End)
+        self.setTextCursor(cursor)

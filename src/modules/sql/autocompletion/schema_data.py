@@ -35,7 +35,9 @@ class SqlSchemaCompletionData:
     columnas, restricciones e índices.
     """
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+    ) -> None:
         """
         Inicializa el almacén de datos del esquema
         para el autocompletador.
@@ -132,6 +134,3 @@ class SqlSchemaCompletionData:
                 category,
                 DEFAULT_COLOR,
             )
-
-
-SQL_SCHEMA_COMPLETION_DATA = SqlSchemaCompletionData()

@@ -1,7 +1,9 @@
 from pathlib import Path
+from typing import Any
 
 from PySide6.QtCore import (
     Qt,
+    QTimer,
     Signal,
 )
 from PySide6.QtGui import (
@@ -67,9 +69,16 @@ class SqlEditorArea(QWidget):
 
         self.files: list[File] = []
 
+        self.schema_data: dict[str, Any] = None
+
         self._setup_ui()
         self._connect_signals()
         self._setup_shortcuts()
+
+        self._add_file_and_editor(
+            file=File(),
+            with_template=True,
+        )
 
     # ================
     # === UI SETUP ===
@@ -401,6 +410,7 @@ class SqlEditorArea(QWidget):
     def _add_file_and_editor(
         self,
         file: File,
+        with_template: bool = False,
     ) -> None:
         """
         Añade un archivo al área de trabajo y crea
@@ -411,7 +421,10 @@ class SqlEditorArea(QWidget):
                 Archivo que debe abrirse.
         """
 
-        editor = SqlEditor(file=file)
+        editor = SqlEditor(
+            file=file,
+            schema_data=self.schema_data,
+        )
         editor.execute_requested.connect(self.execute_requested)
         editor.file_modified.connect(self.files_list.refresh_file)
         editor.save_changes.connect(self._on_save_file_requested)
@@ -423,7 +436,14 @@ class SqlEditorArea(QWidget):
 
         self.editors.addWidget(editor)
         self.editors.setCurrentWidget(editor)
+
+        if with_template:
+            editor.set_template()
+
         editor.setFocus()
+
+        if with_template:
+            QTimer.singleShot(0, editor.setFocus)
 
     def _remove_file_and_editor(
         self,
@@ -571,6 +591,7 @@ class SqlEditorArea(QWidget):
 
     def force_update_editors_completers(
         self,
+        schema_data: dict[str, Any] = None,
     ) -> None:
         """
         Fuerza la actualización del autocompletador de
@@ -582,7 +603,23 @@ class SqlEditorArea(QWidget):
         editores.
         """
 
+        self.save_schema_data(schema_data)
+
         for i in range(self.editors.count()):
 
             editor = self.editors.widget(i)
-            editor.force_update_completer()
+            editor.force_update_completer(schema_data=self.schema_data)
+
+    def save_schema_data(
+        self,
+        schema_data: dict[str, Any] = None,
+    ) -> None:
+        """
+        Almacena los datos del esquema de la base de datos.
+
+        Args:
+            schema_data (dict[str, Any], optional):
+                Datos del esquema de la base de datos.
+        """
+
+        self.schema_data = schema_data

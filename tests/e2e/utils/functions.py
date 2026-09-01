@@ -242,6 +242,21 @@ def get_workspace(
     main_window: MainWindow,
     connection: Connection,
 ) -> Workspace:
+    """
+    Obtiene el workspace asociado a una conexión.
+
+    Args:
+        main_window (MainWindow):
+            Ventana principal que contiene los workspaces
+            de las conexiones activas.
+
+        connection (Connection):
+            Conexión cuyo workspace se desea obtener.
+
+    Returns:
+        Workspace:
+            Workspace asociado al identificador de la conexión.
+    """
 
     return main_window.workspaces[connection.id]
 
@@ -250,13 +265,64 @@ def get_sql_editor_area(
     main_window: MainWindow,
     connection: Connection,
 ) -> SqlEditorArea:
+    """
+    Obtiene el área del editor SQL de una conexión.
+
+    Antes de devolver el área, elimina el editor inicial
+    creado automáticamente. Si el editor inicial contiene
+    cambios, el diálogo de confirmación se acepta automáticamente.
+
+    Args:
+        main_window (MainWindow):
+            Ventana principal que contiene los workspaces
+            de las conexiones activas.
+
+        connection (Connection):
+            Conexión cuyo área de editor SQL se desea obtener.
+
+    Returns:
+        SqlEditorArea:
+            Área del editor SQL asociada a la conexión,
+            sin editores abiertos inicialmente.
+
+    Raises:
+        AssertionError:
+            Si el área del editor no contiene exactamente un
+            editor al obtenerla o si el editor inicial no se
+            elimina correctamente.
+    """
 
     workspace = get_workspace(
         main_window=main_window,
         connection=connection,
     )
 
-    return workspace.sql_editor_area
+    sea = workspace.sql_editor_area
+
+    assert sea.editors.count() == 1
+
+    current_editor = sea._get_current_editor()
+
+    assert current_editor is not None
+
+    monkeypatch = pytest.MonkeyPatch()
+
+    try:
+        auto_accept_confirmation_dialog(
+            monkeypatch=monkeypatch,
+        )
+
+        sea._remove_file_and_editor(
+            current_editor.file,
+        )
+
+    finally:
+        monkeypatch.undo()
+
+    assert sea._get_current_editor() is None
+    assert sea.editors.count() == 0
+
+    return sea
 
 
 def create_new_editor(
@@ -294,6 +360,33 @@ def open_file(
     file_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> SqlEditor | None:
+    """
+    Abre un archivo en el área del editor SQL.
+
+    Sustituye temporalmente el diálogo de selección de archivos
+    para utilizar la ruta proporcionada y espera hasta que exista
+    un editor activo.
+
+    Args:
+        qtbot (QtBot):
+            Objeto de pytest-qt utilizado para interactuar con la
+            interfaz de usuario y esperar operaciones asíncronas.
+
+        sql_editor_area (SqlEditorArea):
+            Área del editor SQL donde se abrirá el archivo.
+
+        file_path (Path):
+            Ruta del archivo que se desea abrir.
+
+        monkeypatch (pytest.MonkeyPatch):
+            Utilidad de pytest para sustituir temporalmente
+            el diálogo de selección de archivos.
+
+    Returns:
+        SqlEditor | None:
+            Editor SQL activo después de intentar abrir el archivo.
+            Devuelve None si no existe ningún editor activo.
+    """
 
     monkeypatch.setattr(
         QFileDialog,

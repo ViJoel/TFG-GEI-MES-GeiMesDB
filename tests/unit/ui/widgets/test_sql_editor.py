@@ -785,6 +785,7 @@ def test_force_update_completer_forces_document_completion_refresh(
 
     editor.completer.update_document_completion.assert_called_once_with(
         force_update=True,
+        schema_data=None,
     )
 
 
@@ -857,3 +858,39 @@ def test_theme_changed_signal_updates_editor(editor):
     ThemeManager.events().theme_changed.emit("dark")
 
     editor._on_theme_changed.assert_called_once_with("dark")
+
+
+# =============================================================================
+# TEMPLATE
+# =============================================================================
+
+
+def test_set_template_loads_default_sql(
+    editor,
+):
+    """
+    Verifica que set_template carga el SQL
+    definido como plantilla por defecto.
+    """
+
+    editor.setPlainText("SELECT 1;")
+
+    editor.set_template()
+
+    assert editor.toPlainText() == editor.DEFAULT_SQL
+
+
+def test_set_template_moves_cursor_to_end(
+    editor,
+):
+    """
+    Verifica que set_template sitúa el cursor
+    al final del contenido de la plantilla.
+    """
+
+    editor.set_template()
+
+    cursor = editor.textCursor()
+
+    assert cursor.position() == len(editor.DEFAULT_SQL)
+    assert cursor.position() == cursor.document().characterCount() - 1

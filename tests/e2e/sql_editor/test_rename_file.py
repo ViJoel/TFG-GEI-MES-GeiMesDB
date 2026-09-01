@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pytest
 from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import QFileDialog
 from pytestqt.qtbot import QtBot
 
 from tests.e2e.data.connections import POSTGRESQL_CONNECTION
