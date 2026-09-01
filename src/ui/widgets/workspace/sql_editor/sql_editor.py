@@ -45,6 +45,25 @@ class SqlEditor(QPlainTextEdit):
     # === VARIABLES ===
     # =================
 
+    DEFAULT_SQL = """\
+-- ==================================================
+-- Welcome to the SQL Editor
+-- ==================================================
+-- You can write and execute your SQL queries here.
+-- Try modifying this example or replace it entirely.
+-- ==================================================
+
+SELECT
+    u.id,
+    u.name,
+    u.email,
+    u.created_at
+FROM users AS u
+WHERE u.active = true
+ORDER BY u.created_at DESC
+LIMIT 100;
+"""
+
     execute_requested = Signal(
         list,
         object,
@@ -966,3 +985,13 @@ class SqlEditor(QPlainTextEdit):
             force_update=True,
             schema_data=schema_data,
         )
+
+    def set_template(
+        self,
+    ) -> None:
+
+        self.setPlainText(self.DEFAULT_SQL)
+
+        cursor = self.textCursor()
+        cursor.movePosition(cursor.MoveOperation.End)
+        self.setTextCursor(cursor)

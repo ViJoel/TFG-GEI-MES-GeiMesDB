@@ -118,11 +118,18 @@ def save_dialog_mock(mocker):
 
 def test_initialization(sql_editor_area):
     """
-    Comprueba la creación del widget.
+    Comprueba la creación del widget y del editor inicial.
     """
 
     assert sql_editor_area.objectName() == "sql_editor_area"
-    assert sql_editor_area.files == []
+
+    assert len(sql_editor_area.files) == 1
+    assert sql_editor_area.editors.count() == 1
+
+    editor = sql_editor_area._get_current_editor()
+
+    assert editor is not None
+    assert editor.file is sql_editor_area.files[0]
 
 
 def test_ui_created(sql_editor_area):
@@ -1086,6 +1093,141 @@ def test_add_file_and_editor_uses_saved_schema_data(
     )
 
 
+def test_add_file_and_editor_with_template(
+    sql_editor_area,
+    fake_file,
+    mocker,
+):
+    """
+    Comprueba que al crear un editor con plantilla
+    se carga la plantilla SQL.
+    """
+
+    fake_editor = mocker.Mock()
+    fake_editor.file = fake_file
+
+    mocker.patch(
+        "ui.widgets.workspace.sql_editor.sql_editor_area.SqlEditor",
+        return_value=fake_editor,
+    )
+
+    mocker.patch.object(
+        sql_editor_area.files_list,
+        "add_file",
+    )
+
+    mocker.patch.object(
+        sql_editor_area.editors,
+        "addWidget",
+    )
+
+    mocker.patch.object(
+        sql_editor_area.editors,
+        "setCurrentWidget",
+    )
+
+    sql_editor_area._add_file_and_editor(
+        fake_file,
+        with_template=True,
+    )
+
+    fake_editor.set_template.assert_called_once_with()
+
+
+def test_add_file_and_editor_with_template_sets_focus_later(
+    sql_editor_area,
+    fake_file,
+    mocker,
+):
+    """
+    Comprueba que al crear un editor con plantilla
+    se programa un segundo setFocus para ejecutarse
+    después de que Qt termine de procesar la creación del widget.
+    """
+
+    fake_editor = mocker.Mock()
+    fake_editor.file = fake_file
+
+    mocker.patch(
+        "ui.widgets.workspace.sql_editor.sql_editor_area.SqlEditor",
+        return_value=fake_editor,
+    )
+
+    mocker.patch.object(
+        sql_editor_area.files_list,
+        "add_file",
+    )
+
+    mocker.patch.object(
+        sql_editor_area.editors,
+        "addWidget",
+    )
+
+    mocker.patch.object(
+        sql_editor_area.editors,
+        "setCurrentWidget",
+    )
+
+    single_shot_mock = mocker.patch(
+        "ui.widgets.workspace.sql_editor.sql_editor_area.QTimer.singleShot",
+    )
+
+    sql_editor_area._add_file_and_editor(
+        fake_file,
+        with_template=True,
+    )
+
+    single_shot_mock.assert_called_once_with(
+        0,
+        fake_editor.setFocus,
+    )
+
+
+def test_add_file_and_editor_without_template_does_not_set_template_focus(
+    sql_editor_area,
+    fake_file,
+    mocker,
+):
+    """
+    Comprueba que un editor creado sin plantilla
+    no carga la plantilla ni programa un foco diferido.
+    """
+
+    fake_editor = mocker.Mock()
+    fake_editor.file = fake_file
+
+    mocker.patch(
+        "ui.widgets.workspace.sql_editor.sql_editor_area.SqlEditor",
+        return_value=fake_editor,
+    )
+
+    mocker.patch.object(
+        sql_editor_area.files_list,
+        "add_file",
+    )
+
+    mocker.patch.object(
+        sql_editor_area.editors,
+        "addWidget",
+    )
+
+    mocker.patch.object(
+        sql_editor_area.editors,
+        "setCurrentWidget",
+    )
+
+    single_shot_mock = mocker.patch(
+        "ui.widgets.workspace.sql_editor.sql_editor_area.QTimer.singleShot",
+    )
+
+    sql_editor_area._add_file_and_editor(fake_file)
+
+    fake_editor.set_template.assert_not_called()
+    single_shot_mock.assert_not_called()
+
+    fake_editor.setFocus.assert_called_once_with()
+
+
 # =============================================================================
 # _GET_EDITOR
 # =============================================================================
@@ -1537,8 +1679,12 @@ def test_force_update_editors_completers_updates_all_editors_with_schema(
 
     schema_data = {
         "tables": {
-            "users": [],
-            "orders": [],
+            "users": {
+                "columns": [],
+            },
+            "orders": {
+                "columns": [],
+            },
         },
     }
 
@@ -1573,6 +1719,11 @@ def test_force_update_editors_completers_with_no_editors(
     Verifica que no falla cuando no existen
     editores abiertos.
     """
+
+    while sql_editor_area.editors.count():
+        editor = sql_editor_area.editors.widget(0)
+        sql_editor_area.editors.removeWidget(editor)
+        editor.deleteLater()
 
     assert sql_editor_area.editors.count() == 0
 
@@ -1640,8 +1791,12 @@ def test_force_update_editors_completers_updates_all_editors_with_schema_data(
 
     schema_data = {
         "tables": {
-            "users": [],
-            "orders": [],
+            "users": {
+                "columns": [],
+            },
+            "orders": {
+                "columns": [],
+            },
         },
     }
 
@@ -1699,9 +1854,16 @@ def test_force_update_editors_completers_with_no_editors_and_schema_data(
     cuando no existen editores abiertos.
     """
 
+    while sql_editor_area.editors.count():
+        editor = sql_editor_area.editors.widget(0)
+        sql_editor_area.editors.removeWidget(editor)
+        editor.deleteLater()
+
     schema_data = {
         "tables": {
-            "users": [],
+            "users": {
+                "columns": [],
+            },
         },
     }
 

@@ -3,6 +3,7 @@ from typing import Any
 
 from PySide6.QtCore import (
     Qt,
+    QTimer,
     Signal,
 )
 from PySide6.QtGui import (
@@ -73,6 +74,11 @@ class SqlEditorArea(QWidget):
         self._setup_ui()
         self._connect_signals()
         self._setup_shortcuts()
+
+        self._add_file_and_editor(
+            file=File(),
+            with_template=True,
+        )
 
     # ================
     # === UI SETUP ===
@@ -404,6 +410,7 @@ class SqlEditorArea(QWidget):
     def _add_file_and_editor(
         self,
         file: File,
+        with_template: bool = False,
     ) -> None:
         """
         Añade un archivo al área de trabajo y crea
@@ -429,7 +436,14 @@ class SqlEditorArea(QWidget):
 
         self.editors.addWidget(editor)
         self.editors.setCurrentWidget(editor)
+
+        if with_template:
+            editor.set_template()
+
         editor.setFocus()
+
+        if with_template:
+            QTimer.singleShot(0, editor.setFocus)
 
     def _remove_file_and_editor(
         self,
