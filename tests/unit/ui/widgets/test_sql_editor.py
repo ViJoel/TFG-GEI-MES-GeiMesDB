@@ -785,6 +785,7 @@ def test_force_update_completer_forces_document_completion_refresh(
 
     editor.completer.update_document_completion.assert_called_once_with(
         force_update=True,
+        schema_data=None,
     )
 
 

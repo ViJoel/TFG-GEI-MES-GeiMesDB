@@ -6,6 +6,7 @@ from entities.query_result import QueryResult
 from entities.script_result import ScriptResult
 from entities.session import Session
 from entities.update_operation import UpdateOperation
+from modules.sessions.db_tree import build_completion_data as bcd
 from modules.sessions.db_tree import get_db_tree as gdt
 from modules.sessions.manager import close_all_sessions as cas
 from modules.sessions.manager import close_session as cs
@@ -250,3 +251,35 @@ def get_db_tree(
     """
 
     return gdt(connection_id=connection_id)
+
+
+def build_completion_data(
+    tree_data: dict[str, Any],
+) -> dict[
+    str,
+    list[str],
+]:
+    """
+    Construye el modelo simplificado utilizado por el autocompletador
+    a partir del árbol de metadatos de la base de datos.
+
+    Extrae únicamente los nombres únicos de tablas, vistas, columnas,
+    restricciones e índices.
+
+    Args:
+        tree_data:
+            Modelo completo generado por `_extract_schema_metadata()`.
+
+    Returns:
+        dict[str, list[str]]:
+            Diccionario con las categorías utilizadas por el
+            autocompletador:
+
+            - `tables`
+            - `views`
+            - `columns`
+            - `constraints`
+            - `indexes`
+    """
+
+    return bcd(tree_data=tree_data)

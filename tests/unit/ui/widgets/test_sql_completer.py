@@ -190,6 +190,7 @@ def test_update_document_completion_delegates_to_model(qtbot):
     completer._model.update.assert_called_once_with(
         sql="SELECT * FROM table",
         force_update=False,
+        schema_data=None,
     )
 
 
@@ -212,4 +213,5 @@ def test_update_document_completion_can_force_model_update(qtbot):
     completer._model.update.assert_called_once_with(
         sql=None,
         force_update=True,
+        schema_data=None,
     )

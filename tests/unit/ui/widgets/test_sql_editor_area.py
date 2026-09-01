@@ -1016,6 +1016,7 @@ def test_add_file_and_editor(
 
     sql_editor_cls.assert_called_once_with(
         file=fake_file,
+        schema_data=None,
     )
 
     assert fake_file in sql_editor_area.files
@@ -1033,6 +1034,56 @@ def test_add_file_and_editor(
     fake_editor.save_changes.connect.assert_called_once()
 
     fake_editor.rename_file.connect.assert_called_once()
+
+
+def test_add_file_and_editor_uses_saved_schema_data(
+    sql_editor_area,
+    fake_file,
+    mocker,
+):
+    """
+    Verifica que un nuevo editor recibe los datos del esquema
+    almacenados previamente en el área.
+    """
+
+    schema_data = {
+        "tables": {
+            "users": [],
+            "orders": [],
+        },
+    }
+
+    sql_editor_area.save_schema_data(schema_data)
+
+    fake_editor = mocker.Mock()
+    fake_editor.file = fake_file
+
+    sql_editor_cls = mocker.patch(
+        "ui.widgets.workspace.sql_editor.sql_editor_area.SqlEditor",
+        return_value=fake_editor,
+    )
+
+    mocker.patch.object(
+        sql_editor_area.files_list,
+        "add_file",
+    )
+
+    mocker.patch.object(
+        sql_editor_area.editors,
+        "addWidget",
+    )
+
+    mocker.patch.object(
+        sql_editor_area.editors,
+        "setCurrentWidget",
+    )
+
+    sql_editor_area._add_file_and_editor(fake_file)
+
+    sql_editor_cls.assert_called_once_with(
+        file=fake_file,
+        schema_data=schema_data,
+    )
 
 
 # =============================================================================
@@ -1475,6 +1526,46 @@ def test_force_update_editors_completers_updates_all_editors(
     editor_2.force_update_completer.assert_called_once()
 
 
+def test_force_update_editors_completers_updates_all_editors_with_schema(
+    sql_editor_area,
+):
+    """
+    Verifica que se fuerza la actualización del
+    autocompletador de todos los editores abiertos
+    pasando los datos del esquema.
+    """
+
+    schema_data = {
+        "tables": {
+            "users": [],
+            "orders": [],
+        },
+    }
+
+    editor_1 = QWidget()
+    editor_1.force_update_completer = MagicMock()
+
+    editor_2 = QWidget()
+    editor_2.force_update_completer = MagicMock()
+
+    sql_editor_area.editors.addWidget(editor_1)
+    sql_editor_area.editors.addWidget(editor_2)
+
+    sql_editor_area.force_update_editors_completers(
+        schema_data=schema_data,
+    )
+
+    assert sql_editor_area.schema_data == schema_data
+
+    editor_1.force_update_completer.assert_called_once_with(
+        schema_data=schema_data,
+    )
+
+    editor_2.force_update_completer.assert_called_once_with(
+        schema_data=schema_data,
+    )
+
+
 def test_force_update_editors_completers_with_no_editors(
     sql_editor_area,
 ):
@@ -1486,3 +1577,138 @@ def test_force_update_editors_completers_with_no_editors(
     assert sql_editor_area.editors.count() == 0
 
     sql_editor_area.force_update_editors_completers()
+
+
+# =============================================================================
+# SCHEMA DATA
+# =============================================================================
+
+
+def test_save_schema_data(
+    sql_editor_area,
+):
+    """
+    Verifica que save_schema_data almacena correctamente
+    los datos del esquema.
+    """
+
+    schema_data = {
+        "tables": {
+            "users": [],
+            "orders": [],
+        },
+    }
+
+    sql_editor_area.save_schema_data(schema_data)
+
+    assert sql_editor_area.schema_data == schema_data
+
+
+def test_save_schema_data_none(
+    sql_editor_area,
+):
+    """
+    Verifica que save_schema_data permite limpiar
+    los datos del esquema.
+    """
+
+    schema_data = {
+        "tables": {
+            "users": [],
+        },
+    }
+
+    sql_editor_area.save_schema_data(schema_data)
+
+    sql_editor_area.save_schema_data()
+
+    assert sql_editor_area.schema_data is None
+
+
+# =============================================================================
+# FORCE UPDATE EDITORS COMPLETERS
+# =============================================================================
+
+
+def test_force_update_editors_completers_updates_all_editors_with_schema_data(
+    sql_editor_area,
+):
+    """
+    Verifica que se fuerza la actualización del autocompletador
+    de todos los editores pasando los datos del esquema.
+    """
+
+    schema_data = {
+        "tables": {
+            "users": [],
+            "orders": [],
+        },
+    }
+
+    editor_1 = QWidget()
+    editor_1.force_update_completer = MagicMock()
+
+    editor_2 = QWidget()
+    editor_2.force_update_completer = MagicMock()
+
+    sql_editor_area.editors.addWidget(editor_1)
+    sql_editor_area.editors.addWidget(editor_2)
+
+    sql_editor_area.force_update_editors_completers(
+        schema_data=schema_data,
+    )
+
+    assert sql_editor_area.schema_data == schema_data
+
+    editor_1.force_update_completer.assert_called_once_with(
+        schema_data=schema_data,
+    )
+
+    editor_2.force_update_completer.assert_called_once_with(
+        schema_data=schema_data,
+    )
+
+
+def test_force_update_editors_completers_without_schema_data(
+    sql_editor_area,
+):
+    """
+    Verifica que se puede forzar la actualización sin
+    proporcionar datos del esquema.
+    """
+
+    editor = QWidget()
+    editor.force_update_completer = MagicMock()
+
+    sql_editor_area.editors.addWidget(editor)
+
+    sql_editor_area.force_update_editors_completers()
+
+    assert sql_editor_area.schema_data is None
+
+    editor.force_update_completer.assert_called_once_with(
+        schema_data=None,
+    )
+
+
+def test_force_update_editors_completers_with_no_editors_and_schema_data(
+    sql_editor_area,
+):
+    """
+    Verifica que los datos del esquema se almacenan incluso
+    cuando no existen editores abiertos.
+    """
+
+    schema_data = {
+        "tables": {
+            "users": [],
+        },
+    }
+
+    assert sql_editor_area.editors.count() == 0
+
+    sql_editor_area.force_update_editors_completers(
+        schema_data=schema_data,
+    )
+
+    assert sql_editor_area.schema_data == schema_data

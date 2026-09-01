@@ -64,6 +64,14 @@ pytest path/to/test/file.py::test_name -vv
 
 ---
 
+```bash
+pytest --cov=.
+```
+
+**Mostrar covertura:** Muestra la covertura de todos los archivos por donde pasa.
+
+---
+
 ## Comandos grandes para generar reporte de covertura
 
 ```bash
